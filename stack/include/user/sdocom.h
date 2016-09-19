@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 /// Callback function pointer to inform application about connection
-typedef tOplkError (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
+typedef tOplkError (*tSdoFinishedCb)(const tSdoComFinished* pSdoComFinished_p);
 
 /**
 \brief Structure for initializing Read/Write by Index SDO transfer
@@ -85,7 +85,7 @@ typedef struct
     tOplkError          (*pfnExit)(void);                                   ///< Exit function pointer
 #if defined(CONFIG_INCLUDE_SDOC)
     tOplkError          (*pfnDefineCon)(tSdoComConHdl*, UINT, tSdoType);    ///< Define Connection function pointer
-    tOplkError          (*pfnTransByIdx)(tSdoComTransParamByIndex*);        ///< Transfer by Index function pointer
+    tOplkError          (*pfnTransByIdx)(const tSdoComTransParamByIndex*);  ///< Transfer by Index function pointer
     tOplkError          (*pfnDeleteCon)(tSdoComConHdl);                     ///< Delete Connection function pointer
     tOplkError          (*pfnGetState)(tSdoComConHdl, tSdoComFinished*);    ///< Get State function pointer
     UINT                (*pfnGetNodeId)(tSdoComConHdl);                     ///< Get Node Id function pointer
@@ -107,12 +107,16 @@ tOplkError sdocom_init(UINT stackType_p,
 tOplkError sdocom_exit(void);
 
 #if defined(CONFIG_INCLUDE_SDOC)
-tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p, tSdoType sdoType_p);
-tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
+tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                   UINT targetNodeId_p,
+                                   tSdoType sdoType_p);
+tOplkError sdocom_initTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p);
 UINT       sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p);
-tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
-tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p,
+                           tSdoComFinished* pSdoComFinished_p);
+tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                UINT32 abortCode_p);
 #endif /* defined(CONFIG_INCLUDE_SDOC) */
 
 #ifdef __cplusplus

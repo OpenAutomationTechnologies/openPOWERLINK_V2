@@ -10,7 +10,7 @@ This file contains the implementation of the SDO over UDP protocol for Windows.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -79,11 +79,11 @@ typedef LPVOID tThreadArg;
 
 typedef struct
 {
-    SOCKET                  udpSocket;
-    HANDLE                  threadHandle;
-    LPCRITICAL_SECTION      pCriticalSection;
-    CRITICAL_SECTION        criticalSection;
-    BOOL                    fStopThread;
+    SOCKET                      udpSocket;
+    HANDLE                      threadHandle;
+    LPCRITICAL_SECTION          pCriticalSection;
+    CRITICAL_SECTION            criticalSection;
+    BOOL                        fStopThread;
 } tSdoUdpSocketInstance;
 
 //------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ static tSdoUdpSocketInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void receiveFromSocket(tSdoUdpSocketInstance* pInstance_p);
+static void          receiveFromSocket(const tSdoUdpSocketInstance* pInstance_p);
 static tThreadResult sdoUdpThread(tThreadArg pArg_p);
 
 //============================================================================//
@@ -119,7 +119,8 @@ tOplkError sdoudp_initSocket(void)
 
     OPLK_MEMSET(&instance_l, 0x00, sizeof(instance_l));
 
-    if ((error = WSAStartup(MAKEWORD(2, 0), &wsa)) != 0)
+    error = WSAStartup(MAKEWORD(2, 0), &wsa);
+    if (error != 0)
         return kErrorSdoUdpNoSocket;
 
     // Create critical section for access of instance variables
@@ -143,6 +144,7 @@ The function shuts down the SDO over UDP socket module.
 //------------------------------------------------------------------------------
 void sdoudp_exitSocket(void)
 {
+
 }
 
 //------------------------------------------------------------------------------
@@ -151,7 +153,7 @@ void sdoudp_exitSocket(void)
 
 The function creates a socket for the SDO over UDP connection.
 
-\param  pSdoUdpCon_p        UDP connection for which a socket shall be created.
+\param[in,out]  pSdoUdpCon_p        UDP connection for which a socket shall be created.
 
 \return The function returns a tOplkError error code.
 
@@ -165,10 +167,13 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
     BOOL                fTermError;
     ULONG               threadId;
 
+    // Check parameter validity
+    ASSERT(pSdoUdpCon_p != NULL);
+
     instance_l.udpSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (instance_l.udpSocket == INVALID_SOCKET)
     {
-        DEBUG_LVL_SDO_TRACE("sdoudp_config: socket() failed\n");
+        DEBUG_LVL_SDO_TRACE("%s(): socket() failed\n", __func__);
         return kErrorSdoUdpNoSocket;
     }
 
@@ -182,15 +187,19 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
     error = bind(instance_l.udpSocket, (struct sockaddr*)&addr, sizeof(addr));
     if (error < 0)
     {
-        DEBUG_LVL_SDO_TRACE("sdoudp_config: bind() finished with %i\n", error);
+        DEBUG_LVL_SDO_TRACE("%s(): bind() finished with %i\n", __func__, error);
         return kErrorSdoUdpNoSocket;
     }
 
     // create Listen-Thread
     instance_l.fStopThread = FALSE;
 
-    instance_l.threadHandle = CreateThread(NULL, 0, sdoUdpThread, &instance_l,
-                                                 0, &threadId);
+    instance_l.threadHandle = CreateThread(NULL,
+                                           0,
+                                           sdoUdpThread,
+                                           &instance_l,
+                                           0,
+                                           &threadId);
     if (instance_l.threadHandle == NULL)
         return kErrorSdoUdpThreadError;
 
@@ -243,29 +252,39 @@ tOplkError sdoudp_closeSocket(void)
 
 The function sends an SDO frame to the given UDP connection.
 
-\param  pSdoUdpCon_p        UDP connection to send the frame to.
-\param  pSrcData_p          Pointer to frame data which should be sent.
-\param  dataSize_p          Size of data to be send.
+\param[in]      pSdoUdpCon_p        UDP connection to send the frame to.
+\param[in]      pSrcData_p          Pointer to frame data which should be sent.
+\param[in]      dataSize_p          Size of data to be send.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
+                               const tPlkFrame* pSrcData_p,
+                               UINT32 dataSize_p)
 {
     INT                 error;
     struct sockaddr_in  addr;
+
+    // Check parameter validity
+    ASSERT(pSdoUdpCon_p != NULL);
+    ASSERT(pSrcData_p != NULL);
 
     addr.sin_family = AF_INET;
     addr.sin_port = (USHORT)pSdoUdpCon_p->port;
     addr.sin_addr.s_addr = pSdoUdpCon_p->ipAddr;
 
-    error = sendto(instance_l.udpSocket, (const char*)&pSrcData_p->messageType,
-                   dataSize_p, 0, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));
+    error = sendto(instance_l.udpSocket,
+                   (const char*)&pSrcData_p->messageType,
+                   dataSize_p,
+                   0,
+                   (struct sockaddr*)&addr,
+                   sizeof(struct sockaddr_in));
     if (error < 0)
     {
-        DEBUG_LVL_SDO_TRACE("sdoudp_sendData: sendto() finished with %i\n", error);
+        DEBUG_LVL_SDO_TRACE("%s(): sendto() finished with %i\n", __func__, error);
         return kErrorSdoUdpSendError;
     }
 
@@ -279,10 +298,10 @@ tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, 
 The function enters or leaves a critical section to ensure correct operation of
 the SDO UDP module.
 
-\param  fEnable_p           Specifies if the critical section shall be entered or
-                            left.
-                            If TRUE, the critical section is entered.
-                            If FALSE, the critical section is left.
+\param[in]      fEnable_p           Specifies if the critical section shall be entered or
+                                    left.
+                                    If TRUE, the critical section is entered.
+                                    If FALSE, the critical section is left.
 
 \return The function returns a tOplkError error code.
 
@@ -292,13 +311,9 @@ the SDO UDP module.
 void sdoudp_criticalSection(BOOL fEnable_p)
 {
     if (fEnable_p)
-    {
         EnterCriticalSection(instance_l.pCriticalSection);
-    }
     else
-    {
         LeaveCriticalSection(instance_l.pCriticalSection);
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -307,7 +322,7 @@ void sdoudp_criticalSection(BOOL fEnable_p)
 
 The function enables triggering ARP to obtain the remote node's Ethernet address.
 
-\param  remoteIpAddr_p      The remote node's IP address
+\param[in]      remoteIpAddr_p      The remote node's IP address
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                    The Ethernet address for the given IP is known.
@@ -317,7 +332,7 @@ The function enables triggering ARP to obtain the remote node's Ethernet address
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p)
+tOplkError sdoudp_arpQuery(UINT32 remoteIpAddr_p)
 {
     UNUSED_PARAMETER(remoteIpAddr_p);
 
@@ -337,11 +352,11 @@ tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p)
 
 The function receives data from the UDP socket.
 
-\param  pInstance_p         Pointer to SDO instance.
+\param[in]      pInstance_p         Pointer to SDO instance.
 
 */
 //------------------------------------------------------------------------------
-static void receiveFromSocket(tSdoUdpSocketInstance* pInstance_p)
+static void receiveFromSocket(const tSdoUdpSocketInstance* pInstance_p)
 {
     struct sockaddr_in  remoteAddr;
     INT                 error;
@@ -349,10 +364,13 @@ static void receiveFromSocket(tSdoUdpSocketInstance* pInstance_p)
     UINT                size;
     tSdoUdpCon          sdoUdpCon;
 
-    size = sizeof(struct sockaddr);
-
-    error = recvfrom(pInstance_p->udpSocket, (char*)&aBuffer[0], sizeof(aBuffer),
-                     0, (struct sockaddr*)&remoteAddr, (int*)&size);
+    size = sizeof(struct sockaddr_in);
+    error = recvfrom(pInstance_p->udpSocket,
+                     (char*)&aBuffer[0],
+                     sizeof(aBuffer),
+                     0,
+                     (struct sockaddr*)&remoteAddr,
+                     (int*)&size);
     if (error > 0)
     {
         tAsySdoSeq* pSdoSeqData;
@@ -377,20 +395,20 @@ static void receiveFromSocket(tSdoUdpSocketInstance* pInstance_p)
 The function implements the UDP receive thread. It waits for packets on the
 UDP socket and calls receiveFromSocket() if data is available.
 
-\param  pArg_p              Thread argument. The pointer to the SDO instance is
-                            transferred to the thread as thread argument.
+\param[in]      pArg_p              Thread argument. The pointer to the SDO instance is
+                                    transferred to the thread as thread argument.
 
 \return The function returns a thread exit code. It returns always NULL (0).
 */
 //------------------------------------------------------------------------------
 static tThreadResult sdoUdpThread(tThreadArg pArg_p)
 {
-    tSdoUdpSocketInstance*  pInstance;
-    fd_set                  readFds;
-    int                     result;
-    struct timeval          timeout;
+    const tSdoUdpSocketInstance*    pInstance;
+    fd_set                          readFds;
+    int                             result;
+    struct timeval                  timeout;
 
-    pInstance = (tSdoUdpSocketInstance*)pArg_p;
+    pInstance = (const tSdoUdpSocketInstance*)pArg_p;
 
     while (!pInstance->fStopThread)
     {
@@ -400,15 +418,18 @@ static tThreadResult sdoUdpThread(tThreadArg pArg_p)
         FD_ZERO(&readFds);
         FD_SET(pInstance->udpSocket, &readFds);
 
-        result = select(pInstance->udpSocket + 1, &readFds, NULL, NULL, &timeout);
+        result = select(pInstance->udpSocket + 1,
+                        &readFds,
+                        NULL,
+                        NULL,
+                        &timeout);
         switch (result)
         {
             case 0:     // timeout
-                //DEBUG_LVL_SDO_TRACE ("select timeout\n");
                 break;
 
             case -1:    // error
-                DEBUG_LVL_SDO_TRACE ("select error: %s\n", strerror(errno));
+                DEBUG_LVL_SDO_TRACE("select error: %s\n", strerror(errno));
                 break;
 
             default:    // data available

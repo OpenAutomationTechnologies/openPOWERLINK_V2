@@ -116,7 +116,7 @@ static BOOL fStackInitialized_l = FALSE;
 //------------------------------------------------------------------------------
 
 #if defined(CONFIG_INCLUDE_SDOC)
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p);
 #endif
 static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p);
 #if defined(CONFIG_INCLUDE_VETH)
@@ -1610,7 +1610,7 @@ SDO event to the application.
 */
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_SDOC)
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;

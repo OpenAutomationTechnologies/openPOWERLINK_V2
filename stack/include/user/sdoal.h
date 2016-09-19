@@ -65,6 +65,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef UINT tSdoConHdl;
 
 /// Callback function pointer for the protocol abstraction layer to call the asynchronous SDO Sequence Layer
-typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl conHdl_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
+typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl conHdl_p,
+                                          const tAsySdoSeq* pSdoSeqData_p,
+                                          UINT dataSize_p);
 
 #endif /* _INC_user_sdoal_H_ */

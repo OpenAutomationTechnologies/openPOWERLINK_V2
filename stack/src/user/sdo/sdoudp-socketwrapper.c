@@ -11,7 +11,7 @@ the socket wrapper.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,9 @@ static tSdoUdpSocketInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void receiveFromSocket(UINT8* pData_p, UINT dataSize_p, tSocketWrapperAddress* pRemote_p);
+static void receiveFromSocket(const UINT8* pData_p,
+                              UINT dataSize_p,
+                              const tSocketWrapperAddress* pRemote_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -130,6 +132,7 @@ The function shuts down the SDO over UDP socket module.
 //------------------------------------------------------------------------------
 void sdoudp_exitSocket(void)
 {
+
 }
 
 //------------------------------------------------------------------------------
@@ -138,7 +141,7 @@ void sdoudp_exitSocket(void)
 
 The function creates a socket for the SDO over UDP connection.
 
-\param  pSdoUdpCon_p        UDP connection for which a socket shall be created.
+\param[in,out]  pSdoUdpCon_p        UDP connection for which a socket shall be created.
 
 \return The function returns a tOplkError error code.
 
@@ -150,10 +153,13 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
     tOplkError              ret;
     tSocketWrapperAddress   socketAddr;
 
+    // Check parameter validity
+    ASSERT(pSdoUdpCon_p != NULL);
+
     instance_l.pSocketWrapper = socketwrapper_create(receiveFromSocket);
     if (instance_l.pSocketWrapper == SOCKETWRAPPER_INVALID)
     {
-        DEBUG_LVL_ERROR_TRACE("%s socketwrapper create failed\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() socketwrapper create failed\n", __func__);
         return kErrorSdoUdpNoSocket;
     }
 
@@ -196,25 +202,33 @@ tOplkError sdoudp_closeSocket(void)
 
 The function sends an SDO frame to the given UDP connection.
 
-\param  pSdoUdpCon_p        UDP connection to send the frame to.
-\param  pSrcData_p          Pointer to frame data which should be sent.
-\param  dataSize_p          Size of data to be send.
+\param[in]      pSdoUdpCon_p        UDP connection to send the frame to.
+\param[in]      pSrcData_p          Pointer to frame data which should be sent.
+\param[in]      dataSize_p          Size of data to be send.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
+                               const tPlkFrame* pSrcData_p,
+                               UINT32 dataSize_p)
 {
     tOplkError              ret;
     tSocketWrapperAddress   remote;
 
+    // Check parameter validity
+    ASSERT(pSdoUdpCon_p != NULL);
+    ASSERT(pSrcData_p != NULL);
+
     remote.ipAddress = pSdoUdpCon_p->ipAddr;
     remote.port = pSdoUdpCon_p->port;
 
-    ret = socketwrapper_send(instance_l.pSocketWrapper, &remote,
-                             &pSrcData_p->messageType, dataSize_p);
+    ret = socketwrapper_send(instance_l.pSocketWrapper,
+                             &remote,
+                             &pSrcData_p->messageType,
+                             dataSize_p);
 
     return ret;
 }
@@ -226,10 +240,10 @@ tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, 
 The function enters or leaves a critical section to ensure correct operation of
 the SDO UDP module.
 
-\param  fEnable_p           Specifies if the critical section shall be entered or
-                            left.
-                            If TRUE, the critical section is entered.
-                            If FALSE, the critical section is left.
+\param[in]      fEnable_p           Specifies if the critical section shall be entered or
+                                    left.
+                                    If TRUE, the critical section is entered.
+                                    If FALSE, the critical section is left.
 
 \return The function returns a tOplkError error code.
 
@@ -247,7 +261,7 @@ void sdoudp_criticalSection(BOOL fEnable_p)
 
 The function enables triggering ARP to obtain the remote node's Ethernet address.
 
-\param  remoteIpAddr_p      The remote node's IP address
+\param[in]      remoteIpAddr_p      The remote node's IP address
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                    The Ethernet address for the given IP is known.
@@ -257,9 +271,9 @@ The function enables triggering ARP to obtain the remote node's Ethernet address
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p)
+tOplkError sdoudp_arpQuery(UINT32 remoteIpAddr_p)
 {
-    return socketwrapper_arpQuery(instance_l.pSocketWrapper, (UINT32)remoteIpAddr_p);
+    return socketwrapper_arpQuery(instance_l.pSocketWrapper, remoteIpAddr_p);
 }
 
 //============================================================================//
@@ -274,17 +288,19 @@ tOplkError sdoudp_arpQuery(ULONG remoteIpAddr_p)
 
 The function receives data from the UDP socket.
 
-\param  pData_p             Pointer to received data.
-\param  dataSize_p          Size of received data.
-\param  pRemote_p           Pointer to address structure of remote.
+\param[out]     pData_p             Pointer to received data.
+\param[in]      dataSize_p          Size of received data.
+\param[in]      pRemote_p           Pointer to address structure of remote.
 
 */
 //------------------------------------------------------------------------------
-static void receiveFromSocket(UINT8* pData_p, UINT dataSize_p, tSocketWrapperAddress* pRemote_p)
+static void receiveFromSocket(const UINT8* pData_p,
+                              UINT dataSize_p,
+                              const tSocketWrapperAddress* pRemote_p)
 {
-    tAsySdoSeq* pSdoSeqData = (tAsySdoSeq*)&pData_p[ASND_HEADER_SIZE];
-    UINT        size = dataSize_p - ASND_HEADER_SIZE;
-    tSdoUdpCon  sdoUdpCon;
+    const tAsySdoSeq*   pSdoSeqData = (const tAsySdoSeq*)&pData_p[ASND_HEADER_SIZE];
+    UINT                size = dataSize_p - ASND_HEADER_SIZE;
+    tSdoUdpCon          sdoUdpCon;
 
     sdoUdpCon.ipAddr = pRemote_p->ipAddress;
     sdoUdpCon.port = pRemote_p->port;

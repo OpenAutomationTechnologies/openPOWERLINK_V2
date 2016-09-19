@@ -11,7 +11,7 @@ It is used to avoid SDO access by other modules (i.e. cfm).
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -73,14 +73,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 static tOplkError sdoInit(tComdLayerObdCb pfnObdWrite_p,
                           tComdLayerObdCb pfnObdRead_p);
 static tOplkError sdoExit(void);
+
 #if defined(CONFIG_INCLUDE_SDOC)
-static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
-                                       tSdoType protType_p);
-static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
+static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                      UINT targetNodeId_p,
+                                      tSdoType protType_p);
+static tOplkError sdoInitTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p);
 static tOplkError sdoUndefineConnection(tSdoComConHdl sdoComConHdl_p);
-static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
+static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p,
+                              tSdoComFinished* pSdoComFinished_p);
 static UINT       sdoGetNodeId(tSdoComConHdl sdoComConHdl_p);
-static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+static tOplkError sdoAbortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                   UINT32 abortCode_p);
 #endif //defined(CONFIG_INCLUDE_SDOC)
 
 //------------------------------------------------------------------------------
@@ -139,8 +143,8 @@ tSdoComFunctions* sdocomdummy_getInterface(void)
 
 This function does nothing, except returning kErrorOk.
 
-\param  pfnObdWrite_p   Callback function for OD write access
-\param  pfnObdRead_p    Callback function for OD read access
+\param[in]      pfnObdWrite_p       Callback function for OD write access
+\param[in]      pfnObdRead_p        Callback function for OD read access
 
 \return The function returns a tOplkError error code.
 */
@@ -175,10 +179,10 @@ static tOplkError sdoExit(void)
 
 This function does nothing, except returning kErrorOk.
 
-\param  pSdoComConHdl_p         Pointer to store the connection handle.
-\param  targetNodeId_p          The node ID to connect to.
-\param  protType_p              The protocol type to use for the connection
-                                (UDP and ASnd is supported)
+\param[out]     pSdoComConHdl_p     Pointer to store the connection handle.
+\param[in]      targetNodeId_p      The node ID to connect to.
+\param[in]      protType_p          The protocol type to use for the connection
+                                    (UDP and ASnd is supported)
 
 \return The function returns a tOplkError error code.
 */
@@ -201,12 +205,12 @@ static tOplkError sdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
 
 This function does nothing, except returning kErrorOk.
 
-\param  pSdoComTransParam_p     Pointer to transfer command parameters
+\param[in]      pSdoComTransParam_p Pointer to transfer command parameters
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+static tOplkError sdoInitTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
     // Ignore unused parameters
     UNUSED_PARAMETER(pSdoComTransParam_p);
@@ -220,7 +224,7 @@ static tOplkError sdoInitTransferByIndex(tSdoComTransParamByIndex* pSdoComTransP
 
 This function does nothing, except returning kErrorOk.
 
-\param  sdoComConHdl_p          Handle of the connection to delete.
+\param[in]      sdoComConHdl_p      Handle of the connection to delete.
 
 \return The function returns a tOplkError error code.
 */
@@ -239,8 +243,8 @@ static tOplkError sdoUndefineConnection(tSdoComConHdl sdoComConHdl_p)
 
 This function does nothing, except returning kErrorOk.
 
-\param  sdoComConHdl_p          Handle of the command layer connection.
-\param  pSdoComFinished_p       Pointer to store connection information.
+\param[in]      sdoComConHdl_p      Handle of the command layer connection.
+\param[out]     pSdoComFinished_p   Pointer to store connection information.
 
 \return The function returns a tOplkError error code.
 */
@@ -261,7 +265,7 @@ static tOplkError sdoGetState(tSdoComConHdl sdoComConHdl_p,
 
 This function does nothing, except returning C_ADR_INVALID
 
-\param  sdoComConHdl_p          Handle of connection.
+\param[in]      sdoComConHdl_p      Handle of connection.
 
 \return The function returns a C_ADR_INVALID error code.
 */
@@ -280,8 +284,8 @@ static UINT sdoGetNodeId(tSdoComConHdl sdoComConHdl_p)
 
 This function does nothing, except returning kErrorOk.
 
-\param  sdoComConHdl_p          Handle of the connection to abort.
-\param  abortCode_p             The abort code to use.
+\param[in]      sdoComConHdl_p      Handle of the connection to abort.
+\param[in]      abortCode_p         The abort code to use.
 
 \return The function returns a tOplkError error code.
 */

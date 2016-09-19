@@ -5,13 +5,13 @@
 \brief  SDO command layer wrapper
 
 This file manages the available SDO stacks. The function calls are forwarded
-to the SDO stack defined in the api init parameters.
+to the SDO stack defined in the API init parameters.
 
 \ingroup module_sdocom
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -92,9 +92,9 @@ static tSdoComFunctions* pSdoComInstance = NULL;
 
 The function initializes the SDO stack.
 
-\param stackType_p      Variable that defines which SDO stack to use.
-\param pfnObdWrite_p    Callback function for OD write access
-\param pfnObdRead_p     Callback function for OD read access
+\param[in]      stackType_p         Variable that defines which SDO stack to use.
+\param[in]      pfnObdWrite_p       Callback function for OD write access
+\param[in]      pfnObdRead_p        Callback function for OD read access
 
 \return The function returns a tOplkError error code.
 
@@ -105,19 +105,19 @@ tOplkError sdocom_init(UINT stackType_p,
                        tComdLayerObdCb pfnObdWrite_p,
                        tComdLayerObdCb pfnObdRead_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     switch (stackType_p)
     {
-       case tOplkApiTestSdoCom:
-       case tOplkApiTestSdoSeq:
+        case tOplkApiTestSdoCom:
+        case tOplkApiTestSdoSeq:
             pSdoComInstance = sdocomdummy_getInterface();
-           break;
+            break;
 
-       default:
-       case tOplkApiStdSdoStack:
+        default:
+        case tOplkApiStdSdoStack:
             pSdoComInstance = sdocomstandard_getInterface();
-           break;
+            break;
     }
 
     ret = pSdoComInstance->pfnInit(pfnObdWrite_p, pfnObdRead_p);
@@ -157,20 +157,24 @@ tOplkError sdocom_exit(void)
 The function initializes a SDO layer connection. It tries to reuse an
 existing connection to the specified node.
 
-\param  pSdoComConHdl_p         Pointer to store the layer connection
-                                handle.
-\param  targetNodeId_p          Node ID of the target to connect to.
-\param  sdoType_p               Type of the SDO connection.
+\param[out]     pSdoComConHdl_p     Pointer to store the layer connection
+                                    handle.
+\param[in]      targetNodeId_p      Node ID of the target to connect to.
+\param[in]      sdoType_p           Type of the SDO connection.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p,
+tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                   UINT targetNodeId_p,
                                    tSdoType sdoType_p)
 {
     tOplkError ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pSdoComConHdl_p != NULL);
 
     if (pSdoComInstance != NULL)
         ret = pSdoComInstance->pfnDefineCon(pSdoComConHdl_p, targetNodeId_p, sdoType_p);
@@ -184,16 +188,19 @@ tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNo
 
 The function initializes a "transfer by index" operation for a connection.
 
-\param  pSdoComTransParam_p     Pointer to transfer command parameters
+\param[in]      pSdoComTransParam_p Pointer to transfer command parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p)
+tOplkError sdocom_initTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p)
 {
     tOplkError ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pSdoComTransParam_p != NULL);
 
     if (pSdoComInstance != NULL)
         ret = pSdoComInstance->pfnTransByIdx(pSdoComTransParam_p);
@@ -207,7 +214,7 @@ tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransPara
 
 The function returns the node ID of the remote node of a connection.
 
-\param  sdoComConHdl_p          Handle of connection.
+\param[in]      sdoComConHdl_p      Handle of connection.
 
 \return The function returns the node ID of the remote node or C_ADR_INVALID
         on error.
@@ -217,7 +224,7 @@ The function returns the node ID of the remote node of a connection.
 //------------------------------------------------------------------------------
 UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 {
-    UINT node;
+    UINT    node;
 
     if (pSdoComInstance != NULL)
         node = pSdoComInstance->pfnGetNodeId(sdoComConHdl_p);
@@ -233,17 +240,21 @@ UINT sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p)
 
 The function returns the state of a command layer connection.
 
-\param  sdoComConHdl_p          Handle of the command layer connection.
-\param  pSdoComFinished_p       Pointer to store connection information.
+\param[in]      sdoComConHdl_p      Handle of the command layer connection.
+\param[out]     pSdoComFinished_p   Pointer to store connection information.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p)
+tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p,
+                           tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pSdoComFinished_p != NULL);
 
     if (pSdoComInstance != NULL)
         ret = pSdoComInstance->pfnGetState(sdoComConHdl_p, pSdoComFinished_p);
@@ -257,15 +268,16 @@ tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoCo
 
 The function aborts an SDO transfer.
 
-\param  sdoComConHdl_p          Handle of the connection to abort.
-\param  abortCode_p             The abort code to use.
+\param[in]      sdoComConHdl_p      Handle of the connection to abort.
+\param[in]      abortCode_p         The abort code to use.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdocom
 */
 //------------------------------------------------------------------------------
-tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                UINT32 abortCode_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -281,8 +293,8 @@ tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p
 
 The function closes and deletes an existing layer connection.
 
-\param  sdoComConHdl_p          Connection handle of command layer connection
-                                to delete.
+\param[in]      sdoComConHdl_p      Connection handle of command layer connection
+                                    to delete.
 
 \return The function returns a tOplkError error code.
 

@@ -167,7 +167,7 @@ static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtNodeCommand nmtNod
 static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p);
 static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p);
 static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p);
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
@@ -723,7 +723,7 @@ transfer is finished.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
     tCfmNodeInfo*       pNodeInfo = (tCfmNodeInfo*)pSdoComFinished_p->pUserArg;

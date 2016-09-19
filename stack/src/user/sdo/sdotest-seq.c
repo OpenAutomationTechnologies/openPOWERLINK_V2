@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Sequence Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -65,11 +65,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-
 /**
 \brief  SDO sequence layer function pointer struct
 
@@ -77,14 +72,14 @@ This structure defines the connection control structure of the sequence layer.
 */
 typedef struct
 {
-    tOplkError (*pfnInit)(tSequLayerReceiveCb     receiveCb_p);    ///< Init function pointer
-    tOplkError (*pfnExit)(void);                                   ///< Exit function pointer
-    tOplkError (*pfnInitCon)(tSdoConHdl*          sdoConHandle_p,
-                             UINT                 targetNodeId_p); ///< Init Connection function pointer
-    tOplkError (*pfnSendData)(tSdoConHdl          sdoConHandle_p,  ///< Send Data function pointer
-                              tPlkFrame*          pSrcData_p,
-                              UINT32              dwDataSize_p);   ///< Send Data function pointer
-    tOplkError (*pfnDelCon)(tSdoConHdl            sdoConHandle_p); ///< Delete Connection function pointer
+    tOplkError (*pfnInit)(tSequLayerReceiveCb receiveCb_p);         ///< Init function pointer
+    tOplkError (*pfnExit)(void);                                    ///< Exit function pointer
+    tOplkError (*pfnInitCon)(tSdoConHdl* sdoConHandle_p,
+                             UINT targetNodeId_p);                  ///< Init Connection function pointer
+    tOplkError (*pfnSendData)(tSdoConHdl sdoConHandle_p,            ///< Send Data function pointer
+                              tPlkFrame* pSrcData_p,
+                              UINT32 dataSize_p);                   ///< Send Data function pointer
+    tOplkError (*pfnDelCon)(tSdoConHdl sdoConHandle_p);             ///< Delete Connection function pointer
 } tSdoTestSeqFunc;
 
 /**
@@ -132,9 +127,9 @@ typedef struct
 } tSdoTestSeq;
 
 /**
-\brief  SDO sequence layer udp functions
+\brief  SDO sequence layer UDP functions
 
-This array sets the function pointers to the udp functions.
+This array sets the function pointers to the UDP functions.
 */
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 tSdoTestSeqFunc sdoTestSeqUdpFuncs =
@@ -148,9 +143,9 @@ tSdoTestSeqFunc sdoTestSeqUdpFuncs =
 #endif
 
 /**
-\brief  SDO sequence layer asnd functions
+\brief  SDO sequence layer ASnd functions
 
-This array sets the function pointers to the asnd functions.
+This array sets the function pointers to the ASnd functions.
 */
 #if defined(CONFIG_INCLUDE_SDO_ASND)
 tSdoTestSeqFunc sdoTestSeqAsndFuncs =
@@ -163,13 +158,17 @@ tSdoTestSeqFunc sdoTestSeqAsndFuncs =
 };
 #endif
 
-static tSdoTestSeq sdoTestSeqInst;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tSdoTestSeq sdoTestSeqInst_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-tOplkError sdotestseq_conCb(tSdoConHdl sdoConHdl_p, tAsySdoSeq* pSdoSeqData_p,
-                            UINT dataSize_p);
+static tOplkError conCb(tSdoConHdl sdoConHdl_p,
+                        const tAsySdoSeq* pSdoSeqData_p,
+                        UINT dataSize_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -181,7 +180,7 @@ tOplkError sdotestseq_conCb(tSdoConHdl sdoConHdl_p, tAsySdoSeq* pSdoSeqData_p,
 
 This function initializes the SDO sequence layer test.
 
-\param  sdoSequCbApi_p         pointer to the Sequence layer callback function
+\param[in]      sdoSequCbApi_p      pointer to the Sequence layer callback function
 
 \return The function returns a tOplkError error code.
 
@@ -190,27 +189,22 @@ This function initializes the SDO sequence layer test.
 //------------------------------------------------------------------------------
 tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
 {
-    tOplkError  ret;
-
-    ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     // Check parameters
     if (sdoSequCbApi_p == NULL)
-    {
         return kErrorInvalidOperation;
-    }
 
     // Init module
-    OPLK_MEMSET(&sdoTestSeqInst, 0, sizeof(sdoTestSeqInst));
-
-    sdoTestSeqInst.apiCb = sdoSequCbApi_p;
+    OPLK_MEMSET(&sdoTestSeqInst_l, 0, sizeof(sdoTestSeqInst_l));
+    sdoTestSeqInst_l.apiCb = sdoSequCbApi_p;
 
     // Init connection handling
-    sdoTestSeqInst.seqCon.state = kOplkTestSdoSequConIdle;
+    sdoTestSeqInst_l.seqCon.state = kOplkTestSdoSequConIdle;
 
     // Init sub modules
-#if defined (CONFIG_INCLUDE_SDO_ASND)
-    ret = sdoasnd_init(sdotestseq_conCb);
+#if defined(CONFIG_INCLUDE_SDO_ASND)
+    ret = sdoasnd_init(conCb);
     if (ret != kErrorOk)
     {
         sdoasnd_exit();
@@ -219,7 +213,7 @@ tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
 #endif
 
 #if defined (CONFIG_INCLUDE_SDO_UDP)
-    ret = sdoudp_init(sdotestseq_conCb);
+    ret = sdoudp_init(conCb);
     if (ret != kErrorOk)
     {
         sdoudp_exit();
@@ -244,39 +238,37 @@ This function shuts down the SDO sequence layer.
 tOplkError sdotestseq_exit(void)
 {
     tSdoTestSeqCon* pCon;
-#if defined (CONFIG_INCLUDE_SDO_ASND)
-    tOplkError retAsnd;
+#if defined(CONFIG_INCLUDE_SDO_ASND)
+    tOplkError      retAsnd;
 #endif
-#if defined (CONFIG_INCLUDE_SDO_UDP)
-    tOplkError retUdp;
+#if defined(CONFIG_INCLUDE_SDO_UDP)
+    tOplkError      retUdp;
 #endif
 
     // Shutdown sub modules
-#if defined (CONFIG_INCLUDE_SDO_ASND)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
     retAsnd = sdoasnd_exit();
 #endif
 
-#if defined (CONFIG_INCLUDE_SDO_UDP)
+#if defined(CONFIG_INCLUDE_SDO_UDP)
     retUdp = sdoudp_exit();
 #endif
 
     // Shutdown connection handling
-    pCon = &sdoTestSeqInst.seqCon;
+    pCon = &sdoTestSeqInst_l.seqCon;
 
     if (pCon->state != kOplkTestSdoSequConIdle)
     {
         switch (pCon->sdoType)
         {
             case kSdoTypeUdp:
-
-#if defined (CONFIG_INCLUDE_SDO_UDP)
+#if defined(CONFIG_INCLUDE_SDO_UDP)
                 sdoudp_delConnection(pCon->sdoConHandle);
 #endif
                 break;
 
             case kSdoTypeAsnd:
-
-#if defined (CONFIG_INCLUDE_SDO_ASND)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
                 sdoasnd_deleteCon(pCon->sdoConHandle);
 #endif
                 break;
@@ -284,7 +276,6 @@ tOplkError sdotestseq_exit(void)
             default:
             case kSdoTypeAuto:
             case kSdoTypePdo:
-
                 // Wrong SDO type -->  ignore
                 break;
         }
@@ -292,18 +283,14 @@ tOplkError sdotestseq_exit(void)
     pCon->state = kOplkTestSdoSequConIdle;
 
     // Check return values, return first error
-#if defined (CONFIG_INCLUDE_SDO_ASND)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
     if (retAsnd != kErrorOk)
-    {
         return retAsnd;
-    }
 #endif
 
-#if defined (CONFIG_INCLUDE_SDO_UDP)
+#if defined(CONFIG_INCLUDE_SDO_UDP)
     if (retUdp != kErrorOk)
-    {
         return retUdp;
-    }
 #endif
 
     return kErrorOk;
@@ -315,69 +302,64 @@ tOplkError sdotestseq_exit(void)
 
 This function sends an SDO sequence layer frame.
 
-\param  nodeId_p         Node ID of target node
-\param  sdoType_p        Type of SDO lower layer (Asnd/Udp)
-\param  pSdoSeq_p        SDO sequence layer frame
-\param  sdoSize_p        Size of SDO sequence layer frame
+\param[in]      nodeId_p            Node ID of target node
+\param[in]      sdoType_p           Type of SDO lower layer (ASnd/UDP)
+\param[in]      pSdoSeq_p           SDO sequence layer frame
+\param[in]      sdoSize_p           Size of SDO sequence layer frame
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdotest_seq
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestseq_sendFrame(UINT nodeId_p, tSdoType sdoType_p, tAsySdoSeq* pSdoSeq_p,
+tOplkError sdotestseq_sendFrame(UINT nodeId_p,
+                                tSdoType sdoType_p,
+                                const tAsySdoSeq* pSdoSeq_p,
                                 size_t sdoSize_p)
 {
-    tOplkError           ret = kErrorOk;
-    tSdoTestSeqCon*      pCon;
-    size_t               FrameSize;
-    tPlkFrame*           pFrame;
-    tAsySdoSeq*          pSequDst;
+    tOplkError      ret = kErrorOk;
+    tSdoTestSeqCon* pCon;
+    size_t          frameSize;
+    tPlkFrame*      pFrame;
+    tAsySdoSeq*     pSequDst;
 
     // Check parameters
-    FrameSize = sdoSize_p + PLK_FRAME_OFFSET_SDO_SEQU;
-    if (FrameSize > C_DLL_MAX_ASYNC_MTU)
-    {
+    frameSize = sdoSize_p + PLK_FRAME_OFFSET_SDO_SEQU;
+    if (frameSize > C_DLL_MAX_ASYNC_MTU)
         return kErrorInvalidOperation;
-    }
 
     // Try to get a valid lower layer connection
-    pCon = &sdoTestSeqInst.seqCon;
+    pCon = &sdoTestSeqInst_l.seqCon;
     if (pCon->state == kOplkTestSdoSequConIdle)
     {
         // We need a new connection
         switch (sdoType_p)
         {
             case kSdoTypeUdp:
-
-#if defined (CONFIG_INCLUDE_SDO_UDP)
+#if defined(CONFIG_INCLUDE_SDO_UDP)
                 ret = sdoudp_initCon(&pCon->sdoConHandle, nodeId_p);
 #else
                 ret = kErrorSdoSeqUnsupportedProt;
 #endif
                 if (ret != kErrorOk)
-                {
                     return ret;
-                }
 
-#if defined (CONFIG_INCLUDE_SDO_UDP)
+#if defined(CONFIG_INCLUDE_SDO_UDP)
                 pCon->pFuncTable = &sdoTestSeqUdpFuncs;
 #endif
                 break;
 
             case kSdoTypeAsnd:
 
-#if defined (CONFIG_INCLUDE_SDO_ASND)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
                 ret = sdoasnd_initCon(&pCon->sdoConHandle, nodeId_p);
 #else
                 ret = kErrorSdoSeqUnsupportedProt;
 #endif
                 if (ret != kErrorOk)
-                {
                     return ret;
-                }
 
-#if defined (CONFIG_INCLUDE_SDO_ASND)
+#if defined(CONFIG_INCLUDE_SDO_ASND)
                 pCon->pFuncTable = &sdoTestSeqAsndFuncs;
 #endif
                 break;
@@ -385,45 +367,38 @@ tOplkError sdotestseq_sendFrame(UINT nodeId_p, tSdoType sdoType_p, tAsySdoSeq* p
             default:
             case kSdoTypeAuto:
             case kSdoTypePdo:
-
-                // Current implementation only supports Asnd and UDP
+                // Current implementation only supports ASnd and UDP
                 return kErrorSdoSeqUnsupportedProt;
         }
 
         // Save parameters
-        pCon->state   = kOplkTestSdoSequConActive;
+        pCon->state = kOplkTestSdoSequConActive;
         pCon->sdoType = sdoType_p;
-        pCon->nodeId  = nodeId_p;
+        pCon->nodeId = nodeId_p;
     }
     else
     {
         // Connection exists, check parameters
         if ((nodeId_p != pCon->nodeId) ||
             (sdoType_p != pCon->sdoType))
-        {
             return kErrorInvalidOperation;
-        }
     }
 
     // Get frame buffer
-    pFrame = (tPlkFrame*)OPLK_MALLOC(FrameSize);
+    pFrame = (tPlkFrame*)OPLK_MALLOC(frameSize);
     if (pFrame == NULL)
-    {
         ret = kErrorNoResource;
-    }
     else
     {
         // Set up frame
-        OPLK_MEMSET(pFrame, 0, FrameSize);
-
+        OPLK_MEMSET(pFrame, 0, frameSize);
         pSequDst = &pFrame->data.asnd.payload.sdoSequenceFrame;
         OPLK_MEMCPY(pSequDst, pSdoSeq_p, sdoSize_p);
 
-        ami_setUint8Le(&pFrame->data.asnd.serviceId, (BYTE)kDllAsndSdo);
+        ami_setUint8Le(&pFrame->data.asnd.serviceId, (UINT8)kDllAsndSdo);
 
         // Send data
         ret = pCon->pFuncTable->pfnSendData(pCon->sdoConHandle, pFrame, sdoSize_p);
-
         OPLK_FREE(pFrame);
     }
 
@@ -443,10 +418,9 @@ This function closes a SDO sequence layer connection
 //------------------------------------------------------------------------------
 tOplkError sdotestseq_closeCon(void)
 {
-    tOplkError           ret = kErrorOk;
-    tSdoTestSeqCon*      pCon;
+    tOplkError      ret;
+    tSdoTestSeqCon* pCon = &sdoTestSeqInst_l.seqCon;
 
-    pCon = &sdoTestSeqInst.seqCon;
     ret = pCon->pFuncTable->pfnDelCon(pCon->sdoConHandle);
     pCon->state = kOplkTestSdoSequConIdle;
 
@@ -466,30 +440,27 @@ tOplkError sdotestseq_closeCon(void)
 Callback to get called by lower layers on
 reception of SDO sequence layer frames.
 
-\param  sdoConHdl_p       Connection handle
-\param  pSdoSeqData_p     SDO sequence layer frame
-\param  dataSize_p        Size of SDO sequence layer frame
+\param[in]      sdoConHdl_p         Connection handle
+\param[in]      pSdoSeqData_p       SDO sequence layer frame
+\param[in]      dataSize_p          Size of SDO sequence layer frame
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError  sdotestseq_conCb(tSdoConHdl sdoConHdl_p, tAsySdoSeq* pSdoSeqData_p,
-                             UINT dataSize_p)
+static tOplkError conCb(tSdoConHdl sdoConHdl_p,
+                        const tAsySdoSeq* pSdoSeqData_p,
+                        UINT dataSize_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError ret;
 
     // Ignore unused parameters
-    (void)sdoConHdl_p;
+    UNUSED_PARAMETER(sdoConHdl_p);
 
     // Forward frame to API layer
-    if (sdoTestSeqInst.apiCb != NULL)
-    {
-        ret = sdoTestSeqInst.apiCb(pSdoSeqData_p, dataSize_p);
-    }
+    if (sdoTestSeqInst_l.apiCb != NULL)
+        ret = sdoTestSeqInst_l.apiCb(pSdoSeqData_p, dataSize_p);
     else
-    {
         ret = kErrorOk;
-    }
 
     return ret;
 }

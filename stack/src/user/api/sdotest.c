@@ -85,8 +85,8 @@ tOplkApiInitParam initParam;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestCom(tAsySdoCom* asySdoCom_p, UINT dataSize_p);
-static tOplkError oplkCbSdoTestSeq(tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
+static tOplkError oplkCbSdoTestCom(const tAsySdoCom* asySdoCom_p, UINT dataSize_p);
+static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -298,12 +298,12 @@ Callback function for SDO command layer test module.
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestCom(tAsySdoCom* pAsySdoCom_p, UINT dataSize_p)
+static tOplkError oplkCbSdoTestCom(const tAsySdoCom* pAsySdoCom_p, UINT dataSize_p)
 {
     tOplkError       ret = kErrorOk;
     tOplkApiEventArg eventArg;
 
-    eventArg.receivedSdoCom.pAsySdoCom = pAsySdoCom_p;
+    eventArg.receivedSdoCom.pAsySdoCom = (tAsySdoCom*)pAsySdoCom_p;
     eventArg.receivedSdoCom.dataSize = dataSize_p;
 
     ret = initParam.pfnCbEvent(kOplkApiEventReceivedSdoCom, &eventArg, initParam.pEventUserArg);
@@ -327,19 +327,17 @@ Callback function for SDO command layer test module.
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestSeq(tAsySdoSeq* pAsySdoSeq_p, UINT dataSize_p)
+static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* pAsySdoSeq_p, UINT dataSize_p)
 {
     tOplkError       ret = kErrorOk;
     tOplkApiEventArg eventArg;
 
-    eventArg.receivedSdoSeq.pAsySdoSeq = pAsySdoSeq_p;
+    eventArg.receivedSdoSeq.pAsySdoSeq = (tAsySdoSeq*)pAsySdoSeq_p;
     eventArg.receivedSdoSeq.dataSize = dataSize_p;
 
     ret = initParam.pfnCbEvent(kOplkApiEventReceivedSdoSeq, &eventArg, initParam.pEventUserArg);
     if (ret != kErrorOk)
-    {
         ret = kErrorInvalidEvent;
-    }
 
     return ret;
 }

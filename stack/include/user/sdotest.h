@@ -63,12 +63,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This type defines a function pointer for the SDO sequence layer to
 call the SDO command layer for the connection status.
 
-\param pSdoSeqData_p    Pointer to SDO sequence layer frame
-\param dataSize_p       Size of SDO sequence layer frame
+\param[in]      pSdoSeqData_p       Pointer to SDO sequence layer frame
+\param[in]      dataSize_p          Size of SDO sequence layer frame
 
 \return The function returns a tOplkError error code
 */
-typedef tOplkError (*sdoApiCbSeqTest)(tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
+typedef tOplkError (*sdoApiCbSeqTest)(const tAsySdoSeq* pSdoSeqData_p,
+                                      UINT dataSize_p);
 
 /**
 \brief SDO command layer test callback function.
@@ -76,12 +77,13 @@ typedef tOplkError (*sdoApiCbSeqTest)(tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p
 This type defines a function pointer for the SDO command layer to
 call the SDO sequence layer for the connection status.
 
-\param pSdoComData_p    Pointer to SDO command layer frame
-\param dataSize_p       Size of SDO command layer frame
+\param[in]      pSdoComData_p       Pointer to SDO command layer frame
+\param[in]      dataSize_p          Size of SDO command layer frame
 
 \return The function returns a tOplkError error code
 */
-typedef tOplkError (*sdoApiCbComTest)(tAsySdoCom* pSdoComData_p, UINT dataSize_p);
+typedef tOplkError (*sdoApiCbComTest)(const tAsySdoCom* pSdoComData_p,
+                                      UINT dataSize_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -93,12 +95,18 @@ extern "C"
 
 tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p);
 tOplkError sdotestseq_exit(void);
-tOplkError sdotestseq_sendFrame(UINT nodeId_p, tSdoType sdo_type_p, tAsySdoSeq* pSdoSeq_p, size_t sdoSize_p);
+tOplkError sdotestseq_sendFrame(UINT nodeId_p,
+                                tSdoType sdo_type_p,
+                                const tAsySdoSeq* pSdoSeq_p,
+                                size_t sdoSize_p);
 tOplkError sdotestseq_closeCon(void);
 
 tOplkError sdotestcom_init(sdoApiCbComTest sdoComuCbApi_p);
 tOplkError sdotestcom_exit(void);
-tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdo_type_p, tAsySdoCom* pSdoCom_p, size_t sdoSize_p);
+tOplkError sdotestcom_sendFrame(UINT nodeId_p,
+                                tSdoType sdo_type_p,
+                                const tAsySdoCom* pSdoCom_p,
+                                size_t sdoSize_p);
 tOplkError sdotestcom_closeCon(void);
 tOplkError sdotestcom_cbEvent(const tEvent* pEvent_p);
 

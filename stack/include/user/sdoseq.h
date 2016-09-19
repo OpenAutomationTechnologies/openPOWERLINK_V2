@@ -88,10 +88,13 @@ typedef UINT32 tAsySdoConState;
 typedef UINT tSdoSeqConHdl;
 
 /// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command Layer for connection status
-typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState asySdoConState_p);
+typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl sdoSeqConHdl_p,
+                                   tAsySdoConState asySdoConState_p);
 
 /// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command Layer for received data
-typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p, UINT dataSize_p);
+typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p,
+                                       const tAsySdoCom* pAsySdoCom_p,
+                                       UINT dataSize_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -101,10 +104,15 @@ extern "C"
 {
 #endif
 
-tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p, tSdoComConCb pfnSdoComConCb_p);
+tOplkError sdoseq_init(tSdoComReceiveCb pfnSdoComRecvCb_p,
+                       tSdoComConCb pfnSdoComConCb_p);
 tOplkError sdoseq_exit(void);
-tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p, UINT nodeId_p, tSdoType sdoType_p);
-tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p, UINT dataSize_p, tPlkFrame* pData_p);
+tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
+                          UINT nodeId_p,
+                          tSdoType sdoType_p);
+tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p,
+                           UINT dataSize_p,
+                           tPlkFrame* pData_p);
 tOplkError sdoseq_processEvent(const tEvent* pEvent_p);
 tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p);
 tOplkError sdoseq_setTimeout(UINT32 timeout_p);

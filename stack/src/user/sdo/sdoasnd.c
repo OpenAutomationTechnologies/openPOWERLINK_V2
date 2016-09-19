@@ -9,7 +9,7 @@ This file contains the implementation of the SDO over ASnd protocol.
 \ingroup module_sdo_asnd
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdoasnd.h>
 #include <user/dllucal.h>
 #include <common/ami.h>
-
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
 
@@ -107,7 +106,7 @@ static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p);
 
 The function initializes a first instance of the SDO over ASnd module.
 
-\param  pfnReceiveCb_p          Pointer to SDO sequence layer callback function.
+\param[in]      pfnReceiveCb_p      Pointer to SDO sequence layer callback function.
 
 \return The function returns a tOplkError error code.
 
@@ -116,18 +115,14 @@ The function initializes a first instance of the SDO over ASnd module.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&sdoAsndInstance_l, 0x00, sizeof(sdoAsndInstance_l));
 
     if (pfnReceiveCb_p != NULL)
-    {
         sdoAsndInstance_l.pfnSdoAsySeqCb = pfnReceiveCb_p;
-    }
     else
-    {
-        ret = kErrorSdoUdpMissCb;
-    }
+        return kErrorSdoUdpMissCb;
 
     ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
 
@@ -147,7 +142,7 @@ The function shuts down the SDO over ASnd module.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_exit(void)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
     ret = dllucal_regAsndService(kDllAsndSdo, NULL, kDllAsndFilterNone);
 
@@ -160,9 +155,9 @@ tOplkError sdoasnd_exit(void)
 
 The function initializes a SDO over ASnd connection to a node.
 
-\param  pSdoConHandle_p         Pointer to store the connection handle for this
-                                new connection.
-\param  targetNodeId_p          Node ID of the target to connect to.
+\param[out]     pSdoConHandle_p     Pointer to store the connection handle for this
+                                    new connection.
+\param[in]      targetNodeId_p      Node ID of the target to connect to.
 
 \return The function returns a tOplkError error code.
 
@@ -171,17 +166,17 @@ The function initializes a SDO over ASnd connection to a node.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-    tOplkError      ret;
-    UINT            count;
-    UINT            freeCon;
-    UINT*           pConnection;
+    tOplkError  ret = kErrorOk;
+    UINT        count;
+    UINT        freeCon;
+    UINT*       pConnection;
 
-    ret = kErrorOk;
+    // Check parameter validity
+    ASSERT(pSdoConHandle_p != NULL);
 
-    if ((targetNodeId_p == C_ADR_INVALID) || (targetNodeId_p >= C_ADR_BROADCAST))
-    {
+    if ((targetNodeId_p == C_ADR_INVALID) ||
+        (targetNodeId_p >= C_ADR_BROADCAST))
         return kErrorSdoAsndInvalidNodeId;
-    }
 
     // get free entry in control structure
     count = 0;
@@ -199,6 +194,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         {   // free entry-> save target nodeId
             freeCon = count;
         }
+
         count++;
         pConnection++;
     }
@@ -215,6 +211,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         // save handle for higher layer
         *pSdoConHandle_p = (freeCon | SDO_ASND_HANDLE);
     }
+
     return ret;
 }
 
@@ -224,33 +221,33 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 
 The function sends data via an existing SDO over ASnd connection.
 
-\param  sdoConHandle_p          Connection handle of the connection to use.
-\param  pSrcData_p              Pointer to data which shall be sent.
-\param  dataSize_p              Size of data to be sent.
+\param[in]      sdoConHandle_p      Connection handle of the connection to use.
+\param[in,out]  pSrcData_p          Pointer to data which shall be sent.
+\param[in]      dataSize_p          Size of data to be sent.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_asnd
 */
 //------------------------------------------------------------------------------
-tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p,
+                            tPlkFrame* pSrcData_p,
+                            UINT32 dataSize_p)
 {
-    tOplkError      ret;
-    UINT            array;
-    tFrameInfo      frameInfo;
-
-    ret = kErrorOk;
+    tOplkError  ret;
+    UINT        array;
+    tFrameInfo  frameInfo;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
     if (array > CONFIG_SDO_MAX_CONNECTION_ASND)
         return kErrorSdoAsndInvalidHandle;
 
-    // fillout Asnd header
+    // fill Asnd header
     // own node id not needed -> filled by DLL
-    ami_setUint8Le(&pSrcData_p->messageType, (BYTE)kMsgTypeAsnd);  // ASnd == 0x06
-    ami_setUint8Le(&pSrcData_p->dstNodeId, (BYTE)sdoAsndInstance_l.aSdoAsndConnection[array]);
-    ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);                     // set source-nodeid (filled by DLL 0)
+    ami_setUint8Le(&pSrcData_p->messageType, (UINT8)kMsgTypeAsnd);      // ASnd == 0x06
+    ami_setUint8Le(&pSrcData_p->dstNodeId, (UINT8)sdoAsndInstance_l.aSdoAsndConnection[array]);
+    ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);                       // set source-nodeid (filled by DLL 0)
     // calc size (add Ethernet and ASnd header size)
     dataSize_p += (UINT32)((UINT8*)&pSrcData_p->data.asnd.payload.sdoSequenceFrame - (UINT8*)pSrcData_p);
 
@@ -269,7 +266,7 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UI
 
 The function deletes an existing SDO over ASnd connection.
 
-\param  sdoConHandle_p          Connection handle of the connection to delete.
+\param[in]      sdoConHandle_p      Connection handle of the connection to delete.
 
 \return The function returns a tOplkError error code.
 
@@ -278,19 +275,16 @@ The function deletes an existing SDO over ASnd connection.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
 {
-    tOplkError  ret;
+    tOplkError  ret = kErrorOk;
     UINT        array;
-
-    ret = kErrorOk;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if (array > CONFIG_SDO_MAX_CONNECTION_ASND)
-    {
         return kErrorSdoAsndInvalidHandle;
-    }
 
     // set target nodeId to 0
     sdoAsndInstance_l.aSdoAsndConnection[array] = 0;
+
     return ret;
 }
 //============================================================================//
@@ -306,7 +300,7 @@ tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
 The function implements the callback function which should be called when
 receiving ASnd frames.
 
-\param  pFrameInfo_p        Pointer to received frame.
+\param[in]      pFrameInfo_p        Pointer to received frame.
 
 \return The function returns a tOplkError error code.
 */
@@ -330,13 +324,12 @@ static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p)
     while (count < CONFIG_SDO_MAX_CONNECTION_ASND)
     {
         if (nodeId == *pConnection)
-        {
             break;
-        }
         else if ((*pConnection == 0) && (freeEntry == 0xFFFF))
         {   // free entry
             freeEntry = count;
         }
+
         count++;
         pConnection++;
     }
@@ -357,11 +350,13 @@ static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p)
     }
 
     sdoConHdl = (count | SDO_ASND_HANDLE);
-    sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl, &pFrame->data.asnd.payload.sdoSequenceFrame,
+    sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl,
+                                     &pFrame->data.asnd.payload.sdoSequenceFrame,
                                      (pFrameInfo_p->frameSize - 18));
+
     return ret;
 }
 
-///\}
+/// \}
 
 #endif
