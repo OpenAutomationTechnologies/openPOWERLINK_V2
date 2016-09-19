@@ -4,7 +4,7 @@
 
 \brief  PDO user CAL shared-memory module using host interface IP-Core
 
-This file contains an implementation for the user PDO CAL shared-memroy module
+This file contains an implementation for the user PDO CAL shared-memory module
 which uses host interface IP-Core. The shared memory is used to transfer
 PDO data between user and kernel layer. This implementation is used if user and
 kernel layer are separated by the host interface IP-Core.
@@ -13,7 +13,7 @@ kernel layer are separated by the host interface IP-Core.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -83,7 +83,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tLimInstance         limPdo_l;
+static tLimInstance     limPdo_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -107,22 +107,25 @@ start of the stack.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_openMem(void)
 {
-    tHostifReturn hifret;
+    tHostifReturn   hifret;
     tHostifInstance pInstance = hostif_getInstance(0);
 
     if (pInstance == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP hostif instance\n",
                               __func__);
         return kErrorNoResource;
     }
 
-    hifret = hostif_getBuf(pInstance, kHostifInstIdPdo, &limPdo_l.pBase, &limPdo_l.span);
-
+    hifret = hostif_getBuf(pInstance,
+                           kHostifInstIdPdo,
+                           &limPdo_l.pBase,
+                           &limPdo_l.span);
     if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
-                              __func__, hifret);
+                              __func__,
+                              hifret);
         return kErrorNoResource;
     }
 
@@ -154,20 +157,25 @@ tOplkError pdoucal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
+
     if (memSize_p > limPdo_l.span)
     {
         DEBUG_LVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
-                              __func__, memSize_p, limPdo_l.span);
+                              __func__,
+                              memSize_p,
+                              limPdo_l.span);
         return kErrorNoResource;
     }
 
@@ -181,23 +189,25 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 \brief  Free PDO shared memory
 
 The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
 
     DEBUG_LVL_PDO_TRACE("%s() try to free address %p (%p)\n",
-                        __func__, pMem_p, limPdo_l.pBase);
+                        __func__,
+                        pMem_p,
+                        limPdo_l.pBase);
 
     return kErrorOk;
 }
@@ -208,4 +218,4 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

@@ -19,7 +19,7 @@ without locking, the buffer switching has to be performed in an atomic operation
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -83,9 +83,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tPdoMemRegion*       pPdoMem_l;
-static size_t               memSize_l;
-static BYTE*                pTripleBuf_l[3];
+static tPdoMemRegion*   pPdoMem_l;
+static size_t           memSize_l;
+static UINT8*           pTripleBuf_l[3];
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,29 +101,28 @@ static BYTE*                pTripleBuf_l[3];
 
 The function initializes the memory needed to transfer PDOs.
 
-\param  pPdoChannels_p          Pointer to PDO channel configuration.
-\param  rxPdoMemSize_p          Size of RX PDO buffers.
-\param  txPdoMemSize_p          Size of TX PDO buffers.
+\param[in]      pPdoChannels_p      Pointer to PDO channel configuration.
+\param[in]      rxPdoMemSize_p      Size of RX PDO buffers.
+\param[in]      txPdoMemSize_p      Size of TX PDO buffers.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
+tOplkError pdoucal_initPdoMem(const tPdoChannelSetup* pPdoChannels_p,
+                              size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p)
 {
-    BYTE*           pMem = NULL;
-    size_t          pdoMemSize;
+    UINT8*  pMem = NULL;
+    size_t  pdoMemSize;
 
     UNUSED_PARAMETER(pPdoChannels_p);
 
     pdoMemSize = rxPdoMemSize_p + txPdoMemSize_p;
 
     if (pPdoMem_l != NULL)
-    {
         pdoucal_cleanupPdoMem();
-    }
 
     memSize_l = (pdoMemSize * 3) + sizeof(tPdoMemRegion);
     if (memSize_l != 0)
@@ -137,14 +136,19 @@ tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemS
 
     pPdoMem_l = (tPdoMemRegion*)pMem;
 
-    pTripleBuf_l[0] = (BYTE*)pPdoMem_l + sizeof(tPdoMemRegion);
+    pTripleBuf_l[0] = (UINT8*)pPdoMem_l + sizeof(tPdoMemRegion);
     pTripleBuf_l[1] = pTripleBuf_l[0] + pdoMemSize;
     pTripleBuf_l[2] = pTripleBuf_l[1] + pdoMemSize;
 
     DEBUG_LVL_PDO_TRACE("%s() Mapped shared memory for PDO mem region at %p size %d\n",
-                        __func__, pPdoMem_l, memSize_l);
-    DEBUG_LVL_PDO_TRACE("%s() Triple buffers at: %p/%p/%p\n", __func__,
-                        pTripleBuf_l[0], pTripleBuf_l[1], pTripleBuf_l[2]);
+                        __func__,
+                        pPdoMem_l,
+                        memSize_l);
+    DEBUG_LVL_PDO_TRACE("%s() Triple buffers at: %p/%p/%p\n",
+                        __func__,
+                        pTripleBuf_l[0],
+                        pTripleBuf_l[1],
+                        pTripleBuf_l[2]);
 
     OPLK_ATOMIC_INIT(pPdoMem_l);
 
@@ -164,7 +168,7 @@ void pdoucal_cleanupPdoMem(void)
 {
     if (pPdoMem_l != NULL)
     {
-        if (pdoucal_freeMem((BYTE*)pPdoMem_l, memSize_l) != kErrorOk)
+        if (pdoucal_freeMem((UINT8*)pPdoMem_l, memSize_l) != kErrorOk)
         {
             DEBUG_LVL_ERROR_TRACE("%s() Unmapping shared PDO mem failed\n", __func__);
         }
@@ -177,24 +181,30 @@ void pdoucal_cleanupPdoMem(void)
 
 The function returns the address of the TXPDO buffer specified.
 
-\param  channelId_p             The PDO channel ID of the PDO to get the address.
+\param[in]      channelId_p         The PDO channel ID of the PDO to get the address.
 
 \return Returns the address of the specified PDO buffer.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-BYTE* pdoucal_getTxPdoAdrs(UINT channelId_p)
+UINT8* pdoucal_getTxPdoAdrs(UINT channelId_p)
 {
-    OPLK_ATOMIC_T    wi;
-    BYTE*            pPdo;
+    OPLK_ATOMIC_T   wi;
+    UINT8*          pPdo;
 
     // Invalidate data cache for addressed txChannelInfo
     OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->txChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
 
     wi = pPdoMem_l->txChannelInfo[channelId_p].writeBuf;
-    //TRACE("%s() channelId:%d wi:%d\n", __func__, channelId_p, wi);
+
+    DEBUG_LVL_PDO_TRACE("%s() channelId:%d wi:%d\n",
+                        __func__,
+                        channelId_p,
+                        wi);
+
     pPdo = pTripleBuf_l[wi] + pPdoMem_l->txChannelInfo[channelId_p].channelOffset;
+
     return pPdo;
 }
 
@@ -204,24 +214,30 @@ BYTE* pdoucal_getTxPdoAdrs(UINT channelId_p)
 
 The function writes a TXPDO to the PDO memory range.
 
-\param  channelId_p             Channel ID of PDO to write.
-\param  pPdo_p                  Pointer to PDO data.
-\param  pdoSize_p               Size of PDO to write.
+\param[in]      channelId_p         Channel ID of PDO to write.
+\param[in]      pPdo_p              Pointer to PDO data.
+\param[in]      pdoSize_p           Size of PDO to write.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
+tOplkError pdoucal_setTxPdo(UINT channelId_p,
+                            UINT8* pPdo_p,
+                            WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    temp;
+
     UNUSED_PARAMETER(pPdo_p);       // Used to avoid compiler warning if OPLK_DCACHE_FLUSH is not set
     UNUSED_PARAMETER(pdoSize_p);    // Used to avoid compiler warning if OPLK_DCACHE_FLUSH is not set
 
     OPLK_DCACHE_FLUSH(pPdo_p, pdoSize_p);
 
-    //TRACE("%s() chan:%d wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
+    DEBUG_LVL_PDO_TRACE("%s() chan:%d wi:%d\n",
+                        __func__,
+                        channelId_p,
+                        pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     // Invalidate data cache already done in pdoucal_getTxPdoAdrs()
 
@@ -235,7 +251,10 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
     OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
     OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
 
-    //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
+    DEBUG_LVL_PDO_TRACE("%s() chan:%d new wi:%d\n",
+                        __func__,
+                        channelId_p,
+                        pPdoMem_l->txChannelInfo[channelId_p].writeBuf);
 
     return kErrorOk;
 }
@@ -246,19 +265,25 @@ tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p)
 
 The function reads an RXPDO from the PDO buffer.
 
-\param  ppPdo_p                 Pointer to store the RXPDO data address.
-\param  channelId_p             Channel ID of PDO to read.
-\param  pdoSize_p               Size of PDO.
+\param[out]     ppPdo_p             Pointer to store the RXPDO data address.
+\param[in]      channelId_p         Channel ID of PDO to read.
+\param[in]      pdoSize_p           Size of PDO.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
+tOplkError pdoucal_getRxPdo(UINT8** ppPdo_p,
+                            UINT channelId_p,
+                            WORD pdoSize_p)
 {
     OPLK_ATOMIC_T    readBuf;
+
     UNUSED_PARAMETER(pdoSize_p);    // Used to avoid compiler warning if OPLK_DCACHE_INVALIDATE is not set
+
+    // Check parameter validity
+    ASSERT(ppPdo_p != NULL);
 
     // Invalidate data cache for addressed txChannelInfo
     OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->rxChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
@@ -290,4 +315,4 @@ tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

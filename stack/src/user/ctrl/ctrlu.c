@@ -178,7 +178,7 @@ static tOplkError updateSdoConfig(void);
 static tOplkError cbEventUserObdAccess(tObdAlConHdl* pObdAlConHdl_p);
 
 #if defined(CONFIG_INCLUDE_PDO)
-static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p);
+static tOplkError cbEventPdoChange(const tPdoEventPdoChange* pEventPdoChange_p);
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -2146,7 +2146,7 @@ The function posts PDO change events directly to API layer.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbEventPdoChange(tPdoEventPdoChange* pEventPdoChange_p)
+static tOplkError cbEventPdoChange(const tPdoEventPdoChange* pEventPdoChange_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;

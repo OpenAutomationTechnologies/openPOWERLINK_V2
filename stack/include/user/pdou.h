@@ -66,7 +66,7 @@ typedef struct
     UINT                mappObjectCount;        ///< Number of mapped objects
 } tPdoEventPdoChange;
 
-typedef tOplkError (*tPdoCbEventPdoChange)(tPdoEventPdoChange* pEventPdoChange_p);
+typedef tOplkError (*tPdoCbEventPdoChange)(const tPdoEventPdoChange* pEventPdoChange_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -82,10 +82,10 @@ tOplkError pdou_exit(void);
 #if defined(CONFIG_INCLUDE_PDO)
 OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p);
 #else
-#define pdou_cbObdAccess        NULL
+#define pdou_cbObdAccess NULL
 #endif
 
-tOplkError pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
+tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
 tOplkError pdou_copyRxPdoToPi(void);
 tOplkError pdou_copyTxPdoFromPi(void);

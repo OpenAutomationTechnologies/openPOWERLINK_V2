@@ -14,7 +14,8 @@ a common memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -92,7 +93,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tMemInstance    memPdo_l;
+static tMemInstance         memPdo_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -145,6 +146,7 @@ shutdown.
 tOplkError pdoucal_closeMem(void)
 {
     memPdo_l.pDrvInstance = NULL;
+
     return kErrorOk;
 }
 
@@ -154,8 +156,8 @@ tOplkError pdoucal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
@@ -164,15 +166,19 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    tDualprocReturn     dualRet;
-    INT                 loopCount = 0;
+    tDualprocReturn dualRet;
+    INT             loopCount = 0;
+
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
 
     for (loopCount = 0; loopCount < DUALPROCSHM_ADDR_READ_TIMEOUT_MS; loopCount++)
     {
         dualRet = dualprocshm_getMemory(memPdo_l.pDrvInstance,
-                                        DUALPROCSHM_BUFF_ID_PDO, ppPdoMem_p,
-                                        &memSize_p, FALSE);
-
+                                        DUALPROCSHM_BUFF_ID_PDO,
+                                        ppPdoMem_p,
+                                        &memSize_p,
+                                        FALSE);
         if (dualRet == kDualprocSuccessful)
             break;
 
@@ -182,7 +188,8 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     if (loopCount == DUALPROCSHM_ADDR_READ_TIMEOUT_MS)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate Pdo buffer (%d)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         return kErrorNoResource;
     }
 
@@ -196,8 +203,8 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 The function frees shared memory which was allocated in the kernel layer for
 transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory
 
 \return The function returns a tOplkError error code.
 
@@ -206,18 +213,23 @@ transferring the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
-    tDualprocReturn    dualRet;
+    tDualprocReturn dualRet;
 
     UNUSED_PARAMETER(memSize_p);
     UNUSED_PARAMETER(pMem_p); // Avoid warning if debug is disabled
 
-    DEBUG_LVL_PDO_TRACE("%s() try to free address %p\n", __func__, pMem_p);
+    DEBUG_LVL_PDO_TRACE("%s() try to free address %p\n",
+                        __func__,
+                        pMem_p);
 
-    dualRet = dualprocshm_freeMemory(memPdo_l.pDrvInstance, DUALPROCSHM_BUFF_ID_PDO, FALSE);
+    dualRet = dualprocshm_freeMemory(memPdo_l.pDrvInstance,
+                                     DUALPROCSHM_BUFF_ID_PDO,
+                                     FALSE);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't free Pdo buffer (%d)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         return kErrorNoResource;
     }
 
@@ -230,4 +242,4 @@ tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}
