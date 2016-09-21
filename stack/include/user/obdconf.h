@@ -69,14 +69,22 @@ tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p);
 tOplkError obdconf_deletePart(tObdPart odPart_p);
 tOplkError obdconf_openReadPart(tObdPart odPart_p);
 tOplkError obdconf_closePart(tObdPart odPart_p);
-tOplkError obdconf_storePart(tObdPart odPart_p, UINT8* pData, UINT32 size_p);
-tOplkError obdconf_loadPart(tObdPart odPart_p, UINT8* pData, UINT32 size_p);
-tOplkError obdconf_getTargetCapabilities(UINT index_p, UINT subIndex_p,
-                                         tObdPart* pOdPart_p, UINT32* pDevCap_p);
+tOplkError obdconf_storePart(tObdPart odPart_p,
+                             const void* pData,
+                             size_t size_p);
+tOplkError obdconf_loadPart(tObdPart odPart_p,
+                            void* pData,
+                            size_t size_p);
+tOplkError obdconf_getTargetCapabilities(UINT index_p,
+                                         UINT subIndex_p,
+                                         tObdPart* pOdPart_p,
+                                         UINT32* pDevCap_p);
 tOplkError obdconf_getPartArchiveState(tObdPart odPart_p,
                                        UINT32 odPartSignature_p);
 tOplkError obdconf_setBackupArchivePath(const char* pBackupPath_p);
-UINT16     obdconf_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p);
+UINT16     obdconf_calculateCrc16(UINT16 crc_p,
+                                  const void* pData_p,
+                                  size_t size_p);
 #endif
 
 #ifdef __cplusplus

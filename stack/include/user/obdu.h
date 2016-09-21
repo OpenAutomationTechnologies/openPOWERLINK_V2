@@ -112,8 +112,8 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
-typedef tOplkError (*tInitTabEntryCallback)(void* pTabEntry_p, UINT uiObjIndex_p);
-typedef tOplkError (*tObdStoreLoadCallback)(tObdCbStoreParam* pCbStoreParam_p);
+typedef tOplkError (*tInitTabEntryCallback)(void* pTabEntry_p, UINT objIndex_p);
+typedef tOplkError (*tObdStoreLoadCallback)(const tObdCbStoreParam* pCbStoreParam_p);
 
 /**
 \brief Enumeration for Node ID setting types
@@ -144,31 +144,52 @@ extern "C"
 {
 #endif
 
-tOplkError obdu_init(tObdInitParam* pInitParam_p);
+tOplkError obdu_init(const tObdInitParam* pInitParam_p);
 tOplkError obdu_exit(void);
-tOplkError obdu_writeEntry(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obdu_readEntry(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obdu_accessOdPart(tObdPart obdPart_p, tObdDir direction_p);
-tOplkError obdu_defineVar(tVarParam* pVarParam_p);
+tOplkError obdu_writeEntry(UINT index_p,
+                           UINT subIndex_p,
+                           const void* pSrcData_p,
+                           tObdSize size_p);
+tOplkError obdu_readEntry(UINT index_p,
+                          UINT subIndex_p,
+                          void* pDstData_p,
+                          tObdSize* pSize_p);
+tOplkError obdu_accessOdPart(tObdPart obdPart_p,
+                             tObdDir direction_p);
+tOplkError obdu_defineVar(const tVarParam* pVarParam_p);
 void*      obdu_getObjectDataPtr(UINT index_p, UINT subIndex_p);
-tOplkError obdu_registerUserOd(tObdEntryPtr pUserOd_p);
+
+#if (defined(OBD_USER_OD) && (OBD_USER_OD != FALSE))
+tOplkError obdu_registerUserOd(const tObdEntry* pUserOd_p);
+#endif
+
 void       obdu_initVarEntry(tObdVarEntry* pVarEntry_p, tObdType type_p, tObdSize obdSize_p);
 tObdSize   obdu_getDataSize(UINT index_p, UINT subIndex_p);
 UINT       obdu_getNodeId(void);
 tOplkError obdu_setNodeId(UINT nodeId_p, tObdNodeIdType nodeIdType_p);
 tOplkError obdu_isNumerical(UINT index_p, UINT subIndex_p, BOOL* pfEntryNumerical_p);
 tOplkError obdu_getType(UINT index_p, UINT subIndex_p, tObdType* pType_p);
-tOplkError obdu_writeEntryFromLe(UINT index_p, UINT subIndex_p, void* pSrcData_p, tObdSize size_p);
-tOplkError obdu_readEntryToLe(UINT index_p, UINT subIndex_p, void* pDstData_p, tObdSize* pSize_p);
-tOplkError obdu_getAccessType(UINT index_p, UINT subIndex_p, tObdAccess* pAccessType_p);
-tOplkError obdu_searchVarEntry(UINT index_p, UINT subindex_p, tObdVarEntry** ppVarEntry_p);
-
-#if (defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE))
-tOplkError obdu_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
-#endif
+tOplkError obdu_readEntryToLe(UINT index_p,
+                              UINT subIndex_p,
+                              void* pDstData_p,
+                              tObdSize* pSize_p);
+tOplkError obdu_writeEntryFromLe(UINT index_p,
+                                 UINT subIndex_p,
+                                 const void* pSrcData_p,
+                                 tObdSize size_p);
+tOplkError obdu_getAccessType(UINT index_p,
+                              UINT subIndex_p,
+                              tObdAccess* pAccessType_p);
+tOplkError obdu_searchVarEntry(UINT index_p,
+                               UINT subindex_p,
+                               tObdVarEntry** ppVarEntry_p);
 
 #if (defined(CONFIG_OBD_CALC_OD_SIGNATURE) && (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE))
 UINT32     obdu_getOdSignature(tObdPart odPart_p);
+#endif
+
+#if (defined(CONFIG_OBD_USE_STORE_RESTORE) && (CONFIG_OBD_USE_STORE_RESTORE != FALSE))
+tOplkError obdu_storeLoadObjCallback(tObdStoreLoadCallback pfnCallback_p);
 #endif
 
 tOplkError obdu_processWrite(tSdoObdConHdl* pSdoObdConHdl_p);

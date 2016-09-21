@@ -28,6 +28,7 @@ Refer to http://www.tty1.net/pycrc/ for license information.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -142,24 +143,27 @@ static const UINT16 aCrc16Table_l[256] =
 The function calculates CRC16 for the data in the passed buffer.
 This CRC16 version is used in CANopen for SDO CRC calculation.
 
-\param  crc_p           Initialized value of CRC.
-\param  pData_p         Pointer to the data buffer.
-\param  size_p          Size of data in the buffer, in bytes.
+\param[in]      crc_p               Initialized value of CRC.
+\param[in]      pData_p             Pointer to the data buffer.
+\param[in]      size_p              Size of data in the buffer, in bytes.
 
 \return The function returns an unsigned 16 bit CRC value.
 
 \ingroup module_obdconf
 */
 //------------------------------------------------------------------------------
-UINT16 obdconf_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p)
+UINT16 obdconf_calculateCrc16(UINT16 crc_p,
+                              const void* pData_p,
+                              size_t size_p)
 {
-    UINT idx;
+    UINT            idx;
+    const UINT8*    pData = (const UINT8*)pData_p;
 
     while (size_p--)
     {
-        idx = ((crc_p >> 8) ^ *pData_p) & 0xFF;
+        idx = ((crc_p >> 8) ^ *pData) & 0xFF;
         crc_p = (aCrc16Table_l[idx] ^ (crc_p << 8));
-        pData_p++;
+        pData++;
     }
 
     return crc_p;

@@ -60,8 +60,8 @@ extern "C"
 
 tOplkError obdcdc_init(void);
 void       obdcdc_exit(void);
-void       obdcdc_setFilename(char* pCdcFilename_p);
-void       obdcdc_setBuffer(UINT8* pCdc_p, size_t cdcSize_p);
+void       obdcdc_setFilename(const char* pCdcFilename_p);
+void       obdcdc_setBuffer(const void* pCdc_p, size_t cdcSize_p);
 tOplkError obdcdc_loadCdc(void);
 
 #ifdef __cplusplus

@@ -202,7 +202,7 @@ UINT32 getRequiredKernelFeatures(void);
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 static tOplkError storeOdPart(tObdCbParam* pParam_p);
 static tOplkError restoreOdPart(tObdCbParam* pParam_p);
-static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p);
+static tOplkError cbStoreLoadObject(const tObdCbStoreParam* pCbStoreParam_p);
 static tOplkError initDefaultOdPartArchive(void);
 #endif
 
@@ -2539,7 +2539,7 @@ creates an archive and saves the parameters. Following command sequence is used:
 \return The function returns a tOplkError error code.
 */
 //----------------------------------------------------------------------------
-static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p)
+static tOplkError cbStoreLoadObject(const tObdCbStoreParam* pCbStoreParam_p)
 {
     tOplkError      ret = kErrorOk;
     tOplkError      archiveState = kErrorOk;
@@ -2560,7 +2560,7 @@ static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p)
         case kObdCmdWriteObj:
             // Store value from pData_p (with size ObjSize_p) to memory medium
             ret = obdconf_storePart(odPart,
-                                    (UINT8*)pCbStoreParam_p->pData,
+                                    pCbStoreParam_p->pData,
                                     pCbStoreParam_p->objSize);
             break;
 
@@ -2585,7 +2585,7 @@ static tOplkError cbStoreLoadObject(tObdCbStoreParam* pCbStoreParam_p)
 
         case kObdCmdReadObj:
             ret = obdconf_loadPart(odPart,
-                                   (UINT8*)pCbStoreParam_p->pData,
+                                   pCbStoreParam_p->pData,
                                    pCbStoreParam_p->objSize);
             break;
 

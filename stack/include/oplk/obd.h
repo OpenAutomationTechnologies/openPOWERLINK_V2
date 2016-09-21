@@ -326,7 +326,7 @@ typedef struct
     tObdEvent           obdEvent;       ///< Event that caused calling the function.
     UINT                index;          ///< Index of the accessed object.
     UINT                subIndex;       ///< Subindex of the accessed object.
-    void*               pArg;           ///< Additional argument.
+    const void*         pArg;           ///< Additional argument.
     UINT32              abortCode;      ///< Abort Code.
 } tObdCbParam;
 
@@ -347,9 +347,6 @@ typedef struct
     void*               pCurrent;           ///< Pointer to data (points always to RAM)
 } tObdSubEntry;
 
-typedef tObdSubEntry* tObdSubEntryPtr;
-
-
 /**
 \brief Structure for indices
 
@@ -358,12 +355,10 @@ This structure defines an index in the OD.
 typedef struct
 {
     UINT                index;              ///< Index of the object
-    tObdSubEntryPtr     pSubIndex;          ///< Points to subindex structures of this object
+    tObdSubEntry*       pSubIndex;          ///< Points to subindex structures of this object
     UINT                count;              ///< number of subindices.
     BOOL                fCallGenericCb;     ///< flag enabling the call of the generic callback
 } tObdEntry;
-
-typedef tObdEntry* tObdEntryPtr;
 
 /**
 \brief Structure for OBD init parameters
@@ -372,14 +367,14 @@ This structure defines the init parameters of the OBD module.
 */
 struct _tObdInitParam
 {
-    tObdEntryPtr        pGenericPart;           ///< Pointer to generic part of OD
+    tObdEntry*          pGenericPart;           ///< Pointer to generic part of OD
     UINT32              numGeneric;             ///< Number of entries in generic partition
-    tObdEntryPtr        pManufacturerPart;      ///< Pointer to manufacturer part of OD
+    tObdEntry*          pManufacturerPart;      ///< Pointer to manufacturer part of OD
     UINT32              numManufacturer;        ///< Number of entries in manufacturer partition
-    tObdEntryPtr        pDevicePart;            ///< Pointer to device part of OD
+    tObdEntry*          pDevicePart;            ///< Pointer to device part of OD
     UINT32              numDevice;              ///< Number of entries in device partition
 #if (defined(OBD_USER_OD) && (OBD_USER_OD != FALSE))
-    tObdEntryPtr        pUserPart;              ///< Pointer to user part of OD
+    tObdEntry*          pUserPart;              ///< Pointer to user part of OD
     UINT32              numUser;                ///< Number of entries in user partition
 #endif
 };
