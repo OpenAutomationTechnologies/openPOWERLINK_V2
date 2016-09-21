@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tCfmCbEventCnProgress)(tCfmEventCnProgress* pEventCnProgress_p);
+typedef tOplkError (*tCfmCbEventCnProgress)(const tCfmEventCnProgress* pEventCnProgress_p);
 typedef tOplkError (*tCfmCbEventCnResult)(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 
 //------------------------------------------------------------------------------
@@ -63,9 +63,12 @@ extern "C"
 {
 #endif
 
-tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
+tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
+                     tCfmCbEventCnResult pfnCbEventCnResult_p);
 tOplkError cfmu_exit(void);
-tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
+tOplkError cfmu_processNodeEvent(UINT nodeId_p,
+                                 tNmtNodeEvent nodeEvent_p,
+                                 tNmtState nmtState_p);
 BOOL       cfmu_isSdoRunning(UINT nodeId_p);
 tOplkError cfmu_cbObdAccess(tObdCbParam* pParam_p);
 

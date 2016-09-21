@@ -194,7 +194,7 @@ static tOplkError cbBootEvent(tNmtBootEvent BootEvent_p, tNmtState NmtState_p,
                               UINT16 errorCode_p);
 
 #if defined(CONFIG_INCLUDE_CFM)
-static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p);
+static tOplkError cbCfmEventCnProgress(const tCfmEventCnProgress* pEventCnProgress_p);
 static tOplkError cbCfmEventCnResult(unsigned int uiNodeId_p, tNmtNodeCommand NodeCommand_p);
 #endif
 UINT32 getRequiredKernelFeatures(void);
@@ -2037,7 +2037,7 @@ The function implements the callback function for CFM progress events.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbCfmEventCnProgress(tCfmEventCnProgress* pEventCnProgress_p)
+static tOplkError cbCfmEventCnProgress(const tCfmEventCnProgress* pEventCnProgress_p)
 {
     tOplkError              ret;
     tOplkApiEventArg        eventArg;
