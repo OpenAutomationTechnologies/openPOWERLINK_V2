@@ -72,6 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_STATE_XX_OPERATIONAL            0x00FD
 #define NMT_STATE_XX_STOPPED                0x004D
 #define NMT_STATE_XX_BASIC_ETHERNET         0x001E
+#define NMT_STATE_XX_MASK                   0x00FF
 
 #define NMT_IF_CN_OR_RMN(nmtState)  ((nmtState) & NMT_TYPE_CS)
 #define NMT_IF_CN(nmtState)         (((nmtState) & NMT_TYPE_MASK) == NMT_TYPE_CS)

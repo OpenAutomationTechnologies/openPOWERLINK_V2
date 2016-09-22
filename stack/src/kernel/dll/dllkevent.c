@@ -755,7 +755,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     if (ret != kErrorOk)
                         goto Exit;
                 }
-                else if (!((nmtState_p == kNmtCsBasicEthernet) || (nmtState_p == kNmtMsBasicEthernet)))
+                else if ((nmtState_p & NMT_STATE_XX_MASK) < NMT_STATE_XX_PRE_OPERATIONAL_1)
                 {
                     // frame is silently dropped for POWERLINK states < PreOp1
                     // to avoid deadlocks and higher layer confusions
