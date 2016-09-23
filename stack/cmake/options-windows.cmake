@@ -2,7 +2,8 @@
 #
 # CMake options for openPOWERLINK stack on Windows
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,6 +35,8 @@ OPTION(CFG_COMPILE_LIB_MN                       "Compile openPOWERLINK MN librar
 OPTION(CFG_COMPILE_LIB_CN                       "Compile openPOWERLINK CN library" ON)
 OPTION(CFG_COMPILE_LIB_MNAPP_PCIEINTF           "Compile openPOWERLINK MN application library for PCIe interface" ON)
 OPTION(CFG_COMPILE_LIB_MNAPP_KERNELINTF         "Compile openPOWERLINK MN application library for kernel interface" ON)
+OPTION(CFG_COMPILE_LIB_MN_SIM                   "Compile openPOWERLINK MN library with simulation interface" ON)
+OPTION(CFG_COMPILE_LIB_CN_SIM                   "Compile openPOWERLINK CN library with simulation interface" ON)
 
 OPTION(CFG_WINDOWS_DLL              "Build openPOWERLINK library as DLL" OFF)
 
@@ -56,10 +59,16 @@ ENDIF()
 IF(CFG_COMPILE_LIB_MNAPP_KERNELINTF)
     ADD_SUBDIRECTORY(proj/windows/liboplkmnapp-kernelintf)
 ENDIF()
+IF(CFG_COMPILE_LIB_MN_SIM)
+    ADD_SUBDIRECTORY(proj/windows/liboplkmn-sim)
+ENDIF()
 
 # CN libraries
 IF(CFG_COMPILE_LIB_CN)
     ADD_SUBDIRECTORY(proj/windows/liboplkcn)
+ENDIF()
+IF(CFG_COMPILE_LIB_CN_SIM)
+    ADD_SUBDIRECTORY(proj/windows/liboplkcn-sim)
 ENDIF()
 
 

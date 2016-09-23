@@ -3,6 +3,7 @@
 # Directory list for stack cmake build system
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,6 +37,8 @@ SET(COMMON_SOURCE_DIR ${STACK_SOURCE_DIR}/common)
 SET(ARCH_SOURCE_DIR ${STACK_SOURCE_DIR}/arch)
 SET(EDRV_SOURCE_DIR ${STACK_SOURCE_DIR}/kernel/edrv)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
+SET(SIM_SOURCE_DIR ${OPLK_BASE_DIR}/sim/src)
+SET(SIM_INCLUDE_DIR ${OPLK_BASE_DIR}/sim/include)
 
 # Include file directories
 SET(STACK_INCLUDE_DIR ${OPLK_STACK_DIR}/include)

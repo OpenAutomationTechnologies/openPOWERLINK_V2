@@ -3,6 +3,7 @@
 # File lists for openPOWERLINK stack sources
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -56,6 +57,10 @@ SET(COMMON_NOOS_SOURCES
 
 SET(COMMON_CAL_DIRECT_SOURCES
     ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c
+    )
+
+SET(COMMON_SIM_SOURCES
+    ${CONTRIB_SOURCE_DIR}/trace/trace-sim.c
     )
 
 ################################################################################
@@ -251,6 +256,11 @@ SET(EVENT_UCAL_WINDOWSIOCTL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-winioctl.c
     )
 
+SET(EVENT_UCAL_SIM_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -408,6 +418,11 @@ SET(EVENT_KCAL_DUALPROCSHM_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c
     )
 
+SET(EVENT_KCAL_SIM_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-direct.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -488,6 +503,14 @@ SET(HARDWARE_DRIVER_OPENMAC_MN_SOURCES
     ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
     ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
     )
+
+SET(HARDWARE_DRIVER_SIM_SOURCES
+    ${KERNEL_SOURCE_DIR}/veth/veth-generic.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-sim.c
+    ${EDRV_SOURCE_DIR}/edrvcyclic.c
+    ${EDRV_SOURCE_DIR}/edrv-sim.c
+    )
+
 ################################################################################
 # User timer sources
 
@@ -502,6 +525,10 @@ SET(USER_TIMER_WINDOWS_SOURCES
 
 SET(USER_TIMER_GENERIC_SOURCES
     ${USER_SOURCE_DIR}/timer/timer-generic.c
+    )
+
+SET(USER_TIMER_SIM_SOURCES
+    ${USER_SOURCE_DIR}/timer/timer-sim.c
     )
 
 ################################################################################
@@ -541,6 +568,11 @@ SET(CIRCBUF_NOOSHOSTIF_SOURCES
 SET(CIRCBUF_DUALPROCSHM_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c
+    )
+
+SET(CIRCBUF_SIM_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
     )
 
 ################################################################################
@@ -626,6 +658,11 @@ SET(TARGET_ALTERA_ARM_SOURCES
 SET(TARGET_ALTERA_ARM_DUAL_SOURCES
     ${ARCH_SOURCE_DIR}/altera-c5socarm/lock-dualprocnoos.c
     )
+
+SET(TARGET_SIM_SOURCES
+        ${ARCH_SOURCE_DIR}/sim/target-sim.c
+        ${ARCH_SOURCE_DIR}/sim/target-mutex.c
+    )
 ################################################################################
 # Architecture specific sources
 ################################################################################
@@ -636,6 +673,20 @@ SET(ARCH_X86_SOURCES
 
 SET(ARCH_LE_SOURCES
     ${COMMON_SOURCE_DIR}/ami/amile.c
+    )
+
+################################################################################
+# Simulation interface sources
+################################################################################
+SET(SIM_IF_SOURCES
+    ${SIM_SOURCE_DIR}/sim-target.c
+    ${SIM_SOURCE_DIR}/sim-trace.c
+    ${SIM_SOURCE_DIR}/sim-edrv.c
+    ${SIM_SOURCE_DIR}/sim-hrestimer.c
+    ${SIM_SOURCE_DIR}/sim-api.c
+    ${SIM_SOURCE_DIR}/sim-apievent.c
+    ${SIM_SOURCE_DIR}/sim-processsync.c
+    ${SIM_SOURCE_DIR}/sim-timer.c
     )
 
 ################################################################################
