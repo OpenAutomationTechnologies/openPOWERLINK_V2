@@ -148,7 +148,7 @@ static tCtrluInstance   ctrlInstance_l;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static UINT8    aCmdData_l[C_MAX_NMT_CMD_DATA_SIZE];    // Extended NMT request command data
-
+static UINT     nmtCmdDataSize_l;                       // NMT Command Data Size
 // List of objects that need to get linked
 static tLinkObjectRequest   aLinkObjectRequestsMn_l[] =
 {//     Index       Variable        Count   Object size             SubIndex
@@ -2279,6 +2279,16 @@ static tOplkError handleObdRequestCmd(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
 
+    // Receive the data size of a domain object
+    if (pParam_p->obdEvent == kObdEvWrStringDomain)
+    {
+        tObdVStringDomain* pMemVStringDomain = (tObdVStringDomain*)pParam_p->pArg;
+
+        ASSERT(pMemVStringDomain != NULL);
+
+        nmtCmdDataSize_l = pMemVStringDomain->downloadSize;
+    }
+
     // Check if a value unequal to 0 has been written to subindex 1
     // (NMT_RequestCmd_REC.Release_BOOL)
     if ((pParam_p->obdEvent == kObdEvPostWrite) &&
@@ -2319,10 +2329,8 @@ static tOplkError handleObdRequestCmd(tObdCbParam* pParam_p)
         {   // Local node is CN
             // Forward the command to the MN
             // (this is a manufacturer specific feature)
-            ret = nmtcnu_sendNmtRequestEx(cmdTarget,
-                                          (tNmtCommand)cmdId,
-                                          aCmdData_l,
-                                          sizeof(aCmdData_l));
+            ret = nmtcnu_sendNmtRequestEx(cmdTarget, (tNmtCommand)cmdId,
+                                          aCmdData_l, nmtCmdDataSize_l);
         }
         else
         {   // Local node is MN

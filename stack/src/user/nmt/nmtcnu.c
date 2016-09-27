@@ -188,11 +188,10 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p,
     tOplkError  ret = kErrorOk;
     tFrameInfo  nmtRequestFrameInfo;
     tPlkFrame   nmtRequestFrame;
-    size_t      nmtCmdDataSize;
 
-    nmtCmdDataSize = sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData);
-    if (dataSize_p > nmtCmdDataSize)
-        dataSize_p = nmtCmdDataSize; // n.b. truncate size of aCmdData[C_MAX_NMT_CMD_DATA_SIZE]
+    // check NMTCmdData size for correct length
+    if (dataSize_p > C_MAX_NMT_CMD_DATA_SIZE)
+        return kErrorNmtInvalidParam;
 
     // build frame
     OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
