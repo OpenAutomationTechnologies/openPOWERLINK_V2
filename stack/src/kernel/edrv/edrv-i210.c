@@ -372,7 +372,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_STATUS_DEV_RST_SET          (1 << 20)         // Device reset done
 #define EDRV_SW_RST_DONE_TIMEOUT         10   // ms        // Software rest timeout
 #define EDRV_MASTER_DIS_TIMEOUT          90   // ms        // Master disable timeout
-#define EDRV_LINK_UP_TIMEOUT             3000 // ms        // Link up timeout
+#define EDRV_LINK_UP_TIMEOUT             6000 // ms        // Link up timeout
 #define EDRV_AUTO_READ_DONE_TIMEOUT      10                // Auto register read done timeout
 #define EDRV_PHY_SEMPHORE_TIMEOUT        100
 #define EDRV_POLL_TIMEOUT                3                 // Tx-Rx Enable bit poll timeout
