@@ -290,11 +290,11 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 
     // de-register multicast MACs in Ethernet driver
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
-    ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
+    edrv_clearRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOA);
-    ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
+    edrv_clearRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_PRES);
-    ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
+    edrv_clearRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
 
@@ -432,19 +432,19 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
 
     // register multicast MACs in Ethernet driver
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOC);
-    ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+    edrv_setRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_SOA);
-    ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+    edrv_setRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_PRES);
-    ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+    edrv_setRxMulticastMacAddr(aMulticastMac);
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
-    ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+    edrv_setRxMulticastMacAddr(aMulticastMac);
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     if (dllkInstance_g.fRedundancy)
     {
         ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_AMNI);
-        ret = edrv_setRxMulticastMacAddr(aMulticastMac);
+        edrv_setRxMulticastMacAddr(aMulticastMac);
     }
 #endif
 
@@ -1159,8 +1159,8 @@ static tOplkError setupLocalNodeCn(void)
         ami_setUint8Be(&dllkInstance_g.aFilter[handle].aFilterMask[16], 0xFF);
     }
 
-    handle = DLLK_FILTER_PRES;
 #if (NMT_MAX_NODE_ID > 0)
+    handle = DLLK_FILTER_PRES;
     for (index = 0, pIntNodeInfo = &dllkInstance_g.aNodeInfo[0];
          index < tabentries(dllkInstance_g.aNodeInfo);
          index++, pIntNodeInfo++)

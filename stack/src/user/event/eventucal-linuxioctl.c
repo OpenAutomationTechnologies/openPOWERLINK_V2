@@ -326,7 +326,7 @@ static void* eventThread(void* arg_p)
             if (pEvent->eventArgSize != 0)
                 pEvent->eventArg.pEventArg = (char*)pEvent + sizeof(tEvent);
 
-            ret = eventu_process(pEvent);
+            eventu_process(pEvent);
         }
         else
         {

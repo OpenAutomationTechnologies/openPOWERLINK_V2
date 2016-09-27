@@ -1276,12 +1276,10 @@ by calling the event callback function.
 //------------------------------------------------------------------------------
 static tOplkError processUserEvent(const tEvent* pEvent_p)
 {
-    tOplkError          ret;
+    tOplkError          ret = kErrorOk;
     tEventError*        pEventError;
     tOplkApiEventType   eventType;
     tOplkApiEventArg    apiEventArg;
-
-    ret = kErrorOk;
 
     switch (pEvent_p->eventType)
     {
@@ -1296,7 +1294,7 @@ static tOplkError processUserEvent(const tEvent* pEvent_p)
                 case kEventSourceDllk:
                     eventType = kOplkApiEventCriticalError;
                     // halt the stack by entering NMT state Off
-                    ret = nmtu_postNmtEvent(kNmtEventCriticalError);
+                    nmtu_postNmtEvent(kNmtEventCriticalError);
                     break;
 
                 // the other errors are just warnings
@@ -1306,7 +1304,7 @@ static tOplkError processUserEvent(const tEvent* pEvent_p)
             }
 
             // call user callback
-            ret = ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEventError);
+            ctrlu_callUserEventCallback(eventType, (tOplkApiEventArg*)pEventError);
             // discard error from callback function, because this could generate an endless loop
             ret = kErrorOk;
             break;
@@ -1829,8 +1827,7 @@ static tOplkError handleObdVerifyConf(tObdCbParam* pParam_p)
         UINT32  verifyConfInvalid = 0;
 
         // Set CFM_VerifyConfiguration_REC.VerifyConfInvalid_U32 to 0
-        ret = obdu_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
-
+        obdu_writeEntry(0x1020, 4, &verifyConfInvalid, 4);
         // ignore any error because this object is optional
         ret = kErrorOk;
     }
@@ -1970,10 +1967,8 @@ The function implements the callback function for node events.
 static tOplkError cbNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p,
                               UINT16 errorCode_p, BOOL fMandatory_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     // call user callback
     eventArg.nodeEvent.nodeId = nodeId_p;
@@ -2010,10 +2005,8 @@ The function implements the callback function for node events.
 static tOplkError cbBootEvent(tNmtBootEvent bootEvent_p, tNmtState nmtState_p,
                               UINT16 errorCode_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     // call user callback
     eventArg.bootEvent.bootEvent = bootEvent_p;
@@ -2039,10 +2032,8 @@ The function implements the callback function for CFM progress events.
 //------------------------------------------------------------------------------
 static tOplkError cbCfmEventCnProgress(const tCfmEventCnProgress* pEventCnProgress_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tOplkApiEventArg        eventArg;
-
-    ret = kErrorOk;
 
     eventArg.cfmProgress = *pEventCnProgress_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventCfmProgress, &eventArg);

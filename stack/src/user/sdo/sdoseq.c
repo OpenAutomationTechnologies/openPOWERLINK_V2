@@ -381,9 +381,17 @@ tOplkError sdoseq_exit(void)
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
     ret = sdoudp_exit();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("sdoudp_exit():  0x%X\n", ret);
+    }
 #endif
 #if defined(CONFIG_INCLUDE_SDO_ASND)
     ret = sdoasnd_exit();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("sdoasnd_exit(): 0x%X\n", ret);
+    }
 #endif
 
     return ret;
@@ -712,6 +720,8 @@ tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 \brief  Process Idle state
 
 The function processes the sequence layer state: kSdoSeqStateIdle
+Server: Listens for incoming connection requests (InitReq)
+Client: Sends a connection request (InitReq)
 
 \param[in,out]  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param[in]      sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -743,9 +753,12 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             break;
 
-        // init con from extern, check rcon and scon -> send answer
+        // init con from extern, check rcon and scon -> send answer (InitAck)
         case kSdoSeqEventFrameRec:
-            DEBUG_LVL_SDO_TRACE("%s(): scon=%u rcon=%u\n",
+            if (pRecvFrame_p == NULL)
+                return kErrorInvalidOperation;
+
+            DEBUG_LVL_SDO_TRACE("%s scon=%u rcon=%u\n",
                                 __func__,
                                 pRecvFrame_p->sendSeqNumCon,
                                 pRecvFrame_p->recvSeqNumCon);
@@ -797,6 +810,10 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
 \brief  Process state Init1
 
 The function processes the sequence layer state: kSdoSeqStateInit1
+Client: Listens for init request confirmation from server (InitAck)
+        and confirms with an init response frame (InitResp)
+Server: Changes role from client to server, if already in client mode
+        but receiving an initialization (InitReq) request from another client
 
 \param[in,out]  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param[in]      sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -819,6 +836,9 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p,
     {
         // frame received
         case kSdoSeqEventFrameRec:
+            if (pRecvFrame_p == NULL)
+                return kErrorInvalidOperation;
+
             // check scon == 1 and rcon == 1
             if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
                 ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
@@ -900,6 +920,10 @@ static tOplkError processStateInit1(tSdoSeqCon* pSdoSeqCon_p,
 \brief  Process state Init2
 
 The function processes the sequence layer state: kSdoSeqStateInit2
+Server: Listens for init ack confirmation from client (InitResp)
+        and announces a valid connection (Valid)
+Client: Changes role from server to client, if already in server mode, but
+        receiving an initialization confirmation (InitAck) from another server
 
 \param[in,out]  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param[in]      sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -922,6 +946,9 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p,
     {
         // frame received
         case kSdoSeqEventFrameRec:
+            if (pRecvFrame_p == NULL)
+                return kErrorInvalidOperation;
+
             // check scon == 2 and rcon == 1
             if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
                 ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
@@ -1016,6 +1043,9 @@ static tOplkError processStateInit2(tSdoSeqCon* pSdoSeqCon_p,
 \brief  Process state Init3
 
 The function processes the sequence layer state: kSdoSeqStateInit3
+Client: Listens for valid connection announcement from server (Valid)
+        and confirms with a valid connection frame (Valid)
+Server: Never reaches this state
 
 \param[in,out]  pSdoSeqCon_p        Pointer to sequence layer connection information.
 \param[in]      sdoSeqConHdl_p      Handle of sequence layer connection.
@@ -1036,6 +1066,9 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p,
     {
         // frame received
         case kSdoSeqEventFrameRec:
+            if (pRecvFrame_p == NULL)
+                return kErrorInvalidOperation;
+
             // check scon == 2 and rcon == 2
             if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x02) &&
                 ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x02))
@@ -1050,6 +1083,13 @@ static tOplkError processStateInit3(tSdoSeqCon* pSdoSeqCon_p,
 
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
                 sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateConnected);
+            }
+            // check scon == 1 and rcon == 1
+            else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
+                     ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) == 0x01))
+            {   // server repeated an InitAck frame
+                // allow this until timeout -> do nothing and wait for correct frame
+                break;
             }
             // check scon == 2 and rcon == 1
             else if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) == 0x01) &&
@@ -1161,6 +1201,9 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
 
             // set timer
             ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
+            if (ret != kErrorOk)
+                return ret;
+
             // check if data frame or ack
             if (pData_p == NULL)
             {   // send ack, increment scon
@@ -1198,6 +1241,9 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
 
         // frame received
         case kSdoSeqEventFrameRec:
+            if (pRecvFrame_p == NULL)
+                return kErrorInvalidOperation;
+
             sendSeqNumCon = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
             recvSeqNumCon = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
 
@@ -1228,6 +1274,9 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
                         checkHistoryAcked(pSdoSeqCon_p, recvSeqNumCon & SEQ_NUM_MASK))
                     {
                         ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
+                        if (ret != kErrorOk)
+                            return ret;
+
                         // reset timeout counter
                         pSdoSeqCon_p->retryCount = 0;
                     }
@@ -1239,6 +1288,9 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
 
                         // TRACE("sdoseq: error response received\n");
                         ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
+                        if (ret != kErrorOk)
+                            return ret;
+
                         // reset timeout counter
                         pSdoSeqCon_p->retryCount = 0;
                         ret = sendAllTxHistory(pSdoSeqCon_p);
@@ -1372,6 +1424,9 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
     //TODO: retry of acknowledge
     if (event_p == kSdoSeqEventFrameRec)
     {
+        if (pRecvFrame_p == NULL)
+            return kErrorInvalidOperation;
+
         sendSeqNumCon = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
         recvSeqNumCon = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
 
@@ -1402,6 +1457,9 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                     // and one element is now acknowledged
 
                     ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
+                    if (ret != kErrorOk)
+                        return ret;
+
                     // reset timeout counter
                     pSdoSeqCon_p->retryCount = 0;
 
@@ -1419,6 +1477,9 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                     }
                     else
                         forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+
+                    if (ret != kErrorOk)
+                        return ret;
                 }
 
                 // send data to higher layer if needed
@@ -1447,6 +1508,9 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                         //       here, because if we are server it is an initial transfer and will
                         //       not be processed. If we are client, it doesn't happen since the other
                         //       node would need to be a client also.
+
+                        if (ret != kErrorOk)
+                            return ret;
                     }
                 }
 
@@ -1476,6 +1540,9 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                     }
                     else
                         forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+
+                    if (ret != kErrorOk)
+                        return ret;
                 }
 
                 // reset timeout counter
@@ -2254,6 +2321,8 @@ static tOplkError processSubTimeout(tSdoSeqCon* pSdoSeqCon_p)
     // resend data with acknowledge request
     pSdoSeqCon_p->retryCount++;
     ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
+    if (ret != kErrorOk)
+        return ret;
 
     // read first frame from history
     ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);

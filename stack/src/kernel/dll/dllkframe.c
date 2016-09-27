@@ -358,7 +358,7 @@ Exit:
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (nmtEvent << 8);
         // Error event for API layer
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
     BENCHMARK_MOD_02_RESET(3);
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -461,7 +461,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -534,7 +534,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -1168,7 +1168,7 @@ Exit:
     {
         BENCHMARK_MOD_02_TOGGLE(7);
         arg = dllkInstance_g.dllState | (handle << 16);
-        ret = eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
+        eventk_postError(kEventSourceDllk, ret, sizeof(arg), &arg);
     }
 
     TGT_DLLK_LEAVE_CRITICAL_SECTION()
@@ -2053,6 +2053,11 @@ static tOplkError processReceivedPres(const tFrameInfo* pFrameInfo_p,
     // At this point we know that we are in a cyclic state due to the checks above!
     if ((nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {
+        if (pIntNodeInfo == NULL)
+        {
+            ret = kErrorDllNoNodeInfo;
+            return ret;
+        }
         // So we are in ReadyToOp or Operational after the check and can inform the PDO module now.
         if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nodeNmtState))
         {

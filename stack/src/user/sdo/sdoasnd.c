@@ -122,7 +122,9 @@ tOplkError sdoasnd_init(tSequLayerReceiveCb pfnReceiveCb_p)
     if (pfnReceiveCb_p != NULL)
         sdoAsndInstance_l.pfnSdoAsySeqCb = pfnReceiveCb_p;
     else
-        return kErrorSdoUdpMissCb;
+    {
+        return kErrorSdoUdpMissCb; //TODO: Wrong error code?
+    }
 
     ret = dllucal_regAsndService(kDllAsndSdo, sdoAsndCb, kDllAsndFilterLocal);
 

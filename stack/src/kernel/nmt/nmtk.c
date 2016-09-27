@@ -269,7 +269,7 @@ The function processes NMT kernel events. It implements the NMT state machine.
 //------------------------------------------------------------------------------
 tOplkError nmtk_process(const tEvent* pEvent_p)
 {
-    tOplkError              ret;
+    tOplkError              ret = kErrorOk;
     tNmtkStateIndexes       oldState;
     tNmtEvent               nmtEvent;
     tEvent                  event;
