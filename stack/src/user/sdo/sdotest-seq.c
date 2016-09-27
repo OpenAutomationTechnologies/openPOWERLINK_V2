@@ -190,9 +190,7 @@ This function initializes the SDO sequence layer test.
 //------------------------------------------------------------------------------
 tOplkError sdotestseq_init(sdoApiCbSeqTest sdoSequCbApi_p)
 {
-    tOplkError  ret;
-
-    ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     // Check parameters
     if (sdoSequCbApi_p == NULL)
