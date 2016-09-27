@@ -2066,7 +2066,7 @@ static tOplkError serverObdFinishCb(tSdoObdConHdl* pObdHdl_p)
     if (pObdHdl_p->plkError != kErrorOk)
     {
         assignSdoErrorCode(pObdHdl_p->plkError, &pSdoComCon->lastAbortCode);
-        ret = serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
+        serverAbortTransfer(pSdoComCon, pSdoComCon->lastAbortCode);
         ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);
         OPLK_MEMSET(pSdoComCon, 0x00, sizeof(tSdoComCon));
         goto Exit;
@@ -2149,7 +2149,7 @@ static tOplkError clientSdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
     tSdoComCon* pSdoComCon;
 
     if ((targetNodeId_p == C_ADR_INVALID) || (targetNodeId_p >= C_ADR_BROADCAST))
-        ret = kErrorInvalidNodeId;
+        return kErrorInvalidNodeId;
 
     // search free control structure
     pSdoComCon = &sdoComInstance_l.sdoComCon[0];
@@ -2437,6 +2437,11 @@ static tOplkError clientSdoAbortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 ab
 
     pSdoComCon->pData = (UINT8*)&abortCode_p;
     ret = processState(sdoComConHdl_p, kSdoComConEventAbort, (tAsySdoCom*)NULL);
+
+    // reference is only valid locally in this function, therefore it is
+    // invalidated here, since the storage is a global variable
+    pSdoComCon->pData = NULL;
+
     return ret;
 }
 
@@ -2533,7 +2538,7 @@ static tOplkError clientProcessStateWaitInit(tSdoComConHdl sdoComConHdl_p, tSdoC
         case kSdoComConEventInitError:
         case kSdoComConEventTimeout:
         case kSdoComConEventTransferAbort:
-            ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
+            sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             if (sdoComConEvent_p == kSdoComConEventTimeout)
             {
@@ -2613,7 +2618,7 @@ static tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                 if ((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
                     // send acknowledge without any Command layer data
-                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
+                    sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
                     ret = clientTransferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferRxAborted);
@@ -2626,7 +2631,7 @@ static tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p, tSdo
                     if (pSdoComCon->transferSize == 0)
                     {
                         // send acknowledge without any Command layer data
-                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
+                        sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                         pSdoComCon->transactionId++;
                         pSdoComCon->lastAbortCode = 0;
                         ret = clientTransferFinished(sdoComConHdl_p, pSdoComCon, kSdoComTransferFinished);
@@ -2645,7 +2650,7 @@ static tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p, tSdo
         // connection closed event go back to kSdoComStateClientWaitInit
         case kSdoComConEventConClosed:
             // connection closed by communication partner
-            ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
+            sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = 0;
@@ -2661,7 +2666,7 @@ static tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p, tSdo
 
         case kSdoComConEventInitError:
         case kSdoComConEventTimeout:
-            ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
+            sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
@@ -2732,7 +2737,7 @@ static tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                 if ((flag & SDO_CMDL_FLAG_ABORT) != 0)
                 {
                     // send acknowledge without any Command layer data
-                    ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
+                    sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                     pSdoComCon->transactionId++;
                     pSdoComCon->sdoComState = kSdoComStateClientConnected;
                     pSdoComCon->lastAbortCode = ami_getUint32Le(&pRecvdCmdLayer_p->aCommandData[0]);
@@ -2746,7 +2751,7 @@ static tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
                     if (pSdoComCon->transferSize == 0)
                     {
                         // send acknowledge without any Command layer data
-                        ret = sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
+                        sdoseq_sendData(pSdoComCon->sdoSeqConHdl, 0, (tPlkFrame*)NULL);
                         pSdoComCon->transactionId++;
                         pSdoComCon->sdoComState = kSdoComStateClientConnected;
                         pSdoComCon->lastAbortCode = 0;
@@ -2759,7 +2764,7 @@ static tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
         // connection closed event go back to kSdoComStateClientWaitInit
         case kSdoComConEventConClosed:
             // connection closed by communication partner
-            ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
+            sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->transactionId++;
@@ -2778,7 +2783,7 @@ static tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p, t
 
         case kSdoComConEventInitError:
         case kSdoComConEventTimeout:
-            ret = sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
+            sdoseq_deleteCon(pSdoComCon->sdoSeqConHdl);         // close sequence layer handle
             pSdoComCon->sdoSeqConHdl |= SDO_SEQ_INVALID_HDL;
             pSdoComCon->sdoComState = kSdoComStateClientWaitInit;
             pSdoComCon->lastAbortCode = SDO_AC_TIME_OUT;
