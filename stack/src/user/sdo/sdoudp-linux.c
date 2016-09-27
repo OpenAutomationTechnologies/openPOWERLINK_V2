@@ -351,6 +351,8 @@ static void receiveFromSocket(const tSdoUdpSocketInstance* pInstance_p)
     UINT                size;
     tSdoUdpCon          sdoUdpCon;
 
+    OPLK_MEMSET(&remoteAddr, 0, sizeof(remoteAddr));
+
     size = sizeof(struct sockaddr);
 
     error = recvfrom(pInstance_p->udpSocket,
