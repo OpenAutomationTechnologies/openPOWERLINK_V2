@@ -773,18 +773,27 @@ tOplkError dllkcal_clearAsyncBuffer(void)
 {
     tOplkError  ret = kErrorOk;
 
-    //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxNmt, 1000);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Reset NMT Tx queue returned 0x%X\n", __func__, ret);
+    }
 
-    //ret is ignored
     ret = instance_l.pTxGenFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxGen, 1000);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Reset Generic Tx queue returned 0x%X\n", __func__, ret);
+    }
 
 #if defined(CONFIG_INCLUDE_VETH)
-    //ret is ignored
     ret = instance_l.pTxVethFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxVeth, 1000);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Reset Virtual Ethernet Tx queue returned 0x%X\n", __func__, ret);
+    }
 #endif
     return ret;
 }
@@ -805,9 +814,12 @@ tOplkError dllkcal_clearAsyncQueues(void)
 {
     tOplkError  ret = kErrorOk;
 
-    //ret is ignored
     ret = instance_l.pTxSyncFuncs->pfnResetDataBlockQueue(
                                     instance_l.dllCalQueueTxSync, 1000);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Reset Sync Tx queue returned 0x%X\n", __func__, ret);
+    }
 
     // clear MN asynchronous queues
     instance_l.nextRequestQueue = 0;
@@ -840,18 +852,33 @@ tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics)
     ULONG       frameCount;
     ULONG       frameCountVeth;
 
-    //ret is ignored
     ret = instance_l.pTxNmtFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxNmt,
                                      &instance_l.statistics.curTxFrameCountNmt);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Get data count of NMT Tx queue returned 0x%X\n",
+                              __func__,
+                              ret);
+    }
 
-    //ret is ignored
     ret = instance_l.pTxGenFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxGen,
                                      &frameCount);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Get data count of Generic Tx queue returned 0x%X\n",
+                              __func__,
+                              ret);
+    }
 
 #if defined(CONFIG_INCLUDE_VETH)
-    //ret is ignored
     ret = instance_l.pTxVethFuncs->pfnGetDataBlockCount(instance_l.dllCalQueueTxVeth,
                                      &frameCountVeth);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Get data count of Virtual Ethernet Tx queue returned 0x%X\n",
+                              __func__,
+                              ret);
+    }
     frameCount += frameCountVeth;
 #else
     UNUSED_PARAMETER(frameCountVeth);
