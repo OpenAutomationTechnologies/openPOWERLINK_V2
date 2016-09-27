@@ -197,11 +197,12 @@ tOplkError dllk_process(const tEvent* pEvent_p)
 
 
         default:
-            ret = kErrorInvalidEvent;
             TRACE("%s(): unhandled event type!\n", __func__);
 #if !defined(NDEBUG)
             // Severe error -> stop execution here
             for (;;);
+#else
+            ret = kErrorInvalidEvent;
 #endif
             break;
     }
