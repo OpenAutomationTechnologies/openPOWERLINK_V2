@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   linux/target-linux.c
+\file   sim/target-sim.c
 
 \brief  Target specific functions for simulation interface
 

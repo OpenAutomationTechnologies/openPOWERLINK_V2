@@ -4,10 +4,6 @@
 
 \brief  Include file for simulation interface providing process sync functions
 
-This include file only provides the functions which require a customized
-behavior. All other API functions can be called directly by the simulation
-environment.
-
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------

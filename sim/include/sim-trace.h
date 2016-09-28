@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-trace.h
 
-\brief  Include file for trace functions using the simulation interface
+\brief  Include file for simulation interface providing trace functions
 
 *******************************************************************************/
 

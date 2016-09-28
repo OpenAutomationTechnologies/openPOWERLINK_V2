@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-edrv.c
 
-\brief  Stub implementation of edrv specific functions for simulation
+\brief  Implementation of the simulation interface for edrv functions
 
 \ingroup module_sim
 *******************************************************************************/

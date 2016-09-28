@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-target.c
 
-\brief  Stub implementation of target specific functions for simulation
+\brief  Implementation of the simulation interface for target functions
 
 \ingroup module_sim
 *******************************************************************************/

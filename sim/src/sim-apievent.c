@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-apievent.c
 
-\brief  Stub implementation of API event specific functions for simulation
+\brief  Implementation of the simulation interface for API event functions
 
 \ingroup module_sim
 *******************************************************************************/

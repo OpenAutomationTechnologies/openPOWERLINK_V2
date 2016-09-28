@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-trace.c
 
-\brief  Implementation of stub for trace functions using simulation interface
+\brief  Implementation of the simulation interface for trace functions
 
 \ingroup module_sim
 *******************************************************************************/

@@ -261,6 +261,22 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   PCIe interface driver, for status/control and data exchange with the kernel
   stack which runs on an external PCIe device.
 
+- **CFG_COMPILE_LIB_CN_SIM**
+
+  Compile a complete openPOWERLINK CN library including an open simulation
+  interface. The library contains the connection to a simulated Ethernet driver,
+  High Resolution Timer, User Timer, Target System, modules for Process Sync and
+  API Event. The connection to a simulation environment can be established by
+  exported functions and function pointers. It is configured to contain only CN
+  functionality.
+
+- **CFG_COMPILE_LIB_MN_SIM**
+
+  Compile a complete openPOWERLINK MN library including an open simulation
+  interface. The library contains the connection to a simulated Ethernet driver,
+  High Resolution Timer, User Timer, Target System, modules for Process Sync and
+  API Event. The connection to a simulation environment can be established by
+  exported functions and function pointers.
 
 ## Windows Configuration Options
 
@@ -297,6 +313,23 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   the stack is located in the NDIS intermediate driver. The NDIS driver
   communicates with the native NIC miniport driver to access the network
   interface.
+
+- **CFG_COMPILE_LIB_CN_SIM**
+
+  Compile a complete openPOWERLINK CN library including an open simulation
+  interface. The library contains the connection to a simulated Ethernet driver,
+  High Resolution Timer, User Timer, Target System, modules for Process Sync and
+  API Event. The connection to a simulation environment can be established by
+  exported functions and function pointers. It is configured to contain only CN
+  functionality.
+
+- **CFG_COMPILE_LIB_MN_SIM**
+
+  Compile a complete openPOWERLINK MN library including an open simulation
+  interface. The library contains the connection to a simulated Ethernet driver,
+  High Resolution Timer, User Timer, Target System, modules for Process Sync and
+  API Event. The connection to a simulation environment can be established by
+  exported functions and function pointers.
 
 ## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 

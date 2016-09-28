@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-timer.c
 
-\brief  Implementation of stub for timer functions using simulation interface
+\brief  Implementation of the simulation interface for user timer functions
 
 \ingroup module_sim
 *******************************************************************************/

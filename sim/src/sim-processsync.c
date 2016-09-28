@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-processsync.c
 
-\brief  Stub implementation of process sync specific functions for simulation
+\brief  Implementation of the simulation interface for process sync functions
 
 \ingroup module_sim
 *******************************************************************************/

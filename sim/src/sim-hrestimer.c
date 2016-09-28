@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-hrestimer.c
 
-\brief  Implementation of stub for hrestimer functions using simulation interface
+\brief  Implementation of the simulation interface for hrestimer functions
 
 \ingroup module_sim
 *******************************************************************************/

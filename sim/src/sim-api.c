@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-api.c
 
-\brief  Stub implementation of API specific functions for simulation
+\brief  Implementation of the simulation interface for API functions
 
 \ingroup module_sim
 *******************************************************************************/

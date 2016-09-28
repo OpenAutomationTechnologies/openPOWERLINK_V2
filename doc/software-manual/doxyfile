@@ -784,11 +784,14 @@ WARN_LOGFILE           =
 INPUT                  = ../../stack/src \
                          ../../stack/include \
                          ../../apps/common/src/obdcreate \
+                         ../../sim/src \
+                         ../../sim/include \
                          calmodules.txt \
                          usermodules.txt \
                          kernelmodules.txt \
                          commonmodules.txt \
                          libmodules.txt \
+                         simmodules.txt \
                          ../powerlink.md \
                          ../openpowerlink.md \
                          ../platforms.md \

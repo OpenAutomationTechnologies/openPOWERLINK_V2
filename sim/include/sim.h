@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim.h
 
-\brief  Include file for defines regarding all simulation interfaces
+\brief  Include file for type defines regarding all simulation interfaces
 
 *******************************************************************************/
 
@@ -198,7 +198,7 @@ typedef tOplkError(*tSetDefaultGateWayFunc)(tSimulationInstanceHdl
 \brief Type for targets getTick function
 
 This type defines a function pointer for the simulation interface functions
- \ref sim_getTick.
+ \ref sim_getTickCount.
 
 \param  simInstanceHdl_p    The handle of the currently simulated stack instance
 
@@ -383,7 +383,7 @@ typedef struct
 \brief Type for the simulated process sync function
 
 This type defines a function pointer for the simulation interface function
- \ref sim_processSync.
+ \ref sim_processSyncCb.
 
 \param  simInstanceHdl_p    The handle of the currently simulated stack instance
 
@@ -410,7 +410,7 @@ typedef struct
 \brief Type for the simulated api event function
 
 This type defines a function pointer for the simulation interface function
- \ref sim_apiEventCb.
+ \ref sim_eventCb.
 
 \param  simInstanceHdl_p    The handle of the currently simulated stack instance
 \param  eventType_p         The type of the event
@@ -427,7 +427,7 @@ typedef tOplkError(*tSimEventCb)(tSimulationInstanceHdl simInstanceHdl_p,
 \brief Api event function pointer
 
 This struct holds all funtion pointer to the api event functions used in the
- simulation interface (\ref sim-apievent.g).
+ simulation interface (\ref sim-apievent.h).
 */
 typedef struct
 {

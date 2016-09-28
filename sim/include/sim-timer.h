@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   sim-timer.h
 
-\brief  Include file for user timer simulation interface
+\brief  Include file for simulation interface providing user timer functions
 
 *******************************************************************************/
 
