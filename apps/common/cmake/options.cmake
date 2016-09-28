@@ -80,7 +80,7 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
     ENDIF()
 ENDIF()
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 # set global include directories
 INCLUDE_DIRECTORIES (

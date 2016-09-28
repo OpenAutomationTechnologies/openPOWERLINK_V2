@@ -70,7 +70,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
     ///< enable benchmark for specific stack modules
 #endif
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                       0x4C000001L
+#define DEF_DEBUG_LVL                       0xC0000000L
     ///< determine debug level for specific stack modules
 #endif
 /**@}*/

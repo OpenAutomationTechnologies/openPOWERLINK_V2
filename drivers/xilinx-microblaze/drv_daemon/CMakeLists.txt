@@ -57,7 +57,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 
 OPTION(CFG_OPLK_MN "Compile openPOWERLINK MN driver (Otherwise CN)" ON)
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 SET(CFG_BUILD_KERNEL_STACK "host-interface"
     CACHE STRING "Configure how to build the kernel stack")

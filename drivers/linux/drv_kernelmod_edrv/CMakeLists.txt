@@ -178,7 +178,7 @@ OPTION (CFG_OPLK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
 CMAKE_DEPENDENT_OPTION(CFG_INCLUDE_MN_REDUNDANCY "Compile MN redundancy functions into MN driver" OFF
                        "CFG_OPLK_MN" OFF)
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
