@@ -3,6 +3,7 @@
 # Main CMake file for openPOWERLINK stack libraries
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -97,8 +98,6 @@ ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(cmake/options-windows.cmake)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze"))
     INCLUDE(cmake/options-microblaze.cmake)
-ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "zynqarm"))
-    INCLUDE(cmake/options-zynqarm.cmake)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm"))
     INCLUDE(cmake/options-c5socarm.cmake)
 ELSE()

@@ -1,3 +1,0 @@
-THIRPARTY=false
-PROCESSOR=@BSP_CPU_NAME@
-MSS_FILE=system.mss

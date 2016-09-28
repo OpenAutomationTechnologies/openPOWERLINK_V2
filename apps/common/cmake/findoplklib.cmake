@@ -3,7 +3,7 @@
 # CMake script for finding the openPOWERLINK library
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -62,10 +62,6 @@ MACRO(FIND_OPLK_LIBRARY OPLK_NODE_TYPE)
         ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
             SET(OPLKLIB_NAME oplk${OPLK_NODE_TYPE}app-hostif)
         ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
-
-    ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "zynqarm")
-
-        SET(OPLKLIB_NAME oplk${OPLK_NODE_TYPE}app-dualprocshm)
 
     ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
         IF (CFG_KERNEL_STACK_DIRECTLINK)

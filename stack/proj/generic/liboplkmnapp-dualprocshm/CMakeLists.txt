@@ -1,9 +1,9 @@
 ################################################################################
 #
-# CMake file for openPOWERLINK MN user library on Xilinx
-# hardcore(ARM)/soft-core(Microblaze) processor
+# CMake file for openPOWERLINK MN user library for no OS platforms
+# using shared memory interface
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited.
+# Copyright (c) 2016, Kalycito Infotech Private Limited.
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
@@ -73,9 +73,7 @@ ADD_DEFINITIONS(-DCONFIG_MN -DCONFIG_PCP=FALSE)
 
 ################################################################################
 # Handle target specific functions
-IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "zynqarm")
-    INCLUDE(configure-zynqarm.cmake)
-ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "alterac5arm")
+IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "alterac5arm")
     INCLUDE(configure-c5socarm.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
