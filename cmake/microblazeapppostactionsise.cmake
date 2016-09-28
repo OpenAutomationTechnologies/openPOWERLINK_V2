@@ -3,6 +3,7 @@
 # CMake file for microblaze post build actions
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

@@ -1,9 +1,9 @@
 ################################################################################
 #
-# CMake file for hostif library where target is Microblaze
+# CMake file for hostif library where target is Microblaze ISE
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 # Handle includes
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # Include target specific global configuration file
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
 
 ################################################################################
 # Add support for Xilinx Designs in hostinterface

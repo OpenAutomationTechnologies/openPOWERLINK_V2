@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake file for omethlib library where target is Microblaze
+# CMake target configuration file for Xilinx Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,34 +30,21 @@
 ################################################################################
 
 ################################################################################
-# Set architecture specific sources and include directories
-SET(LIB_ARCH_SRCS
-                   ${BOARDS_COMMON_DIR}/drivers/openmac/omethlib_phycfg.c
-   )
+# Name of the target platform
+SET(CMAKE_SYSTEM Xilinx-Microblaze)
+SET(CMAKE_SYSTEM_NAME Generic)
+SET(CMAKE_SYSTEM_PROCESSOR Microblazeise)
 
-SET(LIB_ARCH_INCS
-                    ${EXAMPLE_BINARY_DIR}/bsp${CFG_${PROC_INST_NAME}_NAME}/${CFG_${PROC_INST_NAME}_NAME}/include
-                    ${BOARD_EXAMPLE_DIR}/include
-                   )
+# Version of the system
+SET(CMAKE_SYSTEM_VERSION 1)
 
-# Set architecture specific definitions
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_${PROC_INST_NAME}_CFLAGS} -fmessage-length=0 -mcpu=${CFG_${PROC_INST_NAME}_CPU_VERSION} -ffunction-sections -fdata-sections")
+# specify the cross compiler
+SET(CMAKE_C_COMPILER mb-gcc)
+SET(CMAKE_CXX_COMPILER mb-g++)
+SET(CMAKE_ASM-ATT_COMPILER mb-as)
 
-################################################################################
-# Set architecture specific installation files
-
-########################################################################
-# Eclipse project files
-SET(CFG_CPU_NAME ${CFG_${PROC_INST_NAME}_NAME})
-
-GEN_ECLIPSE_FILE_LIST("${OMETH_LIB_SRCS}" "" PART_ECLIPSE_FILE_LIST)
-SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
-
-GEN_ECLIPSE_FILE_LIST("${LIB_ARCH_SRCS}" "arch" PART_ECLIPSE_FILE_LIST)
-SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
-
-SET(LIBRARY_INCLUDES ${OMETH_LIB_INCS} ${LIB_ARCH_INCS})
-GEN_ECLIPSE_INCLUDE_LIST("${LIBRARY_INCLUDES}" ECLIPSE_INCLUDE_LIST )
-
-CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libproject.in ${PROJECT_BINARY_DIR}/.project @ONLY)
-CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/libcproject.in ${PROJECT_BINARY_DIR}/.cproject @ONLY)
+# search for programs in the build host directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+# for libraries and headers in the target directories
+SET(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+SET(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

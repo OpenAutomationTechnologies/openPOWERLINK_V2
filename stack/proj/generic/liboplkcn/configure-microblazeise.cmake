@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake configuration for openPOWERLINK CN library on Xilinx/Microblaze
+# CMake configuration for openPOWERLINK CN library on Xilinx/Microblaze ISE
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +31,7 @@
 
 ################################################################################
 # Include board specific settings file
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
 
 SET_BOARD_CONFIGURATION(${CFG_COMPILE_LIB_CN_HW_LIB_DIR})
 

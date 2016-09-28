@@ -1,9 +1,9 @@
 ################################################################################
 #
-# CMake options for openPOWERLINK stack on Xilinx/Microblaze
+# CMake options for openPOWERLINK stack on Xilinx/Microblaze ISE
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -29,7 +29,7 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-MESSAGE(STATUS "Adding CMake configuration options for Microblaze")
+MESSAGE(STATUS "Adding CMake configuration options for Microblazeise")
 
 ################################################################################
 # Handle includes
@@ -50,7 +50,6 @@ OPTION(CFG_COMPILE_LIB_CN                           "Compile openPOWERLINK CN li
 # Options for MN libraries
 OPTION(CFG_COMPILE_LIB_MNAPP_HOSTIF     "Compile openPOWERLINK MN host/application library" OFF)
 OPTION(CFG_COMPILE_LIB_MNDRV_HOSTIF     "Compile openPOWERLINK MN driver library" OFF)
-OPTION(CFG_COMPILE_LIB_MNDRV_DUALPROCSHM   "Compile openPOWERLINK MN driver library using dual procesor shared memory" OFF)
 ################################################################################
 # Add library subdirectories and hardware library path
 
@@ -80,13 +79,4 @@ IF (CFG_COMPILE_LIB_MNDRV_HOSTIF)
     ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-hostif)
 ELSE ()
     UNSET(CFG_COMPILE_LIB_MN_DRV_HOSTIF_HW_LIB_DIR CACHE)
-ENDIF ()
-IF (CFG_COMPILE_LIB_MNDRV_DUALPROCSHM)
-    # Path to the hardware library folder of your board example
-    SET(CFG_COMPILE_LIB_MN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/xilinx-z702/mn-dual-shmem-gpio
-            CACHE PATH "Path to the hardware library folder for the dual processor MN library")
-
-    ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-dualprocshm)
-ELSE ()
-    UNSET(CFG_COMPILE_LIB_MN_HW_PATH CACHE)
 ENDIF ()

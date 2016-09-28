@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake boards configuration file for Microblaze platform
+# Microblaze ISE configuration options for openPOWERLINK stack
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,40 +31,63 @@
 
 ################################################################################
 # Handle includes
-SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/xilinx" ${CMAKE_MODULE_PATH})
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
-
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
+INCLUDE(listdir)
 
 ################################################################################
-# U S E R    O P T I O N S
+# Path to the hardware library folder of your board example
+SET(CFG_HW_LIB_PATH ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PROCESSOR_DIR}
+        CACHE PATH "Path to the hardware library folder")
 
-# Assemble path to all boards with Xilinx demos
-SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/avnet-lx150t;${PROJECT_SOURCE_DIR}/boards/xilinx-z702)
+# Get subdirectories (board/demo)
+LIST_SUBDIRECTORIES(HW_BOARD_DEMOS ${CFG_HW_LIB_PATH} 2)
 
-# Skip bitstream generation
-OPTION(SKIP_BITSTREAM "Skip bitstream generation to save time." OFF)
-MARK_AS_ADVANCED(SKIP_BITSTREAM)
+SET(CFG_HW_LIB avnet-s6plkeb/cn-single-gpio CACHE STRING
+    "Subfolder of hardware board demo")
+SET_PROPERTY(CACHE CFG_HW_LIB PROPERTY STRINGS ${HW_BOARD_DEMOS})
 
-################################################################################
-# Find the Xilinx toolchain
-UNSET(XIL_LIBGEN CACHE)
-FIND_PROGRAM(XIL_LIBGEN NAMES libgen
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx board support package generation tool"
-)
-
-UNSET(XIL_XPS CACHE)
-FIND_PROGRAM(XIL_XPS NAMES xps
-    PATHS
-    ${XIL_ISE_ROOT}/EDK/bin
-    DOC "Xilinx Platform Studio"
-)
+SET(CFG_HW_LIB_DIR ${CFG_HW_LIB_PATH}/${CFG_HW_LIB})
 
 ################################################################################
-# Set path to system folders
-SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
-SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)
+# Include board specific settings file
+SET_BOARD_CONFIGURATION(${CFG_HW_LIB_DIR})
+
+################################################################################
+# Set variables
+SET(ARCH_EXE_SUFFIX ".elf")
+SET(ARCH_INSTALL_POSTFIX ${CFG_DEMO_BOARD_NAME}/${CFG_DEMO_NAME})
+SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
+
+################################################################################
+# Stack configuration
+SET(CFG_BUILD_KERNEL_STACK "Link to Application"
+    CACHE STRING "Configure how to build the kernel stack")
+
+SET(KernelStackBuildTypes
+    "Link to Application;PCP Daemon Host-Interface;None"
+    CACHE INTERNAL
+    "List of possible kernel stack build types")
+
+SET_PROPERTY(CACHE CFG_BUILD_KERNEL_STACK
+             PROPERTY STRINGS ${KernelStackBuildTypes})
+
+IF (CFG_BUILD_KERNEL_STACK STREQUAL "Link to Application")
+
+    SET(CFG_KERNEL_STACK_DIRECTLINK ON CACHE INTERNAL
+         "Link kernel stack directly into application (Single process solution)")
+    UNSET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE CACHE)
+
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "PCP Daemon Host-Interface")
+
+    SET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE ON CACHE INTERNAL
+         "Build kernel stack as PCP daemon (dual processor)")
+    UNSET(CFG_KERNEL_STACK_DIRECTLINK CACHE)
+
+ELSEIF (CFG_BUILD_KERNEL_STACK STREQUAL "None")
+    UNSET(CFG_KERNEL_STACK_PCP_HOSTIF_MODULE CACHE)
+    UNSET(CFG_KERNEL_STACK_DIRECTLINK CACHE)
+
+ENDIF (CFG_BUILD_KERNEL_STACK STREQUAL "Link to Application")

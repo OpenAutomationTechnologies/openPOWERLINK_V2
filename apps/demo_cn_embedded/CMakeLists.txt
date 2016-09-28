@@ -3,6 +3,7 @@
 # CMake file of CiA 401 CN embedded demo application
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -81,8 +82,8 @@ ENDIF(CFG_IP_STACK)
 ################################################################################
 # Setup the architecture specific definitions
 
-IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-    include(microblaze.cmake)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    include(microblazeise.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
 ENDIF()
@@ -113,8 +114,8 @@ TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
 
 ################################################################################
 # Post Build targets
-IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-    INCLUDE(microblazeapppostactions)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    INCLUDE(microblazeapppostactionsise)
 ENDIF()
 
 ################################################################################

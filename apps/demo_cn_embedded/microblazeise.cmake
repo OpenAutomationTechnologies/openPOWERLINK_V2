@@ -1,8 +1,9 @@
 ################################################################################
 #
-# Microblaze definitions for demo_mn_embedded application
+# CMake file of CiA 401 CN embedded demo application (Target is Microblaze)
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,22 +31,15 @@
 
 ################################################################################
 # Set paths
-IF (CFG_KERNEL_STACK_DIRECTLINK)
+IF(CFG_KERNEL_STACK_DIRECTLINK)
     SET(XIL_BSP_DIR ${CFG_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/${CFG_PCP_NAME})
     EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy "${CFG_HW_LIB_DIR}/bsp${CFG_PCP_NAME}/lscript.ld" "${PROJECT_BINARY_DIR}")
     SET(LSSCRIPT ${PROJECT_BINARY_DIR}/lscript.ld)
-    SET(EXECUTABLE_CPU_NAME ${CFG_PCP_NAME})
-
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-
-    SET(XIL_BSP_DIR ${CFG_HW_LIB_DIR}/bsp${CFG_HOST_NAME}/${CFG_HOST_NAME})
-    EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} -E copy "${CFG_HW_LIB_DIR}/bsp${CFG_HOST_NAME}/lscript.ld" "${PROJECT_BINARY_DIR}")
-    SET(LSSCRIPT ${PROJECT_BINARY_DIR}/lscript.ld)
-    SET(EXECUTABLE_CPU_NAME ${CFG_HOST_NAME})      # On link using host-interface the CPU name is Host
-
+    SET(EXECUTABLE_CPU_NAME ${CFG_PCP_NAME})      # On direct link the CPU name is PCP
+    SET(CPU_PREFIX PCP)
 ELSE ()
     MESSAGE(FATAL_ERROR "Only CFG_KERNEL_STACK_DIRECTLINK is currently implemented on Microblaze!")
-ENDIF ()
+ENDIF()
 
 ################################################################################
 # Find boards support package
@@ -57,35 +51,17 @@ FIND_LIBRARY(XIL_LIB_BSP NAME xil
 
 ################################################################################
 # Find driver omethlib
+IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+    SET(LIB_OMETHLIB_NAME "omethlib_d")
+ELSE()
+    SET(LIB_OMETHLIB_NAME "omethlib")
+ENDIF()
 
-IF (CFG_KERNEL_STACK_DIRECTLINK)
-    IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-        SET(LIB_OMETHLIB_NAME "omethlib_d")
-    ELSE ()
-        SET(LIB_OMETHLIB_NAME "omethlib")
-    ENDIF ()
-
-    UNSET(XIL_LIB_OMETH CACHE)
-    MESSAGE(STATUS "Searching for LIBRARY ${LIB_OMETHLIB_NAME} in ${CFG_HW_LIB_DIR}/libomethlib")
-    FIND_LIBRARY(XIL_LIB_OMETH NAMES ${LIB_OMETHLIB_NAME}
-                         HINTS ${CFG_HW_LIB_DIR}/libomethlib
-                )
-
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-
-    IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-        SET(LIB_HOSTIFLIB_NAME "hostiflib-host_d")
-    ELSE ()
-        SET(LIB_HOSTIFLIB_NAME "hostiflib-host")
-    ENDIF ()
-
-    UNSET(XIL_LIB_HOSTIF CACHE)
-    MESSAGE(STATUS "Searching for LIBRARY ${LIB_HOSTIFLIB_NAME} in ${CFG_HW_LIB_DIR}/libhostiflib-host")
-    FIND_LIBRARY(XIL_LIB_HOSTIF NAMES ${LIB_HOSTIFLIB_NAME}
-                         HINTS ${CFG_HW_LIB_DIR}/libhostiflib-host
-                )
-
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+UNSET(XIL_LIB_OMETH CACHE)
+MESSAGE(STATUS "Searching for LIBRARY ${LIB_OMETHLIB_NAME} in ${CFG_HW_LIB_DIR}/libomethlib")
+FIND_LIBRARY(XIL_LIB_OMETH NAMES ${LIB_OMETHLIB_NAME}
+                     HINTS ${CFG_HW_LIB_DIR}/libomethlib
+            )
 
 ################################################################################
 # Set architecture specific sources and include directories
@@ -94,55 +70,44 @@ SET(DEMO_ARCH_SOURCES
     ${DEMO_ARCHSOURCES}
     ${COMMON_SOURCE_DIR}/gpio/gpio-microblaze.c
     ${COMMON_SOURCE_DIR}/lcd/lcdl-null.c
-    ${COMMON_SOURCE_DIR}/system/system-microblaze.c
    )
 
 INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
                     ${OPLK_BASE_DIR}/stack/src/arch/xilinx-microblaze
+                    ${COMMON_SOURCE_DIR}/gpio
                    )
 
 ################################################################################
 # Set architecture specific definitions
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_HOST_CFLAGS} -fmessage-length=0 -mcpu=${CFG_HOST_CPU_VERSION} -ffunction-sections -fdata-sections")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_${CPU_PREFIX}_CFLAGS} -fmessage-length=0 -mcpu=${CFG_${CPU_PREFIX}_CPU_VERSION} -ffunction-sections -fdata-sections")
 
 ################################################################################
 # Set architecture specific linker flags
-SET(ARCH_LINKER_FLAGS "${XIL_HOST_PLAT_ENDIAN} -mcpu=${CFG_HOST_CPU_VERSION} -Wl,-T -Wl,${LSSCRIPT} -Wl,-Map,${PROJECT_NAME}.map")
+SET(ARCH_LINKER_FLAGS "${XIL_${CPU_PREFIX}_PLAT_ENDIAN} -mcpu=${CFG_${CPU_PREFIX}_CPU_VERSION} -Wl,-T -Wl,${LSSCRIPT} -Wl,-Map,${PROJECT_NAME}.map" )
 
 ################################################################################
 # Set architecture specific libraries
 
-IF (NOT ${XIL_LIB_BSP} STREQUAL "XIL_LIB_BSP-NOTFOUND")
+IF(NOT ${XIL_LIB_BSP} STREQUAL "XIL_LIB_BSP-NOTFOUND" )
     SET(ARCH_LIBRARIES  ${ARCH_LIBRARIES} ${XIL_LIB_BSP})
 
     LINK_DIRECTORIES(${XIL_BSP_DIR}/lib)
-ELSE ()
+ELSE()
     MESSAGE(FATAL_ERROR "Board support package for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found!")
-ENDIF ()
+ENDIF()
 
-IF (CFG_KERNEL_STACK_DIRECTLINK)
-    IF (NOT ${XIL_LIB_OMETH} STREQUAL "XIL_LIB_OMETH-NOTFOUND")
-        SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} ${XIL_LIB_OMETH})
-    ELSE ()
-        MESSAGE(FATAL_ERROR "${LIB_OMETHLIB_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
-    ENDIF ()
-
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-
-    IF (NOT ${XIL_LIB_HOSTIF} STREQUAL "XIL_LIB_HOSTIF-NOTFOUND")
-        SET(ARCH_LIBRARIES ${ARCH_LIBRARIES} ${XIL_LIB_HOSTIF})
-    ELSE ()
-        MESSAGE(FATAL_ERROR "${LIB_HOSTIFLIB_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
-    ENDIF ()
-
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+IF(NOT ${XIL_LIB_OMETH} STREQUAL "XIL_LIB_OMETH-NOTFOUND")
+    SET(ARCH_LIBRARIES  ${ARCH_LIBRARIES} ${XIL_LIB_OMETH})
+ELSE()
+    MESSAGE(FATAL_ERROR "${LIB_OMETHLIB_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
+ENDIF()
 
 ########################################################################
 # Eclipse project files
 SET(CFG_CPU_NAME ${EXECUTABLE_CPU_NAME})
 
-GEN_ECLIPSE_FILE_LIST("${DEMO_SOURCES}" "" PART_ECLIPSE_FILE_LIST)
+GEN_ECLIPSE_FILE_LIST("${DEMO_SOURCES}" "" PART_ECLIPSE_FILE_LIST )
 SET(ECLIPSE_FILE_LIST "${ECLIPSE_FILE_LIST} ${PART_ECLIPSE_FILE_LIST}")
 
 GEN_ECLIPSE_FILE_LIST("${DEMO_ARCH_SOURCES}" "" PART_ECLIPSE_FILE_LIST)

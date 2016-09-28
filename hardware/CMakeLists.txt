@@ -61,8 +61,8 @@ ENDIF()
 
 ################################################################################
 # Handle target specific functions
-IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
-    INCLUDE(configure-microblaze)
+IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblazeise")
+    INCLUDE(configure-microblazeise)
 ELSEIF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "alterac5arm")
     INCLUDE(configure-c5socarm)
 ELSE()

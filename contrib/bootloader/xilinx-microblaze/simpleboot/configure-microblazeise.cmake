@@ -3,6 +3,7 @@
 # CMake file of the bootloader simpleboot on target microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +35,7 @@ SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 # Set includes
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
 
 ################################################################################
 # Set paths

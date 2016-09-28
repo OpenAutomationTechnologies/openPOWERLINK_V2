@@ -89,9 +89,8 @@ ADD_DEFINITIONS(-DCONFIG_INCLUDE_CFM)
 
 ################################################################################
 # Setup the architecture specific definitions
-
-IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-    include(microblaze.cmake)
+IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    include(microblazeise.cmake)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
     include(c5socarm.cmake)
 ELSE ()
@@ -136,8 +135,8 @@ TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
 
 ################################################################################
 # Post Build targets
-IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-   INCLUDE(microblazeapppostactions)
+IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+   INCLUDE(microblazeapppostactionsise)
 ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
    INCLUDE(c5socarmapppostactions)
 ENDIF ()

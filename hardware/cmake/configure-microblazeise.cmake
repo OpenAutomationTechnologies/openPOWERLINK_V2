@@ -1,8 +1,9 @@
 ################################################################################
 #
-# CMake macro for installing the bsp for Microblaze
+# CMake boards configuration file for Microblaze on ISE platform
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,35 +29,42 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
 
-MACRO(INSTALL_BSP BSP_SOURCE_DIR BSP_TARGET_DIR BSP_CPU_NAME)
-    GET_FILENAME_COMPONENT(BSP_TARGET_NAME ${BSP_SOURCE_DIR} NAME )
-    SET(BSP_CPU_NAME ${BSP_CPU_NAME})
-    SET(CFG_CPU_NAME ${BSP_CPU_NAME})
+################################################################################
+# Handle includes
+SET(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/xilinxise" ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
-    # Copy hardware platform eclipse project file
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspcproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspsdkproject.in ${BSP_SOURCE_DIR} @ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bsplibgen.options.in ${BSP_SOURCE_DIR} @ONLY)
+INCLUDE(geneclipsefilelist)
+INCLUDE(geneclipseincludelist)
+INCLUDE(setmicroblazeiseboardconfig)
 
-    INSTALL(DIRECTORY ${BSP_SOURCE_DIR}
-            DESTINATION ${BSP_TARGET_DIR}
-            PATTERN "*.in" EXCLUDE
-           )
+################################################################################
+# U S E R    O P T I O N S
 
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspcproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .cproject
-           )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .project
-           )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspsdkproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .sdkproject
-           )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bsplibgen.options.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME libgen.options
-           )
-    INSTALL(FILES ${ARCH_TOOLS_DIR}/eclipse/bspmakefile.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME Makefile
-           )
-ENDMACRO()
+# Assemble path to all boards with Xilinx demos
+SET(BOARD_DIRS ${PROJECT_SOURCE_DIR}/boards/avnet-s6plkeb;${PROJECT_SOURCE_DIR}/boards/avnet-lx150t)
+
+# Skip bitstream generation
+OPTION(SKIP_BITSTREAM "Skip bitstream generation to save time." OFF)
+MARK_AS_ADVANCED(SKIP_BITSTREAM)
+
+################################################################################
+# Find the Xilinx toolchain
+UNSET(XIL_LIBGEN CACHE)
+FIND_PROGRAM(XIL_LIBGEN NAMES libgen
+    PATHS
+    ${XIL_ISE_ROOT}/EDK/bin
+    DOC "Xilinx board support package generation tool"
+)
+
+UNSET(XIL_XPS CACHE)
+FIND_PROGRAM(XIL_XPS NAMES xps
+    PATHS
+    ${XIL_ISE_ROOT}/EDK/bin
+    DOC "Xilinx Platform Studio"
+)
+
+################################################################################
+# Set path to system folders
+SET(ARCH_IPCORE_REPO ${PROJECT_SOURCE_DIR}/ipcore/xilinx)
+SET(ARCH_TOOLS_DIR ${OPLK_BASE_DIR}/tools/xilinx-microblaze)

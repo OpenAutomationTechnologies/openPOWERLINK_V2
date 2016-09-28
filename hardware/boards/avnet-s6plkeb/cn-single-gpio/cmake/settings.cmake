@@ -3,6 +3,7 @@
 # CMake settings file for cn-single-gpio demo on avnet-s6plkeb
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -50,7 +51,7 @@ SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
 SET(CFG_PCP_NAME pcp)
 
 # Processor type that matches CMAKE_SYSTEM_PROCESSOR in toolchain file
-SET(CFG_PCP_PROCESSOR Microblaze)
+SET(CFG_PCP_PROCESSOR Microblazeise)
 
 # Version of the Microblaze instance
 SET(CFG_PCP_CPU_VERSION "v8.50.c")
