@@ -14,7 +14,7 @@ to port openPOWERLINK to your platform.
 | X86                  | X             | X        |         |
 | Altera NiosII        |               |          | X       |
 | Xilinx Microblaze    |               |          | X       |
-| Xilinx Zynq          | X             |          | X       |
+| Xilinx Zynq          | X             |          |         |
 | Altera Cyclone V SoC |               |          | X       |
 
 ## Supported Operating Systems

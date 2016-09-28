@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -638,15 +638,6 @@ SET(TARGET_MICROBLAZE_DUAL_SOURCES
 
 SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-microblaze/openmac-microblaze.c
-    )
-
-SET(TARGET_XILINX_ARM_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-zynqarm.c
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-mutex.c
-    )
-
-SET(TARGET_XILINX_ARM_DUAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/lock-dualprocnoos.c
     )
 
 SET(TARGET_ALTERA_ARM_SOURCES
