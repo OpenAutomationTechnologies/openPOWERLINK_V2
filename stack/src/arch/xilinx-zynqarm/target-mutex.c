@@ -96,7 +96,7 @@ The function creates a mutex.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Mutex was successfully created.
-\retval kErrorNoFreeInstance    An error occured while creating the mutex.
+\retval kErrorNoFreeInstance    An error occurred while creating the mutex.
 
 \ingroup module_target
 */
@@ -135,7 +135,7 @@ The function locks a mutex.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                Mutex was successfully locked.
-\retval kErrorNoFreeInstance    An error occured while locking the mutex.
+\retval kErrorNoFreeInstance    An error occurred while locking the mutex.
 
 \ingroup module_target
 */

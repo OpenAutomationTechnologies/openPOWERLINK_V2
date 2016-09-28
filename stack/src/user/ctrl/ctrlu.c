@@ -2255,7 +2255,7 @@ static tOplkError handleObdRequestCmd(tObdCbParam* pParam_p)
                                            aCmdData, sizeof(aCmdData));
         }
 
-        // Return an error via SDO, if problem has occured
+        // Return an error via SDO, if problem has occurred
         if (ret != kErrorOk)
             pParam_p->abortCode = SDO_AC_GENERAL_ERROR;
 

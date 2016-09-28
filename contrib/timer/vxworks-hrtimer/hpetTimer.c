@@ -353,7 +353,7 @@ int timerdev_readClock(unsigned long long* pUllClock_p)
     iLockKey = intLock();
     uiCounter = hpet_readl(HPET_OFF_MAIN_CNT);
 
-    /* check if overrun occured since last read. If it is we had an overrun and
+    /* check if overrun occurred since last read. If it is we had an overrun and
      * have to increment the higher counter part. */
     if (uiCounter <= iLastCounter_l)
     {
