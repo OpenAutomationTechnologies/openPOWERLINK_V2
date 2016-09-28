@@ -1,2 +1,0 @@
-##bitgen options for zynq architecture
--g UnusedPin:PULLUP

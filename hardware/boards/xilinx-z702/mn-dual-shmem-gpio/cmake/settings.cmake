@@ -95,32 +95,3 @@ SET(CFG_PCP_DUALPROCSHM_ENABLE "TRUE")
 
 # Enable openMAC driver (omethlib)
 SET(CFG_PCP_OMETHLIB_ENABLE "TRUE")
-
-################################################################################
-# P R O C E S S O R   F E A T U R E S   ( H O S T )
-
-# Name of host processor
-SET(CFG_HOST_NAME ps7_cortexa9_0)
-
-# Processor type that matches CMAKE_SYSTEM_PROCESSOR in toolchain file
-SET(CFG_HOST_PROCESSOR zynqarm)
-
-# Version of the Microblaze instance
-SET(CFG_HOST_CPU_VERSION "cortex-a9")
-
-# Host's tightly coupled instruction memory name
-SET(CFG_HOST_TCIMEM_NAME dummy)
-
-# ARM core has enabled frame compliant with AAPCS
-OPTION(CFG_HOST_ARM_FRAME_AAPCS "ARM core has Stack frame compliant with AAPCS" ON)
-MARK_AS_ADVANCED(CFG_HOST_ARM_FRAME_AAPCS)
-
-# ARM core should use 4 byte enums
-OPTION(CFG_HOST_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" OFF)
-MARK_AS_ADVANCED(CFG_HOST_ARM_SHORT_ENUMS)
-
-################################################################################
-# E N A B L E   P R O C E S S O R   S O F T W A R E   ( H O S T )
-
-# Enable Dual Processor Shared Memory provided in contrib directory
-SET(CFG_HOST_DUALPROCSHM_ENABLE "TRUE")

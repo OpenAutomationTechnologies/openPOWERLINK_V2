@@ -9,7 +9,7 @@ This header file provides specific macros for Xilinx Zynq platform .
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,30 +50,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(__MICROBLAZE__)
 #include "dualprocshm-microblaze.h"
 
-
 #define TARGET_SYNC_IRQ_ID         -1
 #define TARGET_SYNC_IRQ            -1
 
 ///< Interrupt controller specific defines
 #define TARGET_IRQ_IC_BASE         -1
 #define TARGET_IRQ_IC_DIST_BASE    -1
-
-
-#elif defined(__XILINX_ARM__)
-#include "dualprocshm-arm.h"
-
-
-#define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
-#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_PULSE_IRQ_INTR
-
-///< Interrupt controller specific defines
-#ifdef XPAR_PS7_SCUGIC_0_BASEADDR
-#define TARGET_IRQ_IC_BASE         XPAR_PS7_SCUGIC_0_BASEADDR
-#endif
-
-#ifdef XPAR_PS7_SCUGIC_0_DIST_BASEADDR
-#define TARGET_IRQ_IC_DIST_BASE    XPAR_PS7_SCUGIC_0_DIST_BASEADDR
-#endif
 
 #else
 
