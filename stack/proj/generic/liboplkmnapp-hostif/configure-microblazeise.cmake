@@ -3,7 +3,7 @@
 # CMake configuration for openPOWERLINK MN application/host
 # library on Xilinx Microblaze
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,7 @@
 
 ################################################################################
 # Include demo specific settings file
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
 
 SET_BOARD_CONFIGURATION(${CFG_COMPILE_LIB_MN_APP_HOSTIF_HW_LIB_DIR})
 

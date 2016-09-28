@@ -1,9 +1,9 @@
 ################################################################################
 #
-# Microblaze configuration options for openPOWERLINK stack
+# Microblaze ISE configuration options for openPOWERLINK stack
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,7 @@
 SET(CMAKE_MODULE_PATH "${OPLK_BASE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 INCLUDE(geneclipsefilelist)
 INCLUDE(geneclipseincludelist)
-INCLUDE(setmicroblazeboardconfig)
+INCLUDE(setmicroblazeiseboardconfig)
 INCLUDE(listdir)
 
 ################################################################################
