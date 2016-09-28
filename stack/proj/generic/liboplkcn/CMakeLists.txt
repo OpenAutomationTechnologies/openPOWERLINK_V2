@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK CN library on Linux userspace
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -85,8 +85,8 @@ ADD_DEFINITIONS(-DCONFIG_CN -DCONFIG_PCP=TRUE)
 
 ################################################################################
 # Handle target specific functions
-IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
-    INCLUDE(configure-microblaze.cmake)
+IF(${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblazeise")
+    INCLUDE(configure-microblazeise.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF()

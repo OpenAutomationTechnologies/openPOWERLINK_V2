@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK MN user library on
 # no OS platforms with host interface
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
@@ -83,8 +83,8 @@ ADD_DEFINITIONS(-DCONFIG_HOSTIF_PCP=FALSE -DCONFIG_PCP=FALSE)
 
 ################################################################################
 # Handle target specific functions
-IF (${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
-    INCLUDE(configure-microblaze.cmake)
+IF (${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblazeise")
+    INCLUDE(configure-microblazeise.cmake)
 ELSE ()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF ()

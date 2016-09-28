@@ -3,6 +3,7 @@
 # CMake target configuration file for Xilinx Microblaze
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +33,7 @@
 # Name of the target platform
 SET(CMAKE_SYSTEM Xilinx-Microblaze)
 SET(CMAKE_SYSTEM_NAME Generic)
-SET(CMAKE_SYSTEM_PROCESSOR Microblaze)
+SET(CMAKE_SYSTEM_PROCESSOR Microblazeise)
 
 # Version of the system
 SET(CMAKE_SYSTEM_VERSION 1)

@@ -3,6 +3,7 @@
 # CMake file for hostif libraries (Driver for the host interface IP-Core)
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -111,8 +112,8 @@ ADD_DEFINITIONS(-DCONFIG_HOSTIF_PCP=${CFG_HOSTIF_PCP})
 ########################################################################
 # Setup the architecture specific definitions
 ########################################################################
-IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
-    include(configure-microblaze)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    include(configure-microblazeise)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
 ENDIF()
