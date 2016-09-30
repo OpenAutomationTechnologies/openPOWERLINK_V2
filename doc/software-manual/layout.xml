@@ -27,6 +27,7 @@
           <tab type="user" url="\ref page_platform_linux" title="Linux"/>
           <tab type="user" url="\ref page_platform_windows" title="Windows"/>
       </tab>
+      <tab type="user" title="Porting Guide" url="\ref page_porting-guide"/>
     </tab>
     <tab type="usergroup" title="Software Manual">
       <tab type="user" url="\ref module_api" title="openPOWERLINK API"/>
