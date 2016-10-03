@@ -167,15 +167,17 @@ The function deletes the buffer allocation instance.
 void bufalloc_exit(tBufAlloc* pBufAlloc_p)
 {
     // Check if pBufAlloc_p is a valid buffer allocation instance
-    ASSERT(pBufAlloc_p != NULL);
-    ASSERT(!OPLK_MEMCMP(pBufAlloc_p->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID)));
+    if (pBufAlloc_p != NULL)
+    {
+        ASSERT(!OPLK_MEMCMP(pBufAlloc_p->checkId, BUFALLOC_CHECKID, sizeof(BUFALLOC_CHECKID)));
 
-    // Check and free the buffer data instances
-    ASSERT(pBufAlloc_p->pBufDataBegin != NULL);
-    OPLK_FREE(pBufAlloc_p->pBufDataBegin);
+        // Check and free the buffer data instances
+        ASSERT(pBufAlloc_p->pBufDataBegin != NULL);
+        OPLK_FREE(pBufAlloc_p->pBufDataBegin);
 
-    // Free the buffer allocation instance
-    OPLK_FREE(pBufAlloc_p);
+        // Free the buffer allocation instance
+        OPLK_FREE(pBufAlloc_p);
+    }
 }
 
 //------------------------------------------------------------------------------

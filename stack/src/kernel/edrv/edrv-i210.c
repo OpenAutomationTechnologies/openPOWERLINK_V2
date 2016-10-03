@@ -631,7 +631,7 @@ static struct pci_device_id aEdrvPciTbl[] =
 MODULE_DEVICE_TABLE(pci, aEdrvPciTbl);
 
 tEdrvInstance edrvInstance_l;
-static tBufAlloc* pBufAlloc_l;
+static tBufAlloc* pBufAlloc_l = NULL;
 static struct pci_driver edrvDriver_l =
 {
      .name      = DRIVER_NAME,
@@ -743,6 +743,7 @@ tOplkError edrv_exit(void)
         pci_unregister_driver (&edrvDriver_l);
         // clear buffer allocation
         bufalloc_exit(pBufAlloc_l);
+        pBufAlloc_l = NULL;
         // clear driver structure
         OPLK_MEMSET(&edrvDriver_l, 0, sizeof(edrvDriver_l));
     }
