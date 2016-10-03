@@ -2150,7 +2150,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 
         timerArg.eventSink = kEventSinkNmtMnu;
         timerArg.argument.value = 0;
-        ret = timeru_modifyTimer(&nmtMnuInstance_g.timerHdlNmtState, timeout, timerArg);
+        ret = timeru_modifyTimer(&nmtMnuInstance_g.timerHdlNmtState, timeout, &timerArg);
     }
 
     return ret;
@@ -2209,7 +2209,7 @@ static tOplkError startBootStep2(void)
 
             ret = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay,
-                                     timerArg);
+                                     &timerArg);
             if (ret != kErrorOk)
                 goto Exit;
 
@@ -2302,7 +2302,7 @@ static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
         NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, nodeId_p, timerArg);
         ret = timeru_modifyTimer(&pNodeInfo_p->timerHdlLonger,
                                  nmtMnuInstance_g.timeoutReadyToOp,
-                                 timerArg);
+                                 &timerArg);
     }
 
 Exit:
@@ -2398,7 +2398,7 @@ static tOplkError nodeCheckCom(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
         NMTMNU_SET_FLAGS_TIMERARG_LONGER(pNodeInfo_p, nodeId_p, timerArg);
         ret = timeru_modifyTimer(&pNodeInfo_p->timerHdlLonger,
                                  nmtMnuInstance_g.timeoutCheckCom,
-                                 timerArg);
+                                 &timerArg);
 
         // update mandatory slave counter, because timer was started
         if (ret == kErrorOk)
@@ -2600,7 +2600,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p,
 
             *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                          nmtMnuInstance_g.statusRequestDelay,
-                                         timerArg);
+                                         &timerArg);
             if (*pRet_p != kErrorOk)
                 return -1;
         }
@@ -2897,7 +2897,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p,
                                     ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay,
-                                     timerArg);
+                                     &timerArg);
     }
     else
     {   // trigger IdentRequest immediately
@@ -2979,7 +2979,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p,
                                      ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay,
-                                     timerArg);
+                                     &timerArg);
     }
 
     return 0;
@@ -3491,7 +3491,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p,
     }
     *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                  nmtMnuInstance_g.statusRequestDelay,
-                                 timerArg);
+                                 &timerArg);
     // finish processing, because NmtState_p is the expected and not the current state
     return -1;
 }

@@ -143,16 +143,18 @@ corresponding timer handle.
 
 \param[out]     pTimerHdl_p         Pointer to store the timer handle.
 \param[in]      timeInMs_p          Timeout in milliseconds.
-\param[in]      argument_p          User definable argument for timer.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
+                           ULONG timeInMs_p,
+                           const tTimerArg* pArgument_p)
 {
-    return sim_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
+    return sim_setTimer(pTimerHdl_p, timeInMs_p, *pArgument_p);
 }
 
 //------------------------------------------------------------------------------
@@ -164,17 +166,19 @@ it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 
 \param[in,out]  pTimerHdl_p         Pointer to store the timer handle.
 \param[in]      timeInMs_p          Timeout in milliseconds.
-\param[in]      argument_p          User definable argument for timer.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p,
+                              ULONG timeInMs_p,
+                              const tTimerArg* pArgument_p)
 {
 
-    return sim_modifyTimer(pTimerHdl_p, timeInMs_p, argument_p);
+    return sim_modifyTimer(pTimerHdl_p, timeInMs_p, *pArgument_p);
 }
 
 //------------------------------------------------------------------------------

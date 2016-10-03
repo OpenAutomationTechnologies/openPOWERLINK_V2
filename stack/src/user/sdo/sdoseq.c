@@ -2247,11 +2247,11 @@ static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p)
 
     if (pSdoSeqCon_p->timerHandle == 0)
     {   // create new timer
-        ret = timeru_setTimer(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
+        ret = timeru_setTimer(&pSdoSeqCon_p->timerHandle, timeout_p, &timerArg);
     }
     else
     {   // modify existing timer
-        ret = timeru_modifyTimer(&pSdoSeqCon_p->timerHandle, timeout_p, timerArg);
+        ret = timeru_modifyTimer(&pSdoSeqCon_p->timerHandle, timeout_p, &timerArg);
     }
 
     return ret;

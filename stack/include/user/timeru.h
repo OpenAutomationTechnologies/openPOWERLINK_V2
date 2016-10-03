@@ -73,8 +73,12 @@ extern "C"
 tOplkError timeru_init(void);
 tOplkError timeru_exit(void);
 tOplkError timeru_process(void);
-tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p);
-tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p);
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
+                           ULONG timeInMs_p,
+                           const tTimerArg* pArgument_p);
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p,
+                              ULONG timeInMs_p,
+                              const tTimerArg* pArgument_p);
 tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p);
 BOOL       timeru_isActive(tTimerHdl timerHdl_p);
 

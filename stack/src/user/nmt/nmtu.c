@@ -668,7 +668,7 @@ static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 
     timerArg.eventSink = kEventSinkNmtk;
     timerArg.argument.value = (UINT32)event_p;
-    ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
+    ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, &timerArg);
 
     return ret;
 }
