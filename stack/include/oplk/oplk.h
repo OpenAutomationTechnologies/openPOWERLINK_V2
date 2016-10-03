@@ -381,13 +381,15 @@ typedef union
 
 This type defines a function pointer to an API event callback function.
 
-\param eventType_p  The type of the event
-\param pEventArg_p  Pointer to the event argument
-\param pUserArg_p   Pointer to the user defined argument
+\param[in]      eventType_p         The type of the event
+\param[in]      pEventArg_p         Pointer to the event argument
+\param[in]      pUserArg_p          Pointer to the user defined argument
 
 \return The function returns a tOplkError error code
 */
-typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p,
+                                      tOplkApiEventArg* pEventArg_p,
+                                      void* pUserArg_p);
 
 /**
 \brief openPOWERLINK initialization parameters
@@ -408,7 +410,7 @@ typedef struct
     UINT                sizeOfInitParam;            ///< This field contains the size of the initialization parameter structure.
     BOOL                fAsyncOnly;                 ///< Determines if this node is an async-only node. If TRUE the node communicates only asynchronously.
     UINT                nodeId;                     ///< The node ID of this node.
-    BYTE                aMacAddress[6];             ///< The MAC address of this node.
+    UINT8               aMacAddress[6];             ///< The MAC address of this node.
     UINT32              featureFlags;               ///< The POWERLINK feature flags of this node (0x1F82: NMT_FeatureFlags_U32)
     UINT32              cycleLen;                   ///< The cycle Length (0x1006: NMT_CycleLen_U32) in [us]
     UINT                isochrTxMaxPayload;         ///< Maximum isochronous transmit payload (0x1F98.1: IsochrTxMaxPayload_U16) Const!
@@ -523,56 +525,88 @@ extern "C"
 
 // Generic API functions
 OPLKDLLEXPORT tOplkError oplk_initialize(void);
-OPLKDLLEXPORT tOplkError oplk_create(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT tOplkError oplk_create(const tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT tOplkError oplk_destroy(void);
-OPLKDLLEXPORT void       oplk_exit(void);
-OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT void oplk_exit(void);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(const tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 OPLKDLLEXPORT tOplkError oplk_cbGenericObdAccess(tObdCbParam* pParam_p);
-OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
-                                         tObdSize* pEntrySize_p, UINT firstSubindex_p);
-OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
-                                         UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
-                                         tSdoType sdoType_p, void* pUserArg_p);
-OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
-                                          UINT subindex_p, void* pSrcData_le_p, UINT size_p,
-                                          tSdoType sdoType_p, void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p,
+                                         void* pVar_p,
+                                         UINT* pVarEntries_p,
+                                         tObdSize* pEntrySize_p,
+                                         UINT firstSubindex_p);
+OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p,
+                                         UINT nodeId_p,
+                                         UINT index_p,
+                                         UINT subindex_p,
+                                         void* pDstData_le_p,
+                                         UINT* pSize_p,
+                                         tSdoType sdoType_p,
+                                         void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p,
+                                          UINT nodeId_p,
+                                          UINT index_p,
+                                          UINT subindex_p,
+                                          const void* pSrcData_le_p,
+                                          UINT size_p,
+                                          tSdoType sdoType_p,
+                                          void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p);
 OPLKDLLEXPORT tOplkError oplk_enableUserObdAccess(BOOL fEnable_p);
 OPLKDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
-OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
-OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
-OPLKDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p, UINT size_p);
-OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p, size_t asndSize_p);
-OPLKDLLEXPORT tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p);
-OPLKDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter FilterType_p);
+OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p,
+                                       UINT32 abortCode_p);
+OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p,
+                                              UINT subindex_p,
+                                              void* pDstData_p,
+                                              UINT* pSize_p);
+OPLKDLLEXPORT tOplkError oplk_writeLocalObject(UINT index_p,
+                                               UINT subindex_p,
+                                               const void* pSrcData_p,
+                                               UINT size_p);
+OPLKDLLEXPORT tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p,
+                                            const tAsndFrame* pAsndFrame_p,
+                                            size_t asndSize_p);
+OPLKDLLEXPORT tOplkError oplk_sendEthFrame(const tPlkFrame* pFrame_p,
+                                           size_t frameSize_p);
+OPLKDLLEXPORT tOplkError oplk_setAsndForward(UINT8 serviceId_p,
+                                             tOplkApiAsndFilter FilterType_p);
 OPLKDLLEXPORT tOplkError oplk_setNonPlkForward(BOOL fEnable_p);
 OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
-OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
-OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
-OPLKDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
+OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p,
+                                                   tNmtNodeCommand nodeCommand_p);
+OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(const void* pbCdc_p,
+                                           size_t cdcSize_p);
+OPLKDLLEXPORT tOplkError oplk_setCdcFilename(const char* pszCdcFilename_p);
 OPLKDLLEXPORT tOplkError oplk_setOdArchivePath(const char* pBackupPath_p);
 OPLKDLLEXPORT tOplkError oplk_process(void);
-OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, const tIdentResponse** ppIdentResponse_p);
+OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p,
+                                               const tIdentResponse** ppIdentResponse_p);
 OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);
-OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
+OPLKDLLEXPORT BOOL oplk_checkKernelStack(void);
 OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
-OPLKDLLEXPORT UINT32     oplk_getVersion(void);
-OPLKDLLEXPORT char*      oplk_getVersionString(void);
-OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
+OPLKDLLEXPORT UINT32 oplk_getVersion(void);
+OPLKDLLEXPORT const char* oplk_getVersionString(void);
+OPLKDLLEXPORT UINT32 oplk_getStackConfiguration(void);
 OPLKDLLEXPORT tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p);
 OPLKDLLEXPORT tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p);
 
 // Process image API functions
-OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
+OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p,
+                                                UINT sizeProcessImageOut_p);
 OPLKDLLEXPORT tOplkError oplk_freeProcessImage(void);
-OPLKDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p, UINT offsetPI_p,
-                                                     BOOL fOutputPI_p, tObdSize entrySize_p, UINT* pVarEntries_p);
+OPLKDLLEXPORT tOplkError oplk_linkProcessImageObject(UINT objIndex_p,
+                                                     UINT firstSubindex_p,
+                                                     UINT offsetPI_p,
+                                                     BOOL fOutputPI_p,
+                                                     tObdSize entrySize_p,
+                                                     UINT* pVarEntries_p);
 OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageIn(void);
 OPLKDLLEXPORT tOplkError oplk_exchangeProcessImageOut(void);
-OPLKDLLEXPORT void*      oplk_getProcessImageIn(void);
-OPLKDLLEXPORT void*      oplk_getProcessImageOut(void);
+OPLKDLLEXPORT void* oplk_getProcessImageIn(void);
+OPLKDLLEXPORT void* oplk_getProcessImageOut(void);
 
 // objdict specific process image functions
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_setupProcessImage(void);
@@ -581,22 +615,26 @@ OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_setupProcessImage(void);
 OPLKDLLEXPORT tOplkError oplk_triggerPresForward(UINT nodeId_p);
 
 // SDO Test API functions
-OPLKDLLEXPORT void       oplk_testSdoSetVal(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT void oplk_testSdoSetVal(const tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoComInit(void);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqInit(void);
 // Testing functions for SDO command layer
-OPLKDLLEXPORT tOplkError oplk_testSdoComSend(UINT uiNodeId_p, tSdoType SdoType_p,
-                                              tAsySdoCom* pSdoCom_p, size_t SdoSize_p);
+OPLKDLLEXPORT tOplkError oplk_testSdoComSend(UINT uiNodeId_p,
+                                             tSdoType SdoType_p,
+                                             const tAsySdoCom* pSdoCom_p,
+                                             size_t SdoSize_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoComDelCon(void);
 // Testing functions for SDO sequence layer
-OPLKDLLEXPORT tOplkError oplk_testSdoSeqSend(UINT uiNodeId_p, tSdoType SdoType_p,
-                                              tAsySdoSeq* pSdoCom_p, size_t SdoSize_p);
+OPLKDLLEXPORT tOplkError oplk_testSdoSeqSend(UINT uiNodeId_p,
+                                             tSdoType SdoType_p,
+                                             const tAsySdoSeq* pSdoCom_p,
+                                             size_t SdoSize_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqDelCon(void);
 
 // Service API functions
-OPLKDLLEXPORT tOplkError oplk_serviceWriteFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                                    UINT8* pChunkData_p);
-OPLKDLLEXPORT size_t     oplk_serviceGetFileChunkSize(void);
+OPLKDLLEXPORT tOplkError oplk_serviceWriteFileChunk(const tOplkApiFileChunkDesc* pDesc_p,
+                                                    const void* pChunkData_p);
+OPLKDLLEXPORT size_t oplk_serviceGetFileChunkSize(void);
 OPLKDLLEXPORT tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p);
 
 #ifdef __cplusplus

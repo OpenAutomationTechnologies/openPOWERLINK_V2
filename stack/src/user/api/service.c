@@ -10,7 +10,7 @@ This file contains the implementation of the service module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -94,17 +94,18 @@ segment the file into chunks of a maximum size which can be obtained from
 \ref oplk_serviceGetFileChunkSize. The chunk descriptor is used by the kernel stack
 to reassemble the file.
 
-\param  pDesc_p             File chunk descriptor
-\param  pChunkData_p        File chunk data buffer
+\param[in]      pDesc_p             File chunk descriptor
+\param[in]      pChunkData_p        File chunk data buffer
 
 \return The function returns a \ref tOplkError error code.
 
 \ingroup module_service
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_serviceWriteFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pChunkData_p)
+tOplkError oplk_serviceWriteFileChunk(const tOplkApiFileChunkDesc* pDesc_p,
+                                      const void* pChunkData_p)
 {
-    if (pDesc_p == NULL || pChunkData_p == NULL)
+    if ((pDesc_p == NULL) || (pChunkData_p == NULL))
         return kErrorApiInvalidParam;
 
     return ctrlu_writeFileChunk(pDesc_p, pChunkData_p);
@@ -118,8 +119,8 @@ The function obtains the supported file chunk size which must not be exceeded
 when calling \ref oplk_serviceWriteFileChunk.
 
 \return The function returns the supported file chunk size in bytes.
-\retval 0           This size indicates that no file transfer support is available
-                    in the used stack library.
+\retval 0                           This size indicates that no file transfer support
+                                    is available in the used stack library.
 
 \ingroup module_service
 */
@@ -138,8 +139,8 @@ The function executes a firmware reconfiguration of the kernel stack.
 \note   Make sure to shut down the stack with \ref oplk_exit after triggering
         the firmware reconfiguration.
 
-\param  fFactory_p      Determines if the firmware shall reconfigure to factory
-                        image/configuration.
+\param[in]      fFactory_p          Determines if the firmware shall reconfigure
+                                    to factory image/configuration.
 
 \return The function returns a \ref tOplkError error code.
 
@@ -157,15 +158,19 @@ tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p)
     ret = ctrlucal_executeCmd(cmd, &retval);
     if (ret != kErrorOk)
     {
-        DEBUG_LVL_ERROR_TRACE("%s reconfigure to %s image failed with 0x%X\n",
-               __func__, (fFactory_p) ? "factory" : "update", ret);
+        DEBUG_LVL_ERROR_TRACE("%s(): Reconfigure to %s image failed with 0x%X\n",
+                              __func__,
+                              (fFactory_p) ? "factory" : "update",
+                              ret);
         return ret;
     }
 
     if ((tOplkError)retval != kErrorOk)
     {
-        DEBUG_LVL_ERROR_TRACE("%s reconfigure to %s image rejected by kernel stack (0x%X)!\n",
-               __func__, (fFactory_p) ? "factory" : "update", (tOplkError)retval);
+        DEBUG_LVL_ERROR_TRACE("%s(): Reconfigure to %s image rejected by kernel stack (0x%X)!\n",
+                              __func__,
+                              (fFactory_p) ? "factory" : "update",
+                              (tOplkError)retval);
         return (tOplkError)retval;
     }
 
