@@ -14,7 +14,7 @@ This is done by configuring the kernel with CONFIG_HIGH_RES_TIMERS enabled.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -68,19 +68,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error "Kernel symbol CONFIG_HIGH_RES_TIMERS is required."
 #endif
 
-// TracePoint support for realtime-debugging
-#ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
-void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
-#else
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
-#endif
-#define HRT_DBG_POST_TRACE_VALUE(event_p, nodeId_p, errorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((0xE << 28) | (event_p << 24) | \
-                             (nodeId_p << 16) | errorCode_p)
 
 #define TIMERHDL_MASK           0x0FFFFFFF
 #define TIMERHDL_SHIFT          28

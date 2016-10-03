@@ -11,7 +11,7 @@ This file contains the implementation of the NMT MNU module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -81,19 +81,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// TracePoint support for realtime-debugging
-#ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint(UINT8 tracePointNumber_p);
-void TgtDbgPostTraceValue(UINT32 traceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
-#else
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
-#endif
-#define NMTMNU_DBG_POST_TRACE_VALUE(event_p, nodeId_p, errorCode_p)       \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtMnu << 28) | (event_p << 24) | \
-                             (nodeId_p << 16) | errorCode_p)
+#define NMTMNU_DBG_POST_TRACE_VALUE(event_p, nodeId_p, errorCode_p)               \
+    DEBUG_LVL_NMTMN_TRACE("nmtmnu: event: %02X, nodeId: %02X, errorCode: %04X\n", \
+                          event_p,                                                \
+                          nodeId_p,                                               \
+                          errorCode_p);
 
 // defines for flags in node info structure
 #define NMTMNU_NODE_FLAG_ISOCHRON               0x0001  // CN is being accessed isochronously
@@ -2950,7 +2942,7 @@ INT processNodeEventNoIdentResponse(UINT nodeId_p,
                                     nodeId_p,
                                     ((pNodeInfo->nodeState << 8) | 0x80 |
                                     ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6) |
-                                    ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                    ((timerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay,
                                      &timerArg);
@@ -3032,7 +3024,7 @@ static INT processNodeEventStatusResponse(UINT nodeId_p,
                                     nodeId_p,
                                     ((pNodeInfo->nodeState << 8) | 0x80 |
                                      ((pNodeInfo->flags & NMTMNU_NODE_FLAG_COUNT_STATREQ) >> 6) |
-                                     ((TimerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
+                                     ((timerArg.argument.value & NMTMNU_TIMERARG_COUNT_SR) >> 8)));
         *pRet_p = timeru_modifyTimer(&pNodeInfo->timerHdlStatReq,
                                      nmtMnuInstance_g.statusRequestDelay,
                                      &timerArg);
@@ -3294,7 +3286,7 @@ static INT processNodeEventExecResetConf(UINT nodeId_p,
     }
 
     pNodeInfo->nodeState = kNmtMnuNodeStateResetConf;
-    NMTMNU_DBG_POST_TRACE_VALUE(nodeEvent_p,
+    NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventExecResetConf,
                                 nodeId_p,
                                 (((nodeNmtState_p & 0xFF) << 8) | kNmtCmdResetConfiguration));
 

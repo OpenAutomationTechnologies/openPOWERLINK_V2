@@ -11,7 +11,7 @@ This file contains the implementation of the DLL kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -592,7 +592,7 @@ tOplkError dllk_addNode(const tDllNodeOpParam* pNodeOpParam_p)
         return kErrorDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEventTypeDllkAddNode, pNodeOpParam_p->nodeId, 0);
+    DEBUG_LVL_DLL_TRACE("%s() nodeId: %d\n", __func__, pNodeOpParam_p->nodeId);
 
     switch (pNodeOpParam_p->opNodeType)
     {
@@ -673,7 +673,7 @@ tOplkError dllk_deleteNode(const tDllNodeOpParam* pNodeOpParam_p)
         return kErrorDllNoNodeInfo;
     }
 
-    DLLK_DBG_POST_TRACE_VALUE(kEventTypeDllkDelNode, pNodeOpParam_p->nodeId, 0);
+    DEBUG_LVL_DLL_TRACE("%s() nodeId: %d\n", __func__, pNodeOpParam_p->nodeId);
 
     switch (pNodeOpParam_p->opNodeType)
     {
