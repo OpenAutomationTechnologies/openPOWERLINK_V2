@@ -55,15 +55,15 @@ library work;
 use work.openmacPkg.all;
 
 --! AXI Lite IPIF library
-library axi_lite_ipif_v3_0;
+library axi_lite_ipif_v3_0_4;
 --! Use AXI lite ipif
-use axi_lite_ipif_v3_0.axi_lite_ipif;
-use axi_lite_ipif_v3_0.ipif_pkg.all;
+use axi_lite_ipif_v3_0_4.axi_lite_ipif;
+use axi_lite_ipif_v3_0_4.ipif_pkg.all;
 
 --! AXI Master Burst library
-library axi_master_burst_v2_0;
+library axi_master_burst_v2_0_7;
 --! Use AXI master burst
-use axi_master_burst_v2_0.axi_master_burst;
+use axi_master_burst_v2_0_7.axi_master_burst;
 
 --! Unisim library
 library unisim;
@@ -1093,7 +1093,7 @@ begin
         );
 
     --! The MAC REG AXI lite IPIF converts the AXI interface to IPIF.
-    THEMACREG_AXILITE : entity axi_lite_ipif_v3_0.axi_lite_ipif
+    THEMACREG_AXILITE : entity axi_lite_ipif_v3_0_4.axi_lite_ipif
         generic map (
             C_S_AXI_DATA_WIDTH      => C_S_AXI_MAC_REG_DATA_WIDTH,
             C_S_AXI_ADDR_WIDTH      => C_S_AXI_MAC_REG_ADDR_WIDTH,
@@ -1203,7 +1203,7 @@ begin
     --! Generate the packet buffer IPIF if any location is set to local.
     GEN_THEMACPKT : if gPacketBufferLocRx = cPktBufLocal or gPacketBufferLocTx = cPktBufLocal generate
         --! The MAC PKT BUF AXI lite IPIF converts the AXI interface to IPIF.
-        THEMACREG_AXILITE : entity axi_lite_ipif_v3_0.axi_lite_ipif
+        THEMACREG_AXILITE : entity axi_lite_ipif_v3_0_4.axi_lite_ipif
             generic map (
                 C_S_AXI_DATA_WIDTH      => C_S_AXI_MAC_PKT_DATA_WIDTH,
                 C_S_AXI_ADDR_WIDTH      => C_S_AXI_MAC_PKT_ADDR_WIDTH,
@@ -1252,7 +1252,7 @@ begin
 
     GEN_THEMACDMA : if gPacketBufferLocRx = cPktBufExtern or gPacketBufferLocTx = cPktBufExtern generate
         --! The MAC DMA AXI master IPIF converts the AXI interface to IPIF.
-        THEMACDMA_AXI : entity axi_master_burst_v2_0.axi_master_burst
+        THEMACDMA_AXI : entity axi_master_burst_v2_0_7.axi_master_burst
             generic map (
                 C_M_AXI_ADDR_WIDTH  => C_M_AXI_MAC_DMA_ADDR_WIDTH,
                 C_M_AXI_DATA_WIDTH  => C_M_AXI_MAC_DMA_DATA_WIDTH,

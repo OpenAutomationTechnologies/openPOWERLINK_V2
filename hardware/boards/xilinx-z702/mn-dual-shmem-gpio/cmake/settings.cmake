@@ -2,7 +2,7 @@
 #
 # CMake settings file for mn-dual-shmem-gpio demo on xilinx-z702
 #
-# Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
+# Copyright (c) 2016, Kalycito Infotech Pvt. Ltd.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ SET(CFG_DEMO_BUS_SYSTEM "axi")
 
 # Enable FAT FS support library build
 # Useful when reading CDC file from SDCARD
-SET(CFG_FAT_SUPPORT TRUE)
+SET(CFG_FAT_SUPPORT FALSE)
 
 ################################################################################
 # P R O C E S S O R   F E A T U R E S   ( P C P )
@@ -57,10 +57,10 @@ SET(CFG_PCP_NAME pcp)
 SET(CFG_PCP_PROCESSOR Microblaze)
 
 # Version of the Microblaze instance
-SET(CFG_PCP_CPU_VERSION "v8.50.c")
+SET(CFG_PCP_CPU_VERSION "v9.6")
 
 # Pcp's tightly coupled instruction memory name
-SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
+SET(CFG_PCP_TCIMEM_NAME pcp_bram_ilmb_bram_if_cntlr)
 
 # Bootloader not available for Microblaze
 SET(CFG_MB_BOOTLOADER_ENABLE "FALSE")
