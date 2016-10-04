@@ -237,7 +237,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
     dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                           offsetof(tCtrlBuf, ctrlCmd),
                                           sizeof(tCtrlCmd),
-                                          (UINT8*)&ctrlCmd);
+                                          &ctrlCmd);
     if (dualRet != kDualprocSuccessful)
         return kErrorGeneralError;
 
@@ -249,7 +249,7 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
         dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                              offsetof(tCtrlBuf, ctrlCmd),
                                              sizeof(tCtrlCmd),
-                                             (UINT8*)&ctrlCmd);
+                                             &ctrlCmd);
         if (dualRet != kDualprocSuccessful)
             return kErrorGeneralError;
 
@@ -294,7 +294,7 @@ tOplkError ctrlucal_checkKernelStack(void)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, magic),
                                          sizeof(magic),
-                                         (UINT8*)&magic);
+                                         &magic);
     if (dualRet != kDualprocSuccessful)
         return kErrorGeneralError;
 
@@ -365,7 +365,7 @@ tCtrlKernelStatus ctrlucal_getStatus(void)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, status),
                                          sizeof(status),
-                                         (UINT8*)&status);
+                                         &status);
     if (dualRet == kDualprocSuccessful)
         return status;
     else
@@ -391,7 +391,7 @@ UINT16 ctrlucal_getHeartbeat(void)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, heartbeat),
                                          sizeof(heartbeat),
-                                         (UINT8*)&heartbeat);
+                                         &heartbeat);
     if (dualRet == kDualprocSuccessful)
         return heartbeat;
     else
@@ -418,7 +418,7 @@ void ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p)
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                 offsetof(tCtrlBuf, initParam),
                                 sizeof(tCtrlInitParam),
-                                (UINT8*)pInitParam_p);
+                                pInitParam_p);
 }
 
 //------------------------------------------------------------------------------
@@ -444,7 +444,7 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, initParam),
                                          sizeof(tCtrlInitParam),
-                                         (UINT8*)pInitParam_p);
+                                         pInitParam_p);
 
     if (dualRet != kDualprocSuccessful)
     {

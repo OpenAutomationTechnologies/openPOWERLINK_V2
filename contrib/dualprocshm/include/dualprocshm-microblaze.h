@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_microblaze_H_
 #define _INC_dualprocshm_microblaze_H_
 
@@ -62,48 +61,56 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // Memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
+#define DUALPROCSHM_MALLOC(size)            malloc(size)
+#define DUALPROCSHM_FREE(ptr)               free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)  memcpy((dest), (src), (siz))
 
 // IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
+#define DPSHM_READ8(base)                   Xil_In8((UINT32)base)
+#define DPSHM_WRITE8(base, val)             Xil_Out8((UINT32)base, val)
+#define DPSHM_READ16(base)                  Xil_In16((UINT32)base)
+#define DPSHM_WRITE16(base, val)            Xil_Out16((UINT32)base, val)
+#define DPSHM_READ32(base)                  Xil_In32((UINT32)base)
+#define DPSHM_WRITE32(base, val)            Xil_Out32((UINT32)base, val)
 
 // Memory barrier
 #ifdef __GNUC__
 // Note: Suppress gcc braced-group warning what is not available in ISO C.
-#define DPSHM_DMB()                 __extension__ mbar(1)
+#define DPSHM_DMB()                         __extension__ mbar(1)
 #else
-#define DPSHM_DMB()                 mbar(1)
+#define DPSHM_DMB()                         mbar(1)
 #endif
 
-// Cache hadling
+// Cache handling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
     Xil_L1DCacheFlushRange((UINT32)(base), range)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     Xil_L1DCacheInvalidateRange((UINT32)(base), range)
 
-#define DPSHM_REG_SYNC_INTR(callback, arg)                     \
-    UINT32      intcMask;                                      \
-    XIntc_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                         (XInterruptHandler) callback, arg);   \
-    intcMask = Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET);  \
-    XIntc_EnableIntr(TARGET_IRQ_IC_DIST_BASE,                  \
-                     TARGET_SYNC_IRQ | intcMask)
+#define DPSHM_REG_SYNC_INTR(callback, arg)                        \
+    do                                                            \
+    {                                                             \
+        UINT32  intcMask;                                         \
+                                                                  \
+        XIntc_RegisterHandler(TARGET_IRQ_IC_BASE,                 \
+                              TARGET_SYNC_IRQ,                    \
+                              (XInterruptHandler)callback,        \
+                              arg);                               \
+        intcMask = Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET); \
+        XIntc_EnableIntr(TARGET_IRQ_IC_DIST_BASE,                 \
+                         TARGET_SYNC_IRQ | intcMask);             \
+    } while (0)
 
 #define DPSHM_ENABLE_SYNC_INTR()                                   \
-    XIntc_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |         \
-                     Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
+    XIntc_EnableIntr(TARGET_SYNC_IRQ_ID,                           \
+                     TARGET_SYNC_IRQ |                             \
+                       Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
 
 #define DPSHM_DISABLE_SYNC_INTR()                                  \
-    XIntc_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |        \
-                      Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
+    XIntc_DisableIntr(TARGET_SYNC_IRQ_ID,                          \
+                      TARGET_SYNC_IRQ |                            \
+                        Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
 
 #define DPSHM_CONNECT_SYNC_IRQ()
 #define DPSHM_DISCONNECT_SYNC_IRQ()
@@ -115,11 +122,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_arm_H_
 #define _INC_dualprocshm_arm_H_
 
@@ -62,33 +61,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // memory
-#define DUALPROCSHM_MALLOC(size)              malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
+#define DUALPROCSHM_MALLOC(size)            malloc(size)
+#define DUALPROCSHM_FREE(ptr)               free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)  memcpy((dest), (src), (siz))
 
 // IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
-#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
-#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
+#define DPSHM_READ8(base)                   Xil_In8((UINT32)base)
+#define DPSHM_WRITE8(base, val)             Xil_Out8((UINT32)base, val)
+#define DPSHM_READ16(base)                  Xil_In16((UINT32)base)
+#define DPSHM_WRITE16(base, val)            Xil_Out16((UINT32)base, val)
+#define DPSHM_READ32(base)                  Xil_In32((UINT32)base)
+#define DPSHM_WRITE32(base, val)            Xil_Out32((UINT32)base, val)
 
 // Memory barrier
-#define DPSHM_DMB()                 dmb()
+#define DPSHM_DMB()                         dmb()
 
 // cache handling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    Xil_DCacheFlushRange((UINT32)base, range);
+    Xil_DCacheFlushRange((UINT32)base, range)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    Xil_DCacheInvalidateRange((UINT32)base, range);
+    Xil_DCacheInvalidateRange((UINT32)base, range)
 
-#define DPSHM_REG_SYNC_INTR(callback, arg)                       \
-    XScuGic_SetPriTrigTypeByDistAddr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ, 0xA0, 0x3); \
-    XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE, TARGET_SYNC_IRQ, \
-                           (Xil_InterruptHandler) callback, arg);\
-    XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ)
+#define DPSHM_REG_SYNC_INTR(callback, arg)                                                     \
+    do                                                                                         \
+    {                                                                                          \
+        XScuGic_SetPriTrigTypeByDistAddr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ, 0xA0, 0x3); \
+        XScuGic_RegisterHandler(TARGET_IRQ_IC_BASE,                                            \
+                                TARGET_SYNC_IRQ,                                               \
+                                (Xil_InterruptHandler)callback,                                \
+                                arg);                                                          \
+        XScuGic_EnableIntr(TARGET_IRQ_IC_DIST_BASE, TARGET_SYNC_IRQ);                          \
+    } while (0)
 
 #define DPSHM_ENABLE_SYNC_INTR() \
     XScuGic_EnableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
@@ -107,11 +111,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 #ifdef __cplusplus
 }
 #endif

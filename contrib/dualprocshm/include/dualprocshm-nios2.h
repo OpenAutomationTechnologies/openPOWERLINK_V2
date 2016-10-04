@@ -35,16 +35,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_nios2_H_
 #define _INC_dualprocshm_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h> // For uint*_t
-#include <stdlib.h> // For malloc/free
-#include <string.h> // For memset/memcpy
+#include <stdint.h>         // For uint*_t
+#include <stdlib.h>         // For malloc/free
+#include <string.h>         // For memset/memcpy
 #include <stddef.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -66,26 +65,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_MAKE_NONCACHEABLE(ptr) \
     (void*)(((unsigned long)ptr) | NIOS2_BYPASS_DCACHE_MASK)
 
-#define DUALPROCSHM_MALLOC(size)              alt_uncached_malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 alt_uncached_free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
+#define DUALPROCSHM_MALLOC(size)                (void*)alt_uncached_malloc(size)
+#define DUALPROCSHM_FREE(ptr)                   alt_uncached_free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)      memcpy((dest), (src), (siz))
 #define DPSHM_UNREG_SYNC_INTR(callback, arg)
 #define DPSHM_CLEAR_SYNC_IRQ()
-
-#define CALC_OFFSET(addr_p, baseAddr_p)                                        \
-    ({                                                                         \
-         ULONG offset = 0;                                                     \
-         if ((NIOS2_BYPASS_DCACHE_MASK & addr_p) != 0)                         \
-         {                                                                     \
-             offset =  (addr_p - (ULONG)DPSHM_MAKE_NONCACHEABLE(baseAddr_p));  \
-         }                                                                     \
-         else                                                                  \
-         {                                                                     \
-             offset = (addr_p - baseAddr_p);                                   \
-         }                                                                     \
-                                                                               \
-         offset;                                                               \
-     })
 
 // IO operations
 #define DPSHM_READ8(base)               IORD_8DIRECT((UINT32)base, 0)

@@ -35,32 +35,31 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_winkernel_H_
 #define _INC_dualprocshm_winkernel_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <ndis.h>
 #include <ndis-intf.h>
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
 /// memory
-#define DUALPROCSHM_MALLOC(size)              ExAllocatePool(NonPagedPool, (size))
-#define DUALPROCSHM_FREE(ptr)                 ExFreePool(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    NdisMoveMemory(dest, src, siz)
+#define DUALPROCSHM_MALLOC(size)            ExAllocatePool(NonPagedPool, (size))
+#define DUALPROCSHM_FREE(ptr)               ExFreePool(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)  NdisMoveMemory((dest), (src), (siz))
 
 /// IO operations
-#define DPSHM_READ8(base)                     READ_REGISTER_UCHAR((UINT8*)base)
-#define DPSHM_WRITE8(base, val)               WRITE_REGISTER_UCHAR((UINT8*)base, val)
-#define DPSHM_READ16(base)                    READ_REGISTER_USHORT((UINT16*)base)
-#define DPSHM_WRITE16(base, val)              WRITE_REGISTER_USHORT((UINT16*)base, val)
-#define DPSHM_READ32(base)                    READ_REGISTER_ULONG((UINT32*)base)
-#define DPSHM_WRITE32(base, val)              WRITE_REGISTER_ULONG((UINT32*)base, val)
+#define DPSHM_READ8(base)                   READ_REGISTER_UCHAR((UINT8*)base)
+#define DPSHM_WRITE8(base, val)             WRITE_REGISTER_UCHAR((UINT8*)base, val)
+#define DPSHM_READ16(base)                  READ_REGISTER_USHORT((UINT16*)base)
+#define DPSHM_WRITE16(base, val)            WRITE_REGISTER_USHORT((UINT16*)base, val)
+#define DPSHM_READ32(base)                  READ_REGISTER_ULONG((UINT32*)base)
+#define DPSHM_WRITE32(base, val)            WRITE_REGISTER_ULONG((UINT32*)base, val)
 
 /// cache handling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range)         ((void)0)
@@ -75,9 +74,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_CONNECT_SYNC_IRQ()
 #define DPSHM_DISCONNECT_SYNC_IRQ()
 
-#define DPSHM_DMB()     KeMemoryBarrier()
+#define DPSHM_DMB()                         KeMemoryBarrier()
 
-#define PTR_T           ULONG_PTR
+#define PTR_T                               ULONG_PTR
+
+#define __func__                            __FUNCTION__
 
 //------------------------------------------------------------------------------
 // typedef
@@ -86,5 +87,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_dualprocshm_winkernel_H_ */

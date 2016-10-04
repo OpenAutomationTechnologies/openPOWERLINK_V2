@@ -10,6 +10,7 @@ This header file provides specific macros for Xilinx Zynq platform .
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_ZYNQ_H_
 #define _INC_dualprocshm_ZYNQ_H_
 
@@ -51,40 +51,40 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "dualprocshm-microblaze.h"
 
 
-#define TARGET_SYNC_IRQ_ID         -1
-#define TARGET_SYNC_IRQ            -1
+#define TARGET_SYNC_IRQ_ID          -1
+#define TARGET_SYNC_IRQ             -1
 
 ///< Interrupt controller specific defines
-#define TARGET_IRQ_IC_BASE         -1
-#define TARGET_IRQ_IC_DIST_BASE    -1
+#define TARGET_IRQ_IC_BASE          -1
+#define TARGET_IRQ_IC_DIST_BASE     -1
 
 
 #elif defined(__XILINX_ARM__)
 #include "dualprocshm-arm.h"
 
 
-#define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
-#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_PULSE_IRQ_INTR
+#define TARGET_SYNC_IRQ_ID          XPAR_PS7_SCUGIC_0_DEVICE_ID
+#define TARGET_SYNC_IRQ             XPAR_FABRIC_AXI_OPENMAC_0_TIMER_PULSE_IRQ_INTR
 
 ///< Interrupt controller specific defines
 #ifdef XPAR_PS7_SCUGIC_0_BASEADDR
-#define TARGET_IRQ_IC_BASE         XPAR_PS7_SCUGIC_0_BASEADDR
+#define TARGET_IRQ_IC_BASE          XPAR_PS7_SCUGIC_0_BASEADDR
 #endif
 
 #ifdef XPAR_PS7_SCUGIC_0_DIST_BASEADDR
-#define TARGET_IRQ_IC_DIST_BASE    XPAR_PS7_SCUGIC_0_DIST_BASEADDR
+#define TARGET_IRQ_IC_DIST_BASE     XPAR_PS7_SCUGIC_0_DIST_BASEADDR
 #endif
 
 #else
 
-#error "unknown target for Zynq"
+#error "Unknown target for Zynq"
 
 #endif
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+#define DUALPROC_INSTANCE_COUNT     2       ///< Number of supported instances
 
 //------------------------------------------------------------------------------
 // typedef
@@ -98,14 +98,13 @@ locking mechanism in dual processor shared memory library.
 */
 typedef struct sDualprocLock
 {
-    unsigned char   lockToken;      ///< Locking token
-    unsigned char   aPadding1[3];   ///< Padding array variable 1
+    unsigned char   lockToken;              ///< Locking token
+    unsigned char   aPadding1[3];           ///< Padding array variable 1
 } tDualprocLock;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

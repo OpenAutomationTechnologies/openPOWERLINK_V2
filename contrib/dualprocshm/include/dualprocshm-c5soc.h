@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_c5soc_H_
 #define _INC_dualprocshm_c5soc_H_
 
@@ -64,7 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+#define DUALPROC_INSTANCE_COUNT     2       ///< Number of supported instances
 
 //------------------------------------------------------------------------------
 // typedef
@@ -78,14 +77,13 @@ locking mechanism in dual processor shared memory library.
 */
 typedef struct sDualprocLock
 {
-    unsigned char   lockToken;      ///< Locking token
-    unsigned char   aPadding1[3];   ///< Padding array variable 1
+    unsigned char   lockToken;              ///< Locking token
+    unsigned char   aPadding1[3];           ///< Padding array variable 1
 } tDualprocLock;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

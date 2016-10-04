@@ -124,7 +124,7 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     tDualprocReturn dualRet;
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    UINT8*          pBuffer;
+    void*           pBuffer;
     size_t          memSize = sizeof(tTimesyncSharedMemory);
     INT             loopCount = 0;
 #endif

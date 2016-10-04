@@ -9,7 +9,8 @@ This header file provides specific macros for external PCIe based solutions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,23 +50,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEM_INTR_BASE
 
 /* Memory size */
-#define MAX_COMMON_MEM_SIZE        3072                         ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE      MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
-#define MEM_ADDR_TABLE_OFFSET      MAX_COMMON_MEM_SIZE
-#define MEM_INTR_OFFSET            MAX_COMMON_MEM_SIZE + MAX_DYNAMIC_BUFF_SIZE
-#define OPLK_PCIEBAR_SHM           0
-#define OPLK_PCIEBAR_COMM_MEM      1
+#define MAX_COMMON_MEM_SIZE         3072                            ///< Max common memory size
+#define MAX_DYNAMIC_BUFF_COUNT      20                              ///< Number of maximum dynamic buffers
+#define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4      ///< Max dynamic buffer size
+#define MEM_ADDR_TABLE_OFFSET       MAX_COMMON_MEM_SIZE
+#define MEM_INTR_OFFSET             MAX_COMMON_MEM_SIZE + MAX_DYNAMIC_BUFF_SIZE
+#define OPLK_PCIEBAR_SHM            0
+#define OPLK_PCIEBAR_COMM_MEM       1
 
 #elif defined(__NIOS2__)
 #include <system.h>
 
-#define TARGET_SYNC_IRQ_ID         -1
-#define TARGET_SYNC_IRQ            -1
+#define TARGET_SYNC_IRQ_ID          -1
+#define TARGET_SYNC_IRQ             -1
 
 ///< Interrupt controller specific defines
-#define TARGET_IRQ_IC_BASE         -1
-#define TARGET_IRQ_IC_DIST_BASE    -1
+#define TARGET_IRQ_IC_BASE          -1
+#define TARGET_IRQ_IC_DIST_BASE     -1
 
 #include "dualprocshm-nios2.h"
 
@@ -81,25 +82,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MEM_INTR_BASE
 
 /* Memory size */
-#define MAX_COMMON_MEM_SIZE        3072                         ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE      (MAX_DYNAMIC_BUFF_COUNT * 4) ///< Max dynamic buffer size
+#define MAX_COMMON_MEM_SIZE         3072                            ///< Max common memory size
+#define MAX_DYNAMIC_BUFF_COUNT      20                              ///< Number of maximum dynamic buffers
+#define MAX_DYNAMIC_BUFF_SIZE       (MAX_DYNAMIC_BUFF_COUNT * 4)    ///< Max dynamic buffer size
 
-#define MEM_ADDR_TABLE_OFFSET      MAX_COMMON_MEM_SIZE          ///< Offset of the address table from the start of common memory
-#define MEM_INTR_OFFSET            (MAX_COMMON_MEM_SIZE + MAX_DYNAMIC_BUFF_SIZE) ///< Offset of the interrupt register from the start of common memory
-#define OPLK_PCIEBAR_SHM           0                            ///< BAR id to access the shared memory segment
-#define OPLK_PCIEBAR_COMM_MEM      1                            ///< BAR id to access the common memory segment
+#define MEM_ADDR_TABLE_OFFSET       MAX_COMMON_MEM_SIZE             ///< Offset of the address table from the start of common memory
+#define MEM_INTR_OFFSET             (MAX_COMMON_MEM_SIZE + MAX_DYNAMIC_BUFF_SIZE)   ///< Offset of the interrupt register from the start of common memory
+#define OPLK_PCIEBAR_SHM            0                               ///< BAR id to access the shared memory segment
+#define OPLK_PCIEBAR_COMM_MEM       1                               ///< BAR id to access the common memory segment
 
 #else
 
-#error "unknown target for external PCIe solutions"
+#error "Unknown target for external PCIe solutions"
 
 #endif
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+#define DUALPROC_INSTANCE_COUNT     2       ///< Number of supported instances
 
 //------------------------------------------------------------------------------
 // typedef

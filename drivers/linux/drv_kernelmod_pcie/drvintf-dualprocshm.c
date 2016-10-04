@@ -229,7 +229,7 @@ tOplkError drvintf_executeCmd(tCtrlCmd* pCtrlCmd_p)
     if (dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                     FIELD_OFFSET(tCtrlBuf, ctrlCmd),
                                     sizeof(tCtrlCmd),
-                                    (UINT8*)pCtrlCmd_p) != kDualprocSuccessful)
+                                    pCtrlCmd_p) != kDualprocSuccessful)
         return kErrorNoResource;
 
     // Wait for response
@@ -240,7 +240,7 @@ tOplkError drvintf_executeCmd(tCtrlCmd* pCtrlCmd_p)
         if (dualprocshm_readDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                        FIELD_OFFSET(tCtrlBuf, ctrlCmd),
                                        sizeof(tCtrlCmd),
-                                       (UINT8*)pCtrlCmd_p) != kDualprocSuccessful)
+                                       pCtrlCmd_p) != kDualprocSuccessful)
             return kErrorNoResource;
 
         if (pCtrlCmd_p->cmd == 0)
@@ -304,7 +304,7 @@ tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p)
     dualRet = dualprocshm_readDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                          FIELD_OFFSET(tCtrlBuf, initParam),
                                          sizeof(tCtrlInitParam),
-                                         (UINT8*)pInitParam_p);
+                                         pInitParam_p);
 
     if (dualRet != kDualprocSuccessful)
     {
@@ -354,7 +354,7 @@ tOplkError drvintf_storeInitParam(tCtrlInitParam* pInitParam_p)
     dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                           FIELD_OFFSET(tCtrlBuf, initParam),
                                           sizeof(tCtrlInitParam),
-                                          (UINT8*)pInitParam_p);
+                                          pInitParam_p);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot store initparam (0x%X)\n", dualRet);
@@ -385,7 +385,7 @@ tOplkError drvintf_getStatus(UINT16* pStatus_p)
     if (dualprocshm_readDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                    FIELD_OFFSET(tCtrlBuf, status),
                                    sizeof(UINT16),
-                                   (UINT8*)pStatus_p) != kDualprocSuccessful)
+                                   pStatus_p) != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Error Reading Status\n");
         return kErrorNoResource;
@@ -415,7 +415,7 @@ tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p)
     if (dualprocshm_readDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                    FIELD_OFFSET(tCtrlBuf, heartbeat),
                                    sizeof(UINT16),
-                                   (UINT8*)pHeartbeat_p) != kDualprocSuccessful)
+                                   pHeartbeat_p) != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Error Reading HeartBeat\n");
         return kErrorNoResource;
@@ -766,7 +766,7 @@ user space before sharing it to user layer(host).
 tOplkError drvintf_getPdoMem(UINT8** ppPdoMem_p, size_t* pMemSize_p)
 {
     tDualprocReturn     dualRet;
-    UINT8*              pPdoMem = NULL;
+    void*               pPdoMem = NULL;
 
     if (!drvIntfInstance_l.fDriverActive)
         return kErrorNoResource;
@@ -785,7 +785,7 @@ tOplkError drvintf_getPdoMem(UINT8** ppPdoMem_p, size_t* pMemSize_p)
         return kErrorNoResource;
     }
 
-    *ppPdoMem_p = pPdoMem;
+    *ppPdoMem_p = (UINT8*)pPdoMem;
     return kErrorOk;
 }
 
@@ -1000,7 +1000,7 @@ tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuf_p
     dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                           FIELD_OFFSET(tCtrlBuf, fileChunkDesc),
                                           sizeof(tOplkApiFileChunkDesc),
-                                          (UINT8*)pDesc_p);
+                                          pDesc_p);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot store file chunk descriptor (0x%X)\n", dualRet);
@@ -1011,7 +1011,7 @@ tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuf_p
     dualRet = dualprocshm_writeDataCommon(drvIntfInstance_l.dualProcDrvInst,
                                           FIELD_OFFSET(tCtrlBuf, aFileChunkBuffer),
                                           pDesc_p->length,
-                                          (UINT8*)pBuf_p);
+                                          pBuf_p);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot store file chunk data (0x%X)\n", dualRet);
@@ -1270,7 +1270,7 @@ accessible to user space through ioctl calls.
 static tOplkError initErrHandleInterface(void)
 {
     tDualprocReturn     dualRet;
-    UINT8*              pBase;
+    void*               pBase;
     size_t              span;
 
     if (!drvIntfInstance_l.fDriverActive)

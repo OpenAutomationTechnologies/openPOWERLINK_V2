@@ -106,7 +106,7 @@ tOplkError errhndkcal_init(void)
 {
     tDualprocReturn         dualRet;
     tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    UINT8*                  pBase;
+    void*                   pBase;
     size_t                  span;
 
     if (pInstance == NULL)

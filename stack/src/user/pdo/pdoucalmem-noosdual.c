@@ -176,7 +176,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     {
         dualRet = dualprocshm_getMemory(memPdo_l.pDrvInstance,
                                         DUALPROCSHM_BUFF_ID_PDO,
-                                        ppPdoMem_p,
+                                        (void**)ppPdoMem_p,
                                         &memSize_p,
                                         FALSE);
         if (dualRet == kDualprocSuccessful)

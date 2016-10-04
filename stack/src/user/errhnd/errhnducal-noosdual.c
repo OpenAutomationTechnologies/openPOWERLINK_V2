@@ -112,7 +112,7 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     tDualprocReturn         dualRet;
     tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    UINT8*                  pBase;
+    void*                   pBase;
     size_t                  span;
 
     if (pInstance == NULL)

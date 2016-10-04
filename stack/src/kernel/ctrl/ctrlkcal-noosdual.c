@@ -164,7 +164,7 @@ tOplkError ctrlkcal_init(void)
     dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                           offsetof(tCtrlBuf, magic),
                                           sizeof(magic),
-                                          (UINT8*)&magic);
+                                          &magic);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE(" {%s} Could not create write magic (0x%X)\n",
@@ -250,7 +250,7 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, ctrlCmd.cmd),
                                          sizeof(cmd),
-                                         (UINT8*)&cmd);
+                                         &cmd);
     if (dualRet != kDualprocSuccessful)
         return kErrorGeneralError;
 
@@ -281,7 +281,7 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                 offsetof(tCtrlBuf, ctrlCmd),
                                 sizeof(tCtrlCmd),
-                                (UINT8*)&ctrlCmd);
+                                &ctrlCmd);
 }
 
 //------------------------------------------------------------------------------
@@ -300,7 +300,7 @@ void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                 offsetof(tCtrlBuf, status),
                                 sizeof(status_p),
-                                (UINT8*)&status_p);
+                                &status_p);
 }
 
 //------------------------------------------------------------------------------
@@ -336,7 +336,7 @@ void ctrlkcal_updateHeartbeat(UINT16 heartbeat_p)
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                 offsetof(tCtrlBuf, heartbeat),
                                 sizeof(heartbeat_p),
-                                (UINT8*)&heartbeat_p);
+                                &heartbeat_p);
 }
 
 //------------------------------------------------------------------------------
@@ -361,7 +361,7 @@ void ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p)
     dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
                                 offsetof(tCtrlBuf, initParam),
                                 sizeof(tCtrlInitParam),
-                                (UINT8*)pInitParam_p);
+                                pInitParam_p);
 }
 
 //------------------------------------------------------------------------------
@@ -387,7 +387,7 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
     dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, initParam),
                                          sizeof(tCtrlInitParam),
-                                         (UINT8*)pInitParam_p);
+                                         pInitParam_p);
 
     if (dualRet != kDualprocSuccessful)
     {
@@ -431,7 +431,7 @@ tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
     dualret = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, fileChunkDesc),
                                          sizeof(tOplkApiFileChunkDesc),
-                                         (UINT8*)pDesc_p);
+                                         pDesc_p);
     if (dualret != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot read file chunk descriptor (0x%X)\n", dualret);

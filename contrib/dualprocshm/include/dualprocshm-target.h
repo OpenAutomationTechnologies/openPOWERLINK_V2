@@ -37,14 +37,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_target_H_
 #define _INC_dualprocshm_target_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #if defined(__ZYNQ__)
 
 #include "dualprocshm-zynq.h"
@@ -107,7 +105,7 @@ If the following data types are not defined in the environment, then they are
 set to those provided by stdint.h.
 */
 /**@{*/
-#ifndef _NTDEF_        // defined in ntdef.H, included by dualprocshm-winkernel.h
+#ifndef _NTDEF_     // defined in ntdef.H, included by dualprocshm-winkernel.h
 #ifndef INT
 #define INT         int
 #endif
@@ -121,15 +119,15 @@ set to those provided by stdint.h.
 #endif
 
 #ifndef UINT8
-#define UINT8     uint8_t
+#define UINT8       uint8_t
 #endif
 
 #ifndef UINT16
-#define UINT16    uint16_t
+#define UINT16      uint16_t
 #endif
 
 #ifndef UINT32
-#define UINT32    uint32_t
+#define UINT32      uint32_t
 #endif
 
 #ifndef UINT64
@@ -138,29 +136,29 @@ set to those provided by stdint.h.
 /**@}*/
 
 #ifndef FALSE
-#define FALSE     0x00
+#define FALSE       0x00
 #endif
 
 #ifndef TRUE
-#define TRUE      0xFF
+#define TRUE        0xFF
 #endif
 
 #endif // _NTDEF_
 
 #ifndef BOOL
-#if defined(_WIN32) || defined(_WIN64)
-#define BOOL      unsigned char
+#if (defined(_WIN32) || defined(_WIN64))
+#define BOOL        unsigned char
 #else
-#define BOOL      uint8_t
+#define BOOL        uint8_t
 #endif // _WIN32
 #endif // BOOL
 
 #ifndef UNUSED_PARAMETER
-#define UNUSED_PARAMETER(par)    (void)par
+#define UNUSED_PARAMETER(par)   (void)par
 #endif
 
 #ifndef PTR_T
-#define PTR_T          unsigned long
+#define PTR_T       unsigned long
 #endif
 
 /**
@@ -187,7 +185,7 @@ set to the following by default.
 #endif
 
 #ifndef DPSHM_MAKE_NONCACHEABLE
-#define DPSHM_MAKE_NONCACHEABLE(pHdl_p)     pHdl_p
+#define DPSHM_MAKE_NONCACHEABLE(pHdl_p)     (void*)(pHdl_p)
 #endif
 
 /**@}*/
@@ -233,7 +231,7 @@ typedef void (*targetSyncHdl)(void*);
 /**
 \brief Processor instance
 
-The processor instance determines if the caller is the Pcp or the Host.
+The processor instance determines if the caller is the PCP or the Host.
 */
 typedef enum
 {
@@ -257,19 +255,30 @@ typedef UINT8 tDualProcInstance;
 extern "C"
 {
 #endif
-UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
-UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);
-UINT8*  dualprocshm_getDynMapTableAddr(void);
-UINT8*  dualprocshm_getIntrMemAddr(void);
+
+void*   dualprocshm_getCommonMemAddr(UINT16* pSize_p);
+void*   dualprocshm_getSharedMemInst(UINT32* pSize_p);
+void*   dualprocshm_getDynMapTableAddr(void);
+void*   dualprocshm_getIntrMemAddr(void);
 void    dualprocshm_releaseIntrMemAddr(void);
-void    dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
-void    dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
+void    dualprocshm_targetReadData(const void* pBase_p,
+                                   size_t size_p,
+                                   void* pData_p);
+void    dualprocshm_targetWriteData(void* pBase_p,
+                                    size_t size_p,
+                                    const void* pData_p);
 void    dualprocshm_releaseCommonMemAddr(UINT16 pSize_p);
 void    dualprocshm_releaseDynMapTableAddr(void);
-void    dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_ACQUIRE_LOCK;
-void    dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_RELEASE_LOCK;
-void    dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p);
+void    dualprocshm_targetAcquireLock(tDualprocLock* pBase_p,
+                                      tDualProcInstance procInstance_p)
+                                      SECTION_DUALPROCSHM_ACQUIRE_LOCK;
+void    dualprocshm_targetReleaseLock(tDualprocLock* pBase_p,
+                                      tDualProcInstance procInstance_p)
+                                      SECTION_DUALPROCSHM_RELEASE_LOCK;
+void    dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p,
+                                  void* pArg_p);
 void    dualprocshm_enableSyncIrq(BOOL fEnable_p);
+
 #ifdef __cplusplus
 }
 #endif

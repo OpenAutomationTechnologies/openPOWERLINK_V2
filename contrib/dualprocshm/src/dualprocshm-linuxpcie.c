@@ -80,27 +80,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Target specific routine to retrieve the base address of common memory between
 two processors.
 
-\param  pSize_p      Minimum size of the common memory on input, returns the
-                     actual size of common memory as output.
+\param[in,out]  pSize_p             Minimum size of the common memory on input, returns the
+                                    actual size of common memory as output.
 
 \return Pointer to base address of common memory.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
+void* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
 {
-    UINT8*   pAddr;
+    void*   pAddr;
 
     if (*pSize_p > MAX_COMMON_MEM_SIZE )
         return NULL;
 
-    pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    pAddr = (void*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
 
     *pSize_p = MAX_COMMON_MEM_SIZE - 1;
+
     return pAddr;
 }
 
@@ -111,7 +112,7 @@ UINT8* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
 Target specific routine to release the base address of
 common memory.
 
-\param  pSize_p      Size of the common memory.
+\param[in]      pSize_p             Size of the common memory.
 
 \ingroup module_dualprocshm
  */
@@ -127,18 +128,18 @@ void dualprocshm_releaseCommonMemAddr(UINT16 pSize_p)
 
 Target specific routine to retrieve the shared memory base and size.
 
-\param  pSize_p      Minimum size of the shared memory, returns the
-                     actual size of shared memory.
+\param[in,out]  pSize_p             Minimum size of the shared memory, returns the
+                                    actual size of shared memory.
 
 \return Pointer to base address of shared memory.
 
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
+void* dualprocshm_getSharedMemInst(UINT32* pSize_p)
 {
-    UINT8*   pAddr;
-    ULONG    shmLength = pciedrv_getBarLength(OPLK_PCIEBAR_SHM);
+    void*   pAddr;
+    ULONG   shmLength = pciedrv_getBarLength(OPLK_PCIEBAR_SHM);
 
     if (*pSize_p > shmLength)
     {
@@ -147,7 +148,7 @@ UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p)
         return NULL;
     }
 
-    pAddr = (UINT8*)(pciedrv_getBarAddr(OPLK_PCIEBAR_SHM));
+    pAddr = (void*)pciedrv_getBarAddr(OPLK_PCIEBAR_SHM);
     *pSize_p = shmLength;
 
     return pAddr;
@@ -165,14 +166,14 @@ dynamic mapping table.
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-UINT8* dualprocshm_getDynMapTableAddr(void)
+void* dualprocshm_getDynMapTableAddr(void)
 {
-    UINT8*     pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    void*   pAddr = (void*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
 
-    pAddr = (UINT8*)(pAddr + MEM_ADDR_TABLE_OFFSET);
+    pAddr = (UINT8*)pAddr + MEM_ADDR_TABLE_OFFSET;
 
     return pAddr;
 }
@@ -204,14 +205,14 @@ interrupt synchronization registers.
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-UINT8* dualprocshm_getIntrMemAddr(void)
+void* dualprocshm_getIntrMemAddr(void)
 {
-    UINT8*     pAddr = (UINT8*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    void*   pAddr = (void*)pciedrv_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pAddr == NULL)
         return NULL;
 
-    pAddr = (UINT8*)(pAddr + MEM_INTR_OFFSET);
+    pAddr = (UINT8*)pAddr + MEM_INTR_OFFSET;
 
     return pAddr;
 }
@@ -237,18 +238,21 @@ void dualprocshm_releaseIntrMemAddr()
 
 Target specific memory read routine.
 
-\param  pBase_p    Address to read data from.
-\param  size_p     Number of bytes to be read.
-\param  pData_p    Pointer to store the read data.
+\param[in]      pBase_p             Address to read data from.
+\param[in]      size_p              Number of bytes to be read.
+\param[out]     pData_p             Pointer to store the read data.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
+void dualprocshm_targetReadData(const void* pBase_p,
+                                size_t size_p,
+                                void* pData_p)
 {
-    if (pBase_p == NULL || pData_p == NULL)
+    if ((pBase_p == NULL) ||
+        (pData_p == NULL))
     {
-        TRACE("%s Invalid parameters\n", __FUNCTION__);
+        TRACE("%s(): Invalid parameters\n", __func__);
         return;
     }
 
@@ -263,18 +267,21 @@ void dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
 
 Target specific routine used to write data to the specified memory address.
 
-\param  pBase_p      Address to write data to.
-\param  size_p       Number of bytes to be written.
-\param  pData_p      Pointer to memory containing data to be written.
+\param[out]     pBase_p             Address to write data to.
+\param[in]      size_p              Number of bytes to be written.
+\param[in]      pData_p             Pointer to memory containing data to be written.
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p)
+void dualprocshm_targetWriteData(void* pBase_p,
+                                 size_t size_p,
+                                 const void* pData_p)
 {
-    if (pBase_p == NULL || pData_p == NULL)
+    if ((pBase_p == NULL) ||
+        (pData_p == NULL))
     {
-        TRACE("%s Invalid parameters\n", __FUNCTION__);
+        TRACE("%s(): Invalid parameters\n", __func__);
         return;
     }
 
@@ -294,18 +301,18 @@ address and processor instance of the calling processor.
 The locking is achieved using Peterson's algorithm
 \ref https://en.wikipedia.org/wiki/Peterson's_algorithm
 
-\param  pBase_p           Base address of the lock memory
-\param  procInstance_p    Processor instance of the calling processor
+\param[in,out]  pBase_p             Base address of the lock memory
+\param[in]      procInstance_p      Processor instance of the calling processor
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
+void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p,
+                                   tDualProcInstance procInstance_p)
 {
-    tDualprocLock*      pLock = (tDualprocLock*)pBase_p;
     tDualProcInstance   otherProcInstance;
 
-    if (pLock == NULL)
+    if (pBase_p == NULL)
         return;
 
     switch (procInstance_p)
@@ -323,22 +330,22 @@ void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance pro
             return;
     }
 
-    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pBase_p, sizeof(tDualprocLock));
 
-    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 1);
-    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
-                                   sizeof(pLock->afFlag[procInstance_p]));
+    DPSHM_WRITE8(&pBase_p->afFlag[procInstance_p], 1);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pBase_p->afFlag[procInstance_p],
+                                   sizeof(pBase_p->afFlag[procInstance_p]));
 
-    DPSHM_WRITE8(&pLock->turn, otherProcInstance);
-    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->turn, sizeof(pLock->turn));
+    DPSHM_WRITE8(&pBase_p->turn, otherProcInstance);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pBase_p->turn, sizeof(pBase_p->turn));
 
     DPSHM_DMB();
 
     do
     {
-        DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
-    } while (DPSHM_READ8(&pLock->afFlag[otherProcInstance]) &&
-             (DPSHM_READ8(&pLock->turn) == otherProcInstance));
+        DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pBase_p, sizeof(tDualprocLock));
+    } while (DPSHM_READ8(&pBase_p->afFlag[otherProcInstance]) &&
+             (DPSHM_READ8(&pBase_p->turn) == otherProcInstance));
 }
 
 //------------------------------------------------------------------------------
@@ -347,22 +354,21 @@ void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance pro
 
 This routine is used to release a lock acquired at a specified address.
 
-\param  pBase_p           Base address of the lock memory
-\param  procInstance_p    Processor instance of the calling processor
+\param[in,out]  pBase_p             Base address of the lock memory
+\param[in]      procInstance_p      Processor instance of the calling processor
 
 \ingroup module_dualprocshm
  */
 //------------------------------------------------------------------------------
-void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p)
+void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p,
+                                   tDualProcInstance procInstance_p)
 {
-    tDualprocLock*  pLock = (tDualprocLock*)pBase_p;
-
-    if (pLock == NULL)
+    if (pBase_p == NULL)
         return;
 
-    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 0);
-    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
-                                   sizeof(pLock->afFlag[procInstance_p]));
+    DPSHM_WRITE8(&pBase_p->afFlag[procInstance_p], 0);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pBase_p->afFlag[procInstance_p],
+                                   sizeof(pBase_p->afFlag[procInstance_p]));
 }
 
 //------------------------------------------------------------------------------
@@ -372,13 +378,14 @@ void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance pro
 The function registers the ISR for the target specific synchronization interrupt
 used by the application for synchronization.
 
-\param  callback_p              Interrupt handler.
-\param  pArg_p                  Argument to be passed when calling the handler.
+\param[in]      callback_p          Interrupt handler.
+\param[in]      pArg_p              Argument to be passed when calling the handler.
 
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-void dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p)
+void dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p,
+                               void* pArg_p)
 {
     DPSHM_REG_SYNC_INTR(callback_p, pArg_p);
 }
@@ -389,7 +396,7 @@ void dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p)
 
 The function is used to enable or disable the sync interrupt.
 
-\param  fEnable_p              Enable if TRUE, disable if FALSE.
+\param[in]      fEnable_p           Enable if TRUE, disable if FALSE.
 
 \ingroup module_dualprocshm
 */

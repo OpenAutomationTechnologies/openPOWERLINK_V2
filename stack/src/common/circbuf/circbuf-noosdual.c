@@ -199,7 +199,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     {
         // Queue uses memory provided by dualprocshm
         tDualprocReturn ret;
-        UINT8*          pBuffAddr;
+        void*           pBuffAddr;
 
         ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance, pInstance_p->bufferId,
                                     &pBuffAddr, &size, TRUE);
@@ -286,7 +286,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     {
         // Queue uses memory provided by dualprocshm
         tDualprocReturn ret;
-        UINT8*          pBuffAddr;
+        void*           pBuffAddr;
         size_t          size;
 
         ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance,
