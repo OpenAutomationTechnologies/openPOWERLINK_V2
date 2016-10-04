@@ -983,7 +983,7 @@ static UINT8* getDynBuffAddr(tDualprocDrvInstance pInstance_p, UINT16 index_p)
         return NULL;
     }
 
-    pBuffAddr = (pSharedMemBaseAddr + offset);
+    pBuffAddr = (pSharedMemBaseAddr + offset - MEM_BASE_OFFSET);
 
     if ((pBuffAddr <= pSharedMemBaseAddr) || (pBuffAddr >= pSharedMemBaseAddr + sharedMemSize))
     {

@@ -69,6 +69,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "dualprocshm-pcie.h"
 
+#elif defined (__LINUX_ZYNQ__)
+
+#include "dualprocshm-zynq.h"
+
 #else
 
 #error "Platform is not supported! Please point the target platform file in dualprocshm-target.h "
@@ -218,6 +222,10 @@ set to the following by default.
 
 #ifndef MEM_INTR_BASE
 #error "Interrupt memory address not defined!!!"
+#endif
+
+#ifndef MEM_BASE_OFFSET
+#define MEM_BASE_OFFSET     0
 #endif
 
 //------------------------------------------------------------------------------
