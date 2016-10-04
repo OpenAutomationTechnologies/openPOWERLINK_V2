@@ -1,15 +1,15 @@
 /**
 ********************************************************************************
-\file   dualprocshm-linuxzynq.h
+\file   drv_kernelmod_zynq/zynq.h
 
-\brief  Dual processor library platform support header - For Zynq hybrid solution
+\brief  openPOWERLINK zynq driver header file
 
-This header file provides specific macros for external Zynq hybrid solution.
+openPOWERLINK Kernel driver for zynq/FPGA - Header file
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016 Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,76 +35,26 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-#ifndef _INC_dualprocshm_ZYNQ_H_
-#define _INC_dualprocshm_ZYNQ_H_
+#ifndef _INC_zynqdrv_H_
+#define _INC_zynqdrv_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
+#include <oplk/oplk.h>
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
-/* Memory size */
-#define MAX_COMMON_MEM_SIZE        2048                         ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE      (MAX_DYNAMIC_BUFF_COUNT * 4) ///< Max dynamic buffer size
-
-
-#if defined(__arm__)
-
-    #include <dualprocshm-linuxkernel.h>
-
-    #define COMMON_MEM_BASE          0x2C000000
-    #define SHARED_MEM_BASE          0x30000000
-    #define SHARED_MEM_SPAN          0xFFFFFFE
-
-    #define MEM_ADDR_TABLE_BASE      COMMON_MEM_BASE
-    #define MEM_INTR_BASE            MEM_ADDR_TABLE_BASE
-
-    #define MEM_ADDR_TABLE_OFFSET    MAX_COMMON_MEM_SIZE          ///< Offset of the address table from the start of common memory
-    #define MEM_INTR_OFFSET          MAX_DYNAMIC_BUFF_SIZE        ///< Offset of the interrupt register from the start of common memory
-
-    #define MEM_BASE_OFFSET          0x10000000
-
-#elif defined(__MICROBLAZE__)
-
-#include "dualprocshm-microblaze.h"
-
-    #define TARGET_SYNC_IRQ_ID         -1
-    #define TARGET_SYNC_IRQ            -1
-
-    ///< Interrupt controller specific defines
-    #define TARGET_IRQ_IC_BASE         -1
-    #define TARGET_IRQ_IC_DIST_BASE    -1
-
-#else
-
-#error "unknown target for Zynq"
-
-#endif
-
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+/* Shared memory interface io memory regions */
+#define DEVICE_IO_MEM_COUNT         2
+#define DEVICE_IO_MEM_REG1_IDX      0
+#define DEVICE_IO_MEM_REG2_IDX      1
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-/**
-\brief Dual processor lock
-
-The structure holds the locking parameters used for the
-locking mechanism in dual processor shared memory library.
-
-*/
-typedef struct sDualprocLock
-{
-    unsigned char   lockToken;      ///< Locking token
-    unsigned char   aPadding1[3];   ///< Padding array variable 1
-} tDualprocLock;
+typedef tOplkError (*tIrqCallback)(void);   ///< Function signature of ISR callback for upper layer
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -115,8 +65,15 @@ extern "C"
 {
 #endif
 
+tOplkError zynqdrv_init(void);
+tOplkError zynqdrv_exit(void);
+
+ULONG       zynqdrv_getMemRegionAddr(UINT8 memId_p);
+tOplkError  zynqdrv_regSyncHandler(tIrqCallback cbSync_p);
+tOplkError  zynqdrv_enableSync(BOOL fEnable_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_INC_dualprocshm_ZYNQ_H_
+#endif /* _INC_zynqdrv_H_ */
