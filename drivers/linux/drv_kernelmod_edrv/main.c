@@ -10,7 +10,7 @@ the openPOWERLINK kernel stack.
 \ingroup module_driver_linux_kernel
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/driver.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal-mem.h>
+#include <kernel/ctrlk.h>
+#include <kernel/ctrlkcal.h>
+#include <kernel/dllkcal.h>
+#include <kernel/pdokcal.h>
+#include <kernel/timesynckcal.h>
+#include <kernel/eventkcal.h>
+#include <errhndkcal.h>
+
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
@@ -48,26 +59,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/errno.h>
 #include <linux/version.h>
 #include <linux/mm.h>
-#include <asm/page.h>
 #include <asm/uaccess.h>
 #include <asm/page.h>
 #include <asm/atomic.h>
 
-#include <oplk/oplk.h>
-#include <common/oplkinc.h>
-#include <common/driver.h>
-
-#include <common/ctrl.h>
-#include <common/ctrlcal-mem.h>
-#include <kernel/ctrlk.h>
-#include <kernel/ctrlkcal.h>
-#include <kernel/dllkcal.h>
-#include <kernel/pdokcal.h>
-#include <kernel/timesynckcal.h>
-
-#include <kernel/eventk.h>
-#include <kernel/eventkcal.h>
-#include <errhndkcal.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -81,24 +76,21 @@ MODULE_AUTHOR("josef.baumgartner@br-automation.com");
 MODULE_DESCRIPTION("openPOWERLINK driver");
 
 // VM_RESERVED is removed in kernels > 3.7
-#ifndef VM_RESERVED
-#define VM_RESERVED   (VM_DONTEXPAND | VM_DONTDUMP)
+#if !defined(VM_RESERVED)
+#define VM_RESERVED     (VM_DONTEXPAND | VM_DONTDUMP)
 #endif
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-
-int                     plkMajor_g = 0;
-int                     plkMinor_g = 0;
-int                     plkNrDevs_g = 1;
-dev_t                   plkDev_g;
-struct class*           plkClass_g;
-struct cdev             plkCdev_g;
-struct timer_list       heartbeatTimer_g;
-tEvent                  event_g;
-BOOL                    fEvent_g;
-atomic_t                openCount_g;
+int                 plkMajor_g = 0;
+int                 plkMinor_g = 0;
+int                 plkNrDevs_g = 1;
+dev_t               plkDev_g;
+struct class*       plkClass_g;
+struct cdev         plkCdev_g;
+struct timer_list   heartbeatTimer_g;
+atomic_t            openCount_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -123,71 +115,80 @@ atomic_t                openCount_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static int  __init  powerlinkInit(void);
+static int __init   powerlinkInit(void);
 static void __exit  powerlinkExit(void);
 
-static int      powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p);
-static int      powerlinkRelease(struct inode* pDeviceFile_p, struct file* pInstance_p);
-static ssize_t  powerlinkRead(struct file* pInstance_p, char* pDstBuff_p, size_t BuffSize_p, loff_t* pFileOffs_p);
-static ssize_t  powerlinkWrite(struct file* pInstance_p, const char* pSrcBuff_p, size_t BuffSize_p, loff_t* pFileOffs_p);
+static int          powerlinkOpen(struct inode* pInode_p,
+                                  struct file* pFile_p);
+static int          powerlinkRelease(struct inode* pInode_p,
+                                     struct file* pFile_p);
+static ssize_t      powerlinkRead(struct file* pFile_p,
+                                  char __user* pDstBuff_p,
+                                  size_t buffSize_p,
+                                  loff_t* pFileOffs_p);
+static ssize_t      powerlinkWrite(struct file* pFile_p,
+                                   const char __user* pSrcBuff_p,
+                                   size_t buffSize_p,
+                                   loff_t* pFileOffs_p);
 #ifdef HAVE_UNLOCKED_IOCTL
-static  long    powerlinkIoctl(struct file* filp, unsigned int cmd, unsigned long arg);
+static long         powerlinkIoctl(struct file* pFile_p,
+                                   unsigned int cmd_p,
+                                   unsigned long arg_p);
 #else
-static int      powerlinkIoctl(struct inode* dev, struct file* filp, unsigned int cmd, unsigned long arg);
+static int          powerlinkIoctl(struct inode* pInode_p,
+                                   struct file* pFile_p,
+                                   unsigned int cmd_p,
+                                   unsigned long arg_p);
 #endif
+static int          powerlinkMmap(struct file* pFile_p,
+                                  struct vm_area_struct* pVmArea_p);
 
-static int      powerlinkMmap(struct file* filp, struct vm_area_struct* vma);
-static void     powerlinkVmaOpen(struct vm_area_struct* vma);
-static void     powerlinkVmaClose(struct vm_area_struct* vma);
+static void         powerlinkVmaOpen(struct vm_area_struct* pVmArea_p);
+static void         powerlinkVmaClose(struct vm_area_struct* pVmArea_p);
 
-static int      executeCmd(unsigned long arg);
-static int      readInitParam(unsigned long arg);
-static int      storeInitParam(unsigned long arg);
-static int      getStatus(unsigned long arg);
-static int      getHeartbeat(unsigned long arg);
-static int      sendAsyncFrame(unsigned long arg);
-static int      writeErrorObject(unsigned long arg);
-static int      readErrorObject(unsigned long arg);
+static int          executeCmd(unsigned long arg_p);
+static int          readInitParam(unsigned long arg_p);
+static int          storeInitParam(unsigned long arg_p);
+static int          getStatus(unsigned long arg_p);
+static int          getHeartbeat(unsigned long arg_p);
+static int          sendAsyncFrame(unsigned long arg_p);
+static int          writeErrorObject(unsigned long arg_p);
+static int          readErrorObject(unsigned long arg_p);
 
-static void     increaseHeartbeatCb(ULONG data_p);
-static void     startHeartbeatTimer(ULONG timeInMs_p);
-static void     stopHeartbeatTimer(void);
+static void         increaseHeartbeatCb(ULONG data_p);
+static void         startHeartbeatTimer(ULONG timeInMs_p);
+static void         stopHeartbeatTimer(void);
 
 //------------------------------------------------------------------------------
 //  Kernel module specific data structures
 //------------------------------------------------------------------------------
-module_init(powerlinkInit);
-module_exit(powerlinkExit);
+module_init(powerlinkInit);             // Define kernel module init function
+module_exit(powerlinkExit);             // Define kernel module exit function
 
-static struct file_operations  powerlinkFileOps_g =
+static struct file_operations   powerlinkFileOps_l =
 {
-    .owner =     THIS_MODULE,
-    .open =      powerlinkOpen,
-    .release =   powerlinkRelease,
-    .read =      powerlinkRead,
-    .write =     powerlinkWrite,
-#ifdef HAVE_UNLOCKED_IOCTL
+    .owner          = THIS_MODULE,
+    .open           = powerlinkOpen,
+    .release        = powerlinkRelease,
+    .read           = powerlinkRead,
+    .write          = powerlinkWrite,
+#if defined(HAVE_UNLOCKED_IOCTL)
     .unlocked_ioctl = powerlinkIoctl,
 #else
-    .ioctl =     powerlinkIoctl,
+    .ioctl          = powerlinkIoctl,
 #endif
-    .mmap =      powerlinkMmap,
+    .mmap           = powerlinkMmap,
 };
 
-static struct vm_operations_struct powerlinkVmOps =
+static struct vm_operations_struct  powerlinkVmOps_l =
 {
-        .open = powerlinkVmaOpen,
-        .close = powerlinkVmaClose,
+    .open  = powerlinkVmaOpen,
+    .close = powerlinkVmaClose,
 };
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
-
-//---------------------------------------------------------------------------
-//  Initailize driver
-//---------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 /**
@@ -195,28 +196,38 @@ static struct vm_operations_struct powerlinkVmOps =
 
 The function implements openPOWERLINK kernel module initialization function.
 
+\return Returns an exit code
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
 static int __init powerlinkInit(void)
 {
-    int  err;
+    int err;
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkInit()  Driver build: %s / %s\n", __DATE__, __TIME__);
-    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkInit()  Stack version: %s\n", PLK_DEFINED_STRING_VERSION);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: %s()  Driver build: %s / %s\n",
+                           __func__,
+                           __DATE__,
+                           __TIME__);
+    DEBUG_LVL_ALWAYS_TRACE("PLK: %s()  Stack version: %s\n",
+                           __func__,
+                           PLK_DEFINED_STRING_VERSION);
+
     plkDev_g = 0;
     atomic_set(&openCount_g, 0);
 
-    if ((err = alloc_chrdev_region(&plkDev_g, plkMinor_g, plkNrDevs_g, PLK_DRV_NAME)) < 0)
+    err = alloc_chrdev_region(&plkDev_g, plkMinor_g, plkNrDevs_g, PLK_DRV_NAME);
+    if (err < 0)
     {
-        DEBUG_LVL_ERROR_TRACE ("PLK: Failing allocating major number\n");
+        DEBUG_LVL_ERROR_TRACE("PLK: Allocating major number failed.\n");
         return err;
     }
 
     plkMajor_g = MAJOR(plkDev_g);
-    TRACE("Allocated major number: %d\n", plkMajor_g);
+    DEBUG_LVL_ALWAYS_TRACE("Allocated major number: %d\n", plkMajor_g);
 
-    if ((plkClass_g = class_create(THIS_MODULE, PLK_DRV_NAME)) == NULL)
+    plkClass_g = class_create(THIS_MODULE, PLK_DRV_NAME);
+    if (plkClass_g == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("class_create() failed!\n");
         unregister_chrdev_region(plkDev_g, plkNrDevs_g);
@@ -231,8 +242,9 @@ static int __init powerlinkInit(void)
         return -1;
     }
 
-    cdev_init(&plkCdev_g, &powerlinkFileOps_g);
-    if ((err = cdev_add(&plkCdev_g, plkDev_g, 1)) == -1)
+    cdev_init(&plkCdev_g, &powerlinkFileOps_l);
+    err = cdev_add(&plkCdev_g, plkDev_g, 1);
+    if (err == -1)
     {
         DEBUG_LVL_ERROR_TRACE("cdev_add() failed!\n");
         device_destroy(plkClass_g, plkDev_g);
@@ -255,7 +267,7 @@ The function implements openPOWERLINK kernel module exit function.
 //------------------------------------------------------------------------------
 static void __exit powerlinkExit(void)
 {
-    DEBUG_LVL_ALWAYS_TRACE("PLK: powerlinkExit...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: %s()...\n", __func__);
 
     cdev_del(&plkCdev_g);
     device_destroy(plkClass_g, plkDev_g);
@@ -271,12 +283,24 @@ static void __exit powerlinkExit(void)
 
 The function implements openPOWERLINK kernel module open function.
 
+\param[in,out]  pInode_p            Pointer to inode data structure.
+\param[in,out]  pFile_p             Pointer to the device file object.
+
+\return The function returns an integer value.
+\retval 0                           Successful.
+\retval -ENOTTY                     One instance of the driver is already active.
+\retval -EIO                        Unable to initialize the driver.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
+static int powerlinkOpen(struct inode* pInode_p,
+                         struct file* pFile_p)
 {
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkOpen...\n");
+    UNUSED_PARAMETER(pInode_p);
+    UNUSED_PARAMETER(pFile_p);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
 
     if (atomic_inc_return(&openCount_g) > 1)
     {
@@ -294,7 +318,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     startHeartbeatTimer(20);
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkOpen - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() - OK\n", __func__);
 
     return 0;
 }
@@ -305,17 +329,29 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
 The function implements openPOWERLINK kernel module close function.
 
+\param[in,out]  pInode_p            Pointer to the inode data structure.
+\param[in,out]  pFile_p             Pointer to the device file object.
+
+\return The function returns an integer value.
+\retval 0                           Successful.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int  powerlinkRelease (struct inode* pDeviceFile_p, struct file* pInstance_p)
+static int powerlinkRelease(struct inode* pInode_p,
+                            struct file* pFile_p)
 {
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRelease...\n");
+    UNUSED_PARAMETER(pInode_p);
+    UNUSED_PARAMETER(pFile_p);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
 
     stopHeartbeatTimer();
     ctrlk_exit();
     atomic_dec(&openCount_g);
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRelease - OK\n");
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() - OK\n", __func__);
+
     return 0;
 }
 
@@ -325,22 +361,37 @@ static int  powerlinkRelease (struct inode* pDeviceFile_p, struct file* pInstanc
 
 The function implements openPOWERLINK kernel module read function.
 
+\param[in,out]  pFile_p             Pointer to the device file object.
+\param[out]     pDstBuff_p          Pointer to the destination buffer, to copy the read data.
+\param[in]      buffSize_p          Size of the destination buffer.
+\param[in,out]  pFileOffs_p         Pointer to the long offset in the file.
+
+\return Returns the amount of data that has been read.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static ssize_t powerlinkRead(struct file* pInstance_p, char* pDstBuff_p,
-                             size_t BuffSize_p, loff_t* pFileOffs_p)
+static ssize_t powerlinkRead(struct file* pFile_p,
+                             char __user* pDstBuff_p,
+                             size_t buffSize_p,
+                             loff_t* pFileOffs_p)
 {
-    int  ret;
+    int ret;
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkRead...\n");
+    UNUSED_PARAMETER(pFile_p);
+    UNUSED_PARAMETER(pDstBuff_p);
+    UNUSED_PARAMETER(buffSize_p);
+    UNUSED_PARAMETER(pFileOffs_p);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
     DEBUG_LVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
+
     ret = -EINVAL;
-    DEBUG_LVL_ALWAYS_TRACE("PLK: - powerlinkRead (iRet=%d)\n", ret);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: - %s() (ret=%d)\n", __func__, ret);
+
     return ret;
-
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -348,18 +399,36 @@ static ssize_t powerlinkRead(struct file* pInstance_p, char* pDstBuff_p,
 
 The function implements openPOWERLINK kernel module write function.
 
+\param[in,out]  pFile_p             Pointer to the device file object.
+\param[in]      pSrcBuff_p          Pointer to the source buffer, to copy the data to
+                                    be written.
+\param[in]      buffSize_p          Size of the data to be written.
+\param[in,out]  pFileOffs_p         Pointer to the long offset in the file.
+
+\return Returns the amount of data that has been written.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static ssize_t powerlinkWrite(struct file* pInstance_p, const char* pSrcBuff_p,
-                              size_t BuffSize_p, loff_t* pFileOffs_p)
+static ssize_t powerlinkWrite(struct file* pFile_p,
+                              const char __user* pSrcBuff_p,
+                              size_t buffSize_p,
+                              loff_t* pFileOffs_p)
 {
-    int  ret;
+    int ret;
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkWrite...\n");
+    UNUSED_PARAMETER(pFile_p);
+    UNUSED_PARAMETER(pSrcBuff_p);
+    UNUSED_PARAMETER(buffSize_p);
+    UNUSED_PARAMETER(pFileOffs_p);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
     DEBUG_LVL_ALWAYS_TRACE("PLK:   Sorry, this operation isn't supported.\n");
+
     ret = -EINVAL;
-    DEBUG_LVL_ALWAYS_TRACE("PLK: - powerlinkWrite (iRet=%d)\n", ret);
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: - %s() (iRet=%d)\n", __func__, ret);
+
     return ret;
 }
 
@@ -369,83 +438,103 @@ static ssize_t powerlinkWrite(struct file* pInstance_p, const char* pSrcBuff_p,
 
 The function implements openPOWERLINK kernel module ioctl function.
 
+\param[in,out]  pInode_p            Pointer to the inode data structure.
+\param[in,out]  pFile_p             Pointer to the device file object.
+\param[in]      cmd_p               Type of the ioctl operation.
+\param[in]      arg_p               Argument address for the ioctl operation.
+
+\return The function returns an integer value.
+\retval 0                           The ioctl operation was successful.
+\retval < 0                         The ioctl operation generated error.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-#ifdef HAVE_UNLOCKED_IOCTL
-static long powerlinkIoctl(struct file* filp, unsigned int cmd,
-                           unsigned long arg)
+#if defined(HAVE_UNLOCKED_IOCTL)
+static long powerlinkIoctl(struct file* pFile_p,
+                           unsigned int cmd_p,
+                           unsigned long arg_p)
 #else
-static int  powerlinkIoctl(struct inode* dev, struct file* filp,
-                           unsigned int cmd, unsigned long arg)
+static int  powerlinkIoctl(struct inode* pInode_p,
+                           struct file* pFile_p,
+                           unsigned int cmd_p,
+                           unsigned long arg_p)
 #endif
 {
-    int             ret;
-    tOplkError      oplRet;
+    int         ret = -EINVAL;
+    tOplkError  oplRet;
 
-    //DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkIoctl (cmd=%d type=%d)...\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
-    ret = -EINVAL;
+#if !defined(HAVE_UNLOCKED_IOCTL)
+    UNUSED_PARAMETER(pInode_p);
+#endif
+    UNUSED_PARAMETER(pFile_p);
+
+
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() (cmd=%d type=%d)...\n",
+                           __func__,
+                           _IOC_NR(cmd_p),
+                           _IOC_TYPE(cmd_p));
 
     // Add some checks for valid commands here
-
-    switch (cmd)
+    switch (cmd_p)
     {
         case PLK_CMD_CTRL_EXECUTE_CMD:
-            ret = executeCmd(arg);
+            ret = executeCmd(arg_p);
             break;
 
         case PLK_CMD_CTRL_STORE_INITPARAM:
-            ret = storeInitParam(arg);
+            ret = storeInitParam(arg_p);
             break;
 
         case PLK_CMD_CTRL_READ_INITPARAM:
-            ret = readInitParam(arg);
+            ret = readInitParam(arg_p);
             break;
 
         case PLK_CMD_CTRL_GET_STATUS:
-            ret = getStatus(arg);
+            ret = getStatus(arg_p);
             break;
 
         case PLK_CMD_CTRL_GET_HEARTBEAT:
-            ret = getHeartbeat(arg);
+            ret = getHeartbeat(arg_p);
             break;
 
         case PLK_CMD_POST_EVENT:
-            ret = eventkcal_postEventFromUser(arg);
+            ret = eventkcal_postEventFromUser(arg_p);
             break;
 
         case PLK_CMD_GET_EVENT:
-            ret = eventkcal_getEventForUser(arg);
+            ret = eventkcal_getEventForUser(arg_p);
             break;
 
         case PLK_CMD_DLLCAL_ASYNCSEND:
-            ret = sendAsyncFrame(arg);
+            ret = sendAsyncFrame(arg_p);
             break;
 
         case PLK_CMD_ERRHND_WRITE:
-            ret = writeErrorObject(arg);
+            ret = writeErrorObject(arg_p);
             break;
 
         case PLK_CMD_ERRHND_READ:
-            ret = readErrorObject(arg);
+            ret = readErrorObject(arg_p);
             break;
 
         case PLK_CMD_TIMESYNC_SYNC:
-            if ((oplRet = timesynckcal_waitSyncEvent()) == kErrorRetry)
+            oplRet = timesynckcal_waitSyncEvent();
+            if (oplRet == kErrorRetry)
                 ret = -ERESTARTSYS;
             else
                 ret = 0;
             break;
 
         default:
-            DEBUG_LVL_ERROR_TRACE("PLK: - Invalid cmd (cmd=%d type=%d)\n", _IOC_NR(cmd), _IOC_TYPE(cmd));
+            DEBUG_LVL_ERROR_TRACE("PLK: - Invalid command (cmd=%d type=%d)\n",
+                                  _IOC_NR(cmd_p),
+                                  _IOC_TYPE(cmd_p));
             ret = -ENOTTY;
             break;
     }
 
-    //TRACE("PLK: - powerlinkIoctl (cmd=%d type=%d)..(ret=%d)\n", _IOC_NR(cmd), _IOC_TYPE(cmd), ret);
     return ret;
-
 }
 
 //------------------------------------------------------------------------------
@@ -454,68 +543,92 @@ static int  powerlinkIoctl(struct inode* dev, struct file* filp,
 
 The function implements openPOWERLINK kernel module mmap function.
 
+\param[in,out]  pFile_p             Pointer to the device file object.
+\param[in,out]  pVmArea_p           Pointer to the virtual memory object of user.
+
+\return The function returns an integer value.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
+static int powerlinkMmap(struct file* pFile_p,
+                         struct vm_area_struct* pVmArea_p)
 {
     BYTE*       pPdoMem;
     tOplkError  ret = kErrorOk;
 
-    DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
-                           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
+    UNUSED_PARAMETER(pFile_p);
 
-    vma->vm_flags |= VM_RESERVED;
-    vma->vm_ops = &powerlinkVmOps;
+    DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
+                           __func__,
+                           pVmArea_p->vm_start,
+                           pVmArea_p->vm_end,
+                           pVmArea_p->vm_pgoff);
+
+    pVmArea_p->vm_flags |= VM_RESERVED;
+    pVmArea_p->vm_ops = &powerlinkVmOps_l;
 
     ret = pdokcal_getPdoMemRegion(&pPdoMem, NULL);
 
-    if (ret != kErrorOk || pPdoMem == NULL)
+    if ((ret != kErrorOk) || (pPdoMem == NULL))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() no pdo memory allocated!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() no PDO memory allocated!\n", __func__);
         return -ENOMEM;
     }
 
-    if (remap_pfn_range(vma, vma->vm_start, (__pa(pPdoMem) >> PAGE_SHIFT),
-                        vma->vm_end - vma->vm_start, vma->vm_page_prot))
+    if (remap_pfn_range(pVmArea_p,
+                        pVmArea_p->vm_start,
+                        (__pa(pPdoMem) >> PAGE_SHIFT),
+                        pVmArea_p->vm_end - pVmArea_p->vm_start,
+                        pVmArea_p->vm_page_prot))
     {
         DEBUG_LVL_ERROR_TRACE("%s() remap_pfn_range failed\n", __func__);
         return -EAGAIN;
     }
 
-    powerlinkVmaOpen(vma);
-    return 0;
+    powerlinkVmaOpen(pVmArea_p);
 
+    return 0;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  openPOWERLINK driver VMA open functionnet
+\brief  openPOWERLINK driver VMA open function
 
 The function implements openPOWERLINK kernel module VMA open function.
+
+\param[in,out]  pVmArea_p           Pointer to the virtual memory object of user.
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static void powerlinkVmaOpen(struct vm_area_struct* vma)
+static void powerlinkVmaOpen(struct vm_area_struct* pVmArea_p)
 {
     DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
-                           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
+                           __func__,
+                           pVmArea_p->vm_start,
+                           pVmArea_p->vm_end,
+                           pVmArea_p->vm_pgoff);
 }
 
 //------------------------------------------------------------------------------
-/**TRACE
+/**
 \brief  openPOWERLINK driver VMA close function
 
 The function implements openPOWERLINK kernel module VMA close function.
 
+\param[in,out]  pVmArea_p           Pointer to the virtual memory object of user.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static void powerlinkVmaClose(struct vm_area_struct* vma)
+static void powerlinkVmaClose(struct vm_area_struct* pVmArea_p)
 {
     DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
-                           __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
+                           __func__,
+                           pVmArea_p->vm_start,
+                           pVmArea_p->vm_end,
+                           pVmArea_p->vm_pgoff);
 }
 
 //============================================================================//
@@ -529,18 +642,22 @@ static void powerlinkVmaClose(struct vm_area_struct* vma)
 \brief  Execute control command ioctl
 
 The function implements the calling of the executeCmd function in the control
-module using the ioctl interface..
+module using the ioctl interface.
+
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int executeCmd(unsigned long arg)
+static int executeCmd(unsigned long arg_p)
 {
     tCtrlCmd            ctrlCmd;
     UINT16              ret;
     tCtrlKernelStatus   status;
 
-    if (copy_from_user(&ctrlCmd, (const void __user *)arg, sizeof(tCtrlCmd)))
+    if (copy_from_user(&ctrlCmd, (const void __user*)arg_p, sizeof(tCtrlCmd)))
         return -EFAULT;
 
     ctrlk_executeCmd(ctrlCmd.cmd, &ret, &status, NULL);
@@ -548,7 +665,7 @@ static int executeCmd(unsigned long arg)
     ctrlCmd.retVal = ret;
     ctrlkcal_setStatus(status);
 
-    if (copy_to_user((void __user *)arg, &ctrlCmd, sizeof(tCtrlCmd)))
+    if (copy_to_user((void __user*)arg_p, &ctrlCmd, sizeof(tCtrlCmd)))
         return -EFAULT;
 
     return 0;
@@ -561,14 +678,18 @@ static int executeCmd(unsigned long arg)
 The function implements the calling of the storeInitParam function in the
 control module using the ioctl interface..
 
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int storeInitParam(unsigned long arg)
+static int storeInitParam(unsigned long arg_p)
 {
-    tCtrlInitParam      initParam;
+    tCtrlInitParam  initParam;
 
-    if (copy_from_user(&initParam, (const void __user *)arg, sizeof(tCtrlInitParam)))
+    if (copy_from_user(&initParam, (const void __user*)arg_p, sizeof(tCtrlInitParam)))
         return -EFAULT;
 
     ctrlkcal_storeInitParam(&initParam);
@@ -581,17 +702,21 @@ static int storeInitParam(unsigned long arg)
 \brief  Read init param ioctl
 
 The function implements the calling of the readInitParam function in the control
-module using the ioctl interface..
+module using the ioctl interface.
+
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int readInitParam(unsigned long arg)
+static int readInitParam(unsigned long arg_p)
 {
-    tCtrlInitParam      initParam;
+    tCtrlInitParam  initParam;
 
     ctrlkcal_readInitParam(&initParam);
-    if (copy_to_user((void __user *)arg, &initParam, sizeof(tCtrlInitParam)))
+    if (copy_to_user((void __user*)arg_p, &initParam, sizeof(tCtrlInitParam)))
         return -EFAULT;
 
     return 0;
@@ -602,17 +727,22 @@ static int readInitParam(unsigned long arg)
 \brief  Get status ioctl
 
 The function implements the calling of the getStatus function in the control
-module using the ioctl interface..
+module using the ioctl interface.
+
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int getStatus(unsigned long arg)
+static int getStatus(unsigned long arg_p)
 {
-    UINT16      status;
+    UINT16  status;
 
     status = ctrlkcal_getStatus();
-    put_user(status, (unsigned short __user *)arg);
+    put_user(status, (unsigned short __user*)arg_p);
+
     return 0;
 }
 
@@ -623,15 +753,20 @@ static int getStatus(unsigned long arg)
 The function implements the calling of the getHeartbeat function in the control
 module using the ioctl interface.
 
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int getHeartbeat(unsigned long arg)
+static int getHeartbeat(unsigned long arg_p)
 {
-    UINT16      heartbeat;
+    UINT16  heartbeat;
 
     heartbeat = ctrlk_getHeartbeat();
-    put_user(heartbeat, (unsigned short __user *)arg);
+    put_user(heartbeat, (unsigned short __user*)arg_p);
+
     return 0;
 }
 
@@ -641,10 +776,14 @@ static int getHeartbeat(unsigned long arg)
 
 The function implements the ioctl used for sending asynchronous frames.
 
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int sendAsyncFrame(unsigned long arg)
+static int sendAsyncFrame(unsigned long arg_p)
 {
     BYTE*               pBuf;
     tIoctlDllCalAsync   asyncFrameInfo;
@@ -654,19 +793,19 @@ static int sendAsyncFrame(unsigned long arg)
     order = get_order(C_DLL_MAX_ASYNC_MTU);
     pBuf = (BYTE*)__get_free_pages(GFP_KERNEL, order);
 
-    if (copy_from_user(&asyncFrameInfo, (const void __user *)arg, sizeof(tIoctlDllCalAsync)))
+    if (copy_from_user(&asyncFrameInfo, (const void __user*)arg_p, sizeof(tIoctlDllCalAsync)))
     {
         free_pages((ULONG)pBuf, order);
         return -EFAULT;
     }
 
-    if (copy_from_user(pBuf, (const void __user *)asyncFrameInfo.pData, asyncFrameInfo.size))
+    if (copy_from_user(pBuf, (const void __user*)asyncFrameInfo.pData, asyncFrameInfo.size))
     {
         free_pages((ULONG)pBuf, order);
         return -EFAULT;
     }
 
-    //TRACE("%s() Received frame size:%d\n", __func__, asyncFrame.size);
+    DEBUG_LVL_ALWAYS_TRACE("%s() Received frame size:%d\n", __func__, asyncFrameInfo.size);
     frameInfo.frame.pBuffer = (tPlkFrame*)pBuf;
     frameInfo.frameSize = asyncFrameInfo.size;
 
@@ -683,15 +822,19 @@ static int sendAsyncFrame(unsigned long arg)
 
 The function implements the ioctl for writing an error object.
 
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int writeErrorObject(unsigned long arg)
+static int writeErrorObject(unsigned long arg_p)
 {
     tErrHndIoctl    writeObject;
     tErrHndObjects* errorObjects;
 
-    if (copy_from_user(&writeObject, (const void __user *)arg, sizeof(tErrHndIoctl)))
+    if (copy_from_user(&writeObject, (const void __user*)arg_p, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
     errorObjects = errhndkcal_getMemPtr();
@@ -706,21 +849,25 @@ static int writeErrorObject(unsigned long arg)
 
 The function implements the ioctl for reading error objects
 
+\param[in]      arg_p               Arguments given along with the ioctl command.
+
+\return Returns an error code.
+
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static int readErrorObject(unsigned long arg)
+static int readErrorObject(unsigned long arg_p)
 {
     tErrHndIoctl    readObject;
     tErrHndObjects* errorObjects;
 
-    if (copy_from_user(&readObject, (const void __user *)arg, sizeof(tErrHndIoctl)))
+    if (copy_from_user(&readObject, (const void __user*)arg_p, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
     errorObjects = errhndkcal_getMemPtr();
     readObject.errVal = *((char*)errorObjects + readObject.offset);
 
-    if (copy_to_user((void __user *)arg, &readObject, sizeof(tErrHndIoctl)))
+    if (copy_to_user((void __user*)arg_p, &readObject, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
     return 0;
@@ -732,7 +879,7 @@ static int readErrorObject(unsigned long arg)
 
 The function starts the timer used for updating the heartbeat counter.
 
-\param  timeInMs_p          Timeout value in milliseconds
+\param[in]      timeInMs_p          Timeout value in milliseconds
 
 \ingroup module_driver_linux_kernel
 */
@@ -766,7 +913,7 @@ void stopHeartbeatTimer(void)
 The function implements the timer callback function used to increase the
 heartbeat counter.
 
-\param  data_p          Not used, need for timer interface
+\param[in]      data_p              Not used, need for timer interface
 
 \ingroup module_driver_linux_kernel
 */
@@ -774,8 +921,9 @@ heartbeat counter.
 void increaseHeartbeatCb(ULONG data_p)
 {
     UNUSED_PARAMETER(data_p);
+
     ctrlk_updateHeartbeat();
     startHeartbeatTimer(20);
 }
 
-///\}
+/// \}

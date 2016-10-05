@@ -2,16 +2,16 @@
 ********************************************************************************
 \file   daemon.c
 
-\brief  POWERLINK FPGA Master daemon for Pcp (kernel part)
+\brief  POWERLINK FPGA Master daemon for PCP (kernel part)
 
-This is the daemon for the Pcp (kernel part) of the Xilinx Microblaze POWERLINK
+This is the daemon for the PCP (kernel part) of the Xilinx Microblaze POWERLINK
 master demo application.
 
 \ingroup module_daemon
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited.
 All rights reserved.
 
@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <unistd.h>
 #include <mb_interface.h>
 
@@ -94,7 +93,7 @@ static void         backgroundProcess(void);
 
 //------------------------------------------------------------------------------
 /**
-\brief    main function
+\brief    Main function
 
 Calls the POWERLINK initialization and background task
 
@@ -103,14 +102,14 @@ Calls the POWERLINK initialization and background task
 \ingroup module_daemon
 */
 //------------------------------------------------------------------------------
-INT main(void)
+int main(void)
 {
-    tOplkError    ret;
+    tOplkError  ret;
 
     ret = target_init();
     if (kErrorOk != ret)
     {
-        PRINTF("Target Initialization Failed\n\n");
+        PRINTF("Target initialization failed\n\n");
         return -1;
     }
 
@@ -121,21 +120,22 @@ INT main(void)
         ret = initPowerlink();
 
         PRINTF("Initialization returned with \"%s\" (0x%X)\n",
-               debugstr_getRetValStr(ret), ret);
+               debugstr_getRetValStr(ret),
+               ret);
 
         if (ret != kErrorOk)
             return -1;
 
         backgroundProcess();
 
-        PRINTF("Background loop stopped.\nShutdown Kernel Stack\n");
+        PRINTF("Background loop stopped.\nShutdown kernel stack.\n");
 
         shutdownPowerlink();
 
         usleep(1000000U);
     }
 
-    PRINTF("halt terminal\n%c", 4);
+    PRINTF("Halt terminal\n%c", 4);
 
     return 0;
 }
@@ -155,13 +155,13 @@ This function initializes the communication stack and configures objects.
 //------------------------------------------------------------------------------
 static tOplkError initPowerlink(void)
 {
-    tOplkError    ret;
+    tOplkError  ret;
 
     ret = ctrlk_init(NULL);
 
     if (ret != kErrorOk)
     {
-        PRINTF("Could not initialize control module\n");
+        PRINTF("Could not initialize control module.\n");
         goto Exit;
     }
 

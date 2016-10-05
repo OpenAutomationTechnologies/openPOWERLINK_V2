@@ -10,7 +10,7 @@ which runs in Linux userspace.
 \ingroup    module_driver_linux
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -41,6 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/target.h>
+#include <kernel/ctrlk.h>
+
+#include <console/console.h>
+
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -48,11 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <sched.h>
 
-#include <oplk/oplkinc.h>
-#include <common/oplkinc.h>
-#include <kernel/ctrlk.h>
-#include <console/console.h>
-#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -88,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static char* pLogFile_g = NULL;
+static char* pLogFile_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -105,51 +105,54 @@ static char* pLogFile_g = NULL;
 This is the main function of the openPOWERLINK Linux kernel stack daemon
 running in Linux userspace.
 
-\param  argc                    Number of arguments
-\param  argv                    Pointer to argument strings
+\param[in]      argc                Number of arguments
+\param[in]      argv                Pointer to argument strings
 
 \return Returns an exit code
 
 \ingroup module_driver_linux
 */
 //------------------------------------------------------------------------------
-int  main (int argc, char** argv)
+int main(int argc, char* argv[])
 {
-    tOplkError                  ret = kErrorOk;
-    char                        cKey = 0;
-    BOOL                        fExit;
-
-    struct sched_param          schedParam;
-    int                         opt;
+    tOplkError          ret = kErrorOk;
+    char                cKey = 0;
+    BOOL                fExit;
+    struct sched_param  schedParam;
+    int                 opt;
 
     /* get command line parameters */
     while ((opt = getopt(argc, argv, "l:")) != -1)
     {
         switch (opt)
         {
-        case 'l':
-            pLogFile_g = optarg;
-            break;
+            case 'l':
+                pLogFile_l = optarg;
+                break;
 
-        default: /* '?' */
-            fprintf(stderr, "Usage: %s [-l LOGFILE]\n", argv[0]);
-            goto Exit;
+            default: /* '?' */
+                fprintf(stderr, "Usage: %s [-l LOGFILE]\n", argv[0]);
+                goto Exit;
         }
     }
 
     /* adjust process priority */
     if (nice(-20) == -1)          // push nice level in case we have no RTPreempt
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n",
+                              __func__,
+                              strerror(errno));
     }
+
     schedParam.sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+                              __func__,
+                              schedParam.sched_priority);
     }
 
-#ifdef SET_CPU_AFFINITY
+#if defined(SET_CPU_AFFINITY)
     {
         /* binds all openPOWERLINK threads to the first CPU core */
         cpu_set_t   affinity;
@@ -163,10 +166,10 @@ int  main (int argc, char** argv)
     /* Initialize target specific stuff */
     target_init();
 
-    PRINTF("----------------------------------------------------\n");
-    PRINTF("openPOWERLINK kernel stack daemon\n");
-    PRINTF("using openPOWERLINK Stack: %s\n", PLK_DEFINED_STRING_VERSION);
-    PRINTF("----------------------------------------------------\n");
+    printf("----------------------------------------------------\n");
+    printf("openPOWERLINK kernel stack daemon\n");
+    printf("Using openPOWERLINK stack: %s\n", PLK_DEFINED_STRING_VERSION);
+    printf("----------------------------------------------------\n");
 
     ret = ctrlk_init(NULL);
     if (ret != kErrorOk)
@@ -176,7 +179,7 @@ int  main (int argc, char** argv)
     }
 
     // initialize POWERLINK stack
-    PRINTF("Running...\n");
+    printf("Running...\n");
 
     fExit = FALSE;
     while (!fExit)
@@ -184,7 +187,7 @@ int  main (int argc, char** argv)
         target_msleep(1);
         if (console_kbhit())
         {
-            cKey = (BYTE)console_getch();
+            cKey = (char)console_getch();
             if (cKey == 0x1B)
                 fExit = TRUE;
         }
@@ -199,6 +202,6 @@ int  main (int argc, char** argv)
     ctrlk_exit();
 
 Exit:
-    PRINTF("Exiting\n");
+    printf("Exiting\n");
     return ret;
 }

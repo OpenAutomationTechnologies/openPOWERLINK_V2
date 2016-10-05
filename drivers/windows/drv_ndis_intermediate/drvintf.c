@@ -13,6 +13,7 @@ suitable structure before forwarding to a specific kernel stack module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,21 +42,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include "drvintf.h"
 
-#include <common/driver.h>
-#include <common/ctrl.h>
-#include <common/ctrlcal-mem.h>
 #include <kernel/ctrlk.h>
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
-
-#include <kernel/eventk.h>
-#include <kernel/eventkcal.h>
 #include <errhndkcal.h>
-
-#include <drvintf.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -93,16 +86,16 @@ kernel space.
 */
 typedef struct
 {
-    PMDL      pMdl;                 ///< Pointer to memory descriptor list describing the memory.
-    size_t    memSize;              ///< Size of the memory.
-    void*     pKernelVa;            ///< Pointer to memory in kernel space.
-    void*     pUserVa;              ///< Pointer to memory mapped in user space.
+    PMDL        pMdl;               ///< Pointer to memory descriptor list describing the memory.
+    size_t      memSize;            ///< Size of the memory.
+    void*       pKernelVa;          ///< Pointer to memory in kernel space.
+    void*       pUserVa;            ///< Pointer to memory mapped in user space.
 } tMemInfo;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tMemInfo    pdoMemInfo_l;
+static tMemInfo pdoMemInfo_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -127,9 +120,8 @@ tOplkError drv_init(void)
 {
     tOplkError ret = kErrorOk;
 
-    TRACE("Initialize driver interface...");
-
-    TRACE(" OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("Initialize driver interface...");
+    DEBUG_LVL_ALWAYS_TRACE(" OK\n");
 
     return ret;
 }
@@ -146,7 +138,7 @@ the interface.
 //------------------------------------------------------------------------------
 void drv_exit(void)
 {
-    TRACE("Exit driver interface...\n");
+    DEBUG_LVL_ALWAYS_TRACE("Exit driver interface...\n");
 }
 
 //------------------------------------------------------------------------------
@@ -157,7 +149,7 @@ This function parse the control command from user and passes it to the kernel
 control module for processing. The return value is again passed to user by copying it
 into the common control structure.
 
-\param  pCtrlCmd_p       Pointer to control command structure.
+\param[in,out]  pCtrlCmd_p          Pointer to control command structure.
 
 \return Returns tOplkError error code.
 
@@ -166,9 +158,9 @@ into the common control structure.
 //------------------------------------------------------------------------------
 tOplkError drv_executeCmd(tCtrlCmd* pCtrlCmd_p)
 {
-    tOplkError    oplkRet = kErrorOk;
-    UINT16        retVal;
-    UINT16        status;
+    tOplkError  oplkRet = kErrorOk;
+    UINT16      retVal;
+    UINT16      status;
 
     if (pCtrlCmd_p == NULL)
         return kErrorInvalidOperation;
@@ -195,7 +187,7 @@ tOplkError drv_executeCmd(tCtrlCmd* pCtrlCmd_p)
 
 Read the initialization parameters from the kernel stack.
 
-\param  pInitParam_p       Pointer to initialization parameters structure.
+\param[out]     pInitParam_p        Pointer to initialization parameters structure.
 
 \ingroup module_driver_ndisim
 */
@@ -214,12 +206,12 @@ tOplkError drv_readInitParam(tCtrlInitParam* pInitParam_p)
 
 Write the initialization parameters from the user layer into kernel memory.
 
-\param  pInitParam_p       Pointer to initialization parameters structure.
+\param[in]      pInitParam_p        Pointer to initialization parameters structure.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
-tOplkError drv_storeInitParam(tCtrlInitParam* pInitParam_p)
+tOplkError drv_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
     if (pInitParam_p == NULL)
         return kErrorInvalidOperation;
@@ -235,7 +227,7 @@ tOplkError drv_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 Return the current status of kernel stack.
 
-\param  pStatus_p       Pointer to status variable to return.
+\param[out]     pStatus_p           Pointer to status variable to return.
 
 \ingroup module_driver_ndisim
 */
@@ -256,7 +248,7 @@ tOplkError drv_getStatus(UINT16* pStatus_p)
 
 Return the current heartbeat value in kernel.
 
-\param  pHeartbeat_p       Pointer to heartbeat variable to return.
+\param[out]     pHeartbeat_p        Pointer to heartbeat variable to return.
 
 \ingroup module_driver_ndisim
 */
@@ -278,12 +270,12 @@ tOplkError drv_getHeartbeat(UINT16* pHeartbeat_p)
 This routines extracts the asynchronous frame from the IOCTL buffer and passes it
 to DLL module for processing.
 
-\param  pArg_p       Pointer to IOCTL buffer.
+\param[in]      pArg_p              Pointer to IOCTL buffer.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
-tOplkError drv_sendAsyncFrame(UINT8* pArg_p)
+tOplkError drv_sendAsyncFrame(const void* pArg_p)
 {
     tIoctlDllCalAsync*    asyncFrameInfo = NULL;
     tFrameInfo            frameInfo;
@@ -305,14 +297,14 @@ tOplkError drv_sendAsyncFrame(UINT8* pArg_p)
 This routines updates the error objects in kernel with the value passed from
 user layer.
 
-\param  pWriteObject_p       Pointer to write-object to update.
+\param[in]      pWriteObject_p      Pointer to write-object to update.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
-tOplkError drv_writeErrorObject(tErrHndIoctl* pWriteObject_p)
+tOplkError drv_writeErrorObject(const tErrHndIoctl* pWriteObject_p)
 {
-    tErrHndObjects*   errorObjects = NULL;
+    tErrHndObjects* errorObjects = NULL;
 
     if (pWriteObject_p == NULL)
         return kErrorInvalidOperation;
@@ -329,14 +321,14 @@ tOplkError drv_writeErrorObject(tErrHndIoctl* pWriteObject_p)
 
 This routines fetches the error objects in kernel to be passed to user layer.
 
-\param  pWriteObject_p       Pointer to pReadObject_p to fetch.
+\param[out]     pWriteObject_p      Pointer to pReadObject_p to fetch.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
 tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p)
 {
-    tErrHndObjects*   errorObjects = NULL;
+    tErrHndObjects* errorObjects = NULL;
 
     if (pReadObject_p == NULL)
         return kErrorInvalidOperation;
@@ -354,37 +346,44 @@ tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p)
 This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
 stack. This allows user stack to access the PDO memory directly.
 
-\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
-\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
-\param  memSize_p               Pointer to size of PDO memory.
+\param[out]     ppKernelMem_p       Double pointer to the shared memory segment in kernel space.
+\param[out]     ppUserMem_p         Double pointer to the shared memory segment in user space.
+\param[out]     memSize_p           Pointer to size of PDO memory.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
-tOplkError drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
+tOplkError drv_mapPdoMem(void** ppKernelMem_p,
+                         void** ppUserMem_p,
                          size_t* pMemSize_p)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
     // Get PDO memory
-    ret = pdokcal_getPdoMemRegion((UINT8**)&pdoMemInfo_l.pKernelVa,
+    ret = pdokcal_getPdoMemRegion(&pdoMemInfo_l.pKernelVa,
                                   &pdoMemInfo_l.memSize);
 
-    if (ret != kErrorOk || pdoMemInfo_l.pKernelVa == NULL)
+    if ((ret != kErrorOk) ||
+        (pdoMemInfo_l.pKernelVa == NULL))
         return kErrorNoResource;
 
     if (*pMemSize_p > pdoMemInfo_l.memSize)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Higher Memory requested (Kernel-%d User-%d) !\n",
-                              __func__, pdoMemInfo_l.memSize, *pMemSize_p);
+        DEBUG_LVL_ERROR_TRACE("%s() Higher memory requested (Kernel-%d User-%d) !\n",
+                              __func__,
+                              pdoMemInfo_l.memSize,
+                              *pMemSize_p);
         *pMemSize_p = 0;
         return kErrorNoResource;
     }
 
     // Allocate new MDL pointing to PDO memory
-    pdoMemInfo_l.pMdl = IoAllocateMdl(pdoMemInfo_l.pKernelVa, pdoMemInfo_l.memSize, FALSE, FALSE,
+    pdoMemInfo_l.pMdl = IoAllocateMdl(pdoMemInfo_l.pKernelVa,
+                                      pdoMemInfo_l.memSize,
+                                      FALSE,
+                                      FALSE,
                                       NULL);
 
     if (pdoMemInfo_l.pMdl == NULL)
@@ -416,9 +415,11 @@ tOplkError drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
     *ppUserMem_p = pdoMemInfo_l.pUserVa;
     *pMemSize_p = pdoMemInfo_l.memSize;
 
-    TRACE("Mapped memory info U:%p K:%p size %x", pdoMemInfo_l.pUserVa,
-                                                 (UINT8*)pdoMemInfo_l.pKernelVa,
-                                                 pdoMemInfo_l.memSize);
+    DEBUG_LVL_ALWAYS_TRACE("Mapped memory info U:%p K:%p size %x",
+                           pdoMemInfo_l.pUserVa,
+                           pdoMemInfo_l.pKernelVa,
+                           pdoMemInfo_l.memSize);
+
     return kErrorOk;
 }
 
@@ -429,16 +430,17 @@ tOplkError drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
 Unmap the PDO memory shared with the user layer. The memory will be freed in
 pdokcal_freeMem().
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-void drv_unMapPdoMem(UINT8* pMem_p, size_t memSize_p)
+void drv_unMapPdoMem(void* pMem_p,
+                     size_t memSize_p)
 {
-    UNUSED_PARAMETER(memSize_p);
     UNUSED_PARAMETER(pMem_p);
+    UNUSED_PARAMETER(memSize_p);
 
     if (pdoMemInfo_l.pMdl == NULL)
     {

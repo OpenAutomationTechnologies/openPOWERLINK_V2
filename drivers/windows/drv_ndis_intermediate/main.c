@@ -12,6 +12,7 @@ the openPOWERLINK kernel stack daemon.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,17 +41,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "drvintf.h"
+
 #include <ndis.h>
 #include <ntddk.h>
 
 #include <oplk/oplk.h>
-#include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
 #include <kernel/timesynckcal.h>
-#include <errhndkcal.h>
 
 #include <ndisintermediate/ndis-im.h>
-#include <drvintf.h>
+
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -59,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define PLK_MEM_TAG       'klpO'
+#define PLK_MEM_TAG         'klpO'
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -87,31 +88,33 @@ The structure specifies the instance variable of the Windows kernel driver
 */
 typedef struct
 {
-    PDEVICE_OBJECT        pDrvDeviceObject;         ///< IOCTL interface device object
-    NDIS_HANDLE           pDrvDeviceHandle;         ///< IOCTL interface device handle
-    NDIS_HANDLE           driverHandle;             ///< Miniport driver handle
-    BOOL                  fInitialized;             ///< Initialization status
-    UINT                  instanceCount;            ///< Number of open instances
+    PDEVICE_OBJECT          pDrvDeviceObject;       ///< IOCTL interface device object
+    NDIS_HANDLE             pDrvDeviceHandle;       ///< IOCTL interface device handle
+    NDIS_HANDLE             driverHandle;           ///< Miniport driver handle
+    BOOL                    fInitialized;           ///< Initialization status
+    UINT                    instanceCount;          ///< Number of open instances
 }tPlkDriverInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tPlkDriverInstance    plkDriverInstance_l;
-static NDIS_HANDLE           heartbeatTimer_l;
+static tPlkDriverInstance   plkDriverInstance_l;
+static NDIS_HANDLE          heartbeatTimer_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-DRIVER_DISPATCH       powerlinkCreate;
-DRIVER_DISPATCH       powerlinkCleanup;
-DRIVER_DISPATCH       powerlinkClose;
-DRIVER_DISPATCH       powerlinkIoctl;
+DRIVER_DISPATCH powerlinkCreate;
+DRIVER_DISPATCH powerlinkCleanup;
+DRIVER_DISPATCH powerlinkClose;
+DRIVER_DISPATCH powerlinkIoctl;
 
 static void registerDrvIntf(NDIS_HANDLE driverHandle_p);
 static void deregisterDrvIntf(void);
-static void increaseHeartbeatCb(void* pSystemParam1_p, void* pFunctionContext_p,
-                                void* pSystemParam2_p, void* pSystemParam3_p);
+static void increaseHeartbeatCb(void* pSystemParam1_p,
+                                void* pFunctionContext_p,
+                                void* pSystemParam2_p,
+                                void* pSystemParam3_p);
 static void startHeartbeatTimer(LONG timeInMs_p);
 static void stopHeartbeatTimer(void);
 
@@ -134,26 +137,28 @@ static void stopHeartbeatTimer(void);
 The function implements openPOWERLINK Windows kernel driver initialization callback.
 OS calls this routine on driver registration.
 
-\param  driverObject_p       Pointer to the system's driver object structure
-                             for this driver.
-\param  registryPath_p       System's registry path for this driver.
+\param[in]      driverObject_p      Pointer to the system's driver object structure
+                                    for this driver.
+\param[in]      registryPath_p      System's registry path for this driver.
 
 \return This routine returns an NTSTATUS error code.
-\retval STATUS_SUCCESS If no error occurs.
+\retval STATUS_SUCCESS              If no error occurs.
 
 \ingroup module_driver_ndisim
 */
 //------------------------------------------------------------------------------
-NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject_p, PUNICODE_STRING registryPath_p)
+NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject_p,
+                     PUNICODE_STRING registryPath_p)
 {
-    NDIS_STATUS    ndisStatus = NDIS_STATUS_SUCCESS;
+    NDIS_STATUS ndisStatus = NDIS_STATUS_SUCCESS;
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + Driver Entry\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()\n", __func__);
+
     ndisStatus = ndis_initDriver(driverObject_p, registryPath_p);
-
     if (ndisStatus != NDIS_STATUS_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Failed to initialize driver 0x%X\n", __FUNCTION__,
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to initialize driver 0x%X\n",
+                              __func__,
                               ndisStatus);
         return ndisStatus;
     }
@@ -163,7 +168,8 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT driverObject_p, PUNICODE_STRING registryPath
     plkDriverInstance_l.fInitialized = FALSE;
     plkDriverInstance_l.instanceCount = 0;
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + Driver Entry - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() - OK\n", __func__);
+
     return ndisStatus;
 }
 
@@ -175,34 +181,35 @@ The function implements openPOWERLINK kernel module create callback. OS calls
 this routine when an application tries to open a file interface to this driver
 using CreateFile().
 
-\param  pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
-\param  pIrp_p              Pointer to I/O request packet for this call.
+\param[in]      pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
+\param[in]      pIrp_p              Pointer to I/O request packet for this call.
 
 \return This routine returns an NTSTATUS error code.
-\retval STATUS_SUCCESS If no error occurs
+\retval STATUS_SUCCESS              If no error occurs
 
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-NTSTATUS powerlinkCreate(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
+NTSTATUS powerlinkCreate(PDEVICE_OBJECT pDeviceObject_p,
+                         PIRP pIrp_p)
 {
-    NDIS_TIMER_CHARACTERISTICS    timerChars;
-    tFileContext*                 pFileContext;
-    PIO_STACK_LOCATION            irpStack;
-    NDIS_STATUS                   status;
+    NDIS_TIMER_CHARACTERISTICS  timerChars;
+    tFileContext*               pFileContext;
+    PIO_STACK_LOCATION          irpStack;
+    NDIS_STATUS                 status;
 
-    UNREFERENCED_PARAMETER(pDeviceObject_p);
+    UNUSED_PARAMETER(pDeviceObject_p);
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkCreate ...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() ...\n", __func__);
 
     if (pIrp_p == NULL)
         return NDIS_STATUS_RESOURCES;
 
     irpStack = IoGetCurrentIrpStackLocation(pIrp_p);
 
-    pFileContext = ExAllocatePoolWithQuotaTag(NonPagedPool, sizeof(tFileContext),
+    pFileContext = ExAllocatePoolWithQuotaTag(NonPagedPool,
+                                              sizeof(tFileContext),
                                               PLK_MEM_TAG);
-
     if (pFileContext == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("PLK: Failed to create file context\n");
@@ -250,7 +257,7 @@ NTSTATUS powerlinkCreate(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
     pIrp_p->IoStatus.Status = STATUS_SUCCESS;
     IoCompleteRequest(pIrp_p, IO_NO_INCREMENT);
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkCreate - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() - OK\n", __func__);
 
     return STATUS_SUCCESS;
 }
@@ -262,19 +269,21 @@ NTSTATUS powerlinkCreate(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 The function implements the clean-up callback. OS calls this when an application
 closes the file interface to the IOCTL device.
 
-\param  pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
-\param  pIrp_p              Pointer to I/O request packet for this call.
+\param[in]      pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
+\param[in]      pIrp_p              Pointer to I/O request packet for this call.
 
 \return This routine returns an NTSTATUS error code.
-\retval STATUS_SUCCESS If no error occurs.
+\retval STATUS_SUCCESS              If no error occurs.
 
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-NTSTATUS powerlinkCleanup(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
+NTSTATUS powerlinkCleanup(PDEVICE_OBJECT pDeviceObject_p,
+                          PIRP pIrp_p)
 {
     UNUSED_PARAMETER(pDeviceObject_p);
     UNUSED_PARAMETER(pIrp_p);
+
     return STATUS_SUCCESS;
 }
 
@@ -285,25 +294,26 @@ NTSTATUS powerlinkCleanup(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 The function implements openPOWERLINK kernel driver close callback. OS calls
 this function when the user application calls CloseHandle() for the device.
 
-\param  pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
-\param  pIrp_p              Pointer to I/O request packet for this call.
+\param[in]      pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
+\param[in]      pIrp_p              Pointer to I/O request packet for this call.
 
 \return This routine returns an NTSTATUS error code.
-\retval Always return STATUS_SUCCESS.
+\retval                             Always return STATUS_SUCCESS.
 
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
+NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p,
+                        PIRP pIrp_p)
 {
-    tFileContext*         pFileContext;
-    PIO_STACK_LOCATION    irpStack;
-    UINT16                status;
-    tCtrlCmd              ctrlCmd;
+    tFileContext*       pFileContext;
+    PIO_STACK_LOCATION  irpStack;
+    UINT16              status;
+    tCtrlCmd            ctrlCmd;
 
     UNUSED_PARAMETER(pDeviceObject_p);
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkClose...\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
 
     if (pIrp_p == NULL)
         return NDIS_STATUS_RESOURCES;
@@ -316,7 +326,8 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
     plkDriverInstance_l.instanceCount--;
 
     // Close lower driver resources only if all open instances have closed.
-    if (plkDriverInstance_l.fInitialized && (plkDriverInstance_l.instanceCount == 0))
+    if (plkDriverInstance_l.fInitialized &&
+        (plkDriverInstance_l.instanceCount == 0))
     {
         plkDriverInstance_l.fInitialized = FALSE;
         stopHeartbeatTimer();
@@ -324,7 +335,6 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
         ctrlk_exit();
 
         drv_getStatus(&status);
-
         if (status == kCtrlStatusRunning)
         {
             ctrlCmd.cmd = kCtrlShutdown;
@@ -336,7 +346,7 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
     pIrp_p->IoStatus.Status = STATUS_SUCCESS;
     IoCompleteRequest(pIrp_p, IO_NO_INCREMENT);
 
-    DEBUG_LVL_ALWAYS_TRACE("PLK: + powerlinkClose - OK\n");
+    DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() - OK\n", __func__);
 
     return STATUS_SUCCESS;
 }
@@ -348,28 +358,28 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 The function implements IOCTL callback. OS calls this routine when the user
 application calls DeviceIoControl() for the device.
 
-\param  pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
-\param  pIrp_p              Pointer to I/O request packet for this call.
+\param[in]      pDeviceObject_p     Pointer to device object allocated for the IOCTL device.
+\param[in]      pIrp_p              Pointer to I/O request packet for this call.
 
 \return This routine returns an NTSTATUS error code.
 
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
+NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p,
+                        PIRP pIrp_p)
 {
-    PIO_STACK_LOCATION    irpStack;
-    NTSTATUS              status = STATUS_SUCCESS;
-    ULONG                 inlen, outlen;
-    void*                 pInBuffer;
-    void*                 pOutBuffer;
-    tFileContext*         pFileContext;
-    tOplkError            oplkRet;
+    PIO_STACK_LOCATION  irpStack;
+    NTSTATUS            status = STATUS_SUCCESS;
+    ULONG               inlen, outlen;
+    void*               pInBuffer;
+    void*               pOutBuffer;
+    tFileContext*       pFileContext;
+    tOplkError          oplkRet;
 
-    UNREFERENCED_PARAMETER(pDeviceObject_p);
+    UNUSED_PARAMETER(pDeviceObject_p);
 
     irpStack = IoGetCurrentIrpStackLocation(pIrp_p);
-
     pFileContext = irpStack->FileObject->FsContext;
 
     // Acquire the IRP remove lock
@@ -403,7 +413,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_CTRL_STORE_INITPARAM:
         {
-            tCtrlInitParam*   pCtrlInitCmd = (tCtrlInitParam*)pIrp_p->AssociatedIrp.SystemBuffer;
+            tCtrlInitParam* pCtrlInitCmd = (tCtrlInitParam*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             oplkRet = drv_storeInitParam(pCtrlInitCmd);
             if (oplkRet != kErrorOk)
@@ -416,7 +426,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_CTRL_READ_INITPARAM:
         {
-            tCtrlInitParam*   pCtrlInitCmd = (tCtrlInitParam*)pIrp_p->AssociatedIrp.SystemBuffer;
+            tCtrlInitParam* pCtrlInitCmd = (tCtrlInitParam*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             oplkRet = drv_readInitParam(pCtrlInitCmd);
             if (oplkRet != kErrorOk)
@@ -429,7 +439,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_CTRL_GET_STATUS:
         {
-            UINT16*   pStatus = (UINT16*)pIrp_p->AssociatedIrp.SystemBuffer;
+            UINT16* pStatus = (UINT16*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             oplkRet = drv_getStatus(pStatus);
             if (oplkRet != kErrorOk)
@@ -442,7 +452,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_CTRL_GET_HEARTBEAT:
         {
-            UINT16*   pHeartBeat = (UINT16*)pIrp_p->AssociatedIrp.SystemBuffer;
+            UINT16* pHeartBeat = (UINT16*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             oplkRet = drv_getHeartbeat(pHeartBeat);
             if (oplkRet != kErrorOk)
@@ -466,7 +476,8 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_GET_EVENT:
         {
-            size_t    eventSize = 0;
+            size_t  eventSize = 0;
+
             pOutBuffer = pIrp_p->AssociatedIrp.SystemBuffer;
             eventkcal_getEventForUser(pOutBuffer, &eventSize);
 
@@ -521,18 +532,22 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
         case PLK_CMD_TIMESYNC_SYNC:
         {
             oplkRet = timesynckcal_waitSyncEvent();
-            if (oplkRet != kErrorRetry && oplkRet != kErrorOk)
+            if ((oplkRet != kErrorRetry) &&
+                (oplkRet != kErrorOk))
                 status = STATUS_INSUFFICIENT_RESOURCES;
             else
                 status = STATUS_SUCCESS;
+
             break;
         }
 
         case PLK_CMD_PDO_GET_MEM:
         {
-            tPdoMem*   pPdoMem = (tPdoMem*)pIrp_p->AssociatedIrp.SystemBuffer;
+            tPdoMem*    pPdoMem = (tPdoMem*)pIrp_p->AssociatedIrp.SystemBuffer;
+
             pPdoMem->pdoMemOffset = 0;
             pIrp_p->IoStatus.Information = sizeof(tPdoMem);
+
             status = STATUS_SUCCESS;
             break;
         }
@@ -545,10 +560,11 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_MAP_MEM:
         {
-            tMemStruc*   pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
-            oplkRet = drv_mapPdoMem((UINT8**)&pMemStruc->pKernelAddr,
-                                    (UINT8**)&pMemStruc->pUserAddr,
-                                    (size_t*)&pMemStruc->size);
+            tMemStruc*  pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
+
+            oplkRet = drv_mapPdoMem(&pMemStruc->pKernelAddr,
+                                    &pMemStruc->pUserAddr,
+                                    &pMemStruc->size);
 
             if (oplkRet != kErrorOk)
             {
@@ -559,6 +575,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
             {
                 pIrp_p->IoStatus.Information = sizeof(tMemStruc);
             }
+
             // complete the IOCTL. If error occurred the return parameter size will be zero.
             status = STATUS_SUCCESS;
             break;
@@ -566,8 +583,10 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
 
         case PLK_CMD_UNMAP_MEM:
         {
-            tMemStruc*   pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
+            tMemStruc*  pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
+
             drv_unMapPdoMem(pMemStruc->pUserAddr, pMemStruc->size);
+
             status = STATUS_SUCCESS;
             pIrp_p->IoStatus.Information = 0;
             break;
@@ -613,23 +632,23 @@ This routine is called whenever a new miniport instance is initialized.
 However, only one global device object is created, when the first miniport
 instance is initialized.
 
-\param  driverHandle_p      Miniport driver handle returned by OS on registration
+\param[in]      driverHandle_p      Miniport driver handle returned by OS on registration
 
 */
 //------------------------------------------------------------------------------
 static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
 {
-    NDIS_STATUS                      status = NDIS_STATUS_SUCCESS;
-    UNICODE_STRING                   deviceName;
-    UNICODE_STRING                   deviceLinkUnicodeString;
-    NDIS_DEVICE_OBJECT_ATTRIBUTES    deviceObjectAttributes;
-    PDRIVER_DISPATCH                 dispatchTable[IRP_MJ_MAXIMUM_FUNCTION + 1];
+    NDIS_STATUS                     status = NDIS_STATUS_SUCCESS;
+    UNICODE_STRING                  deviceName;
+    UNICODE_STRING                  deviceLinkUnicodeString;
+    NDIS_DEVICE_OBJECT_ATTRIBUTES   deviceObjectAttributes;
+    PDRIVER_DISPATCH                dispatchTable[IRP_MJ_MAXIMUM_FUNCTION + 1];
 
     DEBUG_LVL_ALWAYS_TRACE("PLK %s()...\n", __func__);
 
     plkDriverInstance_l.driverHandle = driverHandle_p;
-    NdisZeroMemory(dispatchTable, (IRP_MJ_MAXIMUM_FUNCTION + 1) * sizeof(PDRIVER_DISPATCH));
 
+    NdisZeroMemory(dispatchTable, (IRP_MJ_MAXIMUM_FUNCTION + 1) * sizeof(PDRIVER_DISPATCH));
     dispatchTable[IRP_MJ_CREATE] = powerlinkCreate;
     dispatchTable[IRP_MJ_CLEANUP] = powerlinkCleanup;
     dispatchTable[IRP_MJ_CLOSE] = powerlinkClose;
@@ -639,7 +658,6 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
     NdisInitUnicodeString(&deviceLinkUnicodeString, PLK_LINK_NAME);
 
     NdisZeroMemory(&deviceObjectAttributes, sizeof(NDIS_DEVICE_OBJECT_ATTRIBUTES));
-
     // type implicit from the context
     deviceObjectAttributes.Header.Type = NDIS_OBJECT_TYPE_DEFAULT;
     deviceObjectAttributes.Header.Revision = NDIS_DEVICE_OBJECT_ATTRIBUTES_REVISION_1;
@@ -690,14 +708,14 @@ static void deregisterDrvIntf(void)
 
 The function starts the timer used for updating the heartbeat counter.
 
-\param  timeInMs_p          Timeout value in milliseconds
+\param[in]      timeInMs_p          Timeout value in milliseconds
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
 void startHeartbeatTimer(LONG timeInMs_p)
 {
-    LARGE_INTEGER    dueTime;
+    LARGE_INTEGER   dueTime;
 
     if (timeInMs_p < 0)
     {
@@ -731,21 +749,23 @@ void stopHeartbeatTimer(void)
 The function implements the timer callback function used to increase the
 heartbeat counter.
 
-\param  pSystemParam1_p         A pointer to a system-specific value that is
-                                reserved for system use.
-\param  pFunctionContext_p      A pointer to a driver-supplied context area that
-                                the driver passed to the NdisSetTimerObject
-                                function. Optional.
-\param  pSystemParam2_p         A pointer to a system-specific value that is
-                                reserved for system use.
-\param  pSystemParam3_p         A pointer to a system-specific value that is
-                                reserved for system use.
+\param[in,out]  pSystemParam1_p     A pointer to a system-specific value that is
+                                    reserved for system use.
+\param[in,out]  pFunctionContext_p  A pointer to a driver-supplied context area that
+                                    the driver passed to the NdisSetTimerObject
+                                    function. Optional.
+\param[in,out]  pSystemParam2_p     A pointer to a system-specific value that is
+                                    reserved for system use.
+\param[in,out]  pSystemParam3_p     A pointer to a system-specific value that is
+                                    reserved for system use.
 
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
-static void increaseHeartbeatCb(void* pSystemParam1_p, void* pFunctionContext_p,
-                                void* pSystemParam2_p, void* pSystemParam3_p)
+static void increaseHeartbeatCb(void* pSystemParam1_p,
+                                void* pFunctionContext_p,
+                                void* pSystemParam2_p,
+                                void* pSystemParam3_p)
 {
     UNUSED_PARAMETER(pSystemParam1_p);
     UNUSED_PARAMETER(pFunctionContext_p);

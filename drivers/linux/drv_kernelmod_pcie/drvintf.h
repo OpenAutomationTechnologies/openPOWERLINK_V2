@@ -10,6 +10,7 @@ openPOWERLINK PCIe driver interface to PCP - Header file
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,23 +35,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_drvintf_H_
 #define _INC_drvintf_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/driver.h>
+#include <oplk/oplk.h>
 #include <common/ctrl.h>
-#include <common/target.h>
-#include <kernel/timesynckcal.h>
 #include <common/ctrlcal-mem.h>
+#include <common/dllcal.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define FIELD_OFFSET(...)                       offsetof(__VA_ARGS__)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -62,17 +60,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This type defines a function pointer to the VEth frame received
 callback function.
 
-\param  pFrameInfo_p        Frame info of the received frame.
+\param[in]      pFrameInfo_p        Frame info of the received frame.
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tDrvIntfCbVeth)(tFrameInfo* pFrameInfo_p);
+typedef tOplkError (*tDrvIntfCbVeth)(const tFrameInfo* pFrameInfo_p);
 #endif
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -80,27 +77,37 @@ extern "C"
 tOplkError drvintf_init(void);
 void       drvintf_exit(void);
 tOplkError drvintf_executeCmd(tCtrlCmd* ctrlCmd_p);
+tOplkError drvintf_waitSyncEvent(void);
 tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError drvintf_storeInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError drvintf_storeInitParam(const tCtrlInitParam* pInitParam_p);
 tOplkError drvintf_getStatus(UINT16* pStatus_p);
 tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p);
-tOplkError drvintf_postEvent(tEvent* pEvent_p);
-tOplkError drvintf_getEvent(tEvent* pK2UEvent_p, size_t* pSize_p);
-tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p, size_t size_p, void* pData_p);
-tOplkError drvintf_writeErrorObject(UINT32 offset_p, UINT32 errVal_p);
-tOplkError drvintf_readErrorObject(UINT32 offset_p, UINT32* pErrVal_p);
-tOplkError drvintf_getPdoMem(UINT8** ppPdoMem_p, size_t* pMemSize_p);
-tOplkError drvintf_freePdoMem(UINT8** ppPdoMem_p, size_t memSize_p);
-tOplkError drvintf_getBenchmarkMem(UINT8** ppBenchmarkMem_p);
-tOplkError drvintf_freeBenchmarkMem(UINT8** ppBenchmarkMem_p);
-tOplkError drvintf_mapKernelMem(UINT8* pKernelMem_p, UINT8** ppUserMem_p, size_t size_p);
-void       drvintf_unmapKernelMem(UINT8** ppUserMem_p);
-tOplkError drvintf_waitSyncEvent(void);
 #if defined(CONFIG_INCLUDE_VETH)
 tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
-tOplkError drvintf_sendVethFrame(tFrameInfo* pFrameInfo_p);
+tOplkError drvintf_sendVethFrame(const tFrameInfo* pFrameInfo_p);
 #endif
-tOplkError drvintf_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuf_p);
+tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p,
+                                  size_t size_p,
+                                  const void* pData_p);
+tOplkError drvintf_writeErrorObject(UINT32 offset_p,
+                                    UINT32 errVal_p);
+tOplkError drvintf_readErrorObject(UINT32 offset_p,
+                                   UINT32* pErrVal_p);
+tOplkError drvintf_postEvent(const tEvent* pEvent_p);
+tOplkError drvintf_getEvent(tEvent* pK2UEvent_p,
+                            size_t* pSize_p);
+tOplkError drvintf_getPdoMem(void** ppPdoMem_p,
+                             size_t* pMemSize_p);
+tOplkError drvintf_freePdoMem(void** ppPdoMem_p,
+                              size_t memSize_p);
+tOplkError drvintf_getBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError drvintf_freeBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError drvintf_mapKernelMem(const void* pKernelMem_p,
+                                void** ppUserMem_p,
+                                size_t size_p);
+void       drvintf_unmapKernelMem(void** ppUserMem_p);
+tOplkError drvintf_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                   const void* pBuf_p);
 ULONG      drvintf_getFileBufferSize(void);
 
 #ifdef __cplusplus

@@ -110,7 +110,7 @@ static int                      vethStartXmit(struct sk_buff* pSkb_p,
                                               struct net_device* pNetDevice_p);
 static struct net_device_stats* vethGetStats(struct net_device* pNetDevice_p);
 static void                     vethTxTimeout(struct net_device* pNetDevice_p);
-static tOplkError               receiveFrameCb(tFrameInfo* pFrameInfo_p);
+static tOplkError               receiveFrameCb(const tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -348,12 +348,12 @@ static void vethTxTimeout(struct net_device* pNetDevice_p)
 
 The function receives a frame from the virtual Ethernet interface.
 
-\param[in,out]  pFrameInfo_p        Pointer to frame information of received frame.
+\param[in]      pFrameInfo_p        Pointer to frame information of received frame.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p)
+static tOplkError receiveFrameCb(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError               ret = kErrorOk;
     struct net_device*       pNetDevice = pVEthNetDevice_g;

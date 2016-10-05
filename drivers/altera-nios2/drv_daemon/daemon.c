@@ -11,7 +11,7 @@ master demo application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 
 //------------------------------------------------------------------------------
 // includes
@@ -84,9 +83,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initPlk(void);
-static void shtdPlk(void);
-static void bgtPlk(void);
+static tOplkError   initPowerlink(void);
+static void         shutdownPowerlink(void);
+static void         backgroundProcess(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -105,7 +104,7 @@ Calls the POWERLINK initialization and background task
 //------------------------------------------------------------------------------
 int main(void)
 {
-    tOplkError ret;
+    tOplkError  ret;
 
     alt_icache_flush_all();
     alt_dcache_flush_all();
@@ -119,24 +118,25 @@ int main(void)
     {
         PRINTF("\n");
 
-        ret = initPlk();
+        ret = initPowerlink();
 
         PRINTF("Initialization returned with \"%s\" (0x%X)\n",
-               debugstr_getRetValStr(ret), ret);
+               debugstr_getRetValStr(ret),
+               ret);
 
         if (ret != kErrorOk)
-            break;
+            return -1;
 
-        bgtPlk();
+        backgroundProcess();
 
-        PRINTF("Background loop stopped.\nShutdown Kernel Stack\n");
+        PRINTF("Background loop stopped.\nShutdown kernel stack\n");
 
-        shtdPlk();
+        shutdownPowerlink();
 
         usleep(1000000U);
     }
 
-    PRINTF("halt terminal\n%c", 4);
+    PRINTF("Halt terminal\n%c", 4);
 
     return 0;
 }
@@ -154,15 +154,15 @@ This function initializes the communication stack and configures objects.
 \return This function returns tOplkError error codes.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPlk(void)
+static tOplkError initPowerlink(void)
 {
-    tOplkError ret;
+    tOplkError  ret;
 
     ret = ctrlk_init(NULL);
 
     if (ret != kErrorOk)
     {
-        printf("Could not initialize control module\n");
+        PRINTF("Could not initialize control module.\n");
         goto Exit;
     }
 
@@ -170,15 +170,15 @@ Exit:
     return ret;
 }
 
-
 //------------------------------------------------------------------------------
 /**
 \brief    openPOWERLINK stack shutdown
 
-This function shuts down the communication stack.
+This function initiates shutdown of the stack by freeing the allocated
+resources and suspending all processes.
 */
 //------------------------------------------------------------------------------
-static void shtdPlk(void)
+static void shutdownPowerlink(void)
 {
     ctrlk_exit();
 }
@@ -187,12 +187,15 @@ static void shtdPlk(void)
 /**
 \brief    openPOWERLINK stack background tasks
 
-This function runs the background tasks
+Routine to handle background tasks of POWERLINK such as:
+- Event handling
+- Packet processing
+- Status and command exchange
 */
 //------------------------------------------------------------------------------
-static void bgtPlk(void)
+static void backgroundProcess(void)
 {
-    BOOL fExit = FALSE;
+    BOOL    fExit = FALSE;
 
     while (1)
     {
@@ -203,4 +206,3 @@ static void bgtPlk(void)
             break;
     }
 }
-
