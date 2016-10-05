@@ -2053,16 +2053,25 @@ static tOplkError processReceivedPres(const tFrameInfo* pFrameInfo_p,
     // At this point we know that we are in a cyclic state due to the checks above!
     if ((nmtState_p != kNmtCsPreOperational2) && (nmtState_p != kNmtMsPreOperational2))
     {
+#if (NMT_MAX_NODE_ID > 0)
+        // This check can be skipped when no cross traffic is supported
         if (pIntNodeInfo == NULL)
         {
             ret = kErrorDllNoNodeInfo;
             return ret;
         }
+#endif
         // So we are in ReadyToOp or Operational after the check and can inform the PDO module now.
         if (presFrameFormatIsInvalid(pFrameInfo_p, pIntNodeInfo, nodeNmtState))
         {
+#if (NMT_MAX_NODE_ID > 0)
+            // Check if the configuration defines the received node as irrelevant
             if (pIntNodeInfo->presPayloadLimit > 0)
+#endif
+            {
                 postInvalidFormatError(nodeId, nmtState_p);
+            }
+
             return ret;
         }
 
