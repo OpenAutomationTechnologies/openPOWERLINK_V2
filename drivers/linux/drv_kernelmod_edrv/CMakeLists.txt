@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # Copyright (c) 2016, Romain Naour (Open Wide)
 # All rights reserved.
 #
@@ -94,7 +94,9 @@ MACRO(edrvBuild OPLK_EDRV)
             SET(MODULE_DEFS "${MODULE_DEFS_GEN} -DCONFIG_EDRV=267200")
             # 267200 corresponds to Z7200 arch of Zynq family. (Z is represented by 26)
             SET(MODULE_EMACPS_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-emacps.c)
-            SET(MODULE_EMACPS_SOURCE_FILES ${MODULE_EMACPS_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c)
+            # TODO: Interrrupt is not generated from ttc module from Linux, so the driver was updated to use hrestimer-linuxkernel instead
+            # SET(MODULE_EMACPS_SOURCE_FILES ${MODULE_EMACPS_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-zynqttc.c)
+            SET(MODULE_EMACPS_SOURCE_FILES ${MODULE_EMACPS_SOURCE_FILES} ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c)
             SET(MODULE_EDRV_SOURCE_FILES ${MODULE_EMACPS_SOURCE_FILES})
         ELSE()
             MESSAGE(FATAL_ERROR "EmacPs supported only for ARM processor")
