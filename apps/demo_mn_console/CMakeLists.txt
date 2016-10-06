@@ -3,6 +3,7 @@
 # CMake file of CiA 302 MN console demo application
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -111,6 +112,11 @@ ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
 IF (CFG_KERNEL_STACK_PCIE_INTF)
     ADD_DEFINITIONS(-D__LINUX_PCIE__)
 ENDIF()
+
+IF (CFG_KERNEL_STACK_ZYNQ_INTF)
+    ADD_DEFINITIONS(-D__LINUX_ZYNQ__)
+ENDIF()
+
 
 ################################################################################
 # Setup the architecture specific definitions
