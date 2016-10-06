@@ -1,9 +1,9 @@
 ################################################################################
 #
-# CMake file of openPOWERLINK application MN library with kernelspace pcie interface
+# CMake file of openPOWERLINK application MN library with kernelspace pcp interface
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 ################################################################################
 
 # Set library name
-SET(LIB_NAME "oplkmnapp-kernelpcie")
+SET(LIB_NAME "oplkmnapp-kernelpcp")
 MESSAGE(STATUS "Configuring ${LIB_NAME}")
 
 # Set type of library
@@ -71,8 +71,15 @@ IF(CFG_INCLUDE_MN_REDUNDANCY)
     ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
 ENDIF()
 
+IF(CFG_COMPILE_LIB_MNAPP_PCIEINTF)
 ADD_DEFINITIONS(-DCONFIG_MN -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L -D__LINUX_PCIE__)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
+ENDIF()
+
+IF(CFG_COMPILE_LIB_MNAPP_ZYNQINTF)
+ADD_DEFINITIONS(-DCONFIG_MN -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L -D__LINUX_ZYNQ__)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
+ENDIF()
 
 # Additional include directories
 INCLUDE_DIRECTORIES(

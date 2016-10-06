@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,6 +39,7 @@ OPTION (CFG_COMPILE_LIB_MN                      "Compile openPOWERLINK MN librar
 OPTION (CFG_COMPILE_LIB_MNAPP_USERINTF          "Compile openPOWERLINK MN application library for userspace" ON)
 OPTION (CFG_COMPILE_LIB_MNAPP_KERNELINTF        "Compile openPOWERLINK MN application library for kernel interface" ON)
 OPTION (CFG_COMPILE_LIB_MNAPP_PCIEINTF          "Compile openPOWERLINK MN application library for PCIe interface" ON)
+OPTION (CFG_COMPILE_LIB_MNAPP_ZYNQINTF          "Compile openPOWERLINK MN application library for zynq/FPGA interface" ON)
 OPTION (CFG_COMPILE_LIB_MNDRV_PCAP              "Compile openPOWERLINK MN driver library for linux userspace (pcap)" ON)
 OPTION (CFG_COMPILE_LIB_MN_SIM                  "Compile openPOWERLINK MN library with simulation interface" ON)
 
@@ -78,8 +80,8 @@ IF(CFG_COMPILE_LIB_MNAPP_KERNELINTF)
     ADD_SUBDIRECTORY(proj/linux/liboplkmnapp-kernelintf)
 ENDIF()
 
-IF(CFG_COMPILE_LIB_MNAPP_PCIEINTF)
-    ADD_SUBDIRECTORY(proj/linux/liboplkmnapp-kernelpcie)
+IF((CFG_COMPILE_LIB_MNAPP_PCIEINTF) OR (CFG_COMPILE_LIB_MNAPP_ZYNQINTF))
+    ADD_SUBDIRECTORY(proj/linux/liboplkmnapp-kernelpcp)
 ENDIF()
 
 IF(CFG_COMPILE_LIB_MNDRV_PCAP)

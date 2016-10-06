@@ -137,7 +137,7 @@ extern "C"
 // include architecture specific definitions
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
-#ifdef __LINUX_PCIE__
+#if defined (__LINUX_PCIE__) || defined(__LINUX_ZYNQ__)
 #include <common/driver-linuxpcie.h>
 #else /* __LINUX_PCIE__ */
 #include <common/driver-linux.h>
