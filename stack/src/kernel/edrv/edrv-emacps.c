@@ -304,7 +304,7 @@ static UINT16       mdioPhyRead(INT phyId_p, INT regAddr_p);
 #ifdef CONFIG_OF
 static struct of_device_id          xemacps_of_match[] =
 {
-    {   .compatible = "xlnx,ps7-ethernet-1.00.a", },    // __devinitdata creates warning!
+    {   .compatible = "cdns,zynq-gem", },               // __devinitdata creates warning!
     { /* end of table */}                               // keep devinit in separate data section,
                                                         // linker is not able to link
 };
@@ -959,16 +959,16 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     // register clean done ----------------------------->
 
     // Initialize MAC clock
-    edrvInstance_l.ambaPerClk = devm_clk_get(&pDev_p->dev, "aper_clk");
+    edrvInstance_l.ambaPerClk = devm_clk_get(&pDev_p->dev, "pclk");
     if (edrvInstance_l.ambaPerClk == NULL)
     {
-        printk("aper_clk clock not found.\n");
+        printk("pclk clock not found.\n");
     }
 
-    edrvInstance_l.devClk = devm_clk_get(&pDev_p->dev, "ref_clk");
+    edrvInstance_l.devClk = devm_clk_get(&pDev_p->dev, "tx_clk");
     if (edrvInstance_l.devClk == NULL)
     {
-        printk("ref_clk clock not found.\n");
+        printk("tx_clk clock not found.\n");
     }
 
     result = clk_prepare_enable(edrvInstance_l.ambaPerClk);
