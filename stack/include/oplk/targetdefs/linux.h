@@ -8,7 +8,7 @@ This file contains target definitions for Linux systems
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
@@ -105,6 +105,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef __LINUX_PCIE__
 #define ATOMIC_MEM_OFFSET           0x80000 // $$ Get the atomic memory base address from config header
 #define OPLK_ATOMIC_INIT(base)
+#elif defined (__LINUX_ZYNQ__)
+#define ATOMIC_MEM_OFFSET           0
+#endif
+
+#if defined (__LINUX_PCIE__) || defined(__LINUX_ZYNQ__)
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         OPLK_IO_WR8((ULONG)address + ATOMIC_MEM_OFFSET, newval); \
                         oldval = OPLK_IO_RD8((ULONG)address + ATOMIC_MEM_OFFSET)
