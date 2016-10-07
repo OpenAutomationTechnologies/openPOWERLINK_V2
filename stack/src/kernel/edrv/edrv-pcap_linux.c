@@ -109,10 +109,11 @@ static tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void  packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
-static void* workerThread(void* pArgument_p);
-static void  getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
-static BOOL  getLinkStatus(const char* pIfName_p);
+static void     packetHandler(u_char* pParam_p, const struct pcap_pkthdr* pHeader_p, const u_char* pPktData_p);
+static void*    workerThread(void* pArgument_p);
+static void     getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
+static pcap_t*  startPcap(void);
+static BOOL     getLinkStatus(const char* pIfName_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -133,7 +134,6 @@ This function initializes the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
-    char                errorMessage[PCAP_ERRBUF_SIZE];
     struct sched_param  schedParam;
 
     // Check parameter validity
@@ -162,17 +162,10 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
                    edrvInstance_l.initParam.aMacAddr);
     }
 
-    edrvInstance_l.pPcap = pcap_open_live(
-                        edrvInstance_l.initParam.hwParam.pDevName,
-                        65535,  // snaplen
-                        1,      // promiscuous mode
-                        1,      // milliseconds read timeout
-                        errorMessage
-                    );
-
+    // Set up and activate the pcap live capture handle
+    edrvInstance_l.pPcap = startPcap();
     if (edrvInstance_l.pPcap == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
         return kErrorEdrvInit;
     }
 
@@ -204,8 +197,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     schedParam.sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
     if (pthread_setschedparam(edrvInstance_l.hThread, SCHED_FIFO, &schedParam) != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
-                                __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n", __func__);
     }
 
 #if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
@@ -574,29 +566,22 @@ static void* workerThread(void* pArgument_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     int             pcapRet;
-    char            errorMessage[PCAP_ERRBUF_SIZE];
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
-    pInstance->pPcapThread =
-        pcap_open_live(pInstance->initParam.hwParam.pDevName,
-                       65535,  // snaplen
-                       1,      // promiscuous mode
-                       1,      // milliseconds read timeout
-                       errorMessage);
+    // Set up and activate the pcap live capture handle
+    pInstance->pPcapThread = startPcap();
+    if (pInstance->pPcapThread == NULL)
+    {
+        return NULL;
+    }
 
-   if (pInstance->pPcapThread == NULL)
-   {
-       DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
-       return NULL;
-   }
+    if (pcap_setdirection(pInstance->pPcapThread, PCAP_D_INOUT) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP direction!\n", __func__);
+    }
 
-   if (pcap_setdirection(pInstance->pPcapThread, PCAP_D_INOUT) < 0)
-   {
-       DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP direction1\n", __func__);
-   }
-
-   /* signal that thread is successfully started */
+   // signal that thread is successfully started
    sem_post(&pInstance->syncSem);
 
    pcapRet = pcap_loop(pInstance->pPcapThread, -1, packetHandler, (u_char*)pInstance);
@@ -621,6 +606,58 @@ static void* workerThread(void* pArgument_p)
    }
 
    return NULL;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Start pcap live capture handle
+
+This function configures the parameter for a pcap live capture handle and activates it.
+With libpcap >= 1.5.0, the immediate mode is used to support applications that require
+shorter cycletimes.
+
+\return The function returns a pointer to a pcap_t structure.
+*/
+//------------------------------------------------------------------------------
+static pcap_t* startPcap(void)
+{
+    pcap_t* pPcapInst = NULL;
+    char    errorMessage[PCAP_ERRBUF_SIZE];
+
+    // Create a pcap live capture handle
+    pPcapInst = pcap_create(edrvInstance_l.initParam.hwParam.pDevName, errorMessage);
+    if (pPcapInst == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);
+    }
+
+    // Set snapshot length for a not-yet-activated capture handle
+    if (pcap_set_snaplen(pPcapInst, 65535) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP snap length\n", __func__);
+    }
+
+    // Set promiscuous mode for a not-yet-activated capture handle
+    if (pcap_set_promisc(pPcapInst, 1) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP promiscious mode\n", __func__);
+    }
+
+// Pcap immediate mode only supported by libpcap >=1.5.0
+#ifdef PCAP_ERROR_TSTAMP_PRECISION_NOTSUP
+    // Set immediate mode for a not-yet-activated capture handle
+    if (pcap_set_immediate_mode(pPcapInst, 1) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set PCAP immediate mode\n", __func__);
+    }
+#endif
+
+    // Activate the pcap capture handle with the previous parameters
+    if (pcap_activate(pPcapInst) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't activate PCAP\n", __func__);
+    }
+    return pPcapInst;
 }
 
 //------------------------------------------------------------------------------
