@@ -205,7 +205,7 @@ BOOL ctrlk_process(void)
     tOplkError          ret;
     UINT16              fRet;
     tCtrlKernelStatus   status;
-    tCtrlCmdType        cmd;
+    tCtrlCmdType        cmd = kCtrlNone;
     BOOL                fExit = FALSE;
 
     if (ctrlkcal_getCmd(&cmd) != kErrorOk)
