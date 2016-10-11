@@ -49,93 +49,94 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructs an CnState widget.
 
-\param          parent                  Pointer to the parent window
+\param[in]      parent              Pointer to the parent window
 */
 //------------------------------------------------------------------------------
 CnState::CnState(QWidget* parent)
     : QWidget(parent)
 {
-    QFont           LabelFont;
+    QFont   LabelFont;
 
     LabelFont.setBold(true);
     LabelFont.setPointSize(18);
 
-    pStateLayout = new QVBoxLayout;
-    setLayout(pStateLayout);
+    this->pStateLayout = new QVBoxLayout;
+    setLayout(this->pStateLayout);
 
-    pStateLayout->addStretch(0);
+    this->pStateLayout->addStretch(0);
 
     // process value LEDs at upper half
     QLabel* pStateLabel = new QLabel("Node/State");
     pStateLabel->setFont(LabelFont);
-    pStateLayout->addWidget(pStateLabel);
+    this->pStateLayout->addWidget(pStateLabel);
 
-    ppNodeState = new NodeState*[NODE_ID_MAX];
+    this->ppNodeState = new NodeState*[NODE_ID_MAX];
     for (int i = 0; i < NODE_ID_MAX; i++)
     {
-        ppNodeState[i] = new NodeState(QString("CN%1").arg(i));
-        ppNodeState[i]->hide();
-        pStateLayout->addWidget(ppNodeState[i]);
+        this->ppNodeState[i] = new NodeState(QString("CN%1").arg(i));
+        this->ppNodeState[i]->hide();
+        this->pStateLayout->addWidget(this->ppNodeState[i]);
     }
 
-    pStateLayout->addStretch(1);
+    this->pStateLayout->addStretch(1);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  set CN state
+\brief  Set CN state
 
 Sets the state of the CN
 
-\param          nodeId_p               Node ID of CN
-\param          state_p                State of CN
+\param[in]      nodeId_p            Node ID of CN
+\param[in]      state_p             State of CN
 */
 //------------------------------------------------------------------------------
-void CnState::setState(int nodeId_p, int state_p)
+void CnState::setState(int nodeId_p,
+                       int state_p)
 {
-    ppNodeState[nodeId_p]->setState(state_p);
+    this->ppNodeState[nodeId_p]->setState(state_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  add a CN
+\brief  Add a CN
 
 Adds a controlled node to the node list.
 
-\param          nodeId_p               Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void CnState::addNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppNodeState[nodeId_p]->show();
-        //apNodes[nodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
-        pStateLayout->update();
+        this->ppNodeState[nodeId_p]->show();
+        this->pStateLayout->update();
     }
-
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  remove a CN
+\brief  Remove a CN
 
 Removes a controlled node from the node list.
 
-\param          nodeId_p               Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void CnState::removeNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppNodeState[nodeId_p]->hide();
+        this->ppNodeState[nodeId_p]->hide();
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  remove all CNs
+\brief  Remove all CNs
 
 Removes all controlled nodes from the node list.
 */
@@ -147,6 +148,6 @@ void CnState::removeAllNodes(void)
     // count() gives all widgets (hidden ones too)
     for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
-        ppNodeState[nIdx]->hide();
+        this->ppNodeState[nIdx]->hide();
     }
 }

@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_Leds_H_
-#define _INC_Leds_H_
+#ifndef _INC_demo_Leds_H_
+#define _INC_demo_Leds_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -65,15 +64,16 @@ class Leds : public QWidget
 
 public:
     Leds(int count_p, QWidget* parent = 0);
+
     void setLeds(unsigned int dataIn_p);
     void disableLeds(void);
 
 private:
-    QLabel**        ppLedLabels;
-    QPixmap*        pActiveLed;
-    QPixmap*        pInactiveLed;
-    QPixmap*        pNoLed;
-    int             count;
+    QLabel**    ppLedLabels;
+    QPixmap*    pActiveLed;
+    QPixmap*    pInactiveLed;
+    QPixmap*    pNoLed;
+    int         count;
 };
 
-#endif /* _INC_Leds_H_ */
+#endif /* _INC_demo_Leds_H_ */

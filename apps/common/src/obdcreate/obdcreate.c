@@ -242,11 +242,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // For compilers not supporting a comma after last struct value,  a dummy subindex
 // has to be added.
 #if ((DEV_SYSTEM & _DEV_COMMA_EXT_) != 0)
-    #define OBD_END_SUBINDEX()
-    #define OBD_MAX_ARRAY_SUBENTRIES    2
+#define OBD_END_SUBINDEX()
+#define OBD_MAX_ARRAY_SUBENTRIES    2
 #else
-    #define OBD_END_SUBINDEX()          {0, 0, 0, NULL, NULL}
-    #define OBD_MAX_ARRAY_SUBENTRIES    3
+#define OBD_END_SUBINDEX()          {0, 0, 0, NULL, NULL}
+#define OBD_MAX_ARRAY_SUBENTRIES    3
 #endif
 
 
@@ -284,7 +284,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function initializes the object dictionary data structures.
 
-\param  pInitParam_p            Pointer to OD initialization parameters.
+\param[out]     pInitParam_p        Pointer to OD initialization parameters.
 
 \return The function returns a tOplkError error code.
 
@@ -297,7 +297,7 @@ tOplkError obdcreate_initObd(tObdInitParam* pInitParam_p)
 // we exclude the function body from parsing by doxygen!
 #if !defined(DOXYGEN_PARSER)
 
-    tObdInitParam* pInitParam = pInitParam_p;
+    tObdInitParam* pInitParam = pInitParam_p;           // pInitParam is required by obdmacro.h
 
     // check if pointer to parameter structure is valid
     // if not then only copy subindex tables below
@@ -316,7 +316,7 @@ tOplkError obdcreate_initObd(tObdInitParam* pInitParam_p)
 #if (defined(OBD_USER_OD) && (OBD_USER_OD != FALSE))
         {
             // at the beginning no user OD is defined
-            pInitParam_p->pUserPart = NULL;
+            pInitParam->pUserPart = NULL;
         }
 #endif
     }

@@ -54,19 +54,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
-DataInOutThread*  pDataInOutThread_g;
+DataInOutThread*        pDataInOutThread_g;
 
-static int        usedNodeIds_g[] = {1, 32, 110, 0};
+static int              aUsedNodeIds_l[] = {1, 32, 110, 0};
 
 /* process images, structures defined in xap.h from openCONFIGURATOR */
-static PI_IN*     pProcessImageIn_l;
-static PI_OUT*    pProcessImageOut_l;
-
+static PI_IN*           pProcessImageIn_l;
+static const PI_OUT*    pProcessImageOut_l;
 //============================================================================//
 //            S T A T I C   M E M B E R   F U N C T I O N S                   //
 //============================================================================//
-
-tOplkError DataInOutThread::AppCbSync(void)
+tOplkError DataInOutThread::appCbSync(void)
 {
     return pDataInOutThread_g->processSync();
 }
@@ -84,21 +82,22 @@ Constructs a DataInOutThread object.
 //------------------------------------------------------------------------------
 DataInOutThread::DataInOutThread()
 {
-    int         i;
+    int i;
 
     /* initialize all application variables */
-    for (i = 0; (i < MAX_NODES) && (usedNodeIds_g[i] != 0); i++)
+    for (i = 0; (i < MAX_NODES) && (aUsedNodeIds_l[i] != 0); i++)
     {
-        leds[i] = 0;
-        ledsOld[i] = 0;
-        input[i] = 0;
-        inputOld[i] = 0;
-        toggle[i] = 0;
-        period[i] = 0;
+        this->aLeds[i] = 0;
+        this->aLedsOld[i] = 0;
+        this->aInput[i] = 0;
+        this->aInputOld[i] = 0;
+        this->aToggle[i] = 0;
+        this->aPeriod[i] = 0;
     }
 
-    fStop = false;
-    fMnActive = false;
+    this->fStop = false;
+    this->fMnActive = false;
+
     pDataInOutThread_g = this;
 }
 
@@ -107,85 +106,79 @@ DataInOutThread::DataInOutThread()
 \brief  Synchronous data callback
 
 The function implements the handling of synchronous data. It will be called
-from the stack at the synchronisation time.
+from the stack at the synchronization time.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 tOplkError DataInOutThread::processSync(void)
 {
-    tOplkError          ret;
-    int                 i;
+    tOplkError  ret;
+    int         i;
 
     ret = oplk_exchangeProcessImageOut();
     if (ret != kErrorOk)
-    {
         return ret;
-    }
 
-    cnt++;
+    this->cnt++;
 
-    input[0] = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
-    input[1] = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
-    input[2] = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
+    this->aInput[0] = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
+    this->aInput[1] = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
+    this->aInput[2] = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
 
-    for (i = 0; (i < MAX_NODES) && (usedNodeIds_g[i] != 0); i++)
+    for (i = 0; (i < MAX_NODES) && (aUsedNodeIds_l[i] != 0); i++)
     {
 
         // If we are not in an active MN state we don't need to
         // do the processing of the outputs!
-        if (fMnActive)
+        if (this->fMnActive)
         {
-            /* Running Leds */
+            /* Running LEDs */
             /* period for LED flashing determined by inputs */
-            period[i] = (input[i] == 0) ? 1 : (input[i] * 20);
-            if (cnt % period[i] == 0)
+            this->aPeriod[i] = (this->aInput[i] == 0) ? 1 : (this->aInput[i] * 20);
+            if (this->cnt % this->aPeriod[i] == 0)
             {
-                if (leds[i] == 0x00)
+                if (this->aLeds[i] == 0x00)
                 {
-                    leds[i] = 0x1;
-                    toggle[i] = 1;
+                    this->aLeds[i] = 0x1;
+                    this->aToggle[i] = 1;
                 }
                 else
                 {
-                    if (toggle[i])
+                    if (this->aToggle[i])
                     {
-                        leds[i] <<= 1;
-                        if (leds[i] == APP_LED_MASK_1)
-                        {
-                            toggle[i] = 0;
-                        }
+                        this->aLeds[i] <<= 1;
+                        if (this->aLeds[i] == APP_LED_MASK_1)
+                            this->aToggle[i] = 0;
                     }
                     else
                     {
-                        leds[i] >>= 1;
-                        if (leds[i] == 0x01)
-                        {
-                            toggle[i] = 1;
-                        }
+                        this->aLeds[i] >>= 1;
+                        if (this->aLeds[i] == 0x01)
+                            this->aToggle[i] = 1;
                     }
                 }
             }
 
-            outChanged(leds[i], usedNodeIds_g[i]);
-            ledsOld[i] = leds[i];
+            this->outChanged(this->aLeds[i], aUsedNodeIds_l[i]);
+            this->aLedsOld[i] = this->aLeds[i];
         }
         else
         {
-            // We are not controlling the outputs. We show this, by disable the output Leds.
-            emit disableOutputs(usedNodeIds_g[i]);
+            // We are not controlling the outputs. We show this, by disable the output LEDs.
+            emit disableOutputs(aUsedNodeIds_l[i]);
         }
 
-        inChanged(input[i], usedNodeIds_g[i]);
-        inputOld[i] = input[i];
+        this->inChanged(this->aInput[i], aUsedNodeIds_l[i]);
+        this->aInputOld[i] = this->aInput[i];
     }
 
     // If we are not in an active MN state we don't need to update the outputs
-    if (fMnActive)
+    if (this->fMnActive)
     {
-        pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[0];
-        pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[1];
-        pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = leds[2];
+        pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = this->aLeds[0];
+        pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = this->aLeds[1];
+        pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = this->aLeds[2];
 
         ret = oplk_exchangeProcessImageIn();
     }
@@ -195,7 +188,7 @@ tOplkError DataInOutThread::processSync(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  setup the process image
+\brief  Setup the process image
 
 The function sets up the process image used by the application.
 
@@ -204,35 +197,31 @@ The function sets up the process image used by the application.
 //------------------------------------------------------------------------------
 tOplkError DataInOutThread::setupProcessImage()
 {
-    tOplkError          ret;
-    UINT                errorIndex = 0;
+    tOplkError  ret;
+    UINT        errorIndex = 0;
 
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
-    {
         return ret;
-    }
 
     pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
-    pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
+    pProcessImageOut_l = (const PI_OUT*)oplk_getProcessImageOut();
 
     errorIndex = obdpi_setupProcessImage();
     if (errorIndex != 0)
-    {
         ret = kErrorApiPINotAllocated;
-    }
 
     return ret;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  signal change of input process image
+\brief  Signal change of input process image
 
 inChanged() signals that there are changes in the input process image.
 
-\param  input_p         Input data
-\param  usedNodeId_p    Node ID the data belongs to
+\param[in]      input_p             Input data
+\param[in]      usedNodeId_p        Node ID the data belongs to
 */
 //------------------------------------------------------------------------------
 void DataInOutThread::inChanged(int input_p, int usedNodeId_p)
@@ -242,12 +231,12 @@ void DataInOutThread::inChanged(int input_p, int usedNodeId_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  signal change of output process image
+\brief  Signal change of output process image
 
 The function signals that there are changes in the output process image.
 
-\param  led_p           Output data
-\param  usedNodeId_p    Node ID the data belongs to
+\param[in]      led_p               Output data
+\param[in]      usedNodeId_p        Node ID the data belongs to
 */
 //------------------------------------------------------------------------------
 void DataInOutThread::outChanged(int led_p, int usedNodeId_p)
@@ -267,6 +256,7 @@ void DataInOutThread::run()
     tOplkError  ret;
 
     this->fStop = false;
+
     while (!this->fStop)
     {
         if (oplk_waitSyncEvent(10000) != kErrorOk)
@@ -274,9 +264,7 @@ void DataInOutThread::run()
 
         ret = processSync();
         if (ret != kErrorOk)
-        {
             return;
-        }
     }
 }
 
@@ -289,9 +277,9 @@ The function returns the address of the synchronous data callback function.
 \return address of synchronous data callback function
 */
 //------------------------------------------------------------------------------
-tSyncCb DataInOutThread::getSyncCbFunc()
+tSyncCb DataInOutThread::getSyncCbFunc() const
 {
-    return AppCbSync;
+    return appCbSync;
 }
 
 //------------------------------------------------------------------------------
@@ -312,6 +300,9 @@ void DataInOutThread::stop()
 
 The function sets the MN active flag which shows if the MN is in an
 active state and therefore controlling the synchronous output data.
+
+\param[in]      fMnActive_p         Determines whether the MN is active
+
 */
 //------------------------------------------------------------------------------
 void DataInOutThread::setMnActiveFlag(bool fMnActive_p)

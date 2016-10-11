@@ -159,7 +159,7 @@ environment.
  */
 //------------------------------------------------------------------------------
 tOplkError sim_eventCb(tOplkApiEventType eventType_p,
-                       tOplkApiEventArg *pEventArg_p,
+                       const tOplkApiEventArg *pEventArg_p,
                        void *pUserArg_p)
 {
     // check module initialization

@@ -69,7 +69,7 @@ OPLKDLLEXPORT BOOL  sim_setApiEventFunctions(tSimulationInstanceHdl simHdl_p,
 OPLKDLLEXPORT void  sim_unsetApiEventFunctions(void);
 
 tOplkError          sim_eventCb(tOplkApiEventType eventType_p,
-                                tOplkApiEventArg* pEventArg_p,
+                                const tOplkApiEventArg* pEventArg_p,
                                 void* pUserArg_p);
 
 #ifdef __cplusplus

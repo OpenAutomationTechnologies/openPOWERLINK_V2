@@ -421,7 +421,7 @@ This type defines a function pointer for the simulation interface function
 */
 typedef tOplkError(*tSimEventCb)(tSimulationInstanceHdl simInstanceHdl_p,
                                  tOplkApiEventType eventType_p,
-                                 tOplkApiEventArg* pEventArg_p,
+                                 const tOplkApiEventArg* pEventArg_p,
                                  void* pUserArg_p);
 /**
 \brief Api event function pointer

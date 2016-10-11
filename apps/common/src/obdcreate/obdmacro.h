@@ -81,7 +81,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
 #if defined(OBD_DEFINE_MACRO)
 
 #if defined(OBD_CREATE_ROM_DATA)
@@ -90,7 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // generic macros
-#define OBD_BEGIN()                                                             static const DWORD  dwObd_OBK_g = 0x0000;
+#define OBD_BEGIN()                                                                 static const UINT32 obd_OBK_g = 0x0000;
 #define OBD_END()
 
 // partition macros
@@ -225,7 +224,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_BEGIN_PART_GENERIC()                                                static  tObdEntry  aObdTabGeneric_g[]      = {
 #define OBD_BEGIN_PART_MANUFACTURER()                                           static  tObdEntry  aObdTabManufacturer_g[] = {
 #define OBD_BEGIN_PART_DEVICE()                                                 static  tObdEntry  aObdTabDevice_g[]       = {
-#define OBD_END_PART()                                                          {OBD_TABLE_INDEX_END, (tObdSubEntry*)(void*)&dwObd_OBK_g, 0, FALSE}};
+#define OBD_END_PART()                                                          {OBD_TABLE_INDEX_END, (tObdSubEntry*)(void*)&obd_OBK_g, 0, FALSE}};
 
 // index macros
 #define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], cnt, call},

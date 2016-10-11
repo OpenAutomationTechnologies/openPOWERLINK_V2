@@ -53,9 +53,9 @@ The function implements the default constructor of the EventLog class.
 //------------------------------------------------------------------------------
 EventLog::EventLog()
 {
-    filterLevel = 0xffffffff;
-    filterCategory = 0xffffffff;
-    logFormat = kEventlogFormatParsable;
+    this->filterLevel = 0xffffffff;
+    this->filterCategory = 0xffffffff;
+    this->logFormat = kEventlogFormatParsable;
 }
 
 //------------------------------------------------------------------------------
@@ -64,18 +64,20 @@ EventLog::EventLog()
 
 The function is used to log openPOWERLINK node events.
 
-\param  pNodeEvent_p        The node event information to be logged.
+\param[in]      pNodeEvent_p        The node event information to be logged.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tOplkApiEventNode* pNodeEvent_p)
+void EventLog::printEvent(const tOplkApiEventNode* pNodeEvent_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryNodeEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryNodeEvent))))
         return;
 
-    eventlog_createNodeEventString(pNodeEvent_p, logFormat, cstring,
+    eventlog_createNodeEventString(pNodeEvent_p,
+                                   this->logFormat,
+                                   cstring,
                                    EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
@@ -87,18 +89,20 @@ void EventLog::printEvent(tOplkApiEventNode* pNodeEvent_p)
 
 The function is used to log openPOWERLINK history events.
 
-\param  pHistory_p      The information about the history event to log.
+\param[in]      pHistory_p          The information about the history event to log.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tErrHistoryEntry* pHistory_p)
+void EventLog::printEvent(const tErrHistoryEntry* pHistory_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryHistoryEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryHistoryEvent))))
         return;
 
-    eventlog_createHistoryEventString(pHistory_p, logFormat, cstring,
+    eventlog_createHistoryEventString(pHistory_p,
+                                      this->logFormat,
+                                      cstring,
                                       EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
@@ -110,18 +114,20 @@ void EventLog::printEvent(tErrHistoryEntry* pHistory_p)
 
 The function is used to log openPOWERLINK error/warning events.
 
-\param  pError_p      The information about the error event to log.
+\param[in]      pError_p            The information about the error event to log.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tEventError* pError_p)
+void EventLog::printEvent(const tEventError* pError_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryErrorEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryErrorEvent))))
         return;
 
-    eventlog_createErrorEventString(pError_p, logFormat, cstring,
+    eventlog_createErrorEventString(pError_p,
+                                    this->logFormat,
+                                    cstring,
                                     EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
@@ -133,19 +139,21 @@ void EventLog::printEvent(tEventError* pError_p)
 
 The function is used to log openPOWERLINK state change events.
 
-\param  pStateChangeEvent_p     The state change event information to be logged.
+\param[in]      pStateChangeEvent_p The state change event information to be logged.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tEventNmtStateChange* pNmtStateChange_p)
+void EventLog::printEvent(const tEventNmtStateChange* pNmtStateChange_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryStateChangeEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryStateChangeEvent))))
         return;
 
-    eventlog_createStateEventString(pNmtStateChange_p, logFormat,
-                                    cstring, EVENTLOG_MAX_LENGTH);
+    eventlog_createStateEventString(pNmtStateChange_p,
+                                    this->logFormat,
+                                    cstring,
+                                    EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -156,19 +164,21 @@ void EventLog::printEvent(tEventNmtStateChange* pNmtStateChange_p)
 
 The function is used to log openPOWERLINK PDO change events.
 
-\param  pPdoChange_p            The information about the received event.
+\param[in]      pPdoChange_p        The information about the received event.
 
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tOplkApiEventPdoChange *pPdoChange_p)
+void EventLog::printEvent(const tOplkApiEventPdoChange* pPdoChange_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryPdoEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryPdoEvent))))
         return;
 
-    eventlog_createPdoEventString(pPdoChange_p, logFormat, cstring,
+    eventlog_createPdoEventString(pPdoChange_p,
+                                  this->logFormat,
+                                  cstring,
                                   EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
@@ -180,19 +190,21 @@ void EventLog::printEvent(tOplkApiEventPdoChange *pPdoChange_p)
 
 The function is used to log openPOWERLINK CFM progress events.
 
-\param  pCfmProgress_p         The information about the received event.
+\param[in]      pCfmProgress_p      The information about the received event.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(tCfmEventCnProgress *pCfmProgress_p)
+void EventLog::printEvent(const tCfmEventCnProgress* pCfmProgress_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryCfmProgressEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryCfmProgressEvent))))
         return;
 
-    eventlog_createCfmProgressEventString(pCfmProgress_p, logFormat,
-                                          cstring, EVENTLOG_MAX_LENGTH);
+    eventlog_createCfmProgressEventString(pCfmProgress_p,
+                                          this->logFormat,
+                                          cstring,
+                                          EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -203,21 +215,25 @@ void EventLog::printEvent(tCfmEventCnProgress *pCfmProgress_p)
 
 The function is used to log openPOWERLINK CFM result events.
 
-\param  nodeId_p            The node ID of the node specified in the received
-                            event.
-\param  nodeCommand_p       The nodeCommand of the received CFM result event.
+\param[in]      nodeId_p            The node ID of the node specified in the received
+                                    event.
+\param[in]      nodeCommand_p       The nodeCommand of the received CFM result event.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(unsigned int nodeId_p, tNmtNodeCommand nodeCommand_p)
+void EventLog::printEvent(UINT nodeId_p,
+                          tNmtNodeCommand nodeCommand_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelEvent)) &&
-          (filterCategory & (1 << kEventlogCategoryCfmResultEvent))))
+    if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
+          (this->filterCategory & (1 << kEventlogCategoryCfmResultEvent))))
         return;
 
-    eventlog_createCfmResultEventString(nodeId_p, nodeCommand_p, logFormat,
-                                        cstring, EVENTLOG_MAX_LENGTH);
+    eventlog_createCfmResultEventString(nodeId_p,
+                                        nodeCommand_p,
+                                        this->logFormat,
+                                        cstring,
+                                        EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -229,26 +245,32 @@ void EventLog::printEvent(unsigned int nodeId_p, tNmtNodeCommand nodeCommand_p)
 The function can be used to print a generic log message. You can specify a
 printf style format string for printing.
 
-\param  level_p             The log level to be used for the output.
-\param  category_p          The log category to be used for the output.
-\param  fmt_p               The printf style format string which specifies the
-                            message.
-\param  ...                 Required arguments according to the format string.
+\param[in]      level_p             The log level to be used for the output.
+\param[in]      category_p          The log category to be used for the output.
+\param[in]      fmt_p               The printf style format string which specifies the
+                                    message.
+\param[in]      ...                 Required arguments according to the format string.
 */
 //------------------------------------------------------------------------------
-void EventLog::printMessage(tEventlogLevel level_p, tEventlogCategory category_p,
-                            const char* fmt_p, ...)
+void EventLog::printMessage(tEventlogLevel level_p,
+                            tEventlogCategory category_p,
+                            const char* fmt_p,
+                            ...)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
     va_list arglist;
 
-    if (!((filterLevel & (1 << level_p)) &&
-          (filterCategory & (1 << category_p))))
+    if (!((this->filterLevel & (1 << level_p)) &&
+          (this->filterCategory & (1 << category_p))))
         return;
 
     va_start(arglist, fmt_p);
-    eventlog_createMessageString(cstring, EVENTLOG_MAX_LENGTH, level_p, category_p,
-                                 fmt_p, arglist);
+    eventlog_createMessageString(cstring,
+                                 EVENTLOG_MAX_LENGTH,
+                                 level_p,
+                                 category_p,
+                                 fmt_p,
+                                 arglist);
     va_end(arglist);
 
     emit printLog(QString::fromLatin1(cstring, EVENTLOG_MAX_LENGTH));
@@ -260,21 +282,26 @@ void EventLog::printMessage(tEventlogLevel level_p, tEventlogCategory category_p
 
 The function is used to log openPOWERLINK PDO mappings.
 
-\param  mapObject_p     The object index of the mapping object.
-\param  subIndex_p      The sub-index of the mapping object.
-\param  mapping_p       The 64bit mapping information.
+\param[in]      mapObject_p         The object index of the mapping object.
+\param[in]      subIndex_p          The sub-index of the mapping object.
+\param[in]      mapping_p           The 64bit mapping information.
 */
 //------------------------------------------------------------------------------
-void EventLog::printPdoMap(UINT16 mapObject_p, UINT8 subIndex_p, UINT64 mapping_p)
+void EventLog::printPdoMap(UINT16 mapObject_p,
+                           UINT8 subIndex_p,
+                           UINT64 mapping_p)
 {
     char    cstring[EVENTLOG_MAX_LENGTH];
 
-    if (!((filterLevel & (1 << kEventlogLevelInfo)) &&
-          (filterCategory & (1 << kEventlogCategoryPdoMap))))
+    if (!((this->filterLevel & (1 << kEventlogLevelInfo)) &&
+          (this->filterCategory & (1 << kEventlogCategoryPdoMap))))
         return;
 
-    eventlog_createPdoMapString(mapObject_p, subIndex_p, mapping_p,
-                                logFormat, cstring, EVENTLOG_MAX_LENGTH);
+    eventlog_createPdoMapString(mapObject_p,
+                                subIndex_p, mapping_p,
+                                this->logFormat,
+                                cstring,
+                                EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }

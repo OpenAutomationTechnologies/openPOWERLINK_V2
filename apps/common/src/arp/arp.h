@@ -9,7 +9,7 @@ This file contains the definitions for the ARP demo.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_arp_H_
 #define _INC_arp_H_
 
@@ -54,7 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -62,12 +60,13 @@ extern "C"
 
 void arp_init(UINT8 nodeId_p);
 void arp_exit(void);
-void arp_setMacAddr(UINT8* pMacAddr_p);
+void arp_setMacAddr(const UINT8* pMacAddr_p);
 void arp_setIpAddr(UINT32 ipAddr_p);
 void arp_setDefGateway(UINT32 defGateway_p);
 
 int  arp_sendRequest(UINT32 ipAddr_p);
-int  arp_processReceive(tPlkFrame* pFrame_p, UINT size_p);
+int  arp_processReceive(const tPlkFrame* pFrame_p,
+                        UINT size_p);
 
 #ifdef __cplusplus
 }

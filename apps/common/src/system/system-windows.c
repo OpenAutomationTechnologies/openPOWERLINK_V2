@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
@@ -42,8 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
-#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
+#define _WIN32_WINNT            0x0501  // Windows version must be at least Windows XP
+#define WIN32_LEAN_AND_MEAN             // Do not use extended Win32 API functions
 #include <Windows.h>
 
 #include "system.h"
@@ -94,7 +94,7 @@ typedef struct
 // local vars
 //------------------------------------------------------------------------------
 #if defined(CONFIG_USE_SYNCTHREAD)
-static tSyncThreadInstance syncThreadInstance_l;
+static tSyncThreadInstance  syncThreadInstance_l;
 #endif
 
 //------------------------------------------------------------------------------
@@ -173,7 +173,7 @@ BOOL system_getTermSignalState(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_app_common
 */
@@ -190,7 +190,7 @@ void system_msleep(unsigned int milliSeconds_p)
 
 The function starts the thread used for synchronous data handling.
 
-\param  pfnSync_p           Pointer to sync callback function
+\param[in]      pfnSync_p           Pointer to sync callback function
 
 \note   Currently not implemented for Windows!
 
@@ -243,14 +243,14 @@ void system_stopSyncThread(void)
 
 This function implements the synchronous application thread.
 
-\param  pArg_p    Thread parameter. Not used!
+\param[in,out]  pArg_p              Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 */
 //------------------------------------------------------------------------------
 static DWORD WINAPI syncThread(LPVOID pArg_p)
 {
-    tOplkError ret;
+    tOplkError  ret;
 
     UNUSED_PARAMETER(pArg_p);
 
@@ -260,17 +260,14 @@ static DWORD WINAPI syncThread(LPVOID pArg_p)
         {
             ret = syncThreadInstance_l.pfnSyncCb();
             if (ret != kErrorOk)
-            {
                 break;
-            }
         }
         else
-        {
             break;
-        }
     }
 
-    printf("Exiting Sync Thread\n");
+    printf("Exiting sync thread\n");
+
     return 0;
 }
 #endif

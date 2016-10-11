@@ -41,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sys/unistd.h>
 #include <alt_timers.h>
 #include <alt_globaltmr.h>
@@ -59,6 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <trace/trace.h>
 #include <system/system.h>
 #include <sleep.h>
+
+#if defined(CONFIG_USE_SYNCTHREAD)
+#error "Sync thread is not supported on this target!"
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -95,12 +98,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
-static INT initializeFpga(void);
-static INT initializeTimer(void);
-static INT cleanupTimer(void);
-#ifdef CONFIG_BOOT_FROM_SD
-static INT initializeDriver(void);
+static int initializeFpga(void);
+static int initializeTimer(void);
+static int cleanupTimer(void);
+#if defined(CONFIG_BOOT_FROM_SD)
+static int initializeDriver(void);
 #endif
 
 //============================================================================//
@@ -117,9 +119,9 @@ work correctly.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-INT system_init(void)
+int system_init(void)
 {
-    tOplkError          oplkRet = kErrorOk;
+    tOplkError  oplkRet = kErrorOk;
 
     if (initializeTimer() != 0)
     {
@@ -143,7 +145,7 @@ INT system_init(void)
         goto Exit;
     }
 
-#ifdef CONFIG_BOOT_FROM_SD
+#if defined(CONFIG_BOOT_FROM_SD)
     // Initialize the driver processor
     if (initializeDriver() != 0)
     {
@@ -172,39 +174,6 @@ void system_exit(void)
     cleanupTimer();
 }
 
-#if defined(CONFIG_USE_SYNCTHREAD)
-//------------------------------------------------------------------------------
-/**
-\brief  Start synchronous data thread
-
-The function starts the thread used for synchronous data handling.
-On cyclone V ARM, this function only implemented as a stub.
-
-\param  pfnSync_p           Pointer to sync callback function
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void system_startSyncThread(tSyncCb pfnSync_p)
-{
-    UNUSED_PARAMETER(pfnSync_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Stop synchronous data thread
-
-The function stops the thread used for synchronous data handling.
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void system_stopSyncThread(void)
-{
-    syncThreadInstance_l.fTerminate = TRUE;
-}
-#endif
-
 //------------------------------------------------------------------------------
 /**
 \brief  Return true if a termination signal has been received
@@ -227,12 +196,12 @@ BOOL system_getTermSignalState(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void system_msleep(unsigned INT milliSeconds_p)
+void system_msleep(unsigned int milliSeconds_p)
 {
     msleep(milliSeconds_p);
 }
@@ -254,10 +223,10 @@ configures the FPGA for operation.
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static INT initializeFpga(void)
+static int initializeFpga(void)
 {
-    INT                 ret = 0;
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    int             ret = 0;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     /* initialize the FPGA control */
     if (alt_fpga_init() != ALT_E_SUCCESS)                       // initialize the FPGA manager
@@ -325,7 +294,7 @@ Exit:
     return ret;
 }
 
-#ifdef CONFIG_BOOT_FROM_SD
+#if defined(CONFIG_BOOT_FROM_SD)
 //------------------------------------------------------------------------------
 /**
 \brief Initialize the openPOWERLINK driver from the hard processor system
@@ -338,16 +307,16 @@ processor's memory and releases the processor out of reset.
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static INT initializeDriver(void)
+static int initializeDriver(void)
 {
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
     /* Symbol name for the driver binary file contents linked in. */
-    extern char         _binary_drv_daemon_bin_start;
-    extern char         _binary_drv_daemon_bin_end;
+    extern char     _binary_drv_daemon_bin_start;
+    extern char     _binary_drv_daemon_bin_end;
     /* Use the above symbols to extract the driver binary information */
-    const char*         driverBinary = &_binary_drv_daemon_bin_start;
-    const UINT32        driverBinarySize = &_binary_drv_daemon_bin_end - &_binary_drv_daemon_bin_start;
-    char*               driverExecutableStartAddress = (char*)DDR3_EMIF_0_BASE;
+    const char*     driverBinary = &_binary_drv_daemon_bin_start;
+    const UINT32    driverBinarySize = &_binary_drv_daemon_bin_end - &_binary_drv_daemon_bin_start;
+    char*           driverExecutableStartAddress = (char*)DDR3_EMIF_0_BASE;
 
     // Trace the driver image information.
     TRACE("INFO: driver Image binary at %p.\n", driverBinary);
@@ -357,9 +326,7 @@ static INT initializeDriver(void)
     // Reset the driver processor
     halRet = alt_fpga_gpo_write(0x00000001, 0x00000000);
     if (halRet != ALT_E_SUCCESS)
-    {
         return -1;
-    }
 
     while (alt_fpga_gpi_read(0x00000001) == 0);
 
@@ -369,11 +336,10 @@ static INT initializeDriver(void)
     // Release the driver processor from reset
     halRet = alt_fpga_gpo_write(0x00000001, 0x00000001);
     if (halRet != ALT_E_SUCCESS)
-    {
         return -1;
-    }
 
     while (alt_fpga_gpi_read(0x00000001) != 0);
+
     return 0;
 }
 #endif
@@ -390,16 +356,16 @@ the user stack generic timer.
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static INT initializeTimer(void)
+static int initializeTimer(void)
 {
-    INT                 ret = 0;
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    int             ret = 0;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     // initialize timer, only the 64 bit global timer is used
     halRet =  alt_globaltmr_init();
     if (halRet != ALT_E_SUCCESS)
     {
-        TRACE("general purpose timer module initialization failed!!\n");
+        TRACE("General purpose timer module initialization failed!!\n");
         ret = -1;
         goto Exit;
     }
@@ -447,9 +413,11 @@ static INT initializeTimer(void)
     }
 
     TRACE("Timer Comparator Mode: %u, value: %lu",
-          alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
+          alt_globaltmr_is_comp_mode(),
+          alt_globaltmr_comp_get64() - 1);
     TRACE("Timer Auto increment mode: %u, value: %u\n",
-          alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
+          alt_globaltmr_is_autoinc_mode(),
+          alt_globaltmr_autoinc_get());
 
     // stop the comparison function for this timer
     if ((alt_globaltmr_autoinc_mode_stop() != ALT_E_SUCCESS) ||
@@ -461,9 +429,11 @@ static INT initializeTimer(void)
     }
 
     TRACE("Timer Comparator Mode: %u, value: %lu",
-          alt_globaltmr_is_comp_mode(), alt_globaltmr_comp_get64() - 1);
+          alt_globaltmr_is_comp_mode(),
+          alt_globaltmr_comp_get64() - 1);
     TRACE("Timer Auto increment mode: %u, value: %u\n",
-          alt_globaltmr_is_autoinc_mode(), alt_globaltmr_autoinc_get());
+          alt_globaltmr_is_autoinc_mode(),
+          alt_globaltmr_autoinc_get());
 
     // disable comparator interrupts from this timer
     if ((alt_globaltmr_int_disable() != ALT_E_SUCCESS) ||
@@ -489,17 +459,15 @@ The function uninitializes the global timer.
 \retval -1                  Failure
 */
 //------------------------------------------------------------------------------
-static INT cleanupTimer(void)
+static int cleanupTimer(void)
 {
-    INT                 ret = 0;
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    int             ret = 0;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     halRet = alt_globaltmr_stop();
 
     if (halRet == ALT_E_SUCCESS)
-    {
         halRet = alt_globaltmr_uninit();
-    }
 
     if (halRet != ALT_E_SUCCESS)
         ret = -1;

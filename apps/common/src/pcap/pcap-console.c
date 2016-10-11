@@ -11,7 +11,7 @@ library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -95,8 +95,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 With this function the PCAP device to be used for openPOWERLINK is selected
 from a list of devices.
 
-\param  pDevName_p              Pointer to store the device name which should be
-                                used.
+\param[out]     pDevName_p          Pointer to store the device name which
+                                    should be used.
 
 \return The function returns 0 if a device could be selected, otherwise -1.
 
@@ -104,11 +104,11 @@ from a list of devices.
 //------------------------------------------------------------------------------
 int selectPcapDevice(char* pDevName_p)
 {
-    char            sErr_Msg[PCAP_ERRBUF_SIZE];
-    pcap_if_t*      alldevs;
-    pcap_if_t*      seldev;
-    int             i = 0;
-    int             inum;
+    char        sErr_Msg[PCAP_ERRBUF_SIZE];
+    pcap_if_t*  alldevs;
+    pcap_if_t*  seldev;
+    int         i = 0;
+    int         inum;
 
     /* Retrieve the device list on the local machine */
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
@@ -118,20 +118,16 @@ int selectPcapDevice(char* pDevName_p)
     }
 
     printf("--------------------------------------------------\n");
-    printf("List of Ethernet cards found in this system: \n");
+    printf("List of Ethernet cards found in this system:\n");
     printf("--------------------------------------------------\n");
 
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
     {
         printf("%d. ", ++i);
         if (seldev->description)
-        {
             printf("%s\n      %s\n", seldev->description, seldev->name);
-        }
         else
-        {
             printf("%s\n", seldev->name);
-        }
     }
 
     if (i == 0)
@@ -141,7 +137,7 @@ int selectPcapDevice(char* pDevName_p)
     }
 
     printf("--------------------------------------------------\n");
-    printf("Select the interface to be used for POWERLINK (1-%d):",i);
+    printf("Select the interface to be used for POWERLINK (1-%d):", i);
     if (scanf("%d", &inum) == EOF)
     {
         pcap_freealldevs(alldevs);
@@ -172,4 +168,4 @@ int selectPcapDevice(char* pDevName_p)
 /// \{
 
 
-///\}
+/// \}

@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_MainWindow_H_
-#define _INC_MainWindow_H_
+#ifndef _INC_demo_MainWindow_H_
+#define _INC_demo_MainWindow_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -77,17 +76,17 @@ class MainWindow : public QWidget
 public:
     MainWindow(QWidget* parent = 0);
 
-    State*       getStateWidget() {return pState;}
-    Output*      getOutputWidget() {return pOutput;}
-    Input*       getInputWidget() {return pInput;}
-    CnState*     getCnStateWidget() {return pCnState;}
+    State*       getStateWidget() const {return this->pState;}
+    Output*      getOutputWidget() const {return this->pOutput;}
+    Input*       getInputWidget() const {return this->pInput;}
+    CnState*     getCnStateWidget() const {return this->pCnState;}
 
 private slots:
     void         toggleWindowState();
     void         startPowerlink();
     void         stopPowerlink();
     void         showSdoDialog();
-    void         printlog(QString str);
+    void         printlog(const QString& str);
     void         execNmtCmd();
 
 private:
@@ -125,4 +124,4 @@ private:
     tNmtEvent    nmtEvent;
 };
 
-#endif /* _INC_MainWindow_H_ */
+#endif /* _INC_demo_MainWindow_H_ */

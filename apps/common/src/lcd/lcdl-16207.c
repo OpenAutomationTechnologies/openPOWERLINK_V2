@@ -9,7 +9,7 @@ display controller HD44780 - available e.g. on the Terasic DE2-115 board.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef LCD_BASE
+#if !defined(LCD_BASE)
 #error "Rename the LCD component in QSYS/SOPC to 'lcd'!"
 #endif
 
@@ -151,7 +151,7 @@ void lcdl_clear(void)
 
 Changes to specified line of the LCD
 
-\param  line_p      Specifies the line
+\param[in]      line_p              Specifies the line
 
 \return The function returns 0 if the line is changed successfully,
         otherwise -1.
@@ -186,7 +186,7 @@ int lcdl_changeToLine(unsigned int line_p)
 
 Writes text to the LCD currently selected.
 
-\param  sText_p     The text to print
+\param[in]      sText_p             The text to print
 */
 //------------------------------------------------------------------------------
 void lcdl_printText(const char* sText_p)

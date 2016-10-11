@@ -42,6 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "app.h"
+#include "event.h"
+
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 
@@ -50,9 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <lcd/lcd.h>
 #include <arp/arp.h>
 #include <system/system.h>
-
-#include "app.h"
-#include "event.h"
 
 #if (CONFIG_CDC_ON_SD != FALSE)
 #include <sdcard/sdcard.h>
@@ -66,10 +66,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define CYCLE_LEN           -1
-#define NODEID              0xF0                    //=> MN
-#define IP_ADDR             0xc0a86401              // 192.168.100.1
-#define SUBNET_MASK         0xFFFFFF00              // 255.255.255.0
-#define DEFAULT_GATEWAY     0xC0A864FE              // 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define NODEID              0xF0                                    //=> MN
+#define IP_ADDR             0xc0a86401                              // 192.168.100.1
+#define SUBNET_MASK         0xFFFFFF00                              // 255.255.255.0
+#define DEFAULT_GATEWAY     0xC0A864FE                              // 192.168.100.C_ADR_RT1_DEF_NODE_ID
 #define MAC_ADDR            0x02, 0x88, 0xAB, 0x00, 0x00, NODEID    // Locally administered MAC address
 
 //------------------------------------------------------------------------------
@@ -88,10 +88,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #if (CONFIG_CDC_ON_SD != FALSE)
-static char*            pszCdcFilename_g = "mnobd.cdc";
-
+static const char*  cdcFilename_l = "mnobd.cdc";
 #else
-const unsigned char     aCdcBuffer[] =
+static const UINT8  aCdcBuffer_l[] =
 {
     #include "mnobd_char.txt"
 };
@@ -100,15 +99,15 @@ const unsigned char     aCdcBuffer[] =
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef struct sInstace
+typedef struct
 {
     UINT8           aMacAddr[6];    ///< Mac address
     UINT8           nodeId;         ///< Node ID
     UINT32          cycleLen;       ///< Cycle length
     BOOL            fShutdown;      ///< User flag to shutdown the stack
     BOOL            fGsOff;         ///< NMT State GsOff reached
-    unsigned char*  pCdcBuffer;     ///< Pointer to CDC buffer
-    UINT            cdcBufferSize;  ///< Size of CDC buffer
+    const void*     pCdcBuffer;     ///< Pointer to CDC buffer
+    size_t          cdcBufferSize;  ///< Size of CDC buffer
 } tInstance;
 
 //------------------------------------------------------------------------------
@@ -119,11 +118,12 @@ static tInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   initPowerlink(tInstance* pInstance_p);
+static tOplkError   initPowerlink(const tInstance* pInstance_p);
 static tOplkError   loopMain(tInstance* pInstance_p);
-static void         shutdownPowerlink(tInstance* pInstance_p);
+static void         shutdownPowerlink(const tInstance* pInstance_p);
 static tOplkError   eventCbPowerlink(tOplkApiEventType eventType_p,
-                                     tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+                                     const tOplkApiEventArg* pEventArg_p,
+                                     void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -161,20 +161,19 @@ int main(void)
     // initialize instance
     memset(&instance_l, 0, sizeof(instance_l));
 
-    instance_l.cycleLen         = CYCLE_LEN;
-    instance_l.nodeId           = (nodeid != 0) ? nodeid : NODEID;
-    instance_l.fShutdown        = FALSE;
-    instance_l.fGsOff           = FALSE;
+    instance_l.cycleLen = CYCLE_LEN;
+    instance_l.nodeId = (nodeid != 0) ? nodeid : NODEID;
+    instance_l.fShutdown = FALSE;
+    instance_l.fGsOff = FALSE;
 #if (CONFIG_CDC_ON_SD != FALSE)
-    if (sdcard_getCdcOnSd(pszCdcFilename_g, &cdcBuffInfo) != 0)
-    {
+    if (sdcard_getCdcOnSd(cdcFilename_l, &cdcBuffInfo) != 0)
         goto Exit;
-    }
-    instance_l.pCdcBuffer       = (unsigned char*)cdcBuffInfo.pCdcBuffer;
-    instance_l.cdcBufferSize    = cdcBuffInfo.cdcSize;
+
+    instance_l.pCdcBuffer = cdcBuffInfo.pCdcBuffer;
+    instance_l.cdcBufferSize = (size_t)cdcBuffInfo.cdcSize;
 #else
-    instance_l.pCdcBuffer       = (unsigned char*)aCdcBuffer;
-    instance_l.cdcBufferSize    = sizeof(aCdcBuffer);
+    instance_l.pCdcBuffer = aCdcBuffer_l;
+    instance_l.cdcBufferSize = sizeof(aCdcBuffer_l);
 #endif
     // set mac address (last byte is set to node ID)
     memcpy(instance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
@@ -185,22 +184,26 @@ int main(void)
 
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK embedded MN DEMO application\n");
-    PRINTF("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
+    PRINTF("Using openPOWERLINK stack: %s\n", oplk_getVersionString());
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
     lcd_printNodeId(instance_l.nodeId);
 
-    if ((ret = initPowerlink(&instance_l)) != kErrorOk)
+    ret = initPowerlink(&instance_l);
+    if (ret != kErrorOk)
         goto Exit;
 
-    if ((ret = initApp()) != kErrorOk)
+    ret = initApp();
+    if (ret != kErrorOk)
         goto Exit;
 
-    if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
+    ret = oplk_setNonPlkForward(TRUE);
+    if (ret != kErrorOk)
     {
         PRINTF("WARNING: oplk_setNonPlkForward() failed with \"%s\"\n(Error:0x%x!)\n",
-               debugstr_getRetValStr(ret), ret);
+               debugstr_getRetValStr(ret),
+               ret);
     }
 
     loopMain(&instance_l);
@@ -233,15 +236,15 @@ Exit:
 
 The function initializes the openPOWERLINK stack.
 
-\param  pInstance_p             Pointer to demo instance
+\param[in]      pInstance_p         Pointer to demo instance
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(tInstance* pInstance_p)
+static tOplkError initPowerlink(const tInstance* pInstance_p)
 {
-    tOplkError                  ret = kErrorOk;
-    static tOplkApiInitParam    initParam;
+    tOplkError          ret = kErrorOk;
+    tOplkApiInitParam   initParam;
 
     PRINTF("Initializing openPOWERLINK stack...\n");
 
@@ -259,8 +262,8 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.isochrTxMaxPayload      = 256;                    // const
     initParam.isochrRxMaxPayload      = 1490;                   // const
     initParam.presMaxLatency          = 50000;                  // const; only required for IdentRes
-    initParam.preqActPayloadLimit     = 36;                     // required for initialisation (+28 bytes)
-    initParam.presActPayloadLimit     = 36;                     // required for initialisation of Pres frame (+28 bytes)
+    initParam.preqActPayloadLimit     = 36;                     // required for initialization (+28 bytes)
+    initParam.presActPayloadLimit     = 36;                     // required for initialization of Pres frame (+28 bytes)
     initParam.asndMaxLatency          = 150000;                 // const; only required for IdentRes
     initParam.multiplCylceCnt         = 0;                      // required for error detection
     initParam.asyncMtu                = 1500;                   // required to set up max frame size
@@ -288,7 +291,9 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = obdcreate_initObd(&initParam.obdInitParam);
     if (ret != kErrorOk)
     {
-        PRINTF("obdcreate_initObd() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("obdcreate_initObd() failed with \"%s\" (0x%04x)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
@@ -296,21 +301,28 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
     ret = oplk_create(&initParam);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
-    ret = oplk_setCdcBuffer(pInstance_p->pCdcBuffer, pInstance_p->cdcBufferSize);
+    ret = oplk_setCdcBuffer(pInstance_p->pCdcBuffer,
+                            pInstance_p->cdcBufferSize);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_setCdcBuffer() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_setCdcBuffer() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
@@ -334,23 +346,25 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 This function implements the main loop of the demo application.
 - It sends an NMT command to start the stack
 
-\param  pInstance_p             Pointer to demo instance
+\param[in,out]  pInstance_p         Pointer to demo instance
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError loopMain(tInstance* pInstance_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError  ret;
 
     // start processing
-    if ((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
+    ret = oplk_execNmtCommand(kNmtEventSwReset);
+    if (ret != kErrorOk)
         return ret;
 
     while (1)
     {
         // do background tasks
-        if ((ret = oplk_process()) != kErrorOk)
+        ret = oplk_process();
+        if (ret != kErrorOk)
             break;
 
         if (oplk_checkKernelStack() == FALSE)
@@ -402,10 +416,10 @@ static tOplkError loopMain(tInstance* pInstance_p)
 
 The function shuts down the demo application.
 
-\param  pInstance_p             Pointer to demo instance
+\param[in]      pInstance_p         Pointer to demo instance
 */
 //------------------------------------------------------------------------------
-static void shutdownPowerlink(tInstance* pInstance_p)
+static void shutdownPowerlink(const tInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
 
@@ -421,15 +435,16 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
 The function implements the applications stack event handler.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      eventType_p         Type of event
+\param[in]      pEventArg_p         Pointer to union which describes the event in detail
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
-                                   tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+                                   const tOplkApiEventArg* pEventArg_p,
+                                   void* pUserArg_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -442,17 +457,15 @@ static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
     //   The function prints the ARP reply information.
     if (eventType_p == kOplkApiEventNode)
     {
-        tOplkApiEventNode* pNode = &pEventArg_p->nodeEvent;
+        const tOplkApiEventNode*    pNode = &pEventArg_p->nodeEvent;
 
         // Note: This is a demonstration to generate non-POWERLINK frames.
         if (pNode->nodeEvent == kNmtNodeEventFound)
-        {
             arp_sendRequest((0xFFFFFF00 & IP_ADDR) | pNode->nodeId);
-        }
     }
     else if (eventType_p == kOplkApiEventReceivedNonPlk)
     {
-        tOplkApiEventReceivedNonPlk* pFrameInfo = &pEventArg_p->receivedEth;
+        const tOplkApiEventReceivedNonPlk*  pFrameInfo = &pEventArg_p->receivedEth;
 
         // Note: This is a demonstration how to forward Ethernet frames to upper
         //       layers. Instead you can insert an IP stack and forward the

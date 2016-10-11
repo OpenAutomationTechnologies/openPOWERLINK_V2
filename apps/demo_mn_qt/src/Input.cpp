@@ -97,87 +97,89 @@ Constructs an Input widget.
 Input::Input(QWidget* parent)
     : QWidget(parent)
 {
-    QFont LabelFont;
+    QFont   LabelFont;
+
     LabelFont.setBold(true);
     LabelFont.setPointSize(18);
 
-    pInputLayout = new QVBoxLayout;
-    setLayout(pInputLayout);
+    this->pInputLayout = new QVBoxLayout;
+    setLayout(this->pInputLayout);
 
-    pInputLayout->addStretch(0);
+    this->pInputLayout->addStretch(0);
 
     QLabel* pDigiInLabel = new QLabel("Digital Inputs:");
     pDigiInLabel->setFont(LabelFont);
-    pInputLayout->addWidget(pDigiInLabel);
+    this->pInputLayout->addWidget(pDigiInLabel);
 
-    ppLeds = new Leds*[NODE_ID_MAX];
+    this->ppLeds = new Leds*[NODE_ID_MAX];
     for (int i = 0; i < NODE_ID_MAX; i++)
     {
-        ppLeds[i] = new Leds(LED_NUM);
-        ppLeds[i]->hide();
-        pInputLayout->addWidget(ppLeds[i]);
+        this->ppLeds[i] = new Leds(LED_NUM);
+        this->ppLeds[i]->hide();
+        this->pInputLayout->addWidget(this->ppLeds[i]);
     }
 
-    pInputLayout->addStretch(1);
+    this->pInputLayout->addStretch(1);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  set LEDs
+\brief  Set LEDs
 
 Sets the input LEDs of a CN.
 
-\param  dataIn_p        Input data to show on LEDs
-\param  nodeId_p        Node ID for which to set LEDs
+\param[in]      dataIn_p            Input data to show on LEDs
+\param[in]      nodeId_p            Node ID for which to set LEDs
 */
 //------------------------------------------------------------------------------
 void Input::setLeds(int dataIn_p, int nodeId_p)
 {
-    ppLeds[nodeId_p]->setLeds(dataIn_p);
+    this->ppLeds[nodeId_p]->setLeds(dataIn_p);
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  add a CN
+\brief  Add a CN
 
 Adds a controlled node to the node list.
 
-\param          nodeId_p                Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 
 \ingroup module_demo_mn_qt
 */
 //------------------------------------------------------------------------------
 void Input::addNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppLeds[nodeId_p]->show();
-        ppLeds[nodeId_p]->disableLeds();
-        //apNodes[iNodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
-        pInputLayout->update();
+        this->ppLeds[nodeId_p]->show();
+        this->ppLeds[nodeId_p]->disableLeds();
+        this->pInputLayout->update();
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  remove a CN
+\brief  Remove a CN
 
 Removes a controlled node from the node list.
 
-\param          nodeId_p               Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void Input::removeNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppLeds[nodeId_p]->hide();
+        this->ppLeds[nodeId_p]->hide();
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  remove all CNs
+\brief  Remove all CNs
 
 Removes all controlled nodes from the node list.
 */
@@ -189,6 +191,6 @@ void Input::removeAllNodes()
     // count() gives all widgets (hidden ones too)
     for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
-        ppLeds[nIdx]->hide();
+        this->ppLeds[nIdx]->hide();
     }
 }

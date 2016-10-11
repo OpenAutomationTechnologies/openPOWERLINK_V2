@@ -8,6 +8,7 @@ The file contains the definitions fro the NodeState widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -31,11 +32,10 @@ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
 LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
 ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_NodeState_H_
-#define _INC_NodeState_H_
+#ifndef _INC_demo_NodeState_H_
+#define _INC_demo_NodeState_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -67,17 +67,18 @@ class NodeState : public QWidget
     Q_OBJECT
 
 public:
-    NodeState(const QString& label_p, QWidget* parent_p = 0);
+    NodeState(const QString& label_p,
+              QWidget* parent_p = 0);
 
 public:
     void setState(int state_p);
 
 private:
-    QLabel*         pStateLabel;
-    QLabel*         pLedLabel;
-    QPixmap*        pRedLed;
-    QPixmap*        pYellowLed;
-    QPixmap*        pGreenLed;
+    QLabel*     pStateLabel;
+    QLabel*     pLedLabel;
+    QPixmap*    pRedLed;
+    QPixmap*    pYellowLed;
+    QPixmap*    pGreenLed;
 };
 
-#endif /* _INC_NodeState_H_ */
+#endif /* _INC_demo_NodeState_H_ */

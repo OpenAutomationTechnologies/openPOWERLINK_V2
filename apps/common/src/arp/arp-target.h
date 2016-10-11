@@ -9,7 +9,7 @@ This file contains the target specific definitions like endian conversion.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_arp_target_H_
 #define _INC_arp_target_H_
 
@@ -58,11 +57,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 // Little endian => swap needed
 // Swap long: 0x00C0FFEE --> 0xEEFFC000
-#define ARP_SWAPL(x)    ((((x) >> 24) & 0x000000FF) | (((x) >> 8) & 0x0000FF00) | \
-                        (((x) & 0x000000FF) << 24) | (((x) & 0x0000FF00) << 8))
+#define ARP_SWAPL(x)    ((((x) >> 24) & 0x000000FF) | \
+                         (((x) >> 8) & 0x0000FF00) |  \
+                         (((x) & 0x000000FF) << 24) | \
+                         (((x) & 0x0000FF00) << 8))
 
 // Swap short: 0xC0FE --> 0xFEC0
-#define ARP_SWAPS(x)    ((((x) >> 8) & 0x00FF) | (((x) << 8) & 0xFF00))
+#define ARP_SWAPS(x)    ((((x) >> 8) & 0x00FF) | \
+                         (((x) << 8) & 0xFF00))
 
 #define htons(x)        ARP_SWAPS(x)
 #define htonl(x)        ARP_SWAPL(x)
@@ -78,7 +80,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

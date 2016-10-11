@@ -52,7 +52,7 @@ Q_DECLARE_METATYPE(tSdoComFinished)
 //------------------------------------------------------------------------------
 // global variables
 //------------------------------------------------------------------------------
-ProcessThread* pProcessThread_g;
+ProcessThread*  pProcessThread_g;
 
 //============================================================================//
 //            S T A T I C    M E M B E R    F U N C T I O N S                 //
@@ -64,16 +64,16 @@ ProcessThread* pProcessThread_g;
 
 The function processes state change events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      eventType_p         Type of event
+\param[in]      pEventArg_p         Pointer to union which describes the event in detail
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-
 tOplkError ProcessThread::appCbEvent(tOplkApiEventType eventType_p,
-                                     tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+                                     const tOplkApiEventArg* pEventArg_p,
+                                     void* pUserArg_p)
 {
     return pProcessThread_g->processEvent(eventType_p, pEventArg_p, pUserArg_p);
 }
@@ -88,22 +88,26 @@ tOplkError ProcessThread::appCbEvent(tOplkApiEventType eventType_p,
 
 Constructs a ProcessThread object
 
-\param  pMainWindow_p       Pointer to main window object
+\param[in,out]  pMainWindow_p       Pointer to main window object
 */
 //------------------------------------------------------------------------------
 ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
 {
     qRegisterMetaType<tSdoComFinished>();
+
     pProcessThread_g = this;
-    pMainWindow = pMainWindow_p;
-    pEventLog = new EventLog();
 
-    QObject::connect(pEventLog, SIGNAL(printLog(const QString&)),
-                     pMainWindow, SLOT(printlog(const QString&)));
+    this->pMainWindow = pMainWindow_p;
+    this->pEventLog = new EventLog();
 
-    status = -1;
-    currentNmtState = kNmtGsOff;
-    fMnActive = false;
+    QObject::connect(pEventLog,
+                     SIGNAL(printLog(const QString&)),
+                     pMainWindow,
+                     SLOT(printlog(const QString&)));
+
+    this->status = -1;
+    this->currentNmtState = kNmtGsOff;
+    this->fMnActive = false;
 }
 
 //------------------------------------------------------------------------------
@@ -115,7 +119,7 @@ Destructs a ProcessThread object
 //------------------------------------------------------------------------------
 ProcessThread::~ProcessThread()
 {
-    delete pEventLog;
+    delete this->pEventLog;
 }
 
 //------------------------------------------------------------------------------
@@ -127,7 +131,7 @@ run() implements the starting point for the event thread.
 //------------------------------------------------------------------------------
 void ProcessThread::run()
 {
-    tOplkError          ret;
+    tOplkError  ret;
 
     // start process function
     ret = oplk_process();
@@ -139,15 +143,15 @@ void ProcessThread::run()
 
 The function signals the POWERLINK status
 
-\param  status_p       POWERLINK status
+\param[in]      status_p            POWERLINK status
 */
 //------------------------------------------------------------------------------
 void ProcessThread::sigOplkStatus(int status_p)
 {
-    if (status_p != status)
+    if (status_p != this->status)
     {
         emit oplkStatusChanged(status_p);
-        status = status_p;
+        this->status = status_p;
     }
 }
 
@@ -157,16 +161,16 @@ void ProcessThread::sigOplkStatus(int status_p)
 
 The function signals a log message entry to the text edit of the main window.
 
-\param  log_p           Log entry to print.
+\param[in]      rLog_p              Log entry to print.
 */
 //------------------------------------------------------------------------------
-void ProcessThread::sigPrintLog(QString log_p)
+void ProcessThread::sigPrintLog(const QString& rLog_p)
 {
     QString str;
 
     str.append(QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss.zzz"));
     str.append(" - ");
-    str.append(log_p);
+    str.append(rLog_p);
 
     emit printLog(str);
 }
@@ -177,14 +181,14 @@ void ProcessThread::sigPrintLog(QString log_p)
 
 sigNmtState() signals the POWERLINK NMT state
 
-\param  State_p       POWERLINK NMT state
+\param[in]      state_p             POWERLINK NMT state
 */
 //------------------------------------------------------------------------------
-void ProcessThread::sigNmtState(tNmtState State_p)
+void ProcessThread::sigNmtState(tNmtState state_p)
 {
     QString strState;
 
-    switch (State_p)
+    switch (state_p)
     {
         case kNmtGsOff:
             strState = "Off";
@@ -260,7 +264,7 @@ void ProcessThread::sigNmtState(tNmtState State_p)
 
         default:
             strState = "??? (0x";
-            strState += QString::number(State_p, 16);
+            strState += QString::number(state_p, 16);
             strState += ")";
             break;
     }
@@ -274,15 +278,15 @@ void ProcessThread::sigNmtState(tNmtState State_p)
 
 The function signals if it is in an active MN state.
 
-\param  fMnActive_p       If true it is in an active MN state otherwise not.
+\param[in]      fMnActive_p         If true it is in an active MN state otherwise not.
 */
 //------------------------------------------------------------------------------
 void ProcessThread::sigMnActive(bool fMnActive_p)
 {
-    if (fMnActive_p != fMnActive)
+    if (fMnActive_p != this->fMnActive)
     {
         emit isMnActive(fMnActive_p);
-        fMnActive = fMnActive_p;
+        this->fMnActive = fMnActive_p;
     }
 }
 
@@ -295,28 +299,29 @@ waitForNmtStateOff() waits until the NMT state NMT_STATE_OFF is reached
 //------------------------------------------------------------------------------
 void ProcessThread::waitForNmtStateOff()
 {
-    Mutex.lock();
-    if (status > 0)
-    {
-        NmtStateOff.wait(&Mutex);
-    }
-    Mutex.unlock();
+    this->mutex.lock();
+
+    if (this->status > 0)
+        this->nmtStateOff.wait(&this->mutex);
+
+    this->mutex.unlock();
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Do cleanup in NMT_STATE_OFF
 
-reachedNmtStateOff() cleanes up some staff after the NMT state NMT_STATE_OFF
+reachedNmtStateOff() cleans up some staff after the NMT state NMT_STATE_OFF
 is reached.
 */
 //------------------------------------------------------------------------------
 void ProcessThread::reachedNmtStateOff()
 {
     emit allNodesRemoved();
-    Mutex.lock();
-    NmtStateOff.wakeAll();
-    Mutex.unlock();
+
+    this->mutex.lock();
+    this->nmtStateOff.wakeAll();
+    this->mutex.unlock();
 }
 
 //------------------------------------------------------------------------------
@@ -339,13 +344,13 @@ tOplkApiCbEvent ProcessThread::getEventCbFunc(void)
 
 AppCbEvent() implements the openPOWERLINKs event callback function.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Argument of event
-\param  pUserArg_p          User argument
+\param[in]      eventType_p         Type of event
+\param[in]      pEventArg_p         Argument of event
+\param[in]      pUserArg_p          User argument
 */
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::processEvent(tOplkApiEventType eventType_p,
-                                       tOplkApiEventArg* pEventArg_p,
+                                       const tOplkApiEventArg* pEventArg_p,
                                        void* pUserArg_p)
 {
     tOplkError  ret = kErrorOk;
@@ -353,32 +358,32 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType eventType_p,
     switch (eventType_p)
     {
         case kOplkApiEventNmtStateChange:
-            ret = processStateChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processStateChangeEvent(&pEventArg_p->nmtStateChange, pUserArg_p);
             break;
 
         case kOplkApiEventCriticalError:
         case kOplkApiEventWarning:
-            ret = processErrorWarningEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processErrorWarningEvent(&pEventArg_p->internalError, pUserArg_p);
             break;
 
         case kOplkApiEventHistoryEntry:
-            ret = processHistoryEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processHistoryEvent(&pEventArg_p->errorHistoryEntry, pUserArg_p);
             break;
 
         case kOplkApiEventNode:
-            ret = processNodeEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processNodeEvent(&pEventArg_p->nodeEvent, pUserArg_p);
             break;
 
         case kOplkApiEventPdoChange:
-            ret = processPdoChangeEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processPdoChangeEvent(&pEventArg_p->pdoChange, pUserArg_p);
             break;
 
         case kOplkApiEventCfmProgress:
-            ret = processCfmProgressEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processCfmProgressEvent(&pEventArg_p->cfmProgress, pUserArg_p);
             break;
 
         case kOplkApiEventCfmResult:
-            ret = processCfmResultEvent(eventType_p, pEventArg_p, pUserArg_p);
+            ret = processCfmResultEvent(&pEventArg_p->cfmResult, pUserArg_p);
             break;
 
         case kOplkApiEventSdo:
@@ -405,31 +410,26 @@ tOplkError ProcessThread::processEvent(tOplkApiEventType eventType_p,
 
 The function processes state change events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
+\param  pNmtStateChange_p   Pointer to the state change structure
 \param  pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
-                                                  tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processStateChangeEvent(const tEventNmtStateChange* pNmtStateChange_p,
                                                   void* pUserArg_p)
 {
-    tOplkError                  ret = kErrorOk;
-    tEventNmtStateChange*       pNmtStateChange = &pEventArg_p->nmtStateChange;
-    QString                     str;
+    tOplkError  ret = kErrorOk;
+    QString     str;
 
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
+    this->currentNmtState = pNmtStateChange_p->newNmtState;
+    this->sigNmtState(pNmtStateChange_p->newNmtState);
 
-    currentNmtState = pNmtStateChange->newNmtState;
-    sigNmtState(pNmtStateChange->newNmtState);
+    this->pEventLog->printEvent(pNmtStateChange_p);
 
-    pEventLog->printEvent(pNmtStateChange);
-
-    switch (pNmtStateChange->newNmtState)
+    switch (pNmtStateChange_p->newNmtState)
     {
         case kNmtGsOff:
             pProcessThread_g->sigOplkStatus(0);
@@ -441,18 +441,18 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
             // and unblock DataInDataOutThread
             oplk_freeProcessImage(); //jba do we need it here?
 
-            reachedNmtStateOff();
-            sigMnActive(false);
+            this->reachedNmtStateOff();
+            this->sigMnActive(false);
             break;
 
         case kNmtGsResetCommunication:
             pProcessThread_g->sigOplkStatus(1);
-            sigMnActive(false);
+            this->sigMnActive(false);
             break;
 
         case kNmtGsResetConfiguration:
-            sigOplkStatus(1);
-            sigMnActive(false);
+            this->sigOplkStatus(1);
+            this->sigMnActive(false);
             break;
 
         case kNmtCsNotActive:
@@ -467,25 +467,25 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
         case kNmtCsReadyToOperate:
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
-            sigOplkStatus(1);
-            sigMnActive(false);
+            this->sigOplkStatus(1);
+            this->sigMnActive(false);
             break;
 
         case kNmtCsOperational:
-            sigOplkStatus(2);
-            sigMnActive(false);
+            this->sigOplkStatus(2);
+            this->sigMnActive(false);
             break;
 
         case kNmtMsReadyToOperate:
         case kNmtMsOperational:
-            sigOplkStatus(2);
-            sigMnActive(true);
+            this->sigOplkStatus(2);
+            this->sigMnActive(true);
             break;
 
 
         default:
-            sigOplkStatus(-1);
-            sigMnActive(false);
+            this->sigOplkStatus(-1);
+            this->sigMnActive(false);
             break;
     }
 
@@ -498,23 +498,18 @@ tOplkError ProcessThread::processStateChangeEvent(tOplkApiEventType eventType_p,
 
 The function processes error and warning events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pInternalError_p    Pointer to the error structure
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType eventType_p,
-                                                   tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processErrorWarningEvent(const tEventError* pInternalError_p,
                                                    void* pUserArg_p)
 {
-    tEventError*            pInternalError = &pEventArg_p->internalError;
-
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    pEventLog->printEvent(pInternalError);
+    this->pEventLog->printEvent(pInternalError_p);
 
     return kErrorOk;
 }
@@ -525,42 +520,45 @@ tOplkError ProcessThread::processErrorWarningEvent(tOplkApiEventType eventType_p
 
 The function processes error and warning events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pPdoChange_p        Pointer to the PDO change information
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType eventType_p,
-                                                tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processPdoChangeEvent(const tOplkApiEventPdoChange* pPdoChange_p,
                                                 void* pUserArg_p)
 {
-    tOplkApiEventPdoChange*     pPdoChange = &pEventArg_p->pdoChange;
-    UINT                        subIndex;
-    UINT64                      mappObject;
-    tOplkError                  ret;
-    UINT                        varLen;
+    UINT        subIndex;
+    UINT64      mappObject;
+    tOplkError  ret;
+    UINT        varLen;
 
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
+    this->pEventLog->printEvent(pPdoChange_p);
 
-    pEventLog->printEvent(pPdoChange);
-
-    for (subIndex = 1; subIndex <= pPdoChange->mappObjectCount; subIndex++)
+    for (subIndex = 1; subIndex <= pPdoChange_p->mappObjectCount; subIndex++)
     {
         varLen = sizeof(mappObject);
-        ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
+        ret = oplk_readLocalObject(pPdoChange_p->mappParamIndex,
+                                   subIndex,
+                                   &mappObject,
+                                   &varLen);
         if (ret != kErrorOk)
         {
-            pEventLog->printMessage(kEventlogLevelError, kEventlogCategoryObjectDictionary,
-                                    "Reading 0x%X/%d failed with %s(0x%X)",
-                                    pPdoChange->mappParamIndex, subIndex, debugstr_getRetValStr(ret), ret);
+            this->pEventLog->printMessage(kEventlogLevelError,
+                                          kEventlogCategoryObjectDictionary,
+                                          "Reading 0x%X/%d failed with %s(0x%X)",
+                                          pPdoChange_p->mappParamIndex,
+                                          subIndex,
+                                          debugstr_getRetValStr(ret),
+                                          ret);
             continue;
         }
-        pEventLog->printPdoMap(pPdoChange->mappParamIndex, subIndex, mappObject);
+        this->pEventLog->printPdoMap(pPdoChange_p->mappParamIndex, subIndex, mappObject);
     }
+
     return kErrorOk;
 }
 
@@ -570,23 +568,18 @@ tOplkError ProcessThread::processPdoChangeEvent(tOplkApiEventType eventType_p,
 
 The function processes history events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pHistoryEntry_p     Pointer to the history entry
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType eventType_p,
-                                              tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processHistoryEvent(const tErrHistoryEntry* pHistoryEntry_p,
                                               void* pUserArg_p)
 {
-    tErrHistoryEntry*    pHistoryEntry = &pEventArg_p->errorHistoryEntry;
-
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    pEventLog->printEvent(pHistoryEntry);
+    this->pEventLog->printEvent(pHistoryEntry_p);
 
     return kErrorOk;
 }
@@ -597,29 +590,23 @@ tOplkError ProcessThread::processHistoryEvent(tOplkApiEventType eventType_p,
 
 The function processes node events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pNode_p             Pointer to the node event structure
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
-                                           tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processNodeEvent(const tOplkApiEventNode* pNode_p,
                                            void* pUserArg_p)
 {
-    tOplkApiEventNode*   pNode = &pEventArg_p->nodeEvent;
-    tOplkError           ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
-    // printf("AppCbEvent(Node): NodeId=%u Event=0x%02X\n",
-    //        pEventArg_p->nodeEvent.nodeId, pEventArg_p->nodeEvent.nodeEvent);
 
-    pEventLog->printEvent(pNode);
+    this->pEventLog->printEvent(pNode_p);
 
     // check additional argument
-    switch (pEventArg_p->nodeEvent.nodeEvent)
+    switch (pNode_p->nodeEvent)
     {
         case kNmtNodeEventCheckConf:
             break;
@@ -628,11 +615,11 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
             break;
 
         case kNmtNodeEventFound:
-            pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
+            pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
             break;
 
         case kNmtNodeEventNmtState:
-            switch (pEventArg_p->nodeEvent.nmtState)
+            switch (pNode_p->nmtState)
             {
                 case kNmtGsOff:
                 case kNmtGsInitialising:
@@ -640,31 +627,31 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
                 case kNmtGsResetCommunication:
                 case kNmtGsResetConfiguration:
                 case kNmtCsNotActive:
-                    pProcessThread_g->sigNodeDisappeared(pEventArg_p->nodeEvent.nodeId);
+                    pProcessThread_g->sigNodeDisappeared(pNode_p->nodeId);
                     break;
 
                 case kNmtCsPreOperational1:
                 case kNmtCsPreOperational2:
                 case kNmtCsReadyToOperate:
-                    pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 1);
+                    pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, 1);
                     break;
 
                 case kNmtCsOperational:
-                    pProcessThread_g->sigNodeAppeared(pEventArg_p->nodeEvent.nodeId);
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, 2);
+                    pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, 2);
                     break;
 
                 case kNmtCsBasicEthernet:
                 case kNmtCsStopped:
                 default:
-                    pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, -1);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, -1);
                     break;
             }
             break;
 
         case kNmtNodeEventError:
-            pProcessThread_g->sigNodeStatus(pEventArg_p->nodeEvent.nodeId, -1);
+            pProcessThread_g->sigNodeStatus(pNode_p->nodeId, -1);
             break;
 
         case kNmtNodeEventAmniReceived:
@@ -673,6 +660,7 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -682,23 +670,18 @@ tOplkError ProcessThread::processNodeEvent(tOplkApiEventType eventType_p,
 
 The function processes CFM progress events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pCfmProgress_p      Pointer to the CFM progress information
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType eventType_p,
-                                                  tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processCfmProgressEvent(const tCfmEventCnProgress* pCfmProgress_p,
                                                   void* pUserArg_p)
 {
-    tCfmEventCnProgress*     pCfmProgress = &pEventArg_p->cfmProgress;
-
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    pEventLog->printEvent(pCfmProgress);
+    this->pEventLog->printEvent(pCfmProgress_p);
 
     return kErrorOk;
 }
@@ -709,25 +692,21 @@ tOplkError ProcessThread::processCfmProgressEvent(tOplkApiEventType eventType_p,
 
 The function processes CFM result events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pCfmResult_p        Pointer to the CFM result information
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType eventType_p,
-                                                tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processCfmResultEvent(const tOplkApiEventCfmResult* pCfmResult_p,
                                                 void* pUserArg_p)
 {
-    tOplkApiEventCfmResult*       pCfmResult = &pEventArg_p->cfmResult;
-
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    pEventLog->printEvent(pCfmResult->nodeId, pCfmResult->nodeCommand);
+    this->pEventLog->printEvent(pCfmResult_p->nodeId,
+                                pCfmResult_p->nodeCommand);
 
-    switch (pCfmResult->nodeCommand)
+    switch (pCfmResult_p->nodeCommand)
     {
         case kNmtNodeCommandConfOk:
             break;
@@ -744,6 +723,7 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType eventType_p,
         default:
             break;
     }
+
     return kErrorOk;
 }
 
@@ -753,39 +733,36 @@ tOplkError ProcessThread::processCfmResultEvent(tOplkApiEventType eventType_p,
 
 The function processes SDO events.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      pSdo_p              Pointer to SDO event information
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError ProcessThread::processSdoEvent(tOplkApiEventType eventType_p,
-                                          tOplkApiEventArg* pEventArg_p,
+tOplkError ProcessThread::processSdoEvent(const tSdoComFinished* pSdo_p,
                                           void* pUserArg_p)
 {
-    tSdoComFinished*          pSdo = &pEventArg_p->sdoInfo;
-    tOplkError                ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
-    UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
     // SDO transfer finished
-    if ((ret = oplk_freeSdoChannel(pSdo->sdoAccessType)) != kErrorOk)
-    {
+    ret = oplk_freeSdoChannel(pSdo_p->sdoAccessType);
+    if (ret != kErrorOk)
         return ret;
-    }
 
-    if (pSdo->sdoComConState == kSdoComTransferFinished)
+    if (pSdo_p->sdoComConState == kSdoComTransferFinished)
     {   // continue boot-up of CN with NMT command Reset Configuration
-        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfReset);
+        ret = oplk_triggerMnStateChange(pSdo_p->nodeId, kNmtNodeCommandConfReset);
     }
     else
     {   // indicate configuration error CN
-        ret = oplk_triggerMnStateChange(pSdo->nodeId, kNmtNodeCommandConfErr);
+        ret = oplk_triggerMnStateChange(pSdo_p->nodeId, kNmtNodeCommandConfErr);
     }
+
     return ret;
 }
+
 //------------------------------------------------------------------------------
 /**
 \brief  Set default node assignment
@@ -798,8 +775,8 @@ not available.
 //------------------------------------------------------------------------------
 tOplkError ProcessThread::setDefaultNodeAssignment(void)
 {
-    tOplkError  ret = kErrorOk;
-    DWORD       nodeAssignment;
+    tOplkError  ret;
+    UINT32      nodeAssignment;
 
     nodeAssignment = (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_NODE_EXISTS);    // 0x00000003L
     ret = oplk_writeLocalObject(0x1F81, 0x01, &nodeAssignment, sizeof(nodeAssignment));

@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_NmtCommandDialog_H_
-#define _INC_NmtCommandDialog_H_
+#ifndef _INC_demo_NmtCommandDialog_H_
+#define _INC_demo_NmtCommandDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -63,15 +62,14 @@ The class implements the NMT command/event execution dialog.
 //------------------------------------------------------------------------------
 class NmtCommandDialog : public QDialog
 {
-
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    NmtCommandDialog(tNmtEvent nmtEvent = kNmtEventNoEvent);
-    tNmtEvent getNmtEvent(void);
+    NmtCommandDialog(tNmtEvent nmtEvent_p = kNmtEventNoEvent);
+    tNmtEvent getNmtEvent(void) const;
 
 private:
     QLineEdit*  pNmtCmdEdit;
 };
 
-#endif /* _INC_NmtCommandDialog_H_ */
+#endif /* _INC_demo_NmtCommandDialog_H_ */

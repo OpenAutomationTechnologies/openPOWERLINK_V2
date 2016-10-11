@@ -42,6 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "app.h"
+#include "event.h"
+
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 
@@ -50,9 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <lcd/lcd.h>
 #include <arp/arp.h>
 
-#include "app.h"
-#include "event.h"
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -60,12 +60,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CYCLE_LEN         1000        ///< lenght of the cycle [us]
-#define NODEID            1           ///< This node id is overwritten when the dip switches are != 0!
-#define IP_ADDR           0xc0a86401  ///< 192.168.100.1
-#define SUBNET_MASK       0xFFFFFF00  ///< 255.255.255.0
-#define DEFAULT_GATEWAY   0xC0A864FE  ///< 192.168.100.C_ADR_RT1_DEF_NODE_ID
-#define MAC_ADDR          0x02, 0x88, 0xAB, 0x00, 0x00, NODEID      ///< Locally administered MAC address
+#define CYCLE_LEN           1000                                    ///< length of the cycle [us]
+#define NODEID              1                                       ///< This node id is overwritten when the dip switches are != 0!
+#define IP_ADDR             0xc0a86401                              ///< 192.168.100.1
+#define SUBNET_MASK         0xFFFFFF00                              ///< 255.255.255.0
+#define DEFAULT_GATEWAY     0xC0A864FE                              ///< 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define MAC_ADDR            0x02, 0x88, 0xAB, 0x00, 0x00, NODEID    ///< Locally administered MAC address
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -86,27 +86,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef struct sInstace
+typedef struct
 {
-    UINT8   aMacAddr[6];    ///< Mac address
-    UINT8   nodeId;         ///< Node ID
-    UINT32  cycleLen;       ///< Cycle length
-    BOOL    fShutdown;      ///< User flag to shutdown the stack
-    BOOL    fGsOff;         ///< NMT State GsOff reached
+    UINT8           aMacAddr[6];    ///< Mac address
+    UINT8           nodeId;         ///< Node ID
+    UINT32          cycleLen;       ///< Cycle length
+    BOOL            fShutdown;      ///< User flag to shutdown the stack
+    BOOL            fGsOff;         ///< NMT State GsOff reached
 } tInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tInstance instance_l;
+static tInstance    instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(tInstance* pInstance_p);
-static tOplkError loopMain(tInstance* pInstance_p);
-static void shutdownPowerlink(tInstance* pInstance_p);
-static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+static tOplkError   initPowerlink(const tInstance* pInstance_p);
+static tOplkError   loopMain(tInstance* pInstance_p);
+static void         shutdownPowerlink(const tInstance* pInstance_p);
+static tOplkError   eventCbPowerlink(tOplkApiEventType eventType_p,
+                                     const tOplkApiEventArg* pEventArg_p,
+                                     void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -139,36 +141,40 @@ int main(void)
     // initialize instance
     memset(&instance_l, 0, sizeof(instance_l));
 
-    instance_l.cycleLen     = CYCLE_LEN;
-    instance_l.nodeId       = (nodeid != 0) ? nodeid : NODEID;
-    instance_l.fShutdown    = FALSE;
-    instance_l.fGsOff       = FALSE;
+    instance_l.cycleLen = CYCLE_LEN;
+    instance_l.nodeId = (nodeid != 0) ? nodeid : NODEID;
+    instance_l.fShutdown = FALSE;
+    instance_l.fGsOff = FALSE;
 
     // set mac address (last byte is set to node ID)
     memcpy(instance_l.aMacAddr, aMacAddr, sizeof(aMacAddr));
-    instance_l.aMacAddr[5]  = instance_l.nodeId;
+    instance_l.aMacAddr[5] = instance_l.nodeId;
 
     initEvents(&eventCbPowerlink);
     arp_init((UINT8)instance_l.nodeId);
 
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK embedded CN DEMO application\n");
-    PRINTF("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
+    PRINTF("Using openPOWERLINK stack: %s\n", oplk_getVersionString());
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
     lcd_printNodeId(instance_l.nodeId);
 
-    if ((ret = initPowerlink(&instance_l)) != kErrorOk)
+    ret = initPowerlink(&instance_l);
+    if (ret != kErrorOk)
         goto Exit;
 
-    if ((ret = initApp()) != kErrorOk)
+    ret = initApp();
+    if (ret != kErrorOk)
         goto Exit;
 
-    if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
+    ret = oplk_setNonPlkForward(TRUE);
+    if (ret != kErrorOk)
     {
         PRINTF("WARNING: oplk_setNonPlkForward() failed with \"%s\"\n(Error:0x%x!)\n",
-               debugstr_getRetValStr(ret), ret);
+               debugstr_getRetValStr(ret),
+               ret);
     }
 
     loopMain(&instance_l);
@@ -197,21 +203,20 @@ Exit:
 
 The function initializes the openPOWERLINK stack.
 
-\param  pInstance_p             Pointer to demo instance
+\param[in]      pInstance_p         Pointer to demo instance
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(tInstance* pInstance_p)
+static tOplkError initPowerlink(const tInstance* pInstance_p)
 {
-    tOplkError                  ret = kErrorOk;
-    static tOplkApiInitParam    initParam;
+    tOplkError          ret = kErrorOk;
+    tOplkApiInitParam   initParam;
 
     PRINTF("Initializing openPOWERLINK stack...\n");
 
     memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
-
     initParam.nodeId = pInstance_p->nodeId;
     initParam.ipAddress = (0xFFFFFF00 & IP_ADDR) | initParam.nodeId;
 
@@ -232,11 +237,11 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.lossOfFrameTolerance    = 100000;
     initParam.asyncSlotTimeout        = 3000000;
     initParam.waitSocPreq             = 0;
-    initParam.deviceType              = -1;               // NMT_DeviceType_U32
-    initParam.vendorId                = -1;               // NMT_IdentityObject_REC.VendorId_U32
-    initParam.productCode             = -1;               // NMT_IdentityObject_REC.ProductCode_U32
-    initParam.revisionNumber          = -1;               // NMT_IdentityObject_REC.RevisionNo_U32
-    initParam.serialNumber            = -1;               // NMT_IdentityObject_REC.SerialNo_U32
+    initParam.deviceType              = -1;                     // NMT_DeviceType_U32
+    initParam.vendorId                = -1;                     // NMT_IdentityObject_REC.VendorId_U32
+    initParam.productCode             = -1;                     // NMT_IdentityObject_REC.ProductCode_U32
+    initParam.revisionNumber          = -1;                     // NMT_IdentityObject_REC.RevisionNo_U32
+    initParam.serialNumber            = -1;                     // NMT_IdentityObject_REC.SerialNo_U32
     initParam.applicationSwDate       = 0;
     initParam.applicationSwTime       = 0;
     initParam.subnetMask              = SUBNET_MASK;
@@ -253,7 +258,9 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = obdcreate_initObd(&initParam.obdInitParam);
     if (ret != kErrorOk)
     {
-        PRINTF("obdcreate_initObd() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("obdcreate_initObd() failed with \"%s\" (0x%04x)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
@@ -261,14 +268,18 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
     ret = oplk_create(&initParam);
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
@@ -292,23 +303,25 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
 This function implements the main loop of the demo application.
 - It sends an NMT command to start the stack
 
-\param  pInstance_p             Pointer to demo instance
+\param[in,out]  pInstance_p         Pointer to demo instance
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError loopMain(tInstance* pInstance_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     // start processing
-    if ((ret = oplk_execNmtCommand(kNmtEventSwReset)) != kErrorOk)
+    ret = oplk_execNmtCommand(kNmtEventSwReset);
+    if (ret != kErrorOk)
         return ret;
 
     while (1)
     {
         // do background tasks
-        if ((ret = oplk_process()) != kErrorOk)
+        ret = oplk_process();
+        if (ret != kErrorOk)
             break;
 
         // trigger switch off
@@ -334,10 +347,10 @@ static tOplkError loopMain(tInstance* pInstance_p)
 
 The function shuts down the demo application.
 
-\param  pInstance_p             Pointer to demo instance
+\param[in]      pInstance_p         Pointer to demo instance
 */
 //------------------------------------------------------------------------------
-static void shutdownPowerlink(tInstance* pInstance_p)
+static void shutdownPowerlink(const tInstance* pInstance_p)
 {
     UNUSED_PARAMETER(pInstance_p);
 
@@ -353,9 +366,9 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
 The function implements the applications stack event handler.
 
-\param  eventType_p         Type of event
-\param  pEventArg_p         Pointer to union which describes the event in detail
-\param  pUserArg_p          User specific argument
+\param[in]      eventType_p         Type of event
+\param[in]      pEventArg_p         Pointer to union which describes the event in detail
+\param[in]      pUserArg_p          User specific argument
 
 \return The function returns a tOplkError error code.
 
@@ -363,10 +376,10 @@ The function implements the applications stack event handler.
 */
 //------------------------------------------------------------------------------
 static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
-                                   tOplkApiEventArg* pEventArg_p, void* pUserArg_p)
+                                   const tOplkApiEventArg* pEventArg_p,
+                                   void* pUserArg_p)
 {
-    tOplkError                      ret = kErrorOk;
-    tOplkApiEventReceivedNonPlk*    pFrameInfo = &pEventArg_p->receivedEth;
+    tOplkError  ret = kErrorOk;
 
     UNUSED_PARAMETER(pUserArg_p);
 
@@ -391,7 +404,7 @@ static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
                     break;
 
                 case kNmtCsPreOperational2:
-                     // automatic change to kEplNmtCsReadyToOperate can be
+                     // automatic change to kNmtCsReadyToOperate can be
                      // prevented with:
                      // ret = kErrorReject;
                      // As soon as application is ready for OPERATIONAL state,
@@ -405,7 +418,8 @@ static tOplkError eventCbPowerlink(tOplkApiEventType eventType_p,
             break;
 
         case kOplkApiEventReceivedNonPlk:
-            if (arp_processReceive(pFrameInfo->pFrame, pFrameInfo->frameSize) == 0)
+            if (arp_processReceive(pEventArg_p->receivedEth.pFrame,
+                                   pEventArg_p->receivedEth.frameSize) == 0)
                 return kErrorOk;
 
             // If you get here, the received Ethernet frame is no ARP frame.

@@ -64,8 +64,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Constructor
 
-\param  nmtEvent_p  The NMT event which is used to initialize the NMT command
-                    dialog.
+\param[in]      nmtEvent_p          The NMT event which is used to initialize the
+                                    NMT command dialog.
 
 Constructs an NMT command dialog.
 */
@@ -81,7 +81,7 @@ NmtCommandDialog::NmtCommandDialog(tNmtEvent nmtEvent_p)
 
 
     /* create lineedit */
-    pNmtCmdEdit = new QLineEdit(QString::number((UINT)nmtEvent_p, 16).prepend("0x"));
+    this->pNmtCmdEdit = new QLineEdit(QString::number((UINT)nmtEvent_p, 16).prepend("0x"));
 
     /* create buttons */
     QHBoxLayout* buttonLayout = new QHBoxLayout();
@@ -94,7 +94,7 @@ NmtCommandDialog::NmtCommandDialog(tNmtEvent nmtEvent_p)
 
     /* create main layout */
     mainLayout->addWidget(label);
-    mainLayout->addWidget(pNmtCmdEdit);
+    mainLayout->addWidget(this->pNmtCmdEdit);
     mainLayout->addStretch(0);
     mainLayout->addLayout(buttonLayout);
 
@@ -112,19 +112,15 @@ state machine.
 \return The function returns the NMT event to be executed.
 */
 //------------------------------------------------------------------------------
-tNmtEvent NmtCommandDialog::getNmtEvent(void)
+tNmtEvent NmtCommandDialog::getNmtEvent(void) const
 {
     bool fConvOk;
     UINT nmtEventId;
 
-    nmtEventId = pNmtCmdEdit->text().toUInt(&fConvOk, 0);
+    nmtEventId = this->pNmtCmdEdit->text().toUInt(&fConvOk, 0);
 
     if (fConvOk)
-    {
         return (tNmtEvent)nmtEventId;
-    }
     else
-    {
         return kNmtEventNoEvent;
-    }
 }

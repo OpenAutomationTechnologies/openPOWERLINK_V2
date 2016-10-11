@@ -8,7 +8,7 @@ The file contains the definition for the MN running-light application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_app_H_
-#define _INC_app_H_
+#ifndef _INC_demo_app_H_
+#define _INC_demo_app_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,18 +54,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError initApp(void);
-void shutdownApp(void);
-tOplkError processSync(void);
+tOplkError  initApp(void);
+void        shutdownApp(void);
+tOplkError  processSync(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_app_H_ */
+#endif /* _INC_demo_app_H_ */

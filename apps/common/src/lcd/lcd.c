@@ -8,7 +8,7 @@ The generic LCD interface module enables to control any LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -70,15 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define LCD_COLUMN  16  ///< Minimum line size needed
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-
-const char aStrNmtState_l[10][LCD_COLUMN+1] =
+static const char aStrNmtState_l[10][LCD_COLUMN + 1] =
 {
         "INVALID          ",
         "OFF              ",
@@ -91,6 +83,14 @@ const char aStrNmtState_l[10][LCD_COLUMN+1] =
         "OPERATIONAL      ",
         "STOPPED          "
 };
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -145,11 +145,12 @@ void lcd_clear(void)
 
 The function prints the provided text to the specified line in the LCD.
 
-\param  sText_p     Text to be printed
-\param  line_p      Line to print the text in
+\param[in]      sText_p             Text to be printed
+\param[in]      line_p              Line to print the text in
 */
 //------------------------------------------------------------------------------
-void lcd_printText(char* sText_p, UINT line_p)
+void lcd_printText(const char* sText_p,
+                   UINT line_p)
 {
     if (lcdl_changeToLine(line_p) != 0)
         return;
@@ -163,7 +164,7 @@ void lcd_printText(char* sText_p, UINT line_p)
 
 The function prints the NMT state to the second line of the display.
 
-\param  nmtState_p  NMT state to be written
+\param[in]      nmtState_p          NMT state to be written
 */
 //------------------------------------------------------------------------------
 void lcd_printNmtState(tNmtState nmtState_p)
@@ -222,7 +223,6 @@ void lcd_printNmtState(tNmtState nmtState_p)
             lcdl_printText(aStrNmtState_l[0]);
             break;
     }
-
 }
 
 //------------------------------------------------------------------------------
@@ -232,20 +232,22 @@ void lcd_printNmtState(tNmtState nmtState_p)
 The function prints the provided node ID to the first line of the display.
 In addition to the printed node ID 'MN' (=0xF0) or 'CN' is added.
 
-\param  nodeId_p    node ID to be written
+\param[in]      nodeId_p            node ID to be written
 */
 //------------------------------------------------------------------------------
 void lcd_printNodeId(UINT8 nodeId_p)
 {
-    char TextNodeID[LCD_COLUMN+1];
+    char textNodeID[LCD_COLUMN+1];
 
-    sprintf(TextNodeID, "NodeID=0x%02X (%s)", nodeId_p,
+    sprintf(textNodeID,
+            "NodeID=0x%02X (%s)",
+            nodeId_p,
             (nodeId_p == C_ADR_MN_DEF_NODE_ID) ? "MN" : "CN");
 
     if (lcdl_changeToLine(1) != 0)
         return;
 
-    lcdl_printText(TextNodeID);
+    lcdl_printText(textNodeID);
 }
 
 //------------------------------------------------------------------------------
@@ -254,19 +256,19 @@ void lcd_printNodeId(UINT8 nodeId_p)
 
 The function prints the provided error code to the second line of the display.
 
-\param  error_p     error code
+\param[in]      error_p             error code
 */
 //------------------------------------------------------------------------------
 void lcd_printError(tOplkError error_p)
 {
-    char TextError[LCD_COLUMN+1];
+    char textError[LCD_COLUMN+1];
 
-    sprintf(TextError, "ERROR=0x%04X", error_p);
+    sprintf(textError, "ERROR=0x%04X", error_p);
 
     if (lcdl_changeToLine(2) != 0)
         return;
 
-    lcdl_printText(TextError);
+    lcdl_printText(textError);
 }
 
 //============================================================================//

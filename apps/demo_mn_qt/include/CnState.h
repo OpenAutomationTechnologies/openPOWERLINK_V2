@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_CnState_h_
-#define _INC_CnState_h_
+#ifndef _INC_demo_CnState_h_
+#define _INC_demo_CnState_h_
 
 //------------------------------------------------------------------------------
 // includes
@@ -45,7 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Definitions
 //------------------------------------------------------------------------------
-#define NODE_ID_MAX    255
+#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // Class declarations
@@ -68,14 +67,15 @@ public:
     CnState(QWidget* parent = 0);
 
 public slots:
-    void setState(int iNodeId_p, int iState_p);
+    void setState(int nodeId_p,
+                  int state_p);
     void addNode(int nodeId_p);
-    void removeNode(int iNodeId_p);
+    void removeNode(int nodeId_p);
     void removeAllNodes(void);
 
 private:
-    QVBoxLayout*      pStateLayout;
-    NodeState**       ppNodeState;
+    QVBoxLayout*    pStateLayout;
+    NodeState**     ppNodeState;
 };
 
-#endif // _INC_CnState_h_
+#endif // _INC_demo_CnState_h_

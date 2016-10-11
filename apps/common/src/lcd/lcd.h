@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_lcd_H_
 #define _INC_lcd_H_
 
@@ -64,7 +63,8 @@ void lcd_init(void);
 void lcd_exit(void);
 
 void lcd_clear(void);
-void lcd_printText(char* sText_p, UINT line_p);
+void lcd_printText(const char* sText_p,
+                   UINT line_p);
 void lcd_printNmtState(tNmtState nmtState_p);
 void lcd_printNodeId(UINT8 nodeId_p);
 void lcd_printError(tOplkError error_p);

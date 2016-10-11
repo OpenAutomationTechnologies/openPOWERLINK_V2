@@ -8,7 +8,7 @@ The file contains the definitions for the MN demo event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_demo_event_H_
 #define _INC_demo_event_H_
 
@@ -55,16 +54,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void initEvents(BOOL* pfGsOff_p);
-tOplkError processEvents(tOplkApiEventType eventType_p,
-                         tOplkApiEventArg* pEventArg_p,
-                         void* pUserArg_p);
+void        initEvents(BOOL* pfGsOff_p);
+tOplkError  processEvents(tOplkApiEventType eventType_p,
+                          const tOplkApiEventArg* pEventArg_p,
+                          void* pUserArg_p);
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +43,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <usleep.h>
 
 #include "system.h"
+
+#if defined(CONFIG_USE_SYNCTHREAD)
+#error "Sync thread is not supported on this target!"
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -139,7 +143,7 @@ BOOL system_getTermSignalState(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_app_common
 */

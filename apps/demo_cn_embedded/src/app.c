@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   app.c
 
-\brief  Demo CN application which implements an digital input/output node
+\brief  Demo CN application which implements a digital input/output node
 
 This file contains a demo application for digital input/output data.
 
@@ -10,7 +10,7 @@ This file contains a demo application for digital input/output data.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -41,11 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "app.h"
+
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
-
 #include <gpio/gpio.h>
-#include "app.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -77,26 +78,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* structure for input process image */
 typedef struct
 {
-   BYTE    digitalIn[4];
+   UINT8                aDigitalIn[4];
 } PI_IN;
 
 /* structure for output process image */
 typedef struct
 {
-   BYTE    digitalOut[4];
+   UINT8                aDigitalOut[4];
 } PI_OUT;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 /* process image */
-static PI_IN*   pProcessImageIn_l;
-static PI_OUT*  pProcessImageOut_l;
+static PI_IN*           pProcessImageIn_l;
+static const PI_OUT*    pProcessImageOut_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initProcessImage(void);
+static tOplkError       initProcessImage(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -115,7 +116,7 @@ The function initializes the synchronous data application
 //------------------------------------------------------------------------------
 tOplkError initApp(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = initProcessImage();
 
@@ -151,29 +152,29 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tOplkError processSync(void)
 {
-    tOplkError      ret = kErrorOk;
-    UINT32          appOutVal;
-    UINT32          appInVal;
+    tOplkError  ret = kErrorOk;
+    UINT32      appOutVal;
+    UINT32      appInVal;
 
     ret = oplk_exchangeProcessImageOut();
     if (ret != kErrorOk)
         return ret;
 
     /* read input image - digital outputs */
-    appOutVal = pProcessImageOut_l->digitalOut[0] << 0  |
-                pProcessImageOut_l->digitalOut[1] << 8  |
-                pProcessImageOut_l->digitalOut[2] << 16 |
-                pProcessImageOut_l->digitalOut[3] << 24;
+    appOutVal = pProcessImageOut_l->aDigitalOut[0] << 0  |
+                pProcessImageOut_l->aDigitalOut[1] << 8  |
+                pProcessImageOut_l->aDigitalOut[2] << 16 |
+                pProcessImageOut_l->aDigitalOut[3] << 24;
 
     gpio_setAppOutputs(appOutVal);
 
     /* setup output image - digital inputs */
     appInVal = gpio_getAppInput();
 
-    pProcessImageIn_l->digitalIn[0] = (appInVal & 0x000000FF) >> 0;
-    pProcessImageIn_l->digitalIn[1] = (appInVal & 0x0000FF00) >> 8;
-    pProcessImageIn_l->digitalIn[2] = (appInVal & 0x00FF0000) >> 16;
-    pProcessImageIn_l->digitalIn[3] = (appInVal & 0xFF000000) >> 24;
+    pProcessImageIn_l->aDigitalIn[0] = (appInVal & 0x000000FF) >> 0;
+    pProcessImageIn_l->aDigitalIn[1] = (appInVal & 0x0000FF00) >> 8;
+    pProcessImageIn_l->aDigitalIn[2] = (appInVal & 0x00FF0000) >> 16;
+    pProcessImageIn_l->aDigitalIn[3] = (appInVal & 0xFF000000) >> 24;
 
     ret = oplk_exchangeProcessImageIn();
 
@@ -197,43 +198,54 @@ The function initializes the process image of the application.
 //------------------------------------------------------------------------------
 static tOplkError initProcessImage(void)
 {
-    tOplkError      ret = kErrorOk;
-    UINT            varEntries;
-    tObdSize        obdSize;
+    tOplkError  ret = kErrorOk;
+    UINT        varEntries;
+    tObdSize    obdSize;
 
     /* Allocate process image */
     PRINTF("Initializing process image...\n");
-    PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
-    PRINTF("Size of output process image: %d\n", (UINT32)sizeof (PI_OUT));
+    PRINTF("Size of process image: Input = %lu Output = %lu \n",
+           (ULONG)sizeof(PI_IN),
+           (ULONG)sizeof(PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
-    {
         return ret;
-    }
 
-    pProcessImageIn_l = oplk_getProcessImageIn();
-    pProcessImageOut_l = oplk_getProcessImageOut();
+    pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
+    pProcessImageOut_l = (const PI_OUT*)oplk_getProcessImageOut();
 
     /* link process variables used by CN to object dictionary */
     PRINTF("Linking process image vars:\n");
 
-    obdSize = sizeof(pProcessImageIn_l->digitalIn[0]);
+    obdSize = sizeof(pProcessImageIn_l->aDigitalIn[0]);
     varEntries = 4;
-    ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
-                                      FALSE, obdSize, &varEntries);
+    ret = oplk_linkProcessImageObject(0x6000,
+                                      0x01,
+                                      offsetof(PI_IN, aDigitalIn),
+                                      FALSE,
+                                      obdSize,
+                                      &varEntries);
     if (ret != kErrorOk)
     {
-        PRINTF("linking process vars ... error %04x\n\"%s\"\n\n", ret, debugstr_getRetValStr(ret));
+        PRINTF("Linking process vars failed with \"%s\" (0x%04x)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
-    obdSize = sizeof(pProcessImageOut_l->digitalOut[0]);
+    obdSize = sizeof(pProcessImageOut_l->aDigitalOut[0]);
     varEntries = 4;
-    ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
-                                      TRUE, obdSize, &varEntries);
+    ret = oplk_linkProcessImageObject(0x6200,
+                                      0x01,
+                                      offsetof(PI_OUT, aDigitalOut),
+                                      TRUE,
+                                      obdSize,
+                                      &varEntries);
     if (ret != kErrorOk)
     {
-        PRINTF("linking process vars ... error %04x\n\"%s\"\n\n", ret, debugstr_getRetValStr(ret));
+        PRINTF("Linking process vars failed with \"%s\" (0x%04x)\n",
+               debugstr_getRetValStr(ret),
+               ret);
         return ret;
     }
 
@@ -242,5 +254,4 @@ static tOplkError initProcessImage(void)
     return kErrorOk;
 }
 
-///\}
-
+/// \}

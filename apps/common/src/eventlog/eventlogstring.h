@@ -9,7 +9,7 @@ module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,17 +34,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_eventlogstring_H_
 #define _INC_eventlogstring_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdarg.h>
-
 #include <oplk/oplk.h>
 #include <oplk/nmt.h>
+
+#include <stdarg.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -52,9 +51,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // unfortunately older windows compilers don't support snprintf and vsnprintf
 #if (TARGET_SYSTEM == _WIN32_)
-#if _MSC_VER < 1900
-#define snprintf _snprintf
-#define vsnprintf _vsnprintf
+#if (_MSC_VER < 1900)
+#define snprintf    _snprintf
+#define vsnprintf   _vsnprintf
 #endif
 #endif
 
@@ -70,13 +69,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef enum
 {
-    kEventlogLevelFatal = 0,    ///< Fatal errors
-    kEventlogLevelError,        ///< Errors
-    kEventlogLevelWarning,      ///< Warnings
-    kEventlogLevelInfo,         ///< Information
-    kEventlogLevelDebug,        ///< Debug information
-    kEventlogLevelEvent,        ///< Events
+    kEventlogLevelFatal = 0,                    ///< Fatal errors
+    kEventlogLevelError,                        ///< Errors
+    kEventlogLevelWarning,                      ///< Warnings
+    kEventlogLevelInfo,                         ///< Information
+    kEventlogLevelDebug,                        ///< Debug information
+    kEventlogLevelEvent,                        ///< Events
 } eEventlogLevel;
+
 typedef UINT32 tEventlogLevel;
 
 /**
@@ -104,6 +104,7 @@ typedef enum
     kEventlogCategorySdoEvent,                  ///< Sdo events
     kEventlogCategoryUserEvent,                 ///< User event
 } eEventlogCategory;
+
 typedef UINT32 tEventlogCategory;
 
 /**
@@ -116,6 +117,7 @@ typedef enum
     kLogEventCfmProgress = 0,                   ///< CFM progress event
     kLogEventCfmResult                          ///< CFM result event
 } eEventlogEventCfmType;
+
 typedef UINT32 tEventlogEventCfmType;
 
 /**
@@ -128,27 +130,58 @@ typedef enum
     kEventlogFormatParsable,        ///< Parsable format. Intended for further processing.
     kEventlogFormatReadable         ///< Readable format. Optimized for easy reading by humans.
 } eEventlogFormat;
+
 typedef UINT32 tEventlogFormat;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-void eventlog_createMessageString(char* message_p, size_t messageSize_p, tEventlogLevel level_p, tEventlogCategory category_p, const char* fmt_p, va_list arg_p);
-void eventlog_createNodeEventString(tOplkApiEventNode* pNodeEvent_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createStateEventString(tEventNmtStateChange* pStateChangeEvent_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createCfmResultEventString(UINT8 nodeId_p, tNmtNodeCommand nodeCommand_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createCfmProgressEventString(tCfmEventCnProgress* pProgress_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createPdoEventString(tOplkApiEventPdoChange* pPdoChange_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createHistoryEventString(tErrHistoryEntry* pHistory_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createErrorEventString(tEventError* pError_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-void eventlog_createPdoMapString(UINT16 mapObject_p, UINT8 subIndex_p, UINT64 mapping_p, tEventlogFormat format_p, char* message_p, size_t messageSize_p);
-
+void eventlog_createMessageString(char* message_p,
+                                  size_t messageSize_p,
+                                  tEventlogLevel level_p,
+                                  tEventlogCategory category_p,
+                                  const char* fmt_p,
+                                  va_list arg_p);
+void eventlog_createNodeEventString(const tOplkApiEventNode* pNodeEvent_p,
+                                    tEventlogFormat format_p,
+                                    char* message_p,
+                                    size_t messageSize_p);
+void eventlog_createStateEventString(const tEventNmtStateChange* pStateChangeEvent_p,
+                                     tEventlogFormat format_p,
+                                     char* message_p,
+                                     size_t messageSize_p);
+void eventlog_createCfmResultEventString(UINT8 nodeId_p,
+                                         tNmtNodeCommand nodeCommand_p,
+                                         tEventlogFormat format_p,
+                                         char* message_p,
+                                         size_t messageSize_p);
+void eventlog_createCfmProgressEventString(const tCfmEventCnProgress* pProgress_p,
+                                           tEventlogFormat format_p,
+                                           char* message_p,
+                                           size_t messageSize_p);
+void eventlog_createPdoEventString(const tOplkApiEventPdoChange* pPdoChange_p,
+                                   tEventlogFormat format_p,
+                                   char* message_p,
+                                   size_t messageSize_p);
+void eventlog_createHistoryEventString(const tErrHistoryEntry* pHistory_p,
+                                       tEventlogFormat format_p,
+                                       char* message_p,
+                                       size_t messageSize_p);
+void eventlog_createErrorEventString(const tEventError* pError_p,
+                                     tEventlogFormat format_p,
+                                     char* message_p,
+                                     size_t messageSize_p);
+void eventlog_createPdoMapString(UINT16 mapObject_p,
+                                 UINT8 subIndex_p,
+                                 UINT64 mapping_p,
+                                 tEventlogFormat format_p,
+                                 char* message_p,
+                                 size_t messageSize_p);
 
 #ifdef __cplusplus
 }

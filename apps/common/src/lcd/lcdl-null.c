@@ -8,7 +8,7 @@ This implementation shall be used for platforms without an LCD.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -124,7 +124,7 @@ void lcdl_clear(void)
 
 This function is a stub function to change to a specified line of the LCD.
 
-\param  line_p      Specifies the line
+\param[in]      line_p              Specifies the line
 
 \return The function always returns 0 to signal a successful change of line.
 */
@@ -140,7 +140,7 @@ int lcdl_changeToLine(unsigned int line_p)
 
 This function is a stub function to write text to the currently selected LCD.
 
-\param  sText_p     The text to print
+\param[in]      sText_p             The text to print
 */
 //------------------------------------------------------------------------------
 void lcdl_printText(const char* sText_p)
