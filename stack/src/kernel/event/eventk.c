@@ -214,15 +214,17 @@ tOplkError eventk_process(const tEvent* pEvent_p)
 
         default:
             // Unknown sink, provide error event to API layer
+            ret = kErrorEventUnknownSink;
             eventk_postError(kEventSourceEventk,
                              ret,
                              sizeof(pEvent_p->eventSink),
                              &pEvent_p->eventSink);
-            ret = kErrorEventUnknownSink;
             break;
     }
 
-    if ((ret != kErrorOk) && (ret != kErrorShutdown))
+    if ((ret != kErrorOk) &&
+        (ret != kErrorShutdown) &&
+        (ret != kErrorEventUnknownSink))
     {
         // forward error event to API layer
         eventk_postError(kEventSourceEventk,
