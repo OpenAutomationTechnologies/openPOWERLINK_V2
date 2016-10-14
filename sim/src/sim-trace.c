@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-
 /**
 \brief Instance struct for sim-trace module
 
@@ -75,9 +74,9 @@ This struct contains information about the current instance.
  */
 typedef struct
 {
-    tTraceFunctions         traceFunctions;   ///< Struct with all simulation interface functions
-    tSimulationInstanceHdl  simHdl;           ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;     ///< Initialization flag signalling if the stores functions are valid
+    tTraceFunctions         traceFunctions;     ///< Struct with all simulation interface functions
+    tSimulationInstanceHdl  simHdl;             ///< Handle to running simulation for multiple simulated instances
+    BOOL                    fInitialized;       ///< Initialization flag signaling if the stores functions are valid
 } tSimTraceInstance;
 
 //------------------------------------------------------------------------------
@@ -86,7 +85,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimTraceInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimTraceInstance    instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,8 +106,8 @@ static tSimTraceInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's trace functionalities.
 
-\param  simHdl_p            The instance handle defining the current stack instance
-\param  traceFunctions_p    Structure containing all connecting function pointers
+\param[in]      simHdl_p            The instance handle defining the current stack instance
+\param[in]      traceFunctions_p    Structure containing all connecting function pointers
 
 \return BOOL value showing the success of the initialization of the simulation interface
  */
@@ -148,16 +151,17 @@ void sim_unsetTraceFunctions(void)
 This function forwards the trace command to the connected simulation
 environment.
 
-\param  pmsg_p Trace message
+\param[in]      pMsg_p              Trace message
+
 */
 //------------------------------------------------------------------------------
-void sim_trace(const char* pmsg_p)
+void sim_trace(const char* pMsg_p)
 {
     // check if module was initialized
     if (instance_l.fInitialized)
     {
         // call function
-        instance_l.traceFunctions.pfnTrace(instance_l.simHdl, pmsg_p);
+        instance_l.traceFunctions.pfnTrace(instance_l.simHdl, pMsg_p);
     }
 }
 

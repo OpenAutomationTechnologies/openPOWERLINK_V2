@@ -33,14 +33,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_sim_edrv_H_
 #define _INC_sim_edrv_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim.h>
 
 //------------------------------------------------------------------------------
@@ -54,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -70,8 +67,10 @@ const UINT8*        sim_getMacAddr(void);
 tOplkError          sim_sendTxBuffer(tEdrvTxBuffer* pBuffer_p);
 tOplkError          sim_allocTxBuffer(tEdrvTxBuffer* pBuffer_p);
 tOplkError          sim_freeTxBuffer(tEdrvTxBuffer* pBuffer_p);
-tOplkError          sim_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                                       UINT entryChanged_p, UINT changeFlags_p);
+tOplkError          sim_changeRxFilter(tEdrvFilter* pFilter_p,
+                                       UINT count_p,
+                                       UINT entryChanged_p,
+                                       UINT changeFlags_p);
 tOplkError          sim_clearRxMulticastMacAddr(const UINT8* pMacAddr_p);
 tOplkError          sim_setRxMulticastMacAddr(const UINT8* pMacAddr_p);
 

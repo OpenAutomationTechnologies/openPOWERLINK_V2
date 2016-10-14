@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim-apievent.h>
 
 //============================================================================//
@@ -76,9 +75,9 @@ This struct contains information about the current instance.
 */
 typedef struct
 {
-    tApiEventFunctions      eventFunctions;  ///< Struct with all simulation interface functions
-    tSimulationInstanceHdl  simHdl;          ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;    ///< Initialization flag signalling if the stored functions are valid
+    tApiEventFunctions      eventFunctions;     ///< Struct with all simulation interface functions
+    tSimulationInstanceHdl  simHdl;             ///< Handle to running simulation for multiple simulated instances
+    BOOL                    fInitialized;       ///< Initialization flag signaling if the stored functions are valid
 } tSimApiInstance;
 
 //------------------------------------------------------------------------------
@@ -87,7 +86,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimApiInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimApiInstance  instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,12 +107,14 @@ static tSimApiInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's API event functionalities.
 
-\param simHdl_p             The handle of the currently simulated stack instance
-\param eventFunctions_p     Structure with all simulation interface functions
+\param[in]      simHdl_p            The handle of the currently simulated stack instance
+\param[in]      eventFunctions_p    Structure with all simulation interface functions
 
 \return The function returns a BOOL value.
-\retval TRUE    The function pointers are set successfully to the instance.
-\retval FALSE   The function pointers are not set because of an error.
+\retval TRUE                        The function pointers are set successfully to
+                                    the instance.
+\retval FALSE                       The function pointers are not set because of
+                                    an error.
 */
 //------------------------------------------------------------------------------
 BOOL sim_setApiEventFunctions(tSimulationInstanceHdl simHdl_p,
@@ -151,16 +156,16 @@ void sim_unsetApiEventFunctions(void)
 This callback forwards the API event callback to the connected simulation
 environment.
 
-\param eventType_p  The type of the event
-\param pEventArg_p  Pointer to the event argument
-\param pUserArg_p   Pointer to the user defined argument
+\param[in]      eventType_p         The type of the event
+\param[in]      pEventArg_p         Pointer to the event argument
+\param[in]      pUserArg_p          Pointer to the user defined argument
 
 \return This functions returns the resulting tOplkError return code.
  */
 //------------------------------------------------------------------------------
 tOplkError sim_eventCb(tOplkApiEventType eventType_p,
-                       const tOplkApiEventArg *pEventArg_p,
-                       void *pUserArg_p)
+                       const tOplkApiEventArg* pEventArg_p,
+                       void* pUserArg_p)
 {
     // check module initialization
     if (instance_l.fInitialized)

@@ -75,9 +75,9 @@ This struct contains information about the current instance.
  */
 typedef struct
 {
-    tTimerFunctions         timerFunctions;   ///< Struct with all simulation interface functions
-    tSimulationInstanceHdl  simHdl;           ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;     ///< Initialization flag signalling if the stores functions are valid
+    tTimerFunctions         timerFunctions; ///< Struct with all simulation interface functions
+    tSimulationInstanceHdl  simHdl;         ///< Handle to running simulation for multiple simulated instances
+    BOOL                    fInitialized;   ///< Initialization flag signaling if the stores functions are valid
 } tSimTimerInstance;
 
 //------------------------------------------------------------------------------
@@ -86,7 +86,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimTimerInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimTimerInstance    instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,8 +107,8 @@ static tSimTimerInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's user timer functionalities.
 
-\param  simHdl_p            The instance handle defining the current stack instance
-\param  timerFunctions_p    Structure containing all connecting function pointers
+\param[in]      simHdl_p            The instance handle defining the current stack instance
+\param[in]      timerFunctions_p    Structure containing all connecting function pointers
 
 \return BOOL value showing the success of the initialization of the simulation
     interface
@@ -154,18 +158,20 @@ void sim_unsetTimerFunctions(void)
 This callback function provides the connection for the expiration of a simulated
 user timer within the connected simulation environment.
 
-\param  timerHdl_p     Handle of timer which has expired
-\param  argument_p     Timer argument passed to timer
+\param[in]      timerHdl_p          Handle of timer which has expired
+\param[in]      argument_p          Timer argument passed to timer
  */
 //------------------------------------------------------------------------------
-void sim_userTimerCallback(tTimerHdl timerHdl_p, tTimerArg argument_p)
+void sim_userTimerCallback(tTimerHdl timerHdl_p,
+                           tTimerArg argument_p)
 {
-    tEvent event;
-    tTimerEventArg timerEventArg;
+    tEvent          event;
+    tTimerEventArg  timerEventArg;
 
     // call event function
     timerEventArg.timerHdl.handle = timerHdl_p;
-    OPLK_MEMCPY(&timerEventArg.argument, &argument_p.argument,
+    OPLK_MEMCPY(&timerEventArg.argument,
+                &argument_p.argument,
                 sizeof(timerEventArg.argument));
 
     event.eventSink = argument_p.eventSink;
@@ -228,14 +234,15 @@ tOplkError sim_exitTimer(void)
 This function forwards the set user timer command to the connected simulation
 environment.
 
-\param  pTimerHdl_p     Pointer to store the timer handle
-\param  timeInMs_p      Timeout in milliseconds
-\param  argument_p      User definable argument for timer
+\param[out]     pTimerHdl_p         Pointer to store the timer handle
+\param[in]      timeInMs_p          Timeout in milliseconds
+\param[in]      argument_p          User definable argument for timer
 
 \return This functions returns the resulting tOplkError return code.
  */
 //------------------------------------------------------------------------------
-tOplkError sim_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
+tOplkError sim_setTimer(tTimerHdl* pTimerHdl_p,
+                        ULONG timeInMs_p,
                         tTimerArg argument_p)
 {
     // check if module was initialized
@@ -258,14 +265,15 @@ tOplkError sim_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
 This function forwards the modify user timer command to the connected simulation
 environment.
 
-\param  pTimerHdl_p     Pointer to store the timer handle
-\param  timeInMs_p      Timeout in milliseconds
-\param  argument_p      User definable argument for timer
+\param[out]     pTimerHdl_p         Pointer to store the timer handle
+\param[in]      timeInMs_p          Timeout in milliseconds
+\param[in]      argument_p          User definable argument for timer
 
 \return This functions returns the resulting tOplkError return code.
  */
 //------------------------------------------------------------------------------
-tOplkError sim_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
+tOplkError sim_modifyTimer(tTimerHdl* pTimerHdl_p,
+                           ULONG timeInMs_p,
                            tTimerArg argument_p)
 {
     // check if module was initialized
@@ -288,7 +296,7 @@ tOplkError sim_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
 This function forwards the delete user timer command to the connected simulation
 environment.
 
-\param  pTimerHdl_p     Pointer to timer handle of timer to delete
+\param[in,out]  pTimerHdl_p         Pointer to timer handle of timer to delete
 
 \return This functions returns the resulting tOplkError return code.
  */
@@ -313,7 +321,7 @@ tOplkError sim_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function forwards the is user timer active command to the connected
 simulation environment.
 
-\param  timerHdl_p     Handle of timer to check
+\param[in]      timerHdl_p          Handle of timer to check
 
 \return This functions returns the resulting tOplkError return code.
  */

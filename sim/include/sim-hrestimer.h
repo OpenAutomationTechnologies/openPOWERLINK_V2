@@ -33,14 +33,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_sim_hrestimer_H_
 #define _INC_sim_hrestimer_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim.h>
 
 //------------------------------------------------------------------------------
@@ -62,14 +60,15 @@ extern "C"
 
 OPLKDLLEXPORT BOOL  sim_setHresTimerFunctions(tSimulationInstanceHdl simHdl,
                                               tHresTimerFunctions hresTimerFunctions_p);
-
 OPLKDLLEXPORT void  sim_unsetHresTimerFunctions(void);
 
 tOplkError          sim_initHresTimer(void);
 tOplkError          sim_exitHresTimer(void);
-tOplkError          sim_modifyHresTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
+tOplkError          sim_modifyHresTimer(tTimerHdl* pTimerHdl_p,
+                                        ULONGLONG time_p,
                                         tTimerkCallback pfnCallback_p,
-                                        ULONG argument_p, BOOL fContinue_p);
+                                        ULONG argument_p,
+                                        BOOL fContinue_p);
 tOplkError          sim_deleteHresTimer(tTimerHdl* pTimerHdl_p);
 
 #ifdef __cplusplus

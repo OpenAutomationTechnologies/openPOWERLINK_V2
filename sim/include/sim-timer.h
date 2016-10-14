@@ -32,14 +32,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_sim_timer_H_
 #define _INC_sim_timer_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim.h>
 
 //------------------------------------------------------------------------------
@@ -53,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -63,13 +60,15 @@ OPLKDLLEXPORT BOOL  sim_setTimerFunctions(tSimulationInstanceHdl simhdl,
                                           tTimerFunctions functions);
 OPLKDLLEXPORT void  sim_unsetTimerFunctions(void);
 OPLKDLLEXPORT void  sim_userTimerCallback(tTimerHdl timerHdl_p,
-                                             tTimerArg argument_p);
+                                          tTimerArg argument_p);
 
 tOplkError          sim_initTimer(void);
 tOplkError          sim_exitTimer(void);
-tOplkError          sim_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
+tOplkError          sim_setTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONG timeInMs_p,
                                  tTimerArg argument_p);
-tOplkError          sim_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p,
+tOplkError          sim_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                    ULONG timeInMs_p,
                                     tTimerArg argument_p);
 tOplkError          sim_deleteTimer(tTimerHdl* pTimerHdl_p);
 BOOL                sim_isTimerActive(tTimerHdl timerHdl_p);

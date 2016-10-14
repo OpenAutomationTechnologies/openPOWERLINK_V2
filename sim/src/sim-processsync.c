@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim-processsync.h>
 
 //============================================================================//
@@ -78,7 +77,7 @@ typedef struct
 {
     tProcessSyncFunctions   processSyncFunctions;   ///< Struct with all simulation interface functions
     tSimulationInstanceHdl  simHdl;                 ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;           ///< Initialization flag signalling if the stores functions are valid
+    BOOL                    fInitialized;           ///< Initialization flag signaling if the stores functions are valid
 } tSimApiInstance;
 
 //------------------------------------------------------------------------------
@@ -87,7 +86,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimApiInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimApiInstance  instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,12 +107,14 @@ static tSimApiInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's process sync functionalities.
 
-\param simHdl_p                 The handle of the current simulated stack instance
-\param processSyncFunctions_p   Structure with all simulation interface functions
+\param[in]      simHdl_p                The handle of the current simulated stack instance
+\param[in]      processSyncFunctions_p  Structure with all simulation interface functions
 
 \return The function returns a BOOL value.
-\retval TRUE    The function pointers are set successfully to the instance.
-\retval FALSE   The function pointers are not set because of an error.
+\retval TRUE                            The function pointers are set successfully
+                                        to the instance.
+\retval FALSE                           The function pointers are not set because
+                                        of an error.
 */
 //------------------------------------------------------------------------------
 BOOL sim_setProcessSyncFunctions(tSimulationInstanceHdl simHdl_p,

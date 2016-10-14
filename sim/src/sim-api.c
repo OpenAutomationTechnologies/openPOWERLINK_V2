@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim-api.h>
 #include <oplk/oplk.h>
 #include <sim-processsync.h>
@@ -93,16 +92,16 @@ This function forwards the passed init parameter to the default implementation
 
 \note The event callback and the process sync callback are set to the simulation
 interface functions \ref sim_eventCb and \ref sim_processSyncCb. These functions
-forward the different callbacks to the externaly set function pointers set by
+forward the different callbacks to the externally set function pointers set by
 \ref sim_setApiEventFunctions and \ref sim_setProcessSyncFunctions.
 
-\param  pInitParam_p            Pointer to the initialization parameters which
-                                must be set by the application.
+\param[in,out]  pInitParam_p        Pointer to the initialization parameters which
+                                    must be set by the application.
 
 \return The function returns a \ref tOplkError error code.
  */
 //------------------------------------------------------------------------------
-tOplkError sim_oplkCreate(tOplkApiInitParam *pInitParam_p)
+tOplkError sim_oplkCreate(tOplkApiInitParam* pInitParam_p)
 {
     // check parameter
     if (pInitParam_p == NULL)

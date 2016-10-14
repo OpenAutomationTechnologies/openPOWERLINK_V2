@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim-edrv.h>
 
 //============================================================================//
@@ -78,7 +77,7 @@ typedef struct
 {
     tEdrvFunctions          edrvFunctions;  ///< Struct with all simulation interface functions
     tSimulationInstanceHdl  simHdl;         ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;   ///< Initialization flag signalling if the stores functions are valid
+    BOOL                    fInitialized;   ///< Initialization flag signaling if the stores functions are valid
 } tSimEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -87,7 +86,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimEdrvInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimEdrvInstance instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,12 +107,14 @@ static tSimEdrvInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's edrv functionalities.
 
-\param simHdl_p             The handle of the current simulated stack instance
-\param edrvFunctions_p      Structure with all simulation interface functions
+\param[in]      simHdl_p            The handle of the current simulated stack instance
+\param[in]      edrvFunctions_p     Structure with all simulation interface functions
 
 \return The function returns a BOOL value.
-\retval TRUE    The function pointers are set successfully to the instance.
-\retval FALSE   The function pointers are not set because of an error.
+\retval TRUE                        The function pointers are set successfully to
+                                    the instance.
+\retval FALSE                       The function pointers are not set because of
+                                    an error.
 */
 //------------------------------------------------------------------------------
 BOOL sim_setEdrvFunctions(tSimulationInstanceHdl simHdl_p,
@@ -159,12 +164,12 @@ void sim_unsetEdrvFunctions(void)
 This function forwards the initialization of the edrv module to the connected
 simulation environment.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return This functions returns the resulting tOplkError return code.
  */
 //------------------------------------------------------------------------------
-tOplkError sim_initEdrv(const tEdrvInitParam *pEdrvInitParam_p)
+tOplkError sim_initEdrv(const tEdrvInitParam* pEdrvInitParam_p)
 {
     // check if functions are initialized
     if (instance_l.fInitialized)
@@ -178,9 +183,9 @@ tOplkError sim_initEdrv(const tEdrvInitParam *pEdrvInitParam_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief Deinitializes the simulated edrv module
+\brief De-initializes the simulated edrv module
 
-This function forwards the deinitialization of the edrv module to the connected
+This function forwards the de-initialization of the edrv module to the connected
 simulation environment.
 
 \return This functions returns the resulting tOplkError return code.
@@ -190,9 +195,7 @@ tOplkError sim_exitEdrv(void)
 {
     // check if functions are initialized
     if (instance_l.fInitialized)
-    {
         return instance_l.edrvFunctions.pfnExit(instance_l.simHdl);
-    }
 
     return kErrorApiNotInitialized;
 }
@@ -205,16 +208,14 @@ This function forwards the acquisition of the MAC address to the connected
 simulation environment.
 
 \return The function returns a pointer to the MAC address of the connected
-    simulated edrv module.
+        simulated edrv module.
 */
 //------------------------------------------------------------------------------
 const UINT8* sim_getMacAddr(void)
 {
     // check if functions are initialized
     if (instance_l.fInitialized)
-    {
         return instance_l.edrvFunctions.pfnGetMacAddr(instance_l.simHdl);
-    }
 
     return NULL;
 }
@@ -225,7 +226,7 @@ const UINT8* sim_getMacAddr(void)
 
 This function forwards the sending call to the connected simulation environment.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return This functions returns the resulting tOplkError return code.
 */
@@ -249,7 +250,7 @@ tOplkError sim_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 This function forwards the allocate Tx buffer command to the connected
 simulation environment.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return This functions returns the resulting tOplkError return code.
 */
@@ -273,7 +274,7 @@ tOplkError sim_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 This function forwards the free tx buffer command to the connected
 simulation environment.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return This functions returns the resulting tOplkError return code.
 */
@@ -297,16 +298,18 @@ tOplkError sim_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 This function forwards the change Rx filter command to the connected
 simulation environment.
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return This functions returns the resulting tOplkError return code.
 */
 //------------------------------------------------------------------------------
-tOplkError sim_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                              UINT entryChanged_p, UINT changeFlags_p)
+tOplkError sim_changeRxFilter(tEdrvFilter* pFilter_p,
+                              UINT count_p,
+                              UINT entryChanged_p,
+                              UINT changeFlags_p)
 {
     // check if functions are initialized
     if (instance_l.fInitialized)
@@ -328,7 +331,7 @@ tOplkError sim_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 This function forwards the change Rx multicast MAC address command to the
 connected simulation environment.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return This functions returns the resulting tOplkError return code.
 */
@@ -352,7 +355,7 @@ tOplkError sim_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 This function forwards the set Rx multicast MAC address command to the
 connected simulation environment.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return This functions returns the resulting tOplkError return code.
 */

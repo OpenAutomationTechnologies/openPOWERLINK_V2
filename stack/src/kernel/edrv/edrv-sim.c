@@ -208,8 +208,10 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     return sim_changeRxFilter(pFilter_p, count_p, entryChanged_p, changeFlags_p);
 }

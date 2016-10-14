@@ -78,7 +78,7 @@ typedef struct
 {
     tHresTimerFunctions     hresTimerFunctions; ///< Struct with all simulation interface functions
     tSimulationInstanceHdl  simHdl;             ///< Handle to running simulation for multiple simulated instances
-    BOOL                    fInitialized;       ///< Initialization flag signalling if the stores functions are valid
+    BOOL                    fInitialized;       ///< Initialization flag signaling if the stores functions are valid
 } tSimHresTimerInstance;
 
 //------------------------------------------------------------------------------
@@ -87,7 +87,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimHresTimerInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimHresTimerInstance    instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,12 +108,14 @@ static tSimHresTimerInstance instance_l = { .simHdl = 0, .fInitialized = FALSE }
 This function sets the function pointer connecting the simulation to the
 simulation environment's hres timer functionalities.
 
-\param  simHdl_p               The instance handle defining the current stack instance
-\param  hresTimerFunctions_p   Structure containing all connecting function pointers
+\param[in]      simHdl_p                The instance handle defining the current stack instance
+\param[in]      hresTimerFunctions_p    Structure containing all connecting function pointers
 
 \return The function returns a BOOL value.
-\retval TRUE    The function pointers are set successfully to the instance.
-\retval FALSE   The function pointers are not set because of an error.
+\retval TRUE                            The function pointers are set successfully
+                                        to the instance.
+\retval FALSE                           The function pointers are not set because
+                                        of an error.
  */
 //------------------------------------------------------------------------------
 BOOL sim_setHresTimerFunctions(tSimulationInstanceHdl simHdl_p,
@@ -171,9 +177,9 @@ tOplkError sim_initHresTimer(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief Denitializes the simulated hres timer module
+\brief De-initializes the simulated hres timer module
 
-This function forwards the deinitialization of the hres timer module to the
+This function forwards the de-initialization of the hres timer module to the
 connected simulation environment.
 
 \return This functions returns the resulting tOplkError return code.
@@ -198,20 +204,22 @@ tOplkError sim_exitHresTimer(void)
 This function forwards the modify hres timer command to the connected simulation
 environment.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, the callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with the Edrv
+                                    callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return This function returns the resulting tOplkError error code.
  */
 //------------------------------------------------------------------------------
-tOplkError sim_modifyHresTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                               tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError sim_modifyHresTimer(tTimerHdl* pTimerHdl_p,
+                               ULONGLONG time_p,
+                               tTimerkCallback pfnCallback_p,
+                               ULONG argument_p,
                                BOOL fContinue_p)
 {
     // check if module was initialized
@@ -236,7 +244,7 @@ tOplkError sim_modifyHresTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 This function forwards the delete hres timer command to the connected simulation
 environment.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return This function returns the resulting tOplkError error code.
  */

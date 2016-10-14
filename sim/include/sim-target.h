@@ -33,14 +33,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_sim_target_H_
 #define _INC_sim_target_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim.h>
 
 //------------------------------------------------------------------------------
@@ -54,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -67,8 +64,10 @@ OPLKDLLEXPORT void  sim_unsetTargetFunctions(void);
 tOplkError          sim_initTarget(void);
 tOplkError          sim_exitTarget(void);
 void                sim_msleep(UINT32 milliSeconds_p);
-tOplkError          sim_setIpAdrs(char *ifName_p, UINT32 ipAddress_p,
-                                  UINT32 subnetMask_p, UINT16 mtu_p);
+tOplkError          sim_setIpAdrs(const char* ifName_p,
+                                  UINT32 ipAddress_p,
+                                  UINT32 subnetMask_p,
+                                  UINT16 mtu_p);
 tOplkError          sim_setDefaultGateway(UINT32 defaultGateway_p);
 UINT32              sim_getTickCount(void);
 tOplkError          sim_setLed(tLedType ledType_p, BOOL fLedOn_p);

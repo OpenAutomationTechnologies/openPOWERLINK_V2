@@ -38,7 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sim-target.h>
 
 //============================================================================//
@@ -87,7 +86,11 @@ typedef struct
 
 /* The function pointers are only accessed after successful initialization,
  * therefore the initialization can be skipped */
-static tSimTargetInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
+static tSimTargetInstance   instance_l =
+{
+    .simHdl = 0,
+    .fInitialized = FALSE
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -104,8 +107,8 @@ static tSimTargetInstance instance_l = { .simHdl = 0, .fInitialized = FALSE };
 This function sets the function pointer connecting the simulation to the
 simulation environment's target functionalities.
 
-\param  simHdl_p            The instance handle defining the current stack instance
-\param  targetFunctions_p   Structure containing all connecting function pointers
+\param[in]      simHdl_p            The instance handle defining the current stack instance
+\param[in]      targetFunctions_p   Structure containing all connecting function pointers
 
 \return BOOL value showing the success of the initialization of the simulation interface
  */
@@ -173,9 +176,9 @@ tOplkError sim_initTarget(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief Denitializes the simulated target module
+\brief De-initializes the simulated target module
 
-This function forwards the deinitialization of the target module to the
+This function forwards the de-initialization of the target module to the
 connected simulation environment.
 
 \return This functions returns the resulting tOplkError return code
@@ -200,7 +203,8 @@ tOplkError sim_exitTarget(void)
 This function forwards the sleep command to the connected simulation
 environment.
 
-\param  milliSeconds_p  Time to sleep in milliseconds
+\param[in]      milliSeconds_p      Time to sleep in milliseconds
+
  */
 //------------------------------------------------------------------------------
 void sim_msleep(UINT32 milliSeconds_p)
@@ -220,16 +224,18 @@ void sim_msleep(UINT32 milliSeconds_p)
 This function forwards the set IP address command to the connected simulation
 environment.
 
-\param  ifName_p                Name of ethernet interface
-\param  ipAddress_p             IP address to set for interface
-\param  subnetMask_p            Subnet mask to set for interface
-\param  mtu_p                   MTU to set for interface
+\param[in]      ifName_p            Name of Ethernet interface
+\param[in]      ipAddress_p         IP address to set for interface
+\param[in]      subnetMask_p        Subnet mask to set for interface
+\param[in]      mtu_p               MTU to set for interface
 
 \return This functions returns the resulting tOplkError return code
  */
 //------------------------------------------------------------------------------
-tOplkError sim_setIpAdrs(char* ifName_p, UINT32 ipAddress_p,
-                         UINT32 subnetMask_p, UINT16 mtu_p)
+tOplkError sim_setIpAdrs(const char* ifName_p,
+                         UINT32 ipAddress_p,
+                         UINT32 subnetMask_p,
+                         UINT16 mtu_p)
 {
     // check if module was initialized
     if (instance_l.fInitialized)
@@ -252,7 +258,7 @@ tOplkError sim_setIpAdrs(char* ifName_p, UINT32 ipAddress_p,
 This function forwards the set default gateway command to the connected
 simulation environment.
 
-\param  defaultGateway_p            Default gateway to set
+\param[in]      defaultGateway_p    Default gateway to set
 
 \return This functions returns the resulting tOplkError return code
  */
@@ -299,8 +305,8 @@ UINT32 sim_getTickCount(void)
 This function forwards the set LED command to the connected simulation
 environment.
 
-\param  ledType_p       Determines which LED shall be set/reset
-\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE)
+\param[in]      ledType_p           Determines which LED shall be set/reset
+\param[in]      fLedOn_p            Set the addressed LED on (TRUE) or off (FALSE)
 
 \return This functions returns the resulting tOplkError return code
  */

@@ -33,7 +33,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_sim_trace_H_
 #define _INC_sim_trace_H_
 
@@ -53,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -63,7 +61,7 @@ OPLKDLLEXPORT BOOL  sim_setTraceFunctions(tSimulationInstanceHdl simHdl_p,
                                           tTraceFunctions traceFunctions_p);
 OPLKDLLEXPORT void  sim_unsetTraceFunctions(void);
 
-void                sim_trace(char const *pmsg_p);
+void                sim_trace(char const* pMsg_p);
 
 #ifdef __cplusplus
 }
