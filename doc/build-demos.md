@@ -124,11 +124,18 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
   - __Kernel stack on PCIe card__
 
-    The library `liboplkappmn-kernelpcie.a` will be used. It contains the interface
+    The library `liboplkmnapp-kernelpcp.a` will be used. It contains the interface
     to a Linux kernel PCIe interface driver.
     The kernel part of the openPOWERLINK stack is located on an external PCIe
     device. The status/control and data exchange between the application and kernel
     stack is handled by the PCIe interface driver.
+
+  - __Kernel stack on Zynq PCP__
+
+    The library `liboplkmnapp-kernelpcp.a` will be used. It contains the interface
+    to a Linux kernel platform interface driver. It is used along with the Linux
+    kernel platform interface driver, for status/control and data exchange with the kernel
+    stack which runs on Zynq Microblaze as a baremetal application.
 
 ## Windows Specific Options  {#sect_build_demos_windows_options}
 

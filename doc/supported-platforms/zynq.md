@@ -13,8 +13,14 @@ build and run openPOWERLINK on Zynq SoC.
 Currently, openPOWERLINK can run under the following environments on a Zynq SoC:
 
 - __Linux on Zynq ARM__
-  openPOWERLINK runs on Linux which is running on the ARM processing system (PS)
-  of the SoCprocessor under Linux.
+  openPOWERLINK user and kernel libraries execute on Linux running on the dualcore
+  ARM processing system (PS) of the SoC.
+
+- __Zynq Hybrid Design {Linux on ARM + Microblaze}__
+  The time-critical kernel part of the stack is running on a Microblaze softcore
+  processor as a bare metal application in the programming logic (PL) of the Zynq SoC.
+  The application part of the stack is running on the Linux on ARM Cortex A9 Core 0
+  processing system (PS) of the SoC.
 
 # Requirements {#sect_zynq_requirements}
 
@@ -35,15 +41,13 @@ Currently, openPOWERLINK can run under the following environments on a Zynq SoC:
 
 ## Tools {#sect_zynq_requirements_tools}
 
-### Xilinx ISE
+### Xilinx Vivado
 The following tool is necessary to evaluate a Xilinx Zynq based openPOWERLINK
 solution:
 
-* `Xilinx ISE - Embedded Edition` which is called `ISE Design Suite - 14.7 Full
-  Product Installation` or `ISE Design Suite - 14.7 Embedded Edition` and can be
-  downloaded from: http://www.xilinx.com/support/download/index.html. The evaluation license for a period of 30 days
-  can be acquired from the `Xilinx Licensing Site` and is free for an evaluation
-  product.
+* `Xilinx Vivado - HLx Edition` which is called `Vivado Design Suite - 2016.2 Full
+  Product Installation` or `Vivado Design Suite - 2016.2 HLx Edition` and can be
+  downloaded from: http://www.xilinx.com/support/download/index.html.
 
 ### CMake
 
@@ -71,17 +75,23 @@ via apt-get:
 
     > sudo apt-get install minicom
 
-TeraTerm is a program for printing out text which is transmitted over a serial
-interface. It is open source and can be downloaded from: http://ttssh2.sourceforge.jp/
-
 ### Linux Kernel
 
 A Linux kernel for the Zynq platform is required in order to run openPOWERLINK
 on Linux. The Linux port for the Zynq platform is available on github
 and can be downloaded or cloned from: https://github.com/Xilinx/linux-xlnx.
 
-Linux kernel version 3.10 tagged as xilinx-v14.7 on github was used for testing at
+Linux kernel version 4.4.0 tagged as xilinx-v2016.2 on github was used for testing at
 the time of writing this document.
+
+
+# Apply Preempt RT patch to Xilinx-Linux Kernel Version {#ApplyRTzynqlinux}
+
+Download Preempt RT version 4.4.rt2 for the Xilinx-linux from
+https://www.kernel.org/pub/linux/kernel/projects/rt/4.4/older/patch-4.4-rt2.patch.gz
+
+*Apply the patch using the following command:
+patch -p1 <<(gunzip -c “path where the preempt is stored”)*
 
 The steps to cross-compile Linux for Zynq and information about availability of other
 libraries for Zynq can be found here: http://www.wiki.xilinx.com/Zynq+Linux.
@@ -101,7 +111,6 @@ __NOTE__: Third-party libraries such as libpcap, and libqt etc. must also be
 The following modules have been added to the openPOWERLINK stack to support the Zynq SoC:
 
 - Edrv module for the Gigabit Ethernet controller on Zynq 7000 series SoCs (emacps).
-- High-resolution timer module for the triple timer counter on Zynq 7000 series SoCs.
 
 ## openPOWERLINK Stack Components {#sect_zynq_linux_components}
 
@@ -156,3 +165,128 @@ follow the steps listed below:
 * Connect the host PC to the Zynq board using the serial interface on board.
 * Use a terminal program to connect to the Linux console on Zynq.
 * For starting the application, refer to [running openPOWERLINK on Linux] (\ref sect_linux_running).
+
+## Zynq SoC Hybrid Design {#sect_zynq_hybrid}
+
+openPOWERLINK can also run on a Zynq SoC with Linux operating system.In this case
+the time-critical kernel part of the stack is running on a Microblaze softcore
+processor in the programming logic (PL) of the Zynq SoC. The application part of the
+stack is running on the Linux on both ARM cores processing system (PS) of the SoC. The
+communication between the ARM and Microblaze is by using Linux kernel driver
+implementation that employs DDR3 shared memory along with interrupts. The following
+section contains additional information about the Zynq hybrid design implementation
+of openPOWERLINK.
+
+## Contents {#sect_zynq_hybrid_contents}
+
+This section lists the components which are included to support Zynq hybrid systems on the Zynq SoC:
+
+* FPGA design with Microblaze CPU and openMAC IP-Core
+* Dual processor shared memory library
+* Zynq first stage bootloader[FSBL]
+
+## openPOWERLINK Stack Componenets {#sect_zynq_hybrid_components}
+
+The following section contains the description  [openPOWERLINK components](\ref page_components)
+available on a Zynq SoC Hybrid Design.
+
+### Stack libraries {#sect_zynq_hybrid_components_libs}
+
+The openPOWERLINK stack is divided into a user and a kernel part. The application,
+running on Zynq ARM is linked to an application library which uses a dual processor shared
+memory library to communicate with the kernel driver. This driver is linked with the driver
+library which uses openMAC to interface to the network. It uses the dual processor shared memory
+library to communicate with the user application library via the DDR3 shared memory.
+
+The following libraries are available for the FPGA based Zynq hybrid Design:
+
+- `stack/proj/generic/liboplkmnapp-kernelpcp` (liboplkmnapp-kernelpcp.a)
+- `stack/proj/generic/liboplkmndrv-dualprocshm` (liboplkmndrv-dualprocshm.a)
+
+### Demo Applications {#sect_zynq_hybrid_components_apps}
+
+The following demos are supported for the FPGA based Hybrid system on the Zynq SoC:
+
+* [demo_mn_console](\ref sect_components_demo_mn_console)
+
+### Drivers  {#sect_zynq_hybrid_components_drivers}
+
+The following drivers are supported for FPGA based Hybrid system on Zynq SoC:
+
+* **PCP Daemon on Microblaze**
+
+The openPOWERLINK kernel part is compiled as a library which is linked to a
+daemon. This daemon is running on a Microblaze softcore processor working as the
+POWERLINK Communication Processor (PCP). Shared memory is used as the communication
+interface between the PCP and the host processor. The PCP is responsible for
+carrying out time critical processing to achieve higher performance by reducing
+the jitter.
+
+The driver is located in: `drivers/xilinx-microblaze/drv_daemon`
+
+### Build FSBL {#sect_build_fsbl}
+
+* Generate fsbl from SDK for the Vivado hardware.
+* Create new application project and set the name as fsbl
+* Ask for hardware path and get file from /hardware/lib/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio/hw_platform/system.hdf
+* Generate fsbl application and copy the fsbl.elf into bin for generating boot.bin
+
+### Generate BOOT.bin {#sect_generate_boot_bin}
+1. Copy the bootimage.bif in the bin folder which contains all the binary for creating boot.bin
+2. Files required for creating boot.bin as follows:
+       - fsbl.elf
+       - download.bit (generic/microblaze/xilinx-z702/mn-dual-shmem-gpio)
+       - u-boot.elf (from Zynq-z702 package http://www.wiki.xilinx.com/Zynq+2016.2+Release)
+       - oplkdrv-daemon_o.elf(generic/microblaze/xilinx-z702/mn-dual-shmem-gpio)
+3. Run the following command to generate boot.bin on Linux
+       - /opt/Xilinx/SDK/2016.2/bin/bootgen -image bootimage.bif -o i boot.bin
+
+### Generate device tree blob {#sect_generate_device_tree_blob}
+1. Move to device tree source path - /hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/Linux_handoff/
+2. DTC is part of the Linux source directory. linux-xlnx/scripts/dtc/ contains the source code for DTC
+   and needs to be compiled in order to be used.
+3. Build the DTS using the command ./<Xilinx Linux directory>/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb system.dts
+
+## Building
+
+For building openPOWERLINK for FPGA based Hybrid Design on Zynq SoC, refer to the generic build instructions
+and execute all required build steps from this section. The following build steps can be carried out:
+
+
+* [Build the hardware platform](\ref page_build_hardware)
+* [Build the openPOWERLINK stack libraries](\ref page_build_stack)
+* [Build the driver](\ref sect_build_drivers_build_daemon_microblaze)
+* [Build your application (or a delivered demo application)](\ref page_build_demos)
+* [Build boot loader](\ref sect_build_fsbl)
+* [Generate device tree](\ref sect_generate_device_tree_blob)
+* [Generate boot.bin](\ref sect_generate_boot_bin)
+
+## Running openPOWERLINK
+
+### MN console demo
+
+The MN console demo can be started on the Zynq board using the SD card boot mode. Follow the steps below to start the MN demo on the board:
+
+1. Copy the following contents in the SD card to run the demo:
+      - uramdisk.image.gz (from Zynq-z702 package http://www.wiki.xilinx.com/Zynq+2016.2+Release)
+      - devicetree.dtb (from Linux_handoff folder inside hardware directory)
+      - boot.bin (from the generated folder)
+      - uImage (from <Xilinx Linux directory>/arch/arm/boot)
+      - openPOWERLINK driver and application binaries from
+                - <openPOWERLINK_Directory>/bin/linux/arm/oplkdrv_kernelmodule_zynq
+                - <openPOWERLINK_Directory>/bin/linux/arm/demo_mn_console
+
+2. Insert the SD card in the Zynq702 board.
+3.Connect USB UART port in the Zynq-Zc702 board with Linux PC.
+4. From terminal run minicom (Sudo minicom -s).
+5. Go to serial port setup.
+6. Change the serial device as per the USB name(/dev/ttyUSB0).
+7. Keep the hardware flow control settings to “NO”.
+8. Save setup as dfl and exit.
+9. Once autoboot finishes, enter the user-name as “root”.
+10. Mount the sd card using the following command
+     - $ mount /dev/mmcblk0p1 /mnt/
+11. Change directory cd /mnt/oplkdrv_kernelmodule_zynq/
+     - $ insmod oplkmnzynqintf.ko
+12. Change the directory cd /mnt/demo_mn_console
+     - $ ./demo_mn_console

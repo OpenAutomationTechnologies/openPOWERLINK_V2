@@ -57,6 +57,21 @@ To build the kernel PCIe interface driver:
 
 The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
 
+## Building a Linux Kernel Interface Driver for Zynq Hybrid Design {#sect_build_drivers_build_linux_zynq}
+
+To build the kernel space driver, the appropriate kernel sources must be installed
+on your system. The path to the kernel sources can be configured by
+__CFG_KERNEL_DIR__.
+
+To build the kernel interface driver for Zynq hybrid:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
+      > cmake -DCFG_OPLK_MN=TRUE
+      > make
+      > make install
+
+The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_zynq`
+
 ## Building a Windows NDIS driver {#sect_build_drivers_build_windows_ndis}
 
 To build a Windows NDIS driver, an appropriate version of Windows Driver Kit (WDK),
@@ -92,14 +107,36 @@ a different platform and Windows version.
 
 The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
-## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
+## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblazeise}
+
+This section will explain the steps to build the PCP daemon for a Microblaze
+softcore processor in a dual processor design.
+
+      > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblazeise-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > make
+      > make install
+
+## Building a PCP daemon for Zynq Vivado Microblaze {#sect_build_drivers_build_daemon_microblaze}
 
 This section will explain the steps to build the PCP daemon for a Microblaze
 softcore processor in a dual processor design.
 The PCP daemon uses the driver library for the dual processor shared memory interface
 (`liboplkmndrv-dualprocshm`).
 
-To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL) using shared memory interface):
+-# Configure Xilinx Vivado 16.2 Toolchain in Linux and Windows for compilation:
+
+  * On a Linux host platform, open terminal and run the following to set the environment
+       > <Vivado_ROOT_DIR>/2016.2/bin/vivado -mode tcl
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+
+  * On a Windows host platform, open Vivado TCL console 2016.2 and run the following to set the environment
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+       > vivado -mode batch
+
+-# To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL) using shared memory interface):
 
       > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
