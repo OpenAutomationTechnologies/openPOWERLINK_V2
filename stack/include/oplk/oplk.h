@@ -592,6 +592,8 @@ OPLKDLLEXPORT const char* oplk_getVersionString(void);
 OPLKDLLEXPORT UINT32 oplk_getStackConfiguration(void);
 OPLKDLLEXPORT tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p);
 OPLKDLLEXPORT tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p);
+OPLKDLLEXPORT tOplkError oplk_exchangeAppPdoIn(void);
+OPLKDLLEXPORT tOplkError oplk_exchangeAppPdoOut(void);
 
 // Process image API functions
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p,

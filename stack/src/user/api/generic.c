@@ -55,6 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/timesyncucal.h>
 #include <user/timesyncu.h>
 #include <user/obdal.h>
+#include <user/pdou.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
@@ -1498,6 +1499,56 @@ tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p)
 
     return kErrorApiNotSupported;
 #endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Exchange input application process data
+
+The function exchanges the input application process data.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Input process image is successfully exchanged.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_exchangeAppPdoIn(void)
+{
+    tOplkError  ret;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    ret = pdou_copyTxPdoFromPi();
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Exchange output application process data
+
+The function exchanges the output application process data.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Output process image is successfully exchanged.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_exchangeAppPdoOut(void)
+{
+    tOplkError  ret;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    ret = pdou_copyRxPdoToPi();
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
