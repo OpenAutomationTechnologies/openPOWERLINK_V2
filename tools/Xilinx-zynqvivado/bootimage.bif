@@ -1,0 +1,13 @@
+
+//////////////////////////////////////////////////////////////
+// ROM Image for multi SDCARD boot for Powerlink MN
+///////////////////////////////////////////////////////////////////
+
+the_ROM_image:
+{
+
+        [bootloader]        fsbl.elf
+                            download.bit
+                            u-boot.elf
+                            oplkdrv_daemon_o.elf
+}
