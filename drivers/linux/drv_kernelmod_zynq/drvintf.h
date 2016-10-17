@@ -1,16 +1,15 @@
 /**
 ********************************************************************************
-\file   dualprocshm-linuxzynq.h
+\file   drv_kernelmod_zynq/drvintf.h
 
-\brief  Dual processor library platform support header - For Zynq hybrid solution
+\brief  openPOWERLINK Zynq PCP interface driver interface header file
 
-This header file provides specific macros for external Zynq hybrid solution.
+openPOWERLINK Zynq Linux driver interface to PCP - Header file
 
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,76 +34,37 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_dualprocshm_ZYNQ_H_
-#define _INC_dualprocshm_ZYNQ_H_
+#ifndef _INC_drvintf_H_
+#define _INC_drvintf_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplk.h>
+#include <common/ctrl.h>
+#include <common/ctrlcal-mem.h>
+#include <common/dllcal.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-/* Memory size */
-#define MAX_COMMON_MEM_SIZE         2048                            ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT      20                              ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE       (MAX_DYNAMIC_BUFF_COUNT * 4)    ///< Max dynamic buffer size
-
-
-#if defined(__arm__)
-
-    #include <dualprocshm-linuxkernel.h>
-
-    #define COMMON_MEM_BASE         0x2C000000
-    #define SHARED_MEM_BASE         0x30000000
-    #define SHARED_MEM_SPAN         0xFFFFFFE
-
-    #define MEM_ADDR_TABLE_BASE     COMMON_MEM_BASE
-    #define MEM_INTR_BASE           MEM_ADDR_TABLE_BASE
-
-    #define MEM_ADDR_TABLE_OFFSET   MAX_COMMON_MEM_SIZE             ///< Offset of the address table from the start of common memory
-    #define MEM_INTR_OFFSET         MAX_DYNAMIC_BUFF_SIZE           ///< Offset of the interrupt register from the start of common memory
-
-    #define MEM_BASE_OFFSET         0x10000000
-
-#elif defined(__MICROBLAZE__)
-
-#include "dualprocshm-microblaze.h"
-
-#define TARGET_SYNC_IRQ_ID          -1
-#define TARGET_SYNC_IRQ             -1
-
-///< Interrupt controller specific defines
-#define TARGET_IRQ_IC_BASE          -1
-#define TARGET_IRQ_IC_DIST_BASE     -1
-
-#else
-
-#error "Unknown target for Zynq"
-
-#endif
-
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-#define DUALPROC_INSTANCE_COUNT     2       ///< Number of supported instances
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_VETH)
 /**
-\brief Dual processor lock
+\brief Type for VEth frame receive callback function pointer
 
-The structure holds the locking parameters used for the
-locking mechanism in dual processor shared memory library.
+This type defines a function pointer to the VEth frame received
+callback function.
 
+\param[in]      pFrameInfo_p        Frame info of the received frame.
+
+\return The function returns a tOplkError error code.
 */
-typedef struct sDualprocLock
-{
-    unsigned char   lockToken;              ///< Locking token
-    unsigned char   aPadding1[3];           ///< Padding array variable 1
-} tDualprocLock;
+typedef tOplkError (*tDrvIntfCbVeth)(const tFrameInfo* pFrameInfo_p);
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -113,9 +73,44 @@ typedef struct sDualprocLock
 extern "C"
 {
 #endif
+tOplkError drvintf_init(void);
+void       drvintf_exit(void);
+tOplkError drvintf_executeCmd(tCtrlCmd* ctrlCmd_p);
+tOplkError drvintf_waitSyncEvent(void);
+tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError drvintf_storeInitParam(const tCtrlInitParam* pInitParam_p);
+tOplkError drvintf_getStatus(UINT16* pStatus_p);
+tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p);
+#if defined(CONFIG_INCLUDE_VETH)
+tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
+tOplkError drvintf_sendVethFrame(const tFrameInfo* pFrameInfo_p);
+#endif
+tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p,
+                                  size_t size_p,
+                                  const void* pData_p);
+tOplkError drvintf_writeErrorObject(UINT32 offset_p,
+                                    UINT32 errVal_p);
+tOplkError drvintf_readErrorObject(UINT32 offset_p,
+                                   UINT32* pErrVal_p);
+tOplkError drvintf_postEvent(const tEvent* pEvent_p);
+tOplkError drvintf_getEvent(tEvent* pK2UEvent_p,
+                            size_t* pSize_p);
+tOplkError drvintf_getPdoMem(void** ppPdoMem_p,
+                             size_t* pMemSize_p);
+tOplkError drvintf_freePdoMem(void** ppPdoMem_p,
+                              size_t memSize_p);
+tOplkError drvintf_getBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError drvintf_freeBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError drvintf_mapKernelMem(const void* pKernelMem_p,
+                                void** ppUserMem_p,
+                                size_t size_p);
+void       drvintf_unmapKernelMem(void** ppUserMem_p);
+tOplkError drvintf_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                   const void* pBuf_p);
+ULONG      drvintf_getFileBufferSize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //_INC_dualprocshm_ZYNQ_H_
+#endif /* _INC_drvintf_H_ */
