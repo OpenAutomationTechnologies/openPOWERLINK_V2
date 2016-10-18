@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/pdokcal.h>
 #include <kernel/timesynckcal.h>
 #include <kernel/eventkcal.h>
-#include <errhndkcal.h>
+#include <kernel/errhndk.h>
 
 #include <linux/init.h>
 #include <linux/module.h>
@@ -837,7 +837,7 @@ static int writeErrorObject(unsigned long arg_p)
     if (copy_from_user(&writeObject, (const void __user*)arg_p, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
-    errorObjects = errhndkcal_getMemPtr();
+    errorObjects = errhndk_getMemPtr();
     *((char*)errorObjects + writeObject.offset) = writeObject.errVal;
 
     return 0;
@@ -864,7 +864,7 @@ static int readErrorObject(unsigned long arg_p)
     if (copy_from_user(&readObject, (const void __user*)arg_p, sizeof(tErrHndIoctl)))
         return -EFAULT;
 
-    errorObjects = errhndkcal_getMemPtr();
+    errorObjects = errhndk_getMemPtr();
     readObject.errVal = *((char*)errorObjects + readObject.offset);
 
     if (copy_to_user((void __user*)arg_p, &readObject, sizeof(tErrHndIoctl)))

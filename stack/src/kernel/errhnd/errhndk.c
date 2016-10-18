@@ -51,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #include <common/ami.h>
-#include <common/errhnd.h>
 #include <oplk/nmt.h>
 #include <oplk/frame.h>
 #include <oplk/benchmark.h>
@@ -162,6 +161,23 @@ tOplkError errhndk_exit()
     errhndkcal_exit();
 
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get pointer to error handler objects
+
+The function returns a pointer to the memory block where the error handler
+objects are stored.
+
+\return The function returns a pointer to the error handler objects.
+
+\ingroup module_errhndkcal
+*/
+//------------------------------------------------------------------------------
+tErrHndObjects* errhndk_getMemPtr(void)
+{
+    return errhndkcal_getMemPtr();
 }
 
 //------------------------------------------------------------------------------

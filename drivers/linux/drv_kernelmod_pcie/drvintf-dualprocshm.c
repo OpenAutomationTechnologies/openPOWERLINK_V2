@@ -51,8 +51,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/driver.h>
 #include <common/circbuffer.h>
 #include <common/timer.h>
+#include <common/errhnd.h>
 #include <kernel/timesynckcal.h>
-#include <errhndkcal.h>
 
 #if defined(CONFIG_INCLUDE_VETH)
 #include <kernel/veth.h>

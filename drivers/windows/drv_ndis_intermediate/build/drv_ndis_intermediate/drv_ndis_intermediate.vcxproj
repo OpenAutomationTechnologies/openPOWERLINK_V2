@@ -75,7 +75,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\src;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\kernel\dll;..\..\..\..\..\stack\src\kernel\errhnd;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>MaxSpeed</Optimization>
@@ -92,7 +92,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\src;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\kernel\dll;..\..\..\..\..\stack\src\kernel\errhnd;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>MaxSpeed</Optimization>
@@ -109,7 +109,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\src;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\kernel\dll;..\..\..\..\..\stack\src\kernel\errhnd;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>MaxSpeed</Optimization>
@@ -132,7 +132,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\src;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\kernel\dll;..\..\..\..\..\stack\src\kernel\errhnd;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\;..\..\proj\mn;..\..\..\..\..\stack\include\target;..\..\..\..\..\stack\src\arch\windows;..\..\..\..\..\contrib\ndislib;..\..\..\..\..\contrib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <Optimization>MaxSpeed</Optimization>

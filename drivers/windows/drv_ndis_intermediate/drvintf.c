@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
-#include <errhndkcal.h>
+#include <kernel/errhndk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -309,7 +309,7 @@ tOplkError drv_writeErrorObject(const tErrHndIoctl* pWriteObject_p)
     if (pWriteObject_p == NULL)
         return kErrorInvalidOperation;
 
-    errorObjects = errhndkcal_getMemPtr();
+    errorObjects = errhndk_getMemPtr();
     *((UINT32*)((UINT8*)errorObjects + pWriteObject_p->offset)) = pWriteObject_p->errVal;
 
     return kErrorOk;
@@ -333,7 +333,7 @@ tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p)
     if (pReadObject_p == NULL)
         return kErrorInvalidOperation;
 
-    errorObjects = errhndkcal_getMemPtr();
+    errorObjects = errhndk_getMemPtr();
     pReadObject_p->errVal = *((UINT8*)errorObjects + pReadObject_p->offset);
 
     return kErrorOk;

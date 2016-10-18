@@ -225,7 +225,6 @@ ENDIF()
 # specifiy standard include directories
 ###############################################################################
 INCLUDE_DIRECTORIES(${OPLK_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${STACK_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR}/circbuf)
 INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/errhnd)

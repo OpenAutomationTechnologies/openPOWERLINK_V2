@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/errhnd.h>
 #include <oplk/event.h>
 
 //------------------------------------------------------------------------------
@@ -79,14 +80,15 @@ extern "C"
 {
 #endif
 
-tOplkError errhndk_init(void);
-tOplkError errhndk_exit(void);
-tOplkError errhndk_process(const tEvent* pEvent_p);
-tOplkError errhndk_postError(const tEventDllError* pDllEvent_p);
-tOplkError errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
+tOplkError      errhndk_init(void);
+tOplkError      errhndk_exit(void);
+tErrHndObjects* errhndk_getMemPtr(void);
+tOplkError      errhndk_process(const tEvent* pEvent_p);
+tOplkError      errhndk_postError(const tEventDllError* pDllEvent_p);
+tOplkError      errhndk_decrementCounters(BOOL fMN_p) SECTION_ERRHNDK_DECRCNTERS;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-tOplkError errhndk_resetCnError(UINT nodeId_p);
+tOplkError      errhndk_resetCnError(UINT nodeId_p);
 #endif
 
 #ifdef __cplusplus
