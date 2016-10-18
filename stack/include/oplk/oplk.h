@@ -279,9 +279,8 @@ typedef enum
     kOplkApiEventSdo                = 0x62,
 
     /** Object dictionary access. This event informs about an access of the
-    object dictionary. It happens only, if \ref oplk_cbGenericObdAccess is
-    assigned as function pointer to the concerning object in the object dictionary
-    definition.
+    object dictionary. It happens only, if the call flag is set to TRUE in the
+    concerning object in the object dictionary definition.
     The event argument contains an OD callback parameter (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
 
@@ -531,7 +530,6 @@ OPLKDLLEXPORT void oplk_exit(void);
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(const tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
-OPLKDLLEXPORT tOplkError oplk_cbGenericObdAccess(tObdCbParam* pParam_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p,
                                          void* pVar_p,
                                          UINT* pVarEntries_p,

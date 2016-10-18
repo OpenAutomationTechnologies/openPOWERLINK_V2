@@ -165,6 +165,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
                                   BOOL fUpdateIdentity_p);
 static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
                             BOOL fDisableUpdateStoredConf_p);
+static tOplkError cbObdAccess(tObdCbParam* pParam_p);
 static tOplkError handleObdLossOfFrameTolerance(const tObdCbParam* pParam_p);
 static tOplkError handleObdVerifyConf(const tObdCbParam* pParam_p);
 static tOplkError handleObdResetCmd(tObdCbParam* pParam_p);
@@ -771,116 +772,6 @@ tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Default OD callback function
-
-The function implements the standard OD callback function. It contains basic
-actions for system objects.
-
-\param[in,out]  pParam_p            OD callback parameter.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_ctrlu
-*/
-//------------------------------------------------------------------------------
-tOplkError ctrlu_cbObdAccess(tObdCbParam* pParam_p)
-{
-    tOplkError          ret = kErrorOk;
-#if (API_OBD_FORWARD_EVENT != FALSE)
-    tOplkApiEventArg    obdCbEventArg;
-#endif
-
-    // Check parameter validity
-    ASSERT(pParam_p != NULL);
-
-#if (API_OBD_FORWARD_EVENT != FALSE)
-    // call user callback
-    obdCbEventArg.obdCbParam = *pParam_p;
-    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &obdCbEventArg);
-    if (ret != kErrorOk)
-    {   // do not do any further processing on this object
-        if (ret == kErrorReject)
-            ret = kErrorOk;
-        return ret;
-    }
-#endif
-
-    switch (pParam_p->index)
-    {
-        case 0x1C14:    // DLL_LossOfFrameTolerance_U32
-            ret = handleObdLossOfFrameTolerance(pParam_p);
-            break;
-
-        case 0x1020:    // CFM_VerifyConfiguration_REC
-            ret = handleObdVerifyConf(pParam_p);
-            break;
-
-        case 0x1F9E:    // NMT_ResetCmd_U8
-            ret = handleObdResetCmd(pParam_p);
-            break;
-
-#if defined(CONFIG_INCLUDE_IP)
-        case 0x1E40:    // NWL_IpAddrTable_0h_REC
-            ret = handleObdIpAddrTable(pParam_p);
-            break;
-#endif
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-        case 0x1C00:    // DLL_MNCRCError_REC
-        case 0x1C02:    // DLL_MNCycTimeExceed_REC
-#endif
-        case 0x1C0B:    // DLL_CNLossSoC_REC
-        case 0x1C0D:    // DLL_CNLossPReq_REC
-        case 0x1C0F:    // DLL_CNCRCError_REC
-            ret = errhndu_cbObdAccess(pParam_p);
-            break;
-
-#if defined(CONFIG_INCLUDE_NMT_MN)
-        case 0x1C07:    // DLL_MNCNLossPResCumCnt_AU32
-        case 0x1C08:    // DLL_MNCNLossPResThrCnt_AU32
-        case 0x1C09:    // DLL_MNCNLossPResThreshold_AU32
-            ret = errhndu_mnCnLossPresCbObdAccess(pParam_p);
-            break;
-
-        case 0x1F9F:    // NMT_RequestCmd_REC
-            ret = handleObdRequestCmd(pParam_p);
-            break;
-#endif
-
-#if defined(CONFIG_INCLUDE_CFM)
-        case 0x1F22:    // CFM_ConciseDcfList_ADOM
-            ret = cfmu_cbObdAccess(pParam_p);
-            break;
-#endif
-
-#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-        case 0x1010:    // NMT_StoreParam_REC
-            // Call back for Store action
-            ret = storeOdPart(pParam_p);
-            break;
-
-        case 0x1011:    // NMT_RestoreDefParam_REC
-            // Call back for Restore action
-            ret = restoreOdPart(pParam_p);
-            break;
-#endif
-        default:
-#if defined(CONFIG_INCLUDE_PDO)
-            // PDO mapping objects
-            if (((pParam_p->index >= 0x1400) && (pParam_p->index <= 0x14FF)) ||
-                ((pParam_p->index >= 0x1600) && (pParam_p->index <= 0x16FF)) ||
-                ((pParam_p->index >= 0x1800) && (pParam_p->index <= 0x18FF)) ||
-                ((pParam_p->index >= 0x1A00) && (pParam_p->index <= 0x1AFF)))
-                ret = pdou_cbObdAccess(pParam_p);
-#endif
-            break;
-    }
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Get Ethernet Interface MAC address
 
 The function returns the Ethernet Interface MAC address used by the
@@ -1073,7 +964,7 @@ static tOplkError initObd(const tOplkApiInitParam* pInitParam_p)
     tOplkError  ret = kErrorOk;
 
     DEBUG_LVL_CTRL_TRACE("Initialize obdu module...\n");
-    ret = obdu_init(&pInitParam_p->obdInitParam);
+    ret = obdu_init(&pInitParam_p->obdInitParam, cbObdAccess);
     if (ret != kErrorOk)
         return ret;
 
@@ -1832,6 +1723,115 @@ static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  OD callback function
+
+The function implements the OD callback function. It contains basic actions for
+system objects and forwards the access to the user via a user event.
+
+\param[in,out]  pParam_p            OD callback parameter.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_ctrlu
+*/
+//------------------------------------------------------------------------------
+static tOplkError cbObdAccess(tObdCbParam* pParam_p)
+{
+    tOplkError          ret = kErrorOk;
+#if (API_OBD_FORWARD_EVENT != FALSE)
+    tOplkApiEventArg    obdCbEventArg;
+#endif
+
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
+#if (API_OBD_FORWARD_EVENT != FALSE)
+    // call user callback
+    obdCbEventArg.obdCbParam = *pParam_p;
+    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &obdCbEventArg);
+    if (ret != kErrorOk)
+    {   // do not do any further processing on this object
+        if (ret == kErrorReject)
+            ret = kErrorOk;
+        return ret;
+    }
+#endif
+
+    switch (pParam_p->index)
+    {
+        case 0x1C14:    // DLL_LossOfFrameTolerance_U32
+            ret = handleObdLossOfFrameTolerance(pParam_p);
+            break;
+
+        case 0x1020:    // CFM_VerifyConfiguration_REC
+            ret = handleObdVerifyConf(pParam_p);
+            break;
+
+        case 0x1F9E:    // NMT_ResetCmd_U8
+            ret = handleObdResetCmd(pParam_p);
+            break;
+
+#if defined(CONFIG_INCLUDE_IP)
+        case 0x1E40:    // NWL_IpAddrTable_0h_REC
+            ret = handleObdIpAddrTable(pParam_p);
+            break;
+#endif
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        case 0x1C00:    // DLL_MNCRCError_REC
+        case 0x1C02:    // DLL_MNCycTimeExceed_REC
+#endif
+        case 0x1C0B:    // DLL_CNLossSoC_REC
+        case 0x1C0D:    // DLL_CNLossPReq_REC
+        case 0x1C0F:    // DLL_CNCRCError_REC
+            ret = errhndu_cbObdAccess(pParam_p);
+            break;
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        case 0x1C07:    // DLL_MNCNLossPResCumCnt_AU32
+        case 0x1C08:    // DLL_MNCNLossPResThrCnt_AU32
+        case 0x1C09:    // DLL_MNCNLossPResThreshold_AU32
+            ret = errhndu_mnCnLossPresCbObdAccess(pParam_p);
+            break;
+
+        case 0x1F9F:    // NMT_RequestCmd_REC
+            ret = handleObdRequestCmd(pParam_p);
+            break;
+#endif
+
+#if defined(CONFIG_INCLUDE_CFM)
+        case 0x1F22:    // CFM_ConciseDcfList_ADOM
+            ret = cfmu_cbObdAccess(pParam_p);
+            break;
+#endif
+
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
+        case 0x1010:    // NMT_StoreParam_REC
+            // Call back for Store action
+            ret = storeOdPart(pParam_p);
+            break;
+
+        case 0x1011:    // NMT_RestoreDefParam_REC
+            // Call back for Restore action
+            ret = restoreOdPart(pParam_p);
+            break;
+#endif
+        default:
+#if defined(CONFIG_INCLUDE_PDO)
+            // PDO mapping objects
+            if (((pParam_p->index >= 0x1400) && (pParam_p->index <= 0x14FF)) ||
+                ((pParam_p->index >= 0x1600) && (pParam_p->index <= 0x16FF)) ||
+                ((pParam_p->index >= 0x1800) && (pParam_p->index <= 0x18FF)) ||
+                ((pParam_p->index >= 0x1A00) && (pParam_p->index <= 0x1AFF)))
+                ret = pdou_cbObdAccess(pParam_p);
+#endif
+            break;
+    }
+
+    return ret;
+}
 
 //------------------------------------------------------------------------------
 /**

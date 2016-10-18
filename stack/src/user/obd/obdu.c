@@ -91,6 +91,7 @@ typedef struct
 typedef struct
 {
     tObdInitParam                   initParam;
+    tObdAccessCallback              pfnAccessCb;
     tObdStoreLoadCallback           pfnStoreLoadObjectCb;
 #if (CONFIG_OBD_CALC_OD_SIGNATURE != FALSE)
     UINT32                          aOdSignature[3];
@@ -175,7 +176,7 @@ static void         copyObjectData(void* pDstData_p,
                                    tObdSize objSize_p,
                                    tObdType objType_p);
 static tOplkError   callObjectCallback(const tObdEntry* pObdEntry_p,
-                                       const tObdCbParam* pCbParam_p);
+                                       tObdCbParam* pCbParam_p);
 static tOplkError   callPostDefault(const void* pData_p,
                                     const tObdEntry* pObdEntry_p,
                                     const tObdSubEntry* pObdSubEntry_p);
@@ -248,13 +249,15 @@ static tObdDataTypeSize dataTypeSize_l[] =
 The function initializes the OD module.
 
 \param[in]      pInitParam_p        Pointer to OD initialization parameters.
+\param[in]      pObdAccessCb_p      Function to call if the call flag is set for an object.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_obd
 */
 //------------------------------------------------------------------------------
-tOplkError obdu_init(const tObdInitParam* pInitParam_p)
+tOplkError obdu_init(const tObdInitParam* pInitParam_p,
+                     tObdAccessCallback pObdAccessCb_p)
 {
     tOplkError  ret;
 
@@ -262,11 +265,15 @@ tOplkError obdu_init(const tObdInitParam* pInitParam_p)
     if ((pInitParam_p == NULL) ||
         (pInitParam_p->pGenericPart == NULL) ||
         (pInitParam_p->pManufacturerPart == NULL) ||
-        (pInitParam_p->pDevicePart == NULL))
+        (pInitParam_p->pDevicePart == NULL) ||
+        (pObdAccessCb_p == NULL))
         return kErrorApiInvalidParam;
 
     // Store init parameters
     obdInstance_l.initParam = *pInitParam_p;
+
+    // Store the access callback
+    obdInstance_l.pfnAccessCb = pObdAccessCb_p;
 
     // clear callback function for command LOAD and STORE
     obdInstance_l.pfnStoreLoadObjectCb = NULL;
@@ -2825,18 +2832,18 @@ The function calls the generic callback function \ref oplk_cbGenericObdAccess
  with an given object, when the according flag is set.
 
 \param[in]      pObdEntry_p         Pointer to the ObdEntry.
-\param[in]      pCbParam_p          Pointer to callback function parameter structure.
+\param[in,out]  pCbParam_p          Pointer to callback function parameter structure.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError callObjectCallback(const tObdEntry* pObdEntry_p,
-                                     const tObdCbParam* pCbParam_p)
+                                     tObdCbParam* pCbParam_p)
 {
     tOplkError  ret = kErrorOk;
 
     if (pObdEntry_p->fCallGenericCb != FALSE)
-        ret = oplk_cbGenericObdAccess((tObdCbParam*)pCbParam_p);
+        ret = obdInstance_l.pfnAccessCb(pCbParam_p);
 
     return ret;
 }

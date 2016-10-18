@@ -189,12 +189,12 @@ error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead events.
 
-\param[in,out]  pParam_p            OD callback parameter
+\param[in]      pParam_p            OD callback parameter
 
 \return Returns always kErrorOk
 */
 //------------------------------------------------------------------------------
-tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p)
+tOplkError errhndu_cbObdAccess(const tObdCbParam* pParam_p)
 {
     // Check parameter validity
     ASSERT(pParam_p != NULL);
@@ -253,14 +253,14 @@ error objects so that error counters can be updated in shared memory by
 PostWrite events and local objects will be updated from shared memory on
 PreRead objects.
 
-\param[in,out]  pParam_p            OD callback parameter
+\param[in]      pParam_p            OD callback parameter
 
 \return Returns always kErrorOk
 
 \ingroup module_errhndu
 */
 //------------------------------------------------------------------------------
-tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p)
+tOplkError errhndu_mnCnLossPresCbObdAccess(const tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
 

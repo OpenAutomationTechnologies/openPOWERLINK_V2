@@ -67,8 +67,8 @@ tOplkError errhndu_init(void);
 tOplkError errhndu_exit(void);
 
 // object callback functions
-tOplkError errhndu_cbObdAccess(tObdCbParam* pParam_p);
-tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam* pParam_p);
+tOplkError errhndu_cbObdAccess(const tObdCbParam* pParam_p);
+tOplkError errhndu_mnCnLossPresCbObdAccess(const tObdCbParam* pParam_p);
 
 #ifdef __cplusplus
 }

@@ -71,7 +71,6 @@ BOOL         ctrlu_checkKernelStack(void);
 tOplkError   ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
 tOplkError   ctrlu_callUserEventCallback(tOplkApiEventType eventType_p,
                                          const tOplkApiEventArg* pEventArg_p);
-tOplkError   ctrlu_cbObdAccess(tObdCbParam* pParam_p);
 const UINT8* ctrlu_getEthMacAddr(void);
 BOOL         ctrlu_stackIsInitialized(void);
 UINT32       ctrlu_getFeatureFlags(void);

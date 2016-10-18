@@ -112,6 +112,7 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
+typedef tOplkError (*tObdAccessCallback)(tObdCbParam* pParam_p);
 typedef tOplkError (*tInitTabEntryCallback)(void* pTabEntry_p, UINT objIndex_p);
 typedef tOplkError (*tObdStoreLoadCallback)(const tObdCbStoreParam* pCbStoreParam_p);
 
@@ -144,7 +145,8 @@ extern "C"
 {
 #endif
 
-tOplkError obdu_init(const tObdInitParam* pInitParam_p);
+tOplkError obdu_init(const tObdInitParam* pInitParam_p,
+                     tObdAccessCallback pObdAccessCb_p);
 tOplkError obdu_exit(void);
 tOplkError obdu_writeEntry(UINT index_p,
                            UINT subIndex_p,

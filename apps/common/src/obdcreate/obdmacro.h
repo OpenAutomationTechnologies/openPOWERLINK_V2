@@ -336,17 +336,16 @@ with the macro OBD_BEGIN_INDEX_... and ended with OBD_END_INDEX. The suffix
 \brief Begin of index entry
 
 \param ind                  Object index of the entry to be defined
-\param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the calling of the api function
-                            \ref oplk_cbGenericObdAccess for this index entry.
-                            The callback function is always called if an object
-                            has been read or written. It doesn’t matter if the
-                            access comes from the application or per SDO. The
-                            POWERLINK ctrl module has one callback function that
-                            must be specified for some objects in the index range
-                            0x1000 through 0x1FFF and may be specified for any
-                            other object indexes, including application-specific
-                            objects.
+\param cnt                  Number of sub-indices within this index entry
+\param call                 Flag indicating that an object access shall trigger
+                            a function call. If this flag is set to TRUE, a
+                            stack-internal function is called that evaluates the
+                            object index and sub-index and may call internal handling
+                            functionalities. Additionally, a user event is created
+                            that allows the user to react on the object access.
+                            The trigger is always called if an object has been read
+                            or written. It doesn’t matter if the access comes from the
+                            application or via SDO.
 */
 #define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
 
