@@ -68,6 +68,7 @@ SET(KERNEL_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/edrv/edrv-ndisintermediate.c
     ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/event/eventk.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-winkernel.c

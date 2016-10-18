@@ -63,6 +63,8 @@ extern "C"
 
 tOplkError      errhndkcal_init(void);
 void            errhndkcal_exit(void);
+tOplkError      errhndkcal_initMemory(void);
+void            errhndkcal_deinitMemory(void);
 tErrHndObjects* errhndkcal_getMemPtr(void);
 
 /* Reading of error objects */

@@ -321,6 +321,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     ${KERNEL_SOURCE_DIR}/led/ledk.c
     ${KERNEL_SOURCE_DIR}/led/ledktimer.c

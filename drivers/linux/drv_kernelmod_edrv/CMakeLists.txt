@@ -261,6 +261,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
