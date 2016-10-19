@@ -482,12 +482,32 @@ This function removes one zynq device.
 //------------------------------------------------------------------------------
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
-    //TODO: Cleanup check
-    free_irq(instance_l.resIrq, pDev_p);
-    release_mem_region(instance_l.resMemAddr, instance_l.resMemSize);
-    iounmap(instance_l.pIoAddrreg1);
-    iounmap(instance_l.pIoAddrreg2);
+    if (instance_l.resIrq != 0)
+    {
+        free_irq(instance_l.resIrq, pDev_p);
+        instance_l.resIrq = 0;
+    }
 
+    if (instance_l.pIoAddrReg[kIoMemReg1] != NULL)
+    {
+        iounmap(instance_l.pIoAddrReg[kIoMemReg1]);
+        instance_l.pIoAddrReg[kIoMemReg1] = NULL;
+    }
+
+    if (instance_l.pIoAddrReg[kIoMemReg2] != NULL)
+    {
+        iounmap(instance_l.pIoAddrReg[kIoMemReg2]);
+        instance_l.pIoAddrReg[kIoMemReg2] = NULL;
+    }
+
+    if (instance_l.resMemAddr != 0)
+    {
+        release_mem_region(instance_l.resMemAddr, instance_l.resMemSize);
+        instance_l.resMemAddr = 0;
+    }
+
+    gpio_free(GPIO_PIN_NUM);
+    instance_l.pPlatformDev = NULL;
     return 0;
 }
 
