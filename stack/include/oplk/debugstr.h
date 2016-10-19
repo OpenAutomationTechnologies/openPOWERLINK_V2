@@ -55,25 +55,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-OPLKDLLEXPORT char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p);
-OPLKDLLEXPORT char* debugstr_getEventTypeStr(tEventType eventType_p);
-OPLKDLLEXPORT char* debugstr_getEventSourceStr(tEventSource eventSrc_p);
-OPLKDLLEXPORT char* debugstr_getEventSinkStr(tEventSink eventSink_p);
-OPLKDLLEXPORT char* debugstr_getNmtStateStr(tNmtState nmtState_p);
-OPLKDLLEXPORT char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p);
-OPLKDLLEXPORT char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p);
-OPLKDLLEXPORT char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p);
-OPLKDLLEXPORT char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p);
-OPLKDLLEXPORT char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p);
-OPLKDLLEXPORT char* debugstr_getRetValStr(tOplkError OplkError_p);
-OPLKDLLEXPORT char* debugstr_getEmergErrCodeStr(UINT16 EmergErrCode_p);
-OPLKDLLEXPORT char* debugstr_getAbortCodeStr(UINT32 abortCode_p);
+OPLKDLLEXPORT const char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p);
+OPLKDLLEXPORT const char* debugstr_getEventTypeStr(tEventType eventType_p);
+OPLKDLLEXPORT const char* debugstr_getEventSourceStr(tEventSource eventSrc_p);
+OPLKDLLEXPORT const char* debugstr_getEventSinkStr(tEventSink eventSink_p);
+OPLKDLLEXPORT const char* debugstr_getNmtStateStr(tNmtState nmtState_p);
+OPLKDLLEXPORT const char* debugstr_getApiEventStr(tOplkApiEventType apiEvent_p);
+OPLKDLLEXPORT const char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent nodeEventType_p);
+OPLKDLLEXPORT const char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent bootEventType_p);
+OPLKDLLEXPORT const char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p);
+OPLKDLLEXPORT const char* debugstr_getSdoComConStateStr(tSdoComConState sdoComConState_p);
+OPLKDLLEXPORT const char* debugstr_getRetValStr(tOplkError oplkError_p);
+OPLKDLLEXPORT const char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p);
+OPLKDLLEXPORT const char* debugstr_getAbortCodeStr(UINT32 abortCode_p);
 
 #ifdef __cplusplus
 }
