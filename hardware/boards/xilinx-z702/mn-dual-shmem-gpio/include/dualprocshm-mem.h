@@ -53,12 +53,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /* BASE ADDRESSES */
 
+#define COMMON_MEM_OFFSET           0x0C000000
+#define SHARED_MEM_OFFSET           0x10000000
+
 #if defined(__MICROBLAZE__)
     // TODO : gks check if this can be retrieved from hardware configuration
-    #define COMMON_MEM_BASE             0x2C000000
 
     #if defined(XPAR_PS7_DDR_0_HP0_AXI_BASENAME) && defined (XPAR_PS7_DDR_0_HP0_AXI_HIGHNAME)
-        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_HP0_AXI_BASENAME)
+        #define COMMON_MEM_BASE         (XPAR_PS7_DDR_0_HP0_AXI_BASENAME + COMMON_MEM_OFFSET)
+        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_HP0_AXI_BASENAME + SHARED_MEM_OFFSET)
         #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_HP0_AXI_HIGHNAME - SHARED_MEM_BASE + 1)
     #else
         #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"

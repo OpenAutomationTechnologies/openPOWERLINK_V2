@@ -66,8 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define MEM_ADDR_TABLE_OFFSET   MAX_COMMON_MEM_SIZE             ///< Offset of the address table from the start of common memory
     #define MEM_INTR_OFFSET         MAX_DYNAMIC_BUFF_SIZE           ///< Offset of the interrupt register from the start of common memory
 
-    #define MEM_BASE_OFFSET         0x10000000
-
 #elif defined(__MICROBLAZE__)
 
 #include "dualprocshm-microblaze.h"
