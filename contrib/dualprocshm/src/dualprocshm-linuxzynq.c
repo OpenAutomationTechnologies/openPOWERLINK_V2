@@ -101,7 +101,7 @@ void* dualprocshm_getCommonMemAddr(UINT16* pSize_p)
         return NULL;
     }
 
-    pAddr = zynqdrv_getMemRegionAddr(0);
+    pAddr = zynqdrv_getMemRegionAddr(kCommonMemRegion);
 
     *pSize_p = MAX_COMMON_MEM_SIZE - 1;
 
@@ -149,7 +149,7 @@ void* dualprocshm_getSharedMemInst(UINT32* pSize_p)
         return NULL;
     }
 
-     pAddr = zynqdrv_getMemRegionAddr(1);
+     pAddr = zynqdrv_getMemRegionAddr(kSharedMemRegion);
      *pSize_p = SHARED_MEM_SPAN;
 
     return pAddr;
@@ -169,7 +169,7 @@ dynamic mapping table.
 //------------------------------------------------------------------------------
 void* dualprocshm_getDynMapTableAddr(void)
 {
-    void*   pAddr = zynqdrv_getMemRegionAddr(0);
+    void*     pAddr = zynqdrv_getMemRegionAddr(kCommonMemRegion);
 
     if (pAddr == NULL)
         return NULL;
@@ -208,7 +208,7 @@ interrupt synchronization registers.
 //------------------------------------------------------------------------------
 void* dualprocshm_getIntrMemAddr(void)
 {
-    void*   pAddr = zynqdrv_getMemRegionAddr(0);
+    void*     pAddr = zynqdrv_getMemRegionAddr(kCommonMemRegion);
 
     if (pAddr == NULL)
         return NULL;
