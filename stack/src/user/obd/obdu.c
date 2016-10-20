@@ -2828,8 +2828,7 @@ static void copyObjectData(void* pDstData_p,
 /**
 \brief  Call callback function with object
 
-The function calls the generic callback function \ref oplk_cbGenericObdAccess
- with an given object, when the according flag is set.
+The function calls the access callback with a given object if the according flag is set.
 
 \param[in]      pObdEntry_p         Pointer to the ObdEntry.
 \param[in,out]  pCbParam_p          Pointer to callback function parameter structure.
