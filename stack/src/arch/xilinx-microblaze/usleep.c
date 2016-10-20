@@ -12,7 +12,7 @@ into BRAM blocks to increase the accuracy.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,11 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include "usleep.h"
 
-#include "xil_types.h"
-#include "xparameters.h"
+#include <xil_types.h>
+#include <xparameters.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -70,16 +69,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#ifdef XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
-    #define CPU_SPEED_TICKS XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
+#if defined(XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ)
+#define CPU_SPEED_TICKS     XPAR_MICROBLAZE_CORE_CLOCK_FREQ_HZ
 #else
-    #error "There is no CPU speed available! Please check xparameters.h"
+#error "There is no CPU speed available! Please check xparameters.h"
 #endif
 
-#define CPU_SPEED_MHZ (CPU_SPEED_TICKS / 1000000)     ///< CPU speed in Mhz
+#define CPU_SPEED_MHZ       (CPU_SPEED_TICKS / 1000000)     ///< CPU speed in Mhz
 
-#define SMALL_LOOP_SPEED (10 * (CPU_SPEED_MHZ / 50))  ///< The small loop always takes 1us -> it is adjusted to need 10 iterations with 50Mhz
+#define SMALL_LOOP_SPEED    (10 * (CPU_SPEED_MHZ / 50))     ///< The small loop always takes 1us
+                                                            ///< -> it is adjusted to need 10 iterations with 50Mhz
 
 //------------------------------------------------------------------------------
 // local types
@@ -92,7 +91,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
 void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
 
 //============================================================================//
@@ -103,7 +101,7 @@ void usleep(u32 usecs_p) __attribute__((section(".local_memory")));
 /**
 \brief    Sleep until limit of microseconds is reached
 
-\param  usecs_p                Count of microseconds to sleep
+\param[in]      usecs_p             Count of microseconds to sleep
 
 \ingroup module_target
 */
@@ -130,8 +128,7 @@ void usleep(u32 usecs_p)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
-
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

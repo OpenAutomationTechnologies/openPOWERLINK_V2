@@ -105,8 +105,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         target_lock(); \
-                        oldval = Xil_In8(address); \
-                        Xil_Out8(address, newval); \
+                        oldval = Xil_In8((u32)(address)); \
+                        Xil_Out8((u32)(address), newval); \
                         target_unlock()
 
 #define OPLK_MUTEX_T    u8

@@ -69,10 +69,10 @@ extern "C"
 #endif
 
 #if defined(FTRACE_DEBUG)
-extern int ftrace_open(void);
-extern int ftrace_close(void);
+extern int  ftrace_open(void);
+extern int  ftrace_close(void);
 extern void ftrace_enable(int fEnable_p);
-void ftrace_writeTraceMarker(char* fmt, ...);
+void        ftrace_writeTraceMarker(const char* fmt, ...);
 #endif /* defined(FTRACE_DEBUG) */
 
 #ifdef __cplusplus

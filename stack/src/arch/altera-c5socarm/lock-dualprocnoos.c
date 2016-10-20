@@ -41,13 +41,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <common/target.h>
+
 #include <alt_cache.h>
 #include <socal/socal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <system.h>
-
-#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -74,7 +74,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 //FIXME Take lock id from platform header that using hard coded value
-#define LOCK_LOCAL_ID    1
+#define LOCK_LOCAL_ID       1
 
 // Define unlock value or take predefined one...
 #ifndef LOCK_UNLOCKED_C
@@ -92,7 +92,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static OPLK_LOCK_T*     pLock_l = NULL;
+static OPLK_LOCK_T*         pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -108,14 +108,14 @@ static OPLK_LOCK_T*     pLock_l = NULL;
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_initLock(OPLK_LOCK_T* pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
         return -1;
@@ -139,9 +139,9 @@ lock is freed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_lock(void)
+int target_lock(void)
 {
-    uint8_t    val;
+    uint8_t val;
 
     if (pLock_l == NULL)
         return -1;
@@ -175,13 +175,14 @@ This function frees the given lock.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_unlock(void)
+int target_unlock(void)
 {
     if (pLock_l == NULL)
         return -1;
 
     OPLK_IO_WR8(pLock_l, 0, LOCK_UNLOCKED_C);
     OPLK_DCACHE_FLUSH(pLock_l, 1);
+
     return 0;
 }
 

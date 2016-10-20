@@ -11,7 +11,7 @@ Nios II system. Note that the functions are empty calls!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,9 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/target.h>
-
 #include <common/oplkinc.h>
+#include <common/target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -94,7 +93,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
@@ -148,3 +147,7 @@ int target_unlock(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

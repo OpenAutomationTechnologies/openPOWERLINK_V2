@@ -11,7 +11,7 @@ system with shared memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited.
 
 All rights reserved.
@@ -72,7 +72,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LOCK_LOCAL_ID    (XPAR_CPU_ID + 1)
+#define LOCK_LOCAL_ID       (XPAR_CPU_ID + 1)
 
 // Define unlock value or take predefined one...
 #ifndef LOCK_UNLOCKED_C
@@ -80,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
-#error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x0!"
+#error "Change the to LOCK_LOCAL_ID to some unique BYTE value unequal 0x00!"
 #endif
 
 //------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static OPLK_LOCK_T*   pLock_l = NULL;
+static OPLK_LOCK_T* pLock_l = NULL;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -106,14 +106,14 @@ static OPLK_LOCK_T*   pLock_l = NULL;
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-int target_initLock(OPLK_LOCK_T*pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
         return -1;
@@ -137,7 +137,7 @@ lock is freed.
 //------------------------------------------------------------------------------
 int target_lock(void)
 {
-    u8    val;
+    u8  val;
 
     if (pLock_l == NULL)
         return -1;
@@ -146,12 +146,12 @@ int target_lock(void)
     do
     {
         Xil_L1DCacheInvalidateRange((u32)pLock_l, 1);
-        val = Xil_In8((u32)pLock_l);
 
+        val = Xil_In8((u32)pLock_l);
         // write local id if unlocked
         if (val == LOCK_UNLOCKED_C)
         {
-            Xil_Out8(pLock_l, LOCK_LOCAL_ID);
+            Xil_Out8((u32)pLock_l, LOCK_LOCAL_ID);
             Xil_L1DCacheFlushRange((u32)pLock_l, 1);
             continue; // return to top of loop to check again
         }
@@ -176,11 +176,16 @@ int target_unlock(void)
     if (pLock_l == NULL)
         return -1;
 
-    Xil_Out8(pLock_l, LOCK_UNLOCKED_C);
+    Xil_Out8((u32)pLock_l, LOCK_UNLOCKED_C);
     Xil_L1DCacheFlushRange((u32)pLock_l, 1);
+
     return 0;
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

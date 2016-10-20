@@ -89,14 +89,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_initLock(OPLK_LOCK_T* pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 
@@ -115,7 +115,7 @@ lock is freed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_lock(void)
+int target_lock(void)
 {
     target_enableGlobalInterrupt(FALSE);
 
@@ -133,7 +133,7 @@ This function frees the given lock.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_unlock(void)
+int target_unlock(void)
 {
     target_enableGlobalInterrupt(TRUE);
 

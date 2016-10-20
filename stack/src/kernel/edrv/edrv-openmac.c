@@ -455,7 +455,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket = allocTxMsgBufferIntern(pBuffer_p);
 #else
     DEBUG_LVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
-    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc(pBuffer_p->maxBufferSize + sizeof(pPacket->length));
+    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc((size_t)pBuffer_p->maxBufferSize + sizeof(pPacket->length));
 #endif
 
     if (pPacket == NULL)
@@ -516,7 +516,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     freeTxMsgBufferIntern(pBuffer_p);
 #else
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
-    openmac_uncachedFree((UINT8*)pPacket);
+    openmac_uncachedFree(pPacket);
 #endif
 
     // mark buffer as free

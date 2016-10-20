@@ -41,6 +41,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "sleep.h"
+
+#include <stdint.h>
 #include <sys/unistd.h>
 #include <alt_timers.h>
 #include <alt_globaltmr.h>
@@ -53,9 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <alt_clock_manager.h>
 
 #include <system.h>
-
-#include <common/oplkinc.h>
-#include "sleep.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -81,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define SECS_TO_MILLISECS    1000
+#define SECS_TO_MILLISECS   1000
 
 //------------------------------------------------------------------------------
 // local types
@@ -95,9 +95,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
-                                             UINT32 scalingFactor_p,
-                                             UINT32 scaledTimeDuration_p);
+static inline uint64_t getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
+                                               uint32_t scalingFactor_p,
+                                               uint32_t scaledTimeDuration_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -107,7 +107,7 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
 /**
 \brief  Sleep until limit of microseconds is reached
 
-\param  usecs_p                Count of microseconds to sleep
+\param[in]      usecs_p             Count of microseconds to sleep
 
 \return Returns always 0.
 
@@ -116,15 +116,16 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
 //------------------------------------------------------------------------------
 int usleep(unsigned long usecs_p)
 {
-    UINT64          startTime = alt_globaltmr_get64();
-    UINT32          timerPrescaler = alt_globaltmr_prescaler_get() + 1;
-    UINT64          endTime;
-    alt_freq_t      timerClkSrc;
+    uint64_t    startTime = alt_globaltmr_get64();
+    uint32_t    timerPrescaler = alt_globaltmr_prescaler_get() + 1;
+    uint64_t    endTime;
+    alt_freq_t  timerClkSrc;
 
     alt_clk_freq_get(ALT_CLK_MPU_PERIPH, &timerClkSrc);
     endTime = startTime + usecs_p * ((timerClkSrc / timerPrescaler) / 1000000);
 
     while (alt_globaltmr_get64() < endTime);
+
     return 0;
 }
 
@@ -135,7 +136,7 @@ int usleep(unsigned long usecs_p)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \return Returns always 0.
 
@@ -144,24 +145,24 @@ milliseconds have elapsed.
 //------------------------------------------------------------------------------
 int msleep(unsigned long milliSeconds_p)
 {
-    UINT64                  startTickStamp = alt_globaltmr_get64();
-    UINT64                  waitTickCount = getTimerTicksFromScaled(ALT_GPT_CPU_GLOBAL_TMR, SECS_TO_MILLISECS, milliSeconds_p);
-    volatile UINT32*        pGlbTimerRegCntBaseLow = (volatile UINT32*)(GLOBALTMR_BASE + GLOBALTMR_CNTR_LO_REG_OFFSET);
-    volatile UINT32*        pGlbTimerRegCntBaseHigh = (volatile UINT32*)(GLOBALTMR_BASE + GLOBALTMR_CNTR_HI_REG_OFFSET);
-    UINT64                  curTickStamp = 0;
-    UINT32                  temp = 0;
-    UINT32                  hi = 0;
-    UINT32                  lo = 0;
-    volatile UINT32         waitCount = 0;
-    UINT32                  waitCountLimit = (UINT32)(5 + (waitTickCount >> 12));
-    UINT8                   fExit = FALSE;
-    UINT8                   readCntLimit = 3;
+    uint64_t            startTickStamp = alt_globaltmr_get64();
+    uint64_t            waitTickCount = getTimerTicksFromScaled(ALT_GPT_CPU_GLOBAL_TMR, SECS_TO_MILLISECS, milliSeconds_p);
+    volatile uint32_t*  pGlbTimerRegCntBaseLow = (volatile uint32_t*)(GLOBALTMR_BASE + GLOBALTMR_CNTR_LO_REG_OFFSET);
+    volatile uint32_t*  pGlbTimerRegCntBaseHigh = (volatile uint32_t*)(GLOBALTMR_BASE + GLOBALTMR_CNTR_HI_REG_OFFSET);
+    uint64_t            curTickStamp = 0;
+    uint32_t            temp = 0;
+    uint32_t            hi = 0;
+    uint32_t            lo = 0;
+    volatile uint32_t   waitCount = 0;
+    uint32_t            waitCountLimit = (uint32_t)(5 + (waitTickCount >> 12));
+    uint8_t             fExit = 0;
+    uint8_t             readCntLimit = 3;
 
     curTickStamp = alt_globaltmr_get64();
 
-    while (fExit != TRUE)
+    while (fExit == 0)
     {
-        fExit = FALSE;
+        fExit = 0;
 
         if (waitCount == waitCountLimit)
         {
@@ -176,25 +177,18 @@ int msleep(unsigned long milliSeconds_p)
 
             if (readCntLimit != 0)
             {
-                curTickStamp =  (UINT64)hi;
-                curTickStamp =  (((curTickStamp << 32) & ~((UINT64)UINT32_MAX)) | lo);
-                if ((((curTickStamp >= startTickStamp) && ((curTickStamp - startTickStamp) < waitTickCount)) ||
-                     ((curTickStamp < startTickStamp) && ((UINT64_MAX - startTickStamp) +
-                                                          curTickStamp) < waitTickCount)))
-                {
-                    fExit = FALSE;
-                }
+                curTickStamp = (uint64_t)hi;
+                curTickStamp = (((curTickStamp << 32) & ~((uint64_t)UINT32_MAX)) | lo);
+                if (((curTickStamp >= startTickStamp) && ((curTickStamp - startTickStamp) < waitTickCount)) ||
+                    ((curTickStamp < startTickStamp) && ((UINT64_MAX - startTickStamp) + curTickStamp) < waitTickCount))
+                    fExit = 0;
                 else
-                {
-                    fExit = TRUE;
-                }
+                    fExit = 1;
 
                 waitCount = 1;
             }
             else
-            {
                 waitCount--;
-            }
         }
 
         waitCount++;
@@ -216,22 +210,22 @@ int msleep(unsigned long milliSeconds_p)
 The function converts the time in standard unit into ticks for the
 given timer.
 
-\param  timerId_p               The ALT_GPT_TIMER_t enum Id of the timer used
-\param  scalingFactor_p         Ratio of provided time duration scale to seconds
-\param  scaledTimeDuration_p    Time duration in standard unit to be converted
+\param[in]      timerId_p               The ALT_GPT_TIMER_t enum Id of the timer used
+\param[in]      scalingFactor_p         Ratio of provided time duration scale to seconds
+\param[in]      scaledTimeDuration_p    Time duration in standard unit to be converted
 
 \return The function returns a unsigned 64 bit value.
 \retval The converted tick count for the given timer.
 */
 //------------------------------------------------------------------------------
-static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
-                                             UINT32 scalingFactor_p,
-                                             UINT32 scaledTimeDuration_p)
+static inline uint64_t getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
+                                               uint32_t scalingFactor_p,
+                                               uint32_t scaledTimeDuration_p)
 {
-    UINT64          ticks = 0;                      // value to return
-    ALT_CLK_t       clkSrc = ALT_CLK_UNKNOWN;
-    UINT32          preScaler = 0;
-    UINT32          freq = 1;
+    uint64_t    ticks = 0;                      // value to return
+    ALT_CLK_t   clkSrc = ALT_CLK_UNKNOWN;
+    uint32_t    preScaler = 0;
+    uint32_t    freq = 1;
 
     preScaler = alt_gpt_prescaler_get(timerId_p);
     if (preScaler <= UINT8_MAX)
@@ -253,7 +247,7 @@ static inline UINT64 getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
             ticks *= freq;
 
             // total clock ticks
-            ticks *= (UINT64)(scaledTimeDuration_p / scalingFactor_p);
+            ticks *= (uint64_t)(scaledTimeDuration_p / scalingFactor_p);
 
             // convert into timer ticks
             ticks /= (preScaler + 1);

@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <sys/alt_cache.h>
 #include <sys/alt_irq.h>
-
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -96,16 +95,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This function registers a callback for a specific interrupt source.
 
-\param  irqSource_p     Specified interrupt source
-\param  pfnIsrCb_p      Interrupt service routine callback
-\param  pArg_p          Argument given to the callback
+\param[in]      irqSource_p         Specified interrupt source
+\param[in]      pfnIsrCb_p          Interrupt service routine callback
+\param[in]      pArg_p              Argument given to the callback
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p)
+tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p,
+                          tOpenmacIrqCb pfnIsrCb_p,
+                          void* pArg_p)
 {
     tOplkError  ret = kErrorOk;
     UINT32      irqId;
@@ -129,9 +130,7 @@ tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_
     }
 
     if (alt_ic_isr_register(icId, irqId, pfnIsrCb_p, (void*)pArg_p, NULL))
-    {
         return kErrorNoResource;
-    }
 
 Exit:
     return ret;
@@ -143,16 +142,16 @@ Exit:
 
 This function allocates memory and marks it as uncached.
 
-\param  size_p      Size of uncached memory to be allocated
+\param[in]      size_p              Size of uncached memory to be allocated
 
 \return The function returns the base address of the allocated, uncached memory.
 
 \ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-UINT8* openmac_uncachedMalloc(UINT size_p)
+void* openmac_uncachedMalloc(size_t size_p)
 {
-    return (UINT8*)alt_uncached_malloc(size_p);
+    return (void*)alt_uncached_malloc(size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -161,12 +160,12 @@ UINT8* openmac_uncachedMalloc(UINT size_p)
 
 This function frees the uncached memory pMem_p.
 
-\param  pMem_p      Uncached memory to be freed
+\param[in]      pMem_p              Uncached memory to be freed
 
 \ingroup module_openmac
 */
 //------------------------------------------------------------------------------
-void openmac_uncachedFree(UINT8* pMem_p)
+void openmac_uncachedFree(void* pMem_p)
 {
     alt_uncached_free(pMem_p);
 }
@@ -177,4 +176,4 @@ void openmac_uncachedFree(UINT8* pMem_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

@@ -13,7 +13,7 @@ only dummy functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -91,17 +90,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function creates a mutex.
 
-\param  mutexName_p             The name of the mutex to create.
-\param  pMutex_p                Pointer to store the created mutex.
+\param[in]      mutexName_p         The name of the mutex to create.
+\param[out]     pMutex_p            Pointer to store the created mutex.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully created.
-\retval kErrorNoFreeInstance    An error occurred while creating the mutex.
+\retval kErrorOk                    Mutex was successfully created.
+\retval kErrorNoFreeInstance        An error occurred while creating the mutex.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
+tOplkError target_createMutex(const char* mutexName_p,
+                              OPLK_MUTEX_T* pMutex_p)
 {
     UNUSED_PARAMETER(mutexName_p);
     UNUSED_PARAMETER(pMutex_p);
@@ -115,7 +115,7 @@ tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
 
 The function destroys a mutex.
 
-\param  mutexId_p               The ID of the mutex to destroy.
+\param[in]      mutexId_p           The ID of the mutex to destroy.
 
 \ingroup module_target
 */
@@ -131,11 +131,11 @@ void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
 
 The function locks a mutex.
 
-\param  mutexId_p               The ID of the mutex to lock.
+\param[in]      mutexId_p           The ID of the mutex to lock.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully locked.
-\retval kErrorNoFreeInstance    An error occurred while locking the mutex.
+\retval kErrorOk                    Mutex was successfully locked.
+\retval kErrorNoFreeInstance        An error occurred while locking the mutex.
 
 \ingroup module_target
 */
@@ -143,6 +143,7 @@ The function locks a mutex.
 tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
 {
     UNUSED_PARAMETER(mutexId_p);
+
     return kErrorOk;
 }
 
@@ -152,7 +153,7 @@ tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
 
 The function unlocks a mutex.
 
-\param  mutexId_p               The ID of the mutex to unlock.
+\param[in]      mutexId_p           The ID of the mutex to unlock.
 
 \ingroup module_target
 */
@@ -168,4 +169,4 @@ void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

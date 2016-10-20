@@ -123,8 +123,8 @@ extern "C"
 
 tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p);
 
-UINT8*     openmac_uncachedMalloc(UINT size_p);
-void       openmac_uncachedFree(UINT8* pMem_p);
+void*      openmac_uncachedMalloc(size_t size_p);
+void       openmac_uncachedFree(void* pMem_p);
 
 #ifdef __cplusplus
 }

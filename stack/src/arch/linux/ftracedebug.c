@@ -10,7 +10,7 @@ The file implements debug function using the Linux ftrace utility.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -47,10 +47,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdarg.h>
 #include <unistd.h>
 
-#include <common/oplkinc.h>
+#include <common/oplkinc.h>             // Includes the configuration file that sets the guarding macro
+#include <common/ftracedebug.h>
 
-#ifdef  FTRACE_DEBUG
-
+#if defined(FTRACE_DEBUG)
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -58,9 +58,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define MAX_PATH 256
-#define _STR(x) #x
-#define STR(x) _STR(x)
+#define MAX_PATH    256
+#define _STR(x)     #x
+#define STR(x)      _STR(x)
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -85,13 +85,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-int iFtraceEnableFd = 0;
-int iFtraceMarkerFd = -1;
+static int  ftraceEnableFd_l = 0;
+static int  ftraceMarkerFd_l = -1;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static char* findDebugfs(void);
+static const char* findDebugfs(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -104,8 +104,8 @@ static char* findDebugfs(void);
 The function opens the tracing_on and trace_marker files.
 
 \return The function returns an error code.
-\retval 0       Success
-\retval 1       Error
+\retval 0                           Success
+\retval 1                           Error
 
 \ingroup module_debug
 */
@@ -113,32 +113,33 @@ The function opens the tracing_on and trace_marker files.
 int ftrace_open(void)
 {
     char        sPath[MAX_PATH];
-    char*       p_debugfs;
+    const char* p_debugfs;
 
     p_debugfs = findDebugfs();
     if (p_debugfs != NULL)
     {
         strcpy(sPath, p_debugfs);
         strcat(sPath, "/tracing/tracing_on");
-        if ((iFtraceEnableFd = open(sPath, O_WRONLY)) < 0)
-        {
+
+        ftraceEnableFd_l = open(sPath, O_WRONLY);
+        if (ftraceEnableFd_l < 0)
             return -1;
-        }
         else
         {
             strcpy(sPath, p_debugfs);
             strcat(sPath, "/tracing/trace_marker");
-            if ((iFtraceMarkerFd = open(sPath, O_WRONLY)) < 0)
+
+            ftraceMarkerFd_l = open(sPath, O_WRONLY);
+            if (ftraceMarkerFd_l < 0)
             {
-                close(iFtraceEnableFd);
+                close(ftraceEnableFd_l);
                 return -1;
             }
         }
     }
     else
-    {
         return -1;
-    }
+
     return 0;
 }
 
@@ -155,8 +156,9 @@ The function closes the tracing_on and trace_marker files.
 //------------------------------------------------------------------------------
 int ftrace_close(void)
 {
-    close(iFtraceEnableFd);
-    close(iFtraceMarkerFd);
+    close(ftraceEnableFd_l);
+    close(ftraceMarkerFd_l);
+
     return 0;
 }
 
@@ -167,7 +169,7 @@ int ftrace_close(void)
 The function enables or disables ftrace tracing by writing to the tracing_on
 file.
 
-\param  fEnable_p       Enable tracing: 1 for enable and 0 for disable
+\param[in]      fEnable_p           Enable tracing: 1 for enable and 0 for disable
 
 \ingroup module_debug
 */
@@ -175,9 +177,9 @@ file.
 void ftrace_enable(int fEnable_p)
 {
     if (fEnable_p)
-        write(iFtraceEnableFd, "1", 1);
+        write(ftraceEnableFd_l, "1", 1);
     else
-        write(iFtraceEnableFd, "0", 1);
+        write(ftraceEnableFd_l, "0", 1);
 }
 
 //------------------------------------------------------------------------------
@@ -186,25 +188,26 @@ void ftrace_enable(int fEnable_p)
 
 The function writes a ftrace marker.
 
-\param  fmt             Format string.
-\param  ...             Arguments for the format string
+\param[in]      fmt                 Format string.
+\param[in]      ...                 Arguments for the format string
 
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-void ftrace_writeTraceMarker(char* fmt, ...)
+void ftrace_writeTraceMarker(const char* fmt, ...)
 {
     va_list argp;
-    char    sMessage[128];
-    int len;
+    char    message[128];
+    int     len;
 
-    len = sprintf(sMessage, "==== ");
+    len = sprintf(message, "==== ");
+
     va_start(argp, fmt);
-    len += vsprintf(sMessage + len, fmt, argp);
+    len += vsprintf(message + len, fmt, argp);
     va_end(argp);
 
-    sprintf(sMessage + len, " ====\n");
-    write(iFtraceMarkerFd, sMessage, strlen(sMessage) + 1);
+    sprintf(message + len, " ====\n");
+    write(ftraceMarkerFd_l, message, strlen(message) + 1);
 }
 
 //============================================================================//
@@ -222,36 +225,39 @@ The function searches the path to the debug file system on a Linux machine
 \return The function returns the path to the debug file system.
 */
 //------------------------------------------------------------------------------
-static char* findDebugfs(void)
+static const char* findDebugfs(void)
 {
     static char debugfs[MAX_PATH + 1];
-    static int debugfs_found;
-    char type[100];
-    FILE* fp;
+    static int  debugfs_found;
+    char        type[100];
+    FILE*       fp;
 
     if (debugfs_found)
         return debugfs;
 
-    if ((fp = fopen("/proc/mounts", "r")) == NULL)
+    fp = fopen("/proc/mounts", "r");
+    if (fp == NULL)
         return NULL;
 
-    while (fscanf(fp, "%*s %"
-                  STR(MAX_PATH)
-                  "s %99s %*s %*d %*d\n",
-                  debugfs, type) == 2)
+    while (fscanf(fp,
+                  "%*s %" STR(MAX_PATH) "s %99s %*s %*d %*d\n",
+                  debugfs,
+                  type) == 2)
     {
         if (strcmp(type, "debugfs") == 0)
             break;
     }
+
     fclose(fp);
 
     if (strcmp(type, "debugfs") != 0)
         return NULL;
 
     debugfs_found = 1;
+
     return debugfs;
 }
 
-///\}
+/// \}
 
 #endif

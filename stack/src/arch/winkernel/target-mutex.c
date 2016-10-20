@@ -1,17 +1,17 @@
 /**
 ********************************************************************************
-\file   sim/target-sim.c
+\file   winkernel/target-mutex.c
 
-\brief  Target specific functions for simulation interface
+\brief  Architecture specific mutex implementation
 
-The file implements target specific functions used in the openPOWERLINK stack.
+This file contains the mutex implementation for Windows kernelspace.
+It is not implemented.
 
 \ingroup module_target
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,9 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <common/target.h>
-
-#include <sim-target.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -60,6 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
+
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -87,195 +85,81 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize target specific stuff
+\brief  Create Mutex
 
-The function initialize target specific stuff which is needed to run the
-openPOWERLINK stack.
+The function creates a mutex.
+
+\param[in]      mutexName_p         The name of the mutex to create.
+\param[out]     pMutex_p            Pointer to store the created mutex.
 
 \return The function returns a tOplkError error code.
+\retval kErrorOk                    Mutex was successfully created.
+\retval kErrorNoFreeInstance        An error occurred while creating the mutex.
+
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_init(void)
+tOplkError target_createMutex(const char* mutexName_p,
+                              OPLK_MUTEX_T* pMutex_p)
 {
+    UNUSED_PARAMETER(mutexName_p);
+    UNUSED_PARAMETER(pMutex_p);
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Clean up target specific stuff
+\brief  Destroy Mutex
 
-The function cleans up target specific stuff.
+The function destroys a mutex.
 
-\return The function returns a tOplkError error code.
+\param[in]      mutexId_p           The ID of the mutex to destroy.
+
+\ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_cleanup(void)
+void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
 {
+    UNUSED_PARAMETER(mutexId_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Lock Mutex
+
+The function locks a mutex.
+
+\param[in]      mutexId_p           The ID of the mutex to lock.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    Mutex was successfully locked.
+\retval kErrorNoFreeInstance        An error occurred while locking the mutex.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
+{
+    UNUSED_PARAMETER(mutexId_p);
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief Sleep for the specified number of milliseconds
+\brief  Unlock Mutex
 
-The function makes the calling thread sleep until the number of specified
-milliseconds has elapsed.
+The function unlocks a mutex.
 
-\param[in]      milliSeconds_p      Number of milliseconds to sleep
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_msleep(UINT32 milliSeconds_p)
-{
-    sim_msleep(milliSeconds_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set IP address of specified Ethernet interface
-
-The function sets the IP address, subnetMask and MTU of an Ethernet
-interface.
-
-\param[in]      ifName_p            Name of Ethernet interface.
-\param[in]      ipAddress_p         IP address to set for interface.
-\param[in]      subnetMask_p        Subnet mask to set for interface.
-\param[in]      mtu_p               MTU to set for interface.
-
-\return The function returns a tOplkError error code.
+\param[in]      mutexId_p           The ID of the mutex to unlock.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_setIpAdrs(const char* ifName_p,
-                            UINT32 ipAddress_p,
-                            UINT32 subnetMask_p,
-                            UINT16 mtu_p)
+void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
 {
-    return sim_setIpAdrs(ifName_p, ipAddress_p, subnetMask_p, mtu_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set default gateway for Ethernet interface
-
-The function sets the default gateway of an Ethernet interface.
-
-\param[in]      defaultGateway_p    Default gateway to set.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
-{
-    return sim_setDefaultGateway(defaultGateway_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Enables global interrupt
-
-This function enables/disables global interrupts.
-
-\param[in]      fEnable_p           TRUE = enable interrupts
-                                    FALSE = disable interrupts
-
-\note This function is implemented empty for the sim target
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(BOOL fEnable_p)
-{
-    UNUSED_PARAMETER(fEnable_p);
-}
-
-
-//------------------------------------------------------------------------------
-/**
-\brief    Set interrupt context flag
-
-This function enables/disables the interrupt context flag. The flag has to be
-set when the CPU enters the interrupt context. The flag has to be cleared when
-the interrupt context is left.
-
-\param[in]      fEnable_p           TRUE = enable interrupt context flag
-                                    FALSE = disable interrupt context flag
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-void target_setInterruptContextFlag(BOOL fEnable_p)
-{
-    UNUSED_PARAMETER(fEnable_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Get interrupt context flag
-
-This function returns the interrupt context flag.
-
-\return The function returns the state of the interrupt context flag.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-BOOL target_getInterruptContextFlag(void)
-{
-    return FALSE;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief    Get current system tick
-
-This function returns the current system tick determined by the system timer.
-
-\return Returns the system tick in milliseconds
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-UINT32 target_getTickCount(void)
-{
-    return sim_getTickCount();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Get current timestamp
-
-The function returns the current timestamp in nanoseconds.
-
-\return The function returns the timestamp in nanoseconds
-*/
-//------------------------------------------------------------------------------
-ULONGLONG target_getCurrentTimestamp(void)
-{
-    // Not implemented for this target
-    return 0ULL;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Set POWERLINK status/error LED
-
-The function sets the POWERLINK status/error LED.
-
-\param[in]      ledType_p           Determines which LED shall be set/reset.
-\param[in]      fLedOn_p            Set the addressed LED on (TRUE) or off (FALSE).
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_target
-*/
-//------------------------------------------------------------------------------
-tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
-{
-    return sim_setLed(ledType_p, fLedOn_p);
+    UNUSED_PARAMETER(mutexId_p);
 }
 
 //============================================================================//

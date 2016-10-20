@@ -62,27 +62,32 @@ extern "C"
 tOplkError target_init(void);
 tOplkError target_cleanup(void);
 void       target_msleep(UINT32 milliSeconds_p);
-tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p, UINT16 mtu_p);
+tOplkError target_setIpAdrs(const char* ifName_p,
+                            UINT32 ipAddress_p,
+                            UINT32 subnetMask_p,
+                            UINT16 mtu_p);
 tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
-ULONGLONG  target_getCurrentTimestamp(void);
-void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
+void       target_enableGlobalInterrupt(BOOL fEnable_p) SECTION_TARGET_GLOBAL_INT;
 void       target_setInterruptContextFlag(BOOL fEnable_p) SECTION_TARGET_SET_INTCONT;
 BOOL       target_getInterruptContextFlag(void) SECTION_TARGET_GET_INTCONT;
 UINT32     target_getTickCount(void);
+ULONGLONG  target_getCurrentTimestamp(void);
 
 /* functions for mutex implementation */
-tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p);
+tOplkError target_createMutex(const char* mutexName_p,
+                              OPLK_MUTEX_T* pMutex_p);
 tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p);
 void       target_unlockMutex(OPLK_MUTEX_T mutexId_p);
 void       target_destroyMutex(OPLK_MUTEX_T mutexId_p);
 
 /* functions for lock implementation */
-int target_initLock(OPLK_LOCK_T* pSlock_p);
-int target_lock(void);
-int target_unlock(void);
+int        target_initLock(OPLK_LOCK_T* pSlock_p);
+int        target_lock(void);
+int        target_unlock(void);
 
 /* function for LED */
-tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p);
+tOplkError target_setLed(tLedType ledType_p,
+                         BOOL fLedOn_p);
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@ system with shared memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,7 +77,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (LOCK_LOCAL_ID == LOCK_UNLOCKED_C)
-#error "Change the Nios II CPU ID to some unique BYTE value unequal 0x0!"
+#error "Change the Nios II CPU ID to some unique BYTE value unequal 0x00!"
 #endif
 
 //------------------------------------------------------------------------------
@@ -103,7 +103,7 @@ static OPLK_LOCK_T* pLock_l = NULL;
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
@@ -179,3 +179,7 @@ int target_unlock(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}
