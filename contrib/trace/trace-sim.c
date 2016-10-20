@@ -37,7 +37,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <common/oplkinc.h>
 #include <stdarg.h>
 #include <sim-trace.h>
@@ -77,14 +76,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct
 {
-    char buffer[CONFIG_TRACE_SIM_BUFFER_SIZE]; ///< Buffer for trace messages
+    char    aBuffer[CONFIG_TRACE_SIM_BUFFER_SIZE];  ///< Buffer for trace messages
 } tTraceInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 
-static tTraceInstance traceInstance_l;
+static tTraceInstance   traceInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -100,22 +99,20 @@ static tTraceInstance traceInstance_l;
 
 The function prints a debug trace message using the simulation interface
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 */
 //------------------------------------------------------------------------------
 void trace(const char* fmt, ...)
 {
-    // clear buffer
-    OPLK_MEMSET(traceInstance_l.buffer, 0, CONFIG_TRACE_SIM_BUFFER_SIZE);
-
     va_list argptr;
 
+    // clear buffer
+    OPLK_MEMSET(traceInstance_l.aBuffer, 0, CONFIG_TRACE_SIM_BUFFER_SIZE);
+
     va_start(argptr, fmt);
-
-    vsprintf(traceInstance_l.buffer, fmt, argptr);
-
+    vsprintf(traceInstance_l.aBuffer, fmt, argptr);
     va_end(argptr);
 
-    sim_trace(traceInstance_l.buffer);
+    sim_trace(traceInstance_l.aBuffer);
 }

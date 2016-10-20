@@ -10,7 +10,7 @@ This file contains the console input/output implementation for Windows.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,10 +36,9 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
 
-
-//=========================================================================//
-// Includes                                                                //
-//=========================================================================//
+//------------------------------------------------------------------------------
+// includes
+//------------------------------------------------------------------------------
 #include <conio.h>
 
 //============================================================================//
@@ -80,4 +79,3 @@ int console_kbhit(void)
 {
     return _kbhit();
 }
-

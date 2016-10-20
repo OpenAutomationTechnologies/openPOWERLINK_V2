@@ -75,21 +75,20 @@ The function prints a debug trace message.
 //------------------------------------------------------------------------------
 void trace(const char* fmt, ...)
 {
-    char    buffer[0x0400];
+    char    aBuffer[0x0400];
     va_list argptr;
 
     va_start(argptr, fmt);
 #if (_MSC_VER >= 1400)
-    vsprintf_s(buffer, sizeof(buffer), fmt, argptr);
+    vsprintf_s(aBuffer, sizeof(aBuffer), fmt, argptr);
 #else
-    vsprintf(buffer, fmt, argptr);
+    vsprintf(aBuffer, fmt, argptr);
 #endif
     va_end(argptr);
 
 #if defined(_KERNEL_MODE)
-    DbgPrint((LPSTR)&buffer);
+    DbgPrint((LPSTR)&aBuffer);
 #else
-    OutputDebugString((LPSTR)&buffer);
+    OutputDebugString((LPSTR)&aBuffer);
 #endif
-
 }

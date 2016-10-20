@@ -10,7 +10,7 @@ This file contains the console input/output implementation for Linux.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,8 +62,8 @@ termios library.
 //------------------------------------------------------------------------------
 int console_getch(void)
 {
-    struct  termios oldt;
-    struct  termios newt;
+    struct termios  oldt;
+    struct termios  newt;
     int             ch;
 
     // Save old attributes
@@ -99,8 +99,8 @@ The function checks the console for a keystroke.
 //------------------------------------------------------------------------------
 int console_kbhit(void)
 {
-    struct  termios oldt;
-    struct  termios newt;
+    struct termios  oldt;
+    struct termios  newt;
     int             oldf;
     int             newf;
     int             ch;
@@ -134,4 +134,3 @@ int console_kbhit(void)
 
     return 0;
 }
-
