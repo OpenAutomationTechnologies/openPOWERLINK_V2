@@ -53,6 +53,7 @@
         <tab type="user" url="\ref page_coding" title="Coding Guidelines"/>
     </tab>
     <tab type="user" url="\ref page_revision_history" title="Revision History"/>
+    <tab type="user" url="\ref page_update" title="Update Guide"/>
     <tab type="user" url="\ref page_known_issues" title="Known Issues"/>
     <tab type="user" url="\ref page_glossary" title="Glossary"/>
     <tab type="user" url="\ref page_licenses" title="Licenses"/>
