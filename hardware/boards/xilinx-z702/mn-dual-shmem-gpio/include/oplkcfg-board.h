@@ -43,4 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Set number of Rx buffers for openMAC
 #define CONFIG_EDRV_RX_BUFFERS                      32
 
+// Disable deferred Rx frame release
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   FALSE
+
 #endif /* _INC_oplkcfg_board_H_ */
