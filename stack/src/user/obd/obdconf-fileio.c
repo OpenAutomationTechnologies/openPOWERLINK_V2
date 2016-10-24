@@ -525,7 +525,7 @@ corresponding part archive.
 \ingroup module_obdconf
 */
 //------------------------------------------------------------------------------
-tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData, size_t size_p)
+tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData_p, size_t size_p)
 {
     tOplkError          ret = kErrorObdStoreHwError;
     int                 writeCount;
@@ -545,8 +545,8 @@ tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData, size_t size_p
     }
 
     // Write current OD data to the file and calculate the CRC for it
-    pInstEntry->odDataCrc = obdconf_calculateCrc16(pInstEntry->odDataCrc, pData, size_p);
-    writeCount = write(pInstEntry->hBkupArchiveFile, pData, size_p);
+    pInstEntry->odDataCrc = obdconf_calculateCrc16(pInstEntry->odDataCrc, pData_p, size_p);
+    writeCount = write(pInstEntry->hBkupArchiveFile, pData_p, size_p);
     if (writeCount != (int)size_p)
     {
         ret = kErrorObdStoreHwError;
@@ -577,7 +577,7 @@ corresponding part archive.
 */
 //------------------------------------------------------------------------------
 tOplkError obdconf_loadPart(tObdPart odPart_p,
-                            void* pData,
+                            void* pData_p,
                             size_t size_p)
 {
     tOplkError          ret = kErrorObdStoreHwError;
@@ -598,7 +598,7 @@ tOplkError obdconf_loadPart(tObdPart odPart_p,
     }
 
     // Read OD data from current file position
-    readCount = read(pInstEntry->hBkupArchiveFile, pData, size_p);
+    readCount = read(pInstEntry->hBkupArchiveFile, pData_p, size_p);
     if (readCount < 0)
     {
         ret = kErrorObdStoreHwError;
