@@ -40,9 +40,6 @@ ELSE()
     SET(LIB_TYPE "STATIC")
 ENDIF()
 
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
-
 # set general sources of POWERLINK library
 SET (LIB_SOURCES
      ${USER_SOURCES}
@@ -86,7 +83,6 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -fno-strict
 # Additional include directories
 INCLUDE_DIRECTORIES(
         .
-    ${OBJDICT_DIR}/${OBJDICT}
     ${SIM_INCLUDE_DIR}
     )
 
