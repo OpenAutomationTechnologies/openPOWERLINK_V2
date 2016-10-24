@@ -81,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tCircBufInstance        instance_l[NR_OF_CIRC_BUFFERS];
+static tCircBufInstance instance_l[NR_OF_CIRC_BUFFERS];
 
 //------------------------------------------------------------------------------
 // local function prototypes

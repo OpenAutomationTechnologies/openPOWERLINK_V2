@@ -138,7 +138,7 @@ static BOOL triggerLossOfSocEventOnFrameTimeout(void);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tDllkStateFunc  pfnProcessCsFullCycle_g[] =
+static tDllkStateFunc    pfnProcessCsFullCycle_l[] =
 {
     processCsFullCycleDllGsInit,
     processCsFullCycleDllWaitPreq,
@@ -146,7 +146,7 @@ tDllkStateFunc  pfnProcessCsFullCycle_g[] =
     processCsFullCycleDllWaitSoa,
 };
 
-tDllkStateFunc  pfnProcessCsStopped_g[] =
+static tDllkStateFunc    pfnProcessCsStopped_l[] =
 {
     processCsStoppedDllGsInit,
     processCsStoppedDllWaitPreq,
@@ -195,7 +195,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
         case kNmtCsReadyToOperate:
         case kNmtCsOperational:
             if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
-                ret = pfnProcessCsFullCycle_g[dllkInstance_g.dllState](nmtState_p,
+                ret = pfnProcessCsFullCycle_l[dllkInstance_g.dllState](nmtState_p,
                                                                        nmtEvent_p,
                                                                        &dllEvent);
             break;
@@ -231,7 +231,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
 
         case kNmtCsStopped:
             if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
-                ret = pfnProcessCsStopped_g[dllkInstance_g.dllState](nmtState_p,
+                ret = pfnProcessCsStopped_l[dllkInstance_g.dllState](nmtState_p,
                                                                      nmtEvent_p,
                                                                      &dllEvent);
             break;

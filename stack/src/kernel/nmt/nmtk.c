@@ -150,7 +150,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tNmtkInstance               nmtkInstance_g;
+static tNmtkInstance        nmtkInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -182,7 +182,7 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tNmtkStateTable             nmtkStates_g[] =
+static tNmtkStateTable      nmtkStates_l[] =
 {
     { kNmtGsOff,                 doStateGsOff },
     { kNmtGsInitialising,        doStateGsInitialising },
@@ -225,13 +225,13 @@ The function initializes an instance of the NMT kernel module
 tOplkError nmtk_init(void)
 {
     // initialize internal variables
-    nmtkInstance_g.stateIndex = kNmtkGsOff;
-    nmtkInstance_g.fEnableReadyToOperate = FALSE;
-    nmtkInstance_g.fAppReadyToOperate = FALSE;
-    nmtkInstance_g.fTimerMsPreOp2 = FALSE;
-    nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
-    nmtkInstance_g.fFrozen = FALSE;
-    nmtkInstance_g.fRedundancy = FALSE;
+    nmtkInstance_l.stateIndex = kNmtkGsOff;
+    nmtkInstance_l.fEnableReadyToOperate = FALSE;
+    nmtkInstance_l.fAppReadyToOperate = FALSE;
+    nmtkInstance_l.fTimerMsPreOp2 = FALSE;
+    nmtkInstance_l.fAllMandatoryCNIdent = FALSE;
+    nmtkInstance_l.fFrozen = FALSE;
+    nmtkInstance_l.fRedundancy = FALSE;
 
     return kErrorOk;
 }
@@ -249,7 +249,7 @@ The function shuts down the NMT kernel module.
 //------------------------------------------------------------------------------
 tOplkError nmtk_exit(void)
 {
-    nmtkInstance_g.stateIndex = kNmtkGsOff;
+    nmtkInstance_l.stateIndex = kNmtkGsOff;
 
     return kErrorOk;
 }
@@ -291,23 +291,23 @@ tOplkError nmtk_process(const tEvent* pEvent_p)
 
     // save NMT-State
     // needed for later comparison to inform higher layer about state change
-    oldState = nmtkInstance_g.stateIndex;
+    oldState = nmtkInstance_l.stateIndex;
 
     // process NMT state machine
-    ret = nmtkStates_g[nmtkInstance_g.stateIndex].pfnState(nmtEvent);
+    ret = nmtkStates_l[nmtkInstance_l.stateIndex].pfnState(nmtEvent);
 
     // inform higher layer about State-Change if needed
-    if (oldState != nmtkInstance_g.stateIndex)
+    if (oldState != nmtkInstance_l.stateIndex)
     {
-        OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_g[oldState].nmtState,
-                                       nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
+        OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_l[oldState].nmtState,
+                                       nmtkStates_l[nmtkInstance_l.stateIndex].nmtState);
         DEBUG_LVL_NMTK_TRACE("%s(): (NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
                              __func__,
                              nmtEvent,
-                             nmtkStates_g[nmtkInstance_g.stateIndex].nmtState);
+                             nmtkStates_l[nmtkInstance_l.stateIndex].nmtState);
 
-        nmtStateChange.newNmtState = nmtkStates_g[nmtkInstance_g.stateIndex].nmtState;
-        nmtStateChange.oldNmtState = nmtkStates_g[oldState].nmtState;
+        nmtStateChange.newNmtState = nmtkStates_l[nmtkInstance_l.stateIndex].nmtState;
+        nmtStateChange.oldNmtState = nmtkStates_l[oldState].nmtState;
         nmtStateChange.nmtEvent = nmtEvent;
 
 #if defined(CONFIG_INCLUDE_LEDK)
@@ -360,7 +360,7 @@ static tOplkError doStateGsOff(tNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p == kNmtEventSwReset)
     {   // NMT_GT8, NMT_GT1 -> new state kNmtGsInitialising
-        nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+        nmtkInstance_l.stateIndex = kNmtkGsInitialising;
     }
 
     return kErrorOk;
@@ -387,13 +387,13 @@ static tOplkError doStateGsInitialising(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // new state kNmtGsResetApplication
         case kNmtEventEnterResetApp:
             // NMT_GT10
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         default:
@@ -425,13 +425,13 @@ static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // leave this state only if higher layer
@@ -439,7 +439,7 @@ static tOplkError doStateGsResetApplication(tNmtEvent nmtEvent_p)
         case kNmtEventEnterResetCom:
             // NMT_GT11
             // new state kNmtGsResetCommunication
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         default:
@@ -470,26 +470,26 @@ static tOplkError doStateGsResetCommunication(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // leave this state only if higher layer
         // say so
         case kNmtEventEnterResetConfig:
             // NMT_GT12 -> new state kNmtGsResetConfiguration
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         default:
@@ -514,9 +514,9 @@ In this state we build the configuration with information from the OD.
 static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 {
     // reset flags
-    nmtkInstance_g.fEnableReadyToOperate = FALSE;
-    nmtkInstance_g.fAppReadyToOperate = FALSE;
-    nmtkInstance_g.fFrozen = FALSE;
+    nmtkInstance_l.fEnableReadyToOperate = FALSE;
+    nmtkInstance_l.fAppReadyToOperate = FALSE;
+    nmtkInstance_l.fFrozen = FALSE;
 
     // check events
     switch (nmtEvent_p)
@@ -526,31 +526,31 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
         case kNmtEventResetCom:
             // NMT_GT5
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // leave this state only if higher layer says so
         case kNmtEventEnterCsNotActive:
             // Node should be CN (NMT_CT1)
-            nmtkInstance_g.stateIndex = kNmtkCsNotActive;
+            nmtkInstance_l.stateIndex = kNmtkCsNotActive;
             break;
 
         case kNmtEventEnterMsNotActive:
@@ -558,17 +558,17 @@ static tOplkError doStateGsResetConfiguration(tNmtEvent nmtEvent_p)
 #if !defined(CONFIG_INCLUDE_NMT_MN)
                 // no MN functionality
                 // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
-                nmtkInstance_g.fFrozen = TRUE;
+                nmtkInstance_l.fFrozen = TRUE;
 #else
-                nmtkInstance_g.stateIndex = kNmtkMsNotActive;
+                nmtkInstance_l.stateIndex = kNmtkMsNotActive;
 #endif
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventEnterRmsNotActive:
             // Node should be RMN (NMT_RMT1)
-            nmtkInstance_g.stateIndex = kNmtkRmsNotActive;
-            nmtkInstance_g.fRedundancy = TRUE;
+            nmtkInstance_l.stateIndex = kNmtkRmsNotActive;
+            nmtkInstance_l.fRedundancy = TRUE;
             break;
 
 #endif
@@ -601,44 +601,44 @@ static tOplkError doStateCsNotActive(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // see if SoA or SoC received
         case kNmtEventDllCeSoc:
         case kNmtEventDllCeSoa:
             // NMT_CT2 -> new state PRE_OPERATIONAL1
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // timeout for SoA and Soc
         case kNmtEventTimerBasicEthernet:
             // NMT_CT3 -> new state BASIC_ETHERNET
-            nmtkInstance_g.stateIndex = kNmtkCsBasicEthernet;
+            nmtkInstance_l.stateIndex = kNmtkCsBasicEthernet;
             break;
 
         default:
@@ -668,44 +668,44 @@ static tOplkError doStateCsPreOperational1(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
         // or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // check if SoC received
         case kNmtEventDllCeSoc:
             // NMT_CT4
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational2;
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReSwitchOverTimeout:
             // NMT_RMT4
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 #endif
 
@@ -736,86 +736,86 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication
         // or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command Reset Configuration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
         case kNmtEventStopNode:
             // NMT_CT8 - reset flags
-            nmtkInstance_g.fEnableReadyToOperate = FALSE;
-            nmtkInstance_g.fAppReadyToOperate = FALSE;
-            nmtkInstance_g.stateIndex = kNmtkCsStopped;
+            nmtkInstance_l.fEnableReadyToOperate = FALSE;
+            nmtkInstance_l.fAppReadyToOperate = FALSE;
+            nmtkInstance_l.stateIndex = kNmtkCsStopped;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_CT11 - reset flags
-            nmtkInstance_g.fEnableReadyToOperate = FALSE;
-            nmtkInstance_g.fAppReadyToOperate = FALSE;
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.fEnableReadyToOperate = FALSE;
+            nmtkInstance_l.fAppReadyToOperate = FALSE;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // check if application is ready to operate
         case kNmtEventEnterReadyToOperate:
             // check if command NMTEnableReadyToOperate from MN was received
-            if (nmtkInstance_g.fEnableReadyToOperate == TRUE)
+            if (nmtkInstance_l.fEnableReadyToOperate == TRUE)
             {   // reset flags
-                nmtkInstance_g.fEnableReadyToOperate = FALSE;
-                nmtkInstance_g.fAppReadyToOperate = FALSE;
+                nmtkInstance_l.fEnableReadyToOperate = FALSE;
+                nmtkInstance_l.fAppReadyToOperate = FALSE;
                 // change state (NMT_CT6)
-                nmtkInstance_g.stateIndex = kNmtkCsReadyToOperate;
+                nmtkInstance_l.stateIndex = kNmtkCsReadyToOperate;
             }
             else
             {   // set Flag (NMT_CT5)
-                nmtkInstance_g.fAppReadyToOperate = TRUE;
+                nmtkInstance_l.fAppReadyToOperate = TRUE;
             }
             break;
 
         // NMT Commando EnableReadyToOperate
         case kNmtEventEnableReadyToOperate:
             // check if application is ready
-            if (nmtkInstance_g.fAppReadyToOperate == TRUE)
+            if (nmtkInstance_l.fAppReadyToOperate == TRUE)
             {   // reset flags
-                nmtkInstance_g.fEnableReadyToOperate = FALSE;
-                nmtkInstance_g.fAppReadyToOperate = FALSE;
+                nmtkInstance_l.fEnableReadyToOperate = FALSE;
+                nmtkInstance_l.fAppReadyToOperate = FALSE;
                 // change state (NMT_CT6)
-                nmtkInstance_g.stateIndex = kNmtkCsReadyToOperate;
+                nmtkInstance_l.stateIndex = kNmtkCsReadyToOperate;
             }
             else
             {   // set Flag (NMT_CT5)
-                nmtkInstance_g.fEnableReadyToOperate = TRUE;
+                nmtkInstance_l.fEnableReadyToOperate = TRUE;
             }
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReSwitchOverTimeout:
             // NMT_RMT4
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 #endif
 
@@ -846,55 +846,55 @@ static tOplkError doStateCsReadyToOperate(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
         case kNmtEventStopNode:
             // NMT_CT8
-            nmtkInstance_g.stateIndex = kNmtkCsStopped;
+            nmtkInstance_l.stateIndex = kNmtkCsStopped;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_CT11
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // NMT Command StartNode
         case kNmtEventStartNode:
             // NMT_CT7
-            nmtkInstance_g.stateIndex = kNmtkCsOperational;
+            nmtkInstance_l.stateIndex = kNmtkCsOperational;
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReSwitchOverTimeout:
             // NMT_RMT4
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 #endif
 
@@ -925,55 +925,55 @@ static tOplkError doStateCsOperational(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // NMT Command StopNode
         case kNmtEventStopNode:
             // NMT_CT8
-            nmtkInstance_g.stateIndex = kNmtkCsStopped;
+            nmtkInstance_l.stateIndex = kNmtkCsStopped;
             break;
 
         // NMT Command EnterPreOperational2
         case kNmtEventEnterPreOperational2:
             // NMT_CT9
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational2;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_CT11
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReSwitchOverTimeout:
             // NMT_RMT6
-            nmtkInstance_g.stateIndex = kNmtkMsOperational;
+            nmtkInstance_l.stateIndex = kNmtkMsOperational;
             break;
 #endif
 
@@ -1005,50 +1005,50 @@ static tOplkError doStateCsStopped(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
         {   // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
         }
 
         // NMT Command EnterPreOperational2
         case kNmtEventEnterPreOperational2:
             // NMT_CT10
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational2;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational2;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_CT11
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
         case kNmtEventDllReSwitchOverTimeout:
             // NMT_RMT4
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 #endif
 
@@ -1080,37 +1080,37 @@ static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // error occurred
         // d.k.: how does this error occur? on CRC errors
 /*      case kNmtEventNmtCycleError:
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1:
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1:
             break;
 */
         case kNmtEventDllCeSoc:
@@ -1118,7 +1118,7 @@ static tOplkError doStateCsBasicEthernet(tNmtEvent nmtEvent_p)
         case kNmtEventDllCePres:
         case kNmtEventDllCeSoa:
             // NMT_CT12 - POWERLINK frame on net -> stop any communication
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
         default:
@@ -1148,7 +1148,7 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
 
     // no MN functionality
     // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
-    nmtkInstance_g.fFrozen = TRUE;
+    nmtkInstance_l.fFrozen = TRUE;
 #else
     switch (nmtEvent_p)
     {
@@ -1156,31 +1156,31 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1188,26 +1188,26 @@ static tOplkError doStateMsNotActive(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.fFrozen = TRUE;
+            nmtkInstance_l.fFrozen = TRUE;
             break;
 
         // timeout event
         case kNmtEventTimerBasicEthernet:
            // NMT_MT7
-            if (nmtkInstance_g.fFrozen == FALSE)
+            if (nmtkInstance_l.fFrozen == FALSE)
             {   // new state BasicEthernet
-                nmtkInstance_g.stateIndex = kNmtkMsBasicEthernet;
+                nmtkInstance_l.stateIndex = kNmtkMsBasicEthernet;
             }
             break;
 
         // timeout event
         case kNmtEventTimerMsPreOp1:
         {   // NMT_MT2
-            if (nmtkInstance_g.fFrozen == FALSE)
+            if (nmtkInstance_l.fFrozen == FALSE)
             {   // new state PreOp1
-                nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
-                nmtkInstance_g.fTimerMsPreOp2 = FALSE;
-                nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
+                nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
+                nmtkInstance_l.fTimerMsPreOp2 = FALSE;
+                nmtkInstance_l.fAllMandatoryCNIdent = FALSE;
             }
             break;
         }
@@ -1240,7 +1240,7 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
 
     // no MN functionality
     // TODO: -create error E_NMT_BA1_NO_MN_SUPPORT
-    nmtkInstance_g.fFrozen = TRUE;
+    nmtkInstance_l.fFrozen = TRUE;
 #else
     switch (nmtEvent_p)
     {
@@ -1248,31 +1248,31 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1280,17 +1280,17 @@ static tOplkError doStateRmsNotActive(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
         case kNmtEventDllReAmni:
             // NMT_RMT3
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 
         // timeout event
         case kNmtEventTimerMsPreOp1:
             // NMT_RMT2
-            if (nmtkInstance_g.fFrozen == FALSE)
+            if (nmtkInstance_l.fFrozen == FALSE)
             {   // new state PreOp1
-                nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
-                nmtkInstance_g.fTimerMsPreOp2 = FALSE;
-                nmtkInstance_g.fAllMandatoryCNIdent = FALSE;
+                nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
+                nmtkInstance_l.fTimerMsPreOp2 = FALSE;
+                nmtkInstance_l.fAllMandatoryCNIdent = FALSE;
             }
             break;
 
@@ -1323,31 +1323,31 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1357,46 +1357,46 @@ static tOplkError doStateMsPreOperational1(tNmtEvent nmtEvent_p)
         case kNmtEventDllReAmni:
         case kNmtEventGoToStandby:
         case kNmtEventGoToStandbyDelayed:
-            if (nmtkInstance_g.fRedundancy)
+            if (nmtkInstance_l.fRedundancy)
             {
-                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
                 break;
             }
 #endif
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
         // d.k. MSPreOp1->CSPreOp1: nonsense -> keep state
         /*
         case kNmtEventNmtCycleError:
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
         */
 
         case kNmtEventAllMandatoryCNIdent:
             // all mandatory CN identified
-            if (nmtkInstance_g.fTimerMsPreOp2 != FALSE)
+            if (nmtkInstance_l.fTimerMsPreOp2 != FALSE)
             {   // NMT_MT3
-                nmtkInstance_g.stateIndex = kNmtkMsPreOperational2;
+                nmtkInstance_l.stateIndex = kNmtkMsPreOperational2;
             }
             else
             {
-                nmtkInstance_g.fAllMandatoryCNIdent = TRUE;
+                nmtkInstance_l.fAllMandatoryCNIdent = TRUE;
             }
             break;
 
         case kNmtEventTimerMsPreOp2:
             // residence time for PreOp1 is elapsed
-            if (nmtkInstance_g.fAllMandatoryCNIdent != FALSE)
+            if (nmtkInstance_l.fAllMandatoryCNIdent != FALSE)
             {   // NMT_MT3
-                nmtkInstance_g.stateIndex = kNmtkMsPreOperational2;
+                nmtkInstance_l.stateIndex = kNmtkMsPreOperational2;
             }
             else
             {
-                nmtkInstance_g.fTimerMsPreOp2 = TRUE;
+                nmtkInstance_l.fTimerMsPreOp2 = TRUE;
             }
             break;
 
@@ -1427,31 +1427,31 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1461,26 +1461,26 @@ static tOplkError doStateMsPreOperational2(tNmtEvent nmtEvent_p)
         case kNmtEventDllReAmni:
         case kNmtEventGoToStandby:
         case kNmtEventGoToStandbyDelayed:
-            if (nmtkInstance_g.fRedundancy)
+            if (nmtkInstance_l.fRedundancy)
             {
-                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
                 break;
             }
 #endif
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_MT6
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 
         case kNmtEventEnterReadyToOperate:
             // NMT_MT4
-            nmtkInstance_g.stateIndex = kNmtkMsReadyToOperate;
+            nmtkInstance_l.stateIndex = kNmtkMsReadyToOperate;
             break;
 
         default:
@@ -1511,31 +1511,31 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1545,26 +1545,26 @@ static tOplkError doStateMsReadyToOperate(tNmtEvent nmtEvent_p)
         case kNmtEventDllReAmni:
         case kNmtEventGoToStandby:
         case kNmtEventGoToStandbyDelayed:
-            if (nmtkInstance_g.fRedundancy)
+            if (nmtkInstance_l.fRedundancy)
             {
-                nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+                nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
                 break;
             }
 #endif
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_MT6
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 
         case kNmtEventEnterMsOperational:
             // NMT_MT5
-            nmtkInstance_g.stateIndex = kNmtkMsOperational;
+            nmtkInstance_l.stateIndex = kNmtkMsOperational;
             break;
 
         default:
@@ -1593,31 +1593,31 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1627,21 +1627,21 @@ static tOplkError doStateMsOperational(tNmtEvent nmtEvent_p)
         case kNmtEventDllReAmni:
         case kNmtEventGoToStandby:
         case kNmtEventGoToStandbyDelayed:
-            if (nmtkInstance_g.fRedundancy)
+            if (nmtkInstance_l.fRedundancy)
             {
-                nmtkInstance_g.stateIndex = kNmtkCsOperational;
+                nmtkInstance_l.stateIndex = kNmtkCsOperational;
                 break;
             }
 #endif
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
         case kNmtEventNmtCycleError:
             // NMT_MT6
-            nmtkInstance_g.stateIndex = kNmtkMsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkMsPreOperational1;
             break;
 
         default:
@@ -1671,31 +1671,31 @@ static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
         case kNmtEventCriticalError:
         case kNmtEventSwitchOff:
             // NMT_GT3
-            nmtkInstance_g.stateIndex = kNmtkGsOff;
+            nmtkInstance_l.stateIndex = kNmtkGsOff;
             break;
 
         // NMT Command SwReset
         case kNmtEventSwReset:
             // NMT_GT8
-            nmtkInstance_g.stateIndex = kNmtkGsInitialising;
+            nmtkInstance_l.stateIndex = kNmtkGsInitialising;
             break;
 
         // NMT Command ResetNode
         case kNmtEventResetNode:
             // NMT_GT4
-            nmtkInstance_g.stateIndex = kNmtkGsResetApplication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetApplication;
             break;
 
         // NMT Command ResetCommunication or internal Communication error
         case kNmtEventResetCom:          // NMT_GT5
         case kNmtEventInternComError:    // NMT_GT6
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // NMT Command ResetConfiguration
         case kNmtEventResetConfig:
             // NMT_GT7
-            nmtkInstance_g.stateIndex = kNmtkGsResetConfiguration;
+            nmtkInstance_l.stateIndex = kNmtkGsResetConfiguration;
             break;
 
         // POWERLINK frames received
@@ -1703,13 +1703,13 @@ static tOplkError doStateMsBasicEthernet(tNmtEvent nmtEvent_p)
         case kNmtEventDllCeSoa:
             // other MN in network
             // $$$ d.k.: generate error history entry
-            nmtkInstance_g.stateIndex = kNmtkGsResetCommunication;
+            nmtkInstance_l.stateIndex = kNmtkGsResetCommunication;
             break;
 
         // error occurred
         // d.k. BE->PreOp1 on cycle error? No
 /*      case kNmtEventNmtCycleError:
-            nmtkInstance_g.stateIndex = kNmtkCsPreOperational1;
+            nmtkInstance_l.stateIndex = kNmtkCsPreOperational1;
             break;
 */
         default:
