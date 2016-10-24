@@ -94,8 +94,6 @@ The function clears the PDO lookup table.
 \param[in,out]  pLut_p              Pointer to the PDO lookup table.
 \param[in]      numEntries_p        Number of entries in the PDO lookup table.
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_pdoklut
 **/
 //------------------------------------------------------------------------------

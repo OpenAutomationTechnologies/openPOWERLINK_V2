@@ -324,8 +324,6 @@ shared buffer and the size are stored.
 
 \param[in]      pPdoChannels_p      Pointer to PDO channel setup.
 \param[in,out]  pPdoMemRegion_p     Pointer to shared PDO memory region.
-
-\return The function returns the size of the used PDO memory
 */
 //------------------------------------------------------------------------------
 static void setupPdoMemInfo(const tPdoChannelSetup* pPdoChannels_p,

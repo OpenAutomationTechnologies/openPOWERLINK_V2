@@ -263,8 +263,6 @@ to the start address of the buffer.
 
 \param[in]      pInstance_p         Pointer to circular buffer instance to be reset.
 
-\return The function returns a tCircBuf Error code.
-
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------

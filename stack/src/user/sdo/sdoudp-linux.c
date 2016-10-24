@@ -291,8 +291,6 @@ the SDO UDP module.
                                     If TRUE, the critical section is entered.
                                     If FALSE, the critical section is left.
 
-\return The function returns a tOplkError error code.
-
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------

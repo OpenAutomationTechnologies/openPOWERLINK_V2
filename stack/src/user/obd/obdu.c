@@ -2787,8 +2787,6 @@ The functions copies object data.
 \param[in]      pSrcData_p          Source for copy operation.
 \param[in]      objSize_p           Size of data to copy.
 \param[in]      objType_p           Type of object.
-
-\return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static void copyObjectData(void* pDstData_p,

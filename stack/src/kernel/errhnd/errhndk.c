@@ -394,8 +394,6 @@ static tOplkError decrementMnCounters(void)
 \brief    Decrement CN error counters
 
 The function decrements the error counters used by a CN node.
-
-\return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static void decrementCnCounters(void)
@@ -533,8 +531,6 @@ The function checks if a PReq was successfully received. If it is, the
 appropriate error counter will be decremented.
 
 \param[in]      pEvent_p            Pointer to error event provided by DLL.
-
-\return Returns kErrorOk or error code
 */
 //------------------------------------------------------------------------------
 static void handleCorrectPreq(const tEvent* pEvent_p)
