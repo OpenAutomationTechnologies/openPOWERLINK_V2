@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <common/target.h>
+#include <user/timesyncu.h>
 #include <user/timesyncucal.h>
 
 //============================================================================//
