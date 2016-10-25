@@ -356,8 +356,8 @@ typedef struct
 {
     UINT                index;              ///< Index of the object
     tObdSubEntry*       pSubIndex;          ///< Points to subindex structures of this object
-    UINT                count;              ///< number of subindices.
-    BOOL                fCallGenericCb;     ///< flag enabling the call of the generic callback
+    UINT                count;              ///< Number of subindices.
+    BOOL                fUserEvent;         ///< Flag enabling the generation of a user event
 } tObdEntry;
 
 /**

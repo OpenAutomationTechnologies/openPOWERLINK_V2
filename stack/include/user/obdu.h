@@ -112,7 +112,7 @@ typedef struct
     tObdSize            objSize;
 } tObdCbStoreParam;
 
-typedef tOplkError (*tObdAccessCallback)(tObdCbParam* pParam_p);
+typedef tOplkError (*tObdAccessCallback)(tObdCbParam* pParam_p, BOOL fUserEvent_p);
 typedef tOplkError (*tInitTabEntryCallback)(void* pTabEntry_p, UINT objIndex_p);
 typedef tOplkError (*tObdStoreLoadCallback)(const tObdCbStoreParam* pCbStoreParam_p);
 

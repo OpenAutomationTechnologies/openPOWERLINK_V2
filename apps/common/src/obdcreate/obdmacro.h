@@ -99,16 +99,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)          static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)          static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
                                                                                     static const dtyp xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)      static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)      static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
                                                                                     static const dtyp xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)       static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)       static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt); \
                                                                                     static const dtyp xDef##ind##_0x01_g = (def);
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)     static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt);
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)               static const tObdUnsigned8 xDef##ind##_0x00_g = 0; \
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name)     static const tObdUnsigned8 xDef##ind##_0x00_g = (cnt);
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)               static const tObdUnsigned8 xDef##ind##_0x00_g = 0; \
                                                                                     static const tObdUnsigned64 xDef##ind##_0x01_g = (def);
 // subindex macros
 #define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                   static const dtyp xDef##ind##_##sub##_g = val;
@@ -140,14 +140,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)           static dtyp           axCur##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)       static tObdUnsigned8  xCur##ind##_0x00_g; \
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)           static dtyp           axCur##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)       static tObdUnsigned8  xCur##ind##_0x00_g; \
                                                                                      static dtyp           axCur##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)        static tObdVarEntry   aVarEntry##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)      static tObdVarEntry   aVarEntry##ind##_g[cnt];
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)                static tObdUnsigned8  xCur##ind##_0x00_g; \
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)        static tObdVarEntry   aVarEntry##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name)      static tObdVarEntry   aVarEntry##ind##_g[cnt];
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)                static tObdUnsigned8  xCur##ind##_0x00_g; \
                                                                                      static tObdUnsigned64 axCur##ind##_g[cnt];
 // subindex macros
 #define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)                    static dtyp         xCur##ind##_##sub##_g;
@@ -176,25 +176,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     static tObdSubEntry aObdSubEntry##ind##Ram_g[cnt]= {
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)                                     static tObdSubEntry aObdSubEntry##ind##Ram_g[cnt]= {
 #define OBD_END_INDEX(ind)                                                      OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)      static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)  static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, (acc),                             &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, typ,           (acc) | kObdAccArray,              &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)   static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray | kObdAccVar, &xDef##ind##_0x01_g, &aVarEntry##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name) static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8, kObdAccCR,                        &xDef##ind##_0x00_g, NULL}, \
                                                                                 {1, typ,          (acc) | kObdAccArray | kObdAccVar, NULL,                &aVarEntry##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)           static tObdSubEntry aObdSubEntry##ind##Ram_g[]= { \
                                                                                 {0, kObdTypeUInt8,  (acc),                           &xDef##ind##_0x00_g, &xCur##ind##_0x00_g}, \
                                                                                 {1, kObdTypeUInt64, (acc) | kObdAccArray,            &xDef##ind##_0x01_g, &axCur##ind##_g[0]}, \
                                                                                 OBD_END_SUBINDEX()};
@@ -227,13 +227,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()                                                          {OBD_TABLE_INDEX_END, (tObdSubEntry*)(void*)&obd_OBK_g, 0, FALSE}};
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)                                     {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], cnt, call},
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)                                     {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], cnt, evnt},
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)      {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)  {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)   {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name) {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)           {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, call},
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)      {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, evnt},
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)  {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, evnt},
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)   {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, evnt},
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name) {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, evnt},
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)           {ind, (tObdSubEntry*)&aObdSubEntry##ind##Ram_g[0], (cnt)+1, evnt},
 
 // subindex macros
 #define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)
@@ -262,13 +262,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_END_PART()
 
 // index macros
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)
 #define OBD_END_INDEX(ind)
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name)
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)
 
 // subindex macros
 #define OBD_SUBINDEX_RAM_VAR(ind, sub, typ, acc, dtyp, name, val)
@@ -336,17 +336,14 @@ with the macro OBD_BEGIN_INDEX_... and ended with OBD_END_INDEX. The suffix
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices within this index entry
-\param call                 Flag indicating that an object access shall trigger
-                            a function call. If this flag is set to TRUE, a
-                            stack-internal function is called that evaluates the
-                            object index and sub-index and may call internal handling
-                            functionalities. Additionally, a user event is created
-                            that allows the user to react on the object access.
+\param evnt                 Flag indicating that an object access shall trigger
+                            a user event. If this flag is set to TRUE, a user event
+                            is created that allows the user to react on the object access.
                             The trigger is always called if an object has been read
                             or written. It doesn’t matter if the access comes from the
                             application or via SDO.
 */
-#define OBD_BEGIN_INDEX_RAM(ind, cnt, call)
+#define OBD_BEGIN_INDEX_RAM(ind, cnt, evnt)
 
 /**
 \brief Begin of array index entry
@@ -357,15 +354,15 @@ const memory, because of less sub-index table entries. The drawback is that it
 needs a little more RAM.
 
 \param ind                  Object index of the entry to be defined
-\param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the generic callback for this index entry
+\param cnt                  Number of sub-indices within this index entry
+\param evnt                 Flag for enabling the user event for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
 \param name                 Name of object
 \param def                  Default value of object
 */
-#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, call, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_ARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)
 
 /**
 \brief Begin of array index entry with writable subindex 0
@@ -378,14 +375,14 @@ be modified (sub-index 0 is writable).
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the generic callback for this index entry
+\param evnt                 Flag for enabling the user event for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
 \param name                 Name of object
 \param def                  Default value of object
 */
-#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, call, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_ARRAY_ALT(ind, cnt, evnt, typ, acc, dtyp, name, def)
 /**
 \brief Begin of var-array index entry
 
@@ -395,14 +392,14 @@ a variable by oplk_linkObject().
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the generic callback for this index entry.
+\param evnt                 Flag for enabling the user event for this index entry.
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
 \param name                 Name of object
 \param def                  Default value of object
 */
-#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, call, typ, acc, dtyp, name, def)
+#define OBD_RAM_INDEX_RAM_VARARRAY(ind, cnt, evnt, typ, acc, dtyp, name, def)
 
 /**
 \brief Begin of var-array index entry without initialization
@@ -412,13 +409,13 @@ value.
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the generic callback for this index entry
+\param evnt                 Flag for enabling the user event for this index entry
 \param typ                  Coded Object type (see \ref tObdType)
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param dtyp                 C Data type definition used for this object
 \param name                 Name of object
 */
-#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, call, typ, acc, dtyp, name)
+#define OBD_RAM_INDEX_RAM_VARARRAY_NOINIT(ind, cnt, evnt, typ, acc, dtyp, name)
 
 /**
 \brief Begin of PDO mapped variable
@@ -427,12 +424,12 @@ This macro generates an entry for a PDO mapping object.
 
 \param ind                  Object index of the entry to be defined
 \param cnt                  Number of sub-indices whithin this index entry
-\param call                 Flag for enabling the generic callback for this index entry
+\param evnt                 Flag for enabling the user event for this index entry
 \param acc                  Access rights for object (see \ref sect_obdAccessRights "access rights")
 \param name                 Name of object
 \param def                  Default value of object
 */
-#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, call, acc, name, def)
+#define OBD_RAM_INDEX_RAM_PDO_MAPPING(ind, cnt, evnt, acc, name, def)
 
 #define OBD_END_INDEX(ind)                                                  ///< End of index entry
 ///\}

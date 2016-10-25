@@ -165,7 +165,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
                                   BOOL fUpdateIdentity_p);
 static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
                             BOOL fDisableUpdateStoredConf_p);
-static tOplkError cbObdAccess(tObdCbParam* pParam_p);
+static tOplkError cbObdAccess(tObdCbParam* pParam_p, BOOL fUserEvent_p);
 static tOplkError handleObdLossOfFrameTolerance(const tObdCbParam* pParam_p);
 static tOplkError handleObdVerifyConf(const tObdCbParam* pParam_p);
 static tOplkError handleObdResetCmd(tObdCbParam* pParam_p);
@@ -1731,13 +1731,14 @@ The function implements the OD callback function. It contains basic actions for
 system objects and forwards the access to the user via a user event.
 
 \param[in,out]  pParam_p            OD callback parameter.
+\param[in]      fUserEvent_p        Flag indicating whether a user event shall be generated.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlu
 */
 //------------------------------------------------------------------------------
-static tOplkError cbObdAccess(tObdCbParam* pParam_p)
+static tOplkError cbObdAccess(tObdCbParam* pParam_p, BOOL fUserEvent_p)
 {
     tOplkError          ret = kErrorOk;
 #if (API_OBD_FORWARD_EVENT != FALSE)
@@ -1748,14 +1749,17 @@ static tOplkError cbObdAccess(tObdCbParam* pParam_p)
     ASSERT(pParam_p != NULL);
 
 #if (API_OBD_FORWARD_EVENT != FALSE)
-    // call user callback
-    obdCbEventArg.obdCbParam = *pParam_p;
-    ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &obdCbEventArg);
-    if (ret != kErrorOk)
-    {   // do not do any further processing on this object
-        if (ret == kErrorReject)
-            ret = kErrorOk;
-        return ret;
+    if (fUserEvent_p)
+    {
+        // call user callback
+        obdCbEventArg.obdCbParam = *pParam_p;
+        ret = ctrlu_callUserEventCallback(kOplkApiEventObdAccess, &obdCbEventArg);
+        if (ret != kErrorOk)
+        {   // do not do any further processing on this object
+            if (ret == kErrorReject)
+                ret = kErrorOk;
+            return ret;
+        }
     }
 #endif
 

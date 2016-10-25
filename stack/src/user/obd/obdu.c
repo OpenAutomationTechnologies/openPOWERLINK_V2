@@ -2841,8 +2841,7 @@ static tOplkError callObjectCallback(const tObdEntry* pObdEntry_p,
 {
     tOplkError  ret = kErrorOk;
 
-    if (pObdEntry_p->fCallGenericCb != FALSE)
-        ret = obdInstance_l.pfnAccessCb(pCbParam_p);
+    ret = obdInstance_l.pfnAccessCb(pCbParam_p, pObdEntry_p->fUserEvent);
 
     return ret;
 }
