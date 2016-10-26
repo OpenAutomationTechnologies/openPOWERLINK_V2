@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 
 #include <linux/kthread.h>
+#include <linux/err.h>
 #include <linux/errno.h>
 #include <linux/wait.h>
 #include <linux/delay.h>
@@ -166,6 +167,12 @@ tOplkError eventkcal_init(void)
 
     instance_l.threadId = kthread_run(eventThread, NULL, "EventkThread");
 
+    if (IS_ERR(instance_l.threadId))
+    {
+        instance_l.threadId = NULL;
+        goto Exit;
+    }
+
     set_cpus_allowed_ptr(instance_l.threadId, cpumask_of(1));
 
     instance_l.fInitialized = TRUE;
@@ -202,7 +209,10 @@ tOplkError eventkcal_exit(void)
 
     instance_l.fInitialized = FALSE;
 
-    kthread_stop(instance_l.threadId);
+    if (instance_l.threadId)
+        kthread_stop(instance_l.threadId);
+
+    instance_l.threadId = NULL;
 
     while (instance_l.fThreadIsRunning)
     {
