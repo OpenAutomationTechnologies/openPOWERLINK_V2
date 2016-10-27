@@ -55,6 +55,51 @@ hardware-dependent drivers.
 The default hardware platform installation path is:
 `<openPOWERLINK_DIR>/hardware/lib/generic/<CMAKE_SYSTEM_PROCESSOR>/<BOARD_NAME>/<DEMO_NAME>`
 
+
+## Target Xilinx Zynq ARM Microblaze {#sect_build_stack_build_xilinx_zynq_hybrid}
+
+Execute the following steps below to generate the FPGA configuration and all
+hardware-dependent drivers.
+-# Configure Xilinx Vivado 16.2 Toolchain in Linux and Windows for compilation:
+
+  * On a Linux host platform, open terminal and run the following to set the environment
+       > <Vivado_ROOT_DIR>/2016.2/bin/vivado -mode tcl
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+
+  * On a Windows host platform, open Vivado TCL console 2016.2 and run the following to set the environment
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+       > vivado -mode batch
+
+-# Initialize the hardware platform build system
+
+        > cd openPOWERLINK/hardware/build/xilinx-microblaze
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
+  After this command CMake will search for available hardware platforms and
+  report all found platforms by the following messages:
+
+        Found hardware platform: DEMO_Z702_MN_DUAL_SHMEM_GPIO set to OFF!
+        Found hardware platform: DEMO_[BOARD_NAME]_[DEMO_NAME] set to OFF!
+
+-# Build hardware platform with all driver libraries set to debug
+
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
+        > make
+        > make install
+
+  This will build the hardware platform for the demo `DEMO_Z702_MN_DUAL_SHMEM_GPIO`.
+  Multiple platforms can be built together by passing each platform define to CMake.
+
+-# Build hardware platforms with all driver libraries set to release
+
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
+        > make
+        > make install
+
+The default hardware platform installation path is:
+`<openPOWERLINK_DIR>/hardware/lib/generic/<CMAKE_SYSTEM_PROCESSOR>/<BOARD_NAME>/<DEMO_NAME>`
+
 ## Target Altera Cyclone V SoC ARM {#sect_build_hardware_build_altera_arm}
 
 The FPGA bitstream for Altera Cyclone V SoC is generated from the NIOSII command shell.

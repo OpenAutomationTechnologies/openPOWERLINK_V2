@@ -67,6 +67,8 @@ generating Visual Studio solution files.
 
 ### Microblaze {#sect_build_stack_build_microblaze}
 
+###ISE toolchain
+
 Follow the steps below to build the stack library on your host platform:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
   - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
@@ -77,7 +79,7 @@ Follow the steps below to build the stack library on your host platform:
 * Create debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblazeise-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_MNDRV_HOSTIF=ON
       > make all
       > make install
 
@@ -85,6 +87,42 @@ Follow the steps below to build the stack library on your host platform:
   Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
   and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
   Refer to \ref sect_build_stack_options_noos_microblaze for details!
+
+* Create release libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblazeise-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > make all
+      > make install
+
+  This will create the `[LIB_NAME]` stack library for the hardware library in `[PATH_TO_HW_LIB]`.
+  Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
+  and `CFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR`) for each stack library to CMake.
+  Refer to \ref sect_build_stack_options_noos_microblaze for details!
+
+The default library installation path is:
+`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>
+
+###Vivado 2016.2
+
+-# Configure Xilinx Vivado 16.2 Toolchain in Linux and Windows for compilation:
+
+  * On a Linux host platform, open terminal and run the following to set the environment
+       > <Vivado_ROOT_DIR>/2016.2/bin/vivado -mode tcl
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+
+  * On a Windows host platform, open Vivado TCL console 2016.2 and run the following to set the environment
+       > xsct (To set the SDK environment path)
+       > vivado -mode tcl
+       > vivado -mode batch
+
+* Create debug libraries
+
+      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > make all
+      > make install
 
 * Create release libraries
 
@@ -99,7 +137,7 @@ Follow the steps below to build the stack library on your host platform:
   Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
 The default library installation path is:
-`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>
 
 ### Altera Cyclone V SoC ARM {#sect_build_stack_build_c5socarm-altera}
 
@@ -225,6 +263,13 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   PCIe interface driver, for status/control and data exchange with the kernel
   stack which runs on an external PCIe device.
 
+- **CFG_COMPILE_LIB_MNAPP_ZYNQINTF**
+
+  Compile openPOWERLINK MN application library for Zynq platform, that contains the
+  interface to a Linux kernel platform interface driver. It is used along with the Linux
+  kernel platform interface driver, for status/control and data exchange with the kernel
+  stack which runs on Zynq Microblaze as a baremetal application.
+
 - **CFG_COMPILE_LIB_CN_SIM**
 
   Compile a complete openPOWERLINK CN library including an open simulation
@@ -326,21 +371,17 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
 ### Xilinx Zynq ARM Configuration Options {#sect_build_stack_options_noos_zynqarm}
 
-- **CFG_COMPILE_LIB_MNAPP_DUALPROCSHM**
+- **CFG_COMPILE_LIB_MNAPP_KERNELPCP**
 
   Compile openPOWERLINK MN application library for Xilinx Zynq ARM. The library
   contains the openPOWERLINK user layer with CAL modules for accessing dual
   processor shared memory library. The dual processor shared memory library is
-  used to communication with the user part of openPOWERLINK. The library can be
-  used to implement an application designed to run on non-OS Zynq ARM processor
-  communicating with the openPOWERLINK kernel layer running on a separate
-  processor connected via a shared memory.
+  used to communicate with the kernel part of openPOWERLINK. The library can be used
+  to implement a Linux application designed to run on Zynq ARM processor
+  communicating with the openPOWERLINK kernel layer running on Microblaze connected
+  via a shared memory.
 
-    - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
-
-  Specify the path to the hardware platform the application library should refer to.
-  The path to the hardware platform should point to the export folder of the hardware
-  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/zynqarm/<BOARD_NAME>/<DEMO_NAME>`)
+  Refer to \ref sect_build_stack_options above for details!
 
 ### Altera Cyclone V SoC ARM Configuration Options {#sect_build_stack_options_noos_c5socarm}
 
