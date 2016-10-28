@@ -5,6 +5,67 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.5.0 {#sect_revision_v2_5_0}
+
+This is the first release of the V2.5 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.4 series (\ref sect_revision_v2_4_1)
+
+Following is a summary of changes in V2.5.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Port Zynq PCAP design to Vivado 2016.2
+- Port Zynq emacps design to Vivado 2016.2
+- Port Zynq + Microblaze (Hybrid) design to Vivado 2016.2
+- Add Linux Kernel driver for Zynq Hybrid design
+- Add MinGW support
+- Replace OBD callbacks with flags for calling generic callback
+- Add an example image and icon to CN xdd
+- Add function to SDO/UDP and socketwrapper for ARP query
+- Add simulation stub and simulation interface
+- Add porting guide
+- Add API functions for process data exchange
+
+### Fixes:
+- Several fixes to silence static code analyzer
+- Avoid deadlock with asynchronous auto-response frames
+- Fix 'occurred' typos
+- Increase the i210 link up timeout
+- Fix NULL pointer dereference during edrv_exit
+- Fix wrong NMT state check in processFillTx()
+- Solve NMT command truncation
+- Add NMT_MAX_NODE_ID check for dllkframe PRes handling
+- Solve dereferencing of a null pointer
+
+### Changes:
+- Remove Zynq ISE design
+- Remove Zynq ARM no-OS support
+- Move Object Dictionary from the stack to the application
+- Move process image setup for CiA302-4 to the application
+- Use a locally administered MAC address in embedded demos
+- Allow to build several oplk kernel modules at once
+- Split FeatureFlags definition from actual value calculation
+- Implement buffer allocation lib to edrv-8255x
+- openmac-nios2: use alt_irq_pending() only with IIC
+- Update documentation to Doxygen version 1.8.11
+- Simplify assert function
+- Add a general definition for assertions
+- Reduce default debug level for all stack libraries
+- Pass user timer arguments by reference
+- Add pcap immediate mode support
+- Add openMAC IP core Vivado port
+- Remove the now unused oplk_cbGenericObdAccess() function
+- Remove redundancies in errhndkcal implementations
+- Cleanup error handler kernel include paths in drivers
+- Add an update guide for users of previous stack versions
+- Improve code quality in stack, contrib, driver and app modules
+- Several code cleanups
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.4.1 {#sect_revision_v2_4_1}
 
 This is the latest release of the V2.4 release series. This release is a stable
