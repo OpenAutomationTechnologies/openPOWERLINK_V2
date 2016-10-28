@@ -57,6 +57,21 @@ To build the kernel PCIe interface driver:
 
 The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
 
+## Building a Linux Kernel Interface Driver for Zynq Hybrid Design {#sect_build_drivers_build_linux_zynq}
+
+To build the kernel space driver, the appropriate kernel sources must be installed
+on your system. The path to the kernel sources can be configured by
+__CFG_KERNEL_DIR__.
+
+To build the kernel interface driver for Zynq hybrid:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
+      > cmake -DCFG_OPLK_MN=TRUE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake
+      > make
+      > make install
+
+The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_zynq`
+
 ## Building a Windows NDIS driver {#sect_build_drivers_build_windows_ndis}
 
 To build a Windows NDIS driver, an appropriate version of Windows Driver Kit (WDK),
@@ -92,7 +107,7 @@ a different platform and Windows version.
 
 The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
-## Building a PCP daemon for Microblaze (ISE) {#sect_build_drivers_build_daemon_microblaze}
+## Building a PCP daemon for Microblaze (ISE) {#sect_build_drivers_build_daemon_microblazeise}
 
 This section will explain the steps to build the PCP daemon for a Microblaze
 softcore processor with host interface by using the ISE toolchain.
@@ -102,6 +117,19 @@ To build the PCP daemon:
 
       > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > make
+      > make install
+
+## Building a PCP daemon for Microblaze (Vivado) {#sect_build_drivers_build_daemon_microblaze}
+
+This section will explain the steps to build the PCP daemon for a Microblaze
+softcore processor with host interface by using the Vivado toolchain.
+The PCP daemon uses the driver library for the host interface (`liboplkmndrv-dualprocshm`).
+
+To build the PCP daemon:
+
+      > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
       > make
       > make install
 
