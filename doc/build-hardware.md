@@ -16,7 +16,7 @@ and all hardware near drivers.
 **NOTE:** In order to be able to debug the final user application, both, the
 Debug and the Release driver versions should be created.
 
-## Target Xilinx Microblaze {#sect_build_stack_build_xilinx_microblaze}
+## Target Xilinx Microblaze (ISE) {#sect_build_stack_build_xilinx_microblaze}
 
 Execute the following steps below to generate the FPGA configuration and all
 hardware-dependent drivers.
@@ -29,7 +29,7 @@ hardware-dependent drivers.
 -# Initialize the hardware platform build system
 
         > cd openPOWERLINK/hardware/build/xilinx-microblaze
-        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
+        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../..
 
   After this command CMake will search for available hardware platforms and
   report all found platforms by the following messages:

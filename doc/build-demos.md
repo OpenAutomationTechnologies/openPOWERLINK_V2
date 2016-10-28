@@ -40,7 +40,7 @@ generating Visual Studio solution files.
 
 ## Building for embedded systems (Non-OS targets) {#sect_build_demos_noos}
 
-### Building for target Microblaze {#sect_build_demos_build_microblaze}
+### Building for target Microblaze (ISE) {#sect_build_demos_build_microblaze}
 
 Follow the steps below to cross compile your demo application for Microblaze:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -52,7 +52,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 * Create the executable
 
       > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
       > make all
       > make install
 
@@ -158,7 +158,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
 ## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
 
-### Microblaze Specific Options  {#sect_build_demos_microblaze_options}
+### Microblaze (ISE) Specific Options  {#sect_build_demos_microblaze_options}
 
 - **CFG_HW_LIB_DIR**
 
@@ -174,6 +174,13 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. (Single processor demo)
+
+  - __PCP Daemon Host-Interface__
+
+    The library liboplk[mn,cn]app-hostif.a will be used. It contains the interface to
+    the kernel daemon running on a separte processor. It uses the host interface to
+    communicate with the kernel part of the openPOWERLINK stack running on the second
+    processor.
 
 ### Altera Cyclone V SoC ARM Specific Options  {#sect_build_demos_altera-arm_options}
 

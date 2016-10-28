@@ -65,7 +65,7 @@ generating Visual Studio solution files.
 
 ## Embedded Systems (No-OS) {#sect_build_stack_build_noos}
 
-### Microblaze {#sect_build_stack_build_microblaze}
+### Xilinx Microblaze (ISE) {#sect_build_stack_build_microblaze}
 
 Follow the steps below to build the stack library on your host platform:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -77,7 +77,7 @@ Follow the steps below to build the stack library on your host platform:
 * Create debug libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
 
@@ -89,7 +89,7 @@ Follow the steps below to build the stack library on your host platform:
 * Create release libraries
 
       > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
 
@@ -297,7 +297,7 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
 ## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 
-### Microblaze Configuration Options {#sect_build_stack_options_noos_microblaze}
+### Microblaze Configuration Options (ISE) {#sect_build_stack_options_noos_microblaze}
 
 - **CFG_COMPILE_LIB_CN**
 
@@ -309,14 +309,14 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
     The path to the hardware platform should point to the export folder of the hardware
     project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
-- **CFG_COMPILE_LIB_MNDRV_DUALPROCSHM**
+- **CFG_COMPILE_LIB_MNDRV_HOSTIF**
 
   Compile openPOWERLINK MN driver library for Xilinx Microblaze. This library
   contains the openPOWERLINK kernel layer and uses the openMAC driver for
   accessing the network. It communicates with the openPOWERLINK user part by
-  using the dual processor shared memory library. It can be used to implement
+  using the host interface IP-Core. It can be used to implement
   an openPOWERLINK driver (PCP) on dual processor designs where the openPOWERLINK
-  user layer is running on a separate processor connected via a shared memory.
+  user layer is running on a separate processor connected via the host interface.
 
   - __CFG_COMPILE_LIB_MN_HW_LIB_DIR__
 

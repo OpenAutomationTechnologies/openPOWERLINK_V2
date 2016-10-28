@@ -92,17 +92,16 @@ a different platform and Windows version.
 
 The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
-## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
+## Building a PCP daemon for Microblaze (ISE) {#sect_build_drivers_build_daemon_microblaze}
 
 This section will explain the steps to build the PCP daemon for a Microblaze
-softcore processor in a dual processor design.
-The PCP daemon uses the driver library for the dual processor shared memory interface
-(`liboplkmndrv-dualprocshm`).
+softcore processor with host interface by using the ISE toolchain.
+The PCP daemon uses the driver library for the host interface (`liboplkmndrv-hostif`).
 
-To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL) using shared memory interface):
+To build the PCP daemon:
 
       > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
       > make
       > make install
 
@@ -174,7 +173,7 @@ To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL
   __NOTE__: Only one of them can be loaded at runtime since openPOWERLINK doesn't support
   several stack instances.
 
-## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
+## PCP daemon on Microblaze (ISE) {#sect_build_drivers_options_pcp_daemon}
 
 Following options are available for a PCP daemon of a dual processor design:
 
@@ -186,11 +185,6 @@ Following options are available for a PCP daemon of a dual processor design:
 
   Determines which driver library of the stack should be linked with the daemon.
   The following options are available and automatically (implicitly) pre-selected:
-
-  - __PCP Daemon Dual-Proc__
-
-    The openPOWERLINK user part will be running on a separate processor
-    communicating with the daemon through shared memory (dual processor).
 
   - __host-interface__
 
