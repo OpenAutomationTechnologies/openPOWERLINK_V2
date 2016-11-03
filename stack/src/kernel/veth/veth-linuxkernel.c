@@ -287,7 +287,11 @@ static int vethStartXmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p
     struct net_device_stats* pStats = netdev_priv(pNetDevice_p);
 
     //save time stamp
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(4, 7, 0))
     pNetDevice_p->trans_start = jiffies;
+#else
+    netif_trans_update(pNetDevice_p);
+#endif
 
     frameInfo.frame.pBuffer = (tPlkFrame*)pSkb_p->data;
     frameInfo.frameSize = pSkb_p->len;
