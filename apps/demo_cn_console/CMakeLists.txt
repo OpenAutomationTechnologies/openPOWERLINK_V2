@@ -36,6 +36,11 @@ MESSAGE(STATUS "Configuring demo_cn_console")
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
 
+# Set CMake Policy to suppress the warning in CMake version 3.3.x
+IF (POLICY CMP0043)
+    CMAKE_POLICY(SET CMP0043 OLD)
+ENDIF()
+
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
 
 OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)

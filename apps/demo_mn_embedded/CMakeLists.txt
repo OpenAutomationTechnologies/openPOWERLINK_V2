@@ -31,10 +31,17 @@
 
 ################################################################################
 # Setup project and generic options
+
 PROJECT(demo_mn_embedded C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
+
+# Set CMake Policy to suppress the warnings in CMake version 3.3.x
+IF ((POLICY CMP0043) OR (POLICY CMP0053))
+    CMAKE_POLICY(SET CMP0043 OLD)
+    CMAKE_POLICY(SET CMP0053 OLD)
+ENDIF()
 
 INCLUDE(../common/cmake/options.cmake)
 

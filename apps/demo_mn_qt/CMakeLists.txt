@@ -30,10 +30,16 @@
 
 ################################################################################
 # Setup project and generic options
+
 PROJECT(demo_mn_qt C CXX)
 MESSAGE(STATUS "Configuring demo_mn_qt")
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8.11)
+
+# Set CMake Policy to suppress the warning in CMake version 3.3.x
+IF (POLICY CMP0043)
+    CMAKE_POLICY(SET CMP0043 OLD)
+ENDIF()
 
 INCLUDE(../common/cmake/options.cmake)
 
