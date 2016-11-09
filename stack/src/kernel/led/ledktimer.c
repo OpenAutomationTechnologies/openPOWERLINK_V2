@@ -167,7 +167,6 @@ tOplkError ledk_updateLedState(void)
             case kLedModeOn:
             case kLedModeOff:
                 goto Exit;      // should not occur
-                break;
 
             case kLedModeFlickering:
                 if (ledkInstance_l.statusLedState >= kLedModeOn)
@@ -310,7 +309,6 @@ tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p)
 
             default:
                 return ret;      // should not occur
-                break;
         }
 
         switch (oldMode)
