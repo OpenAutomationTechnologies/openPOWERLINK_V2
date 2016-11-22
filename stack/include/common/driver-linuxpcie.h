@@ -67,6 +67,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
 #define PLK_CMD_TIMESYNC_SYNC                   _IO  (PLK_IOC_MAGIC, 10)
 #define PLK_CMD_PDO_MAP_OFFSET                  _IOR (PLK_IOC_MAGIC, 11, ULONG)
+#define PLK_CMD_CTRL_WRITE_FILE_BUFFER          _IOW (PLK_IOC_MAGIC, 12, tIoctlFileChunk)
+#define PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE       _IOR (PLK_IOC_MAGIC, 13, ULONG)
 
 //------------------------------------------------------------------------------
 // typedef
