@@ -395,6 +395,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
 
     /* Reset Microblaze */
     gpio_set_value(MB_RESET_PIN, MICROBLAZE_RESET);
+
     /* Wait for Microblaze to come out of reset */
     msleep(500);
 
@@ -507,14 +508,32 @@ This function removes one zynq device.
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
     UINT8 memId = 0;
-    //TODO: Cleanup check
-    free_irq(instance_l.IrqResource.IrqNum, pDev_p);
+
+    /* Remove interrupt handler */
+    if (instance_l.IrqResource.IrqNum != 0)
+    {
+        free_irq(instance_l.IrqResource.IrqNum, pDev_p);
+        instance_l.IrqResource.IrqNum = 0;
+    }
+
     for (memId = 0; memId < kIoMemRegionLast; memId++)
     {
-    iounmap(instance_l.aIoMemRes[memId].pIoMemBase);
-    release_mem_region(instance_l.aIoMemRes[memId].pIoMemRes->start,
-                      instance_l.aIoMemRes[memId].IoMemSize);
+        if (instance_l.aIoMemRes[memId].pIoMemBase != NULL)
+        {
+            iounmap(instance_l.aIoMemRes[memId].pIoMemBase);
+            instance_l.aIoMemRes[memId].pIoMemBase = NULL;
+        }
+
+        if (instance_l.aIoMemRes[memId].pIoMemRes != NULL)
+        {
+            release_mem_region(instance_l.aIoMemRes[memId].pIoMemRes->start,
+                              instance_l.aIoMemRes[memId].IoMemSize);
+            instance_l.aIoMemRes[memId].pIoMemRes = NULL;
+        }
     }
+    /* Bring Microblaze to reset */
+    gpio_free(MB_RESET_PIN);
+    instance_l.pPlatformDev = NULL;
     return 0;
 }
 /// \}
