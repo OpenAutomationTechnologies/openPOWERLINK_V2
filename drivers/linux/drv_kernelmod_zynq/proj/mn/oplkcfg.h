@@ -66,6 +66,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
+#if defined(__LINUX_ZYNQ__)
+#define PLK_VETH_NAME                                   "plk_Veth" // name of net device in Linux
+#endif
+
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================

@@ -79,6 +79,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_CHECK_HEARTBEAT_PERIOD                   100        // 100 ms
 
+#if defined(__LINUX_ZYNQ__)
+#define PLK_VETH_NAME                                   "plk_Veth" // name of net device in Linux
+#endif
+
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================
