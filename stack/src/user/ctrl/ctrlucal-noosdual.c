@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define CMD_TIMEOUT_SEC                 20      // command timeout in seconds
 #define DPSHM_ENABLE_TIMEOUT_SEC        10      // wait for dpshm interface enable time out
+#define CMD_TIMEOUT_LOOP_COUNT          100     // loop count value
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -242,9 +243,9 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
         return kErrorGeneralError;
 
     // wait for response
-    for (timeout = 0; timeout < CMD_TIMEOUT_SEC; timeout++)
+    for (timeout = 0; timeout < CMD_TIMEOUT_SEC * CMD_TIMEOUT_LOOP_COUNT; timeout++)
     {
-        target_msleep(1000U);
+        target_msleep(10U);
 
         dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                              offsetof(tCtrlBuf, ctrlCmd),
