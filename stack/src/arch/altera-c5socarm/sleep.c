@@ -222,7 +222,7 @@ static inline uint64_t getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
                                                uint32_t scalingFactor_p,
                                                uint32_t scaledTimeDuration_p)
 {
-    uint64_t    ticks = 0;                      // value to return
+    uint64_t    ticks = 0;                          // value to return
     ALT_CLK_t   clkSrc = ALT_CLK_UNKNOWN;
     uint32_t    preScaler = 0;
     uint32_t    freq = 1;
@@ -247,7 +247,8 @@ static inline uint64_t getTimerTicksFromScaled(ALT_GPT_TIMER_t timerId_p,
             ticks *= freq;
 
             // total clock ticks
-            ticks *= (uint64_t)(scaledTimeDuration_p / scalingFactor_p);
+            ticks /= scalingFactor_p;               //TODO: Improve fixed point division
+            ticks *= (uint64_t)scaledTimeDuration_p;
 
             // convert into timer ticks
             ticks /= (preScaler + 1);

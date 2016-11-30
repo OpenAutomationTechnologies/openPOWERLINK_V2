@@ -59,8 +59,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CMD_TIMEOUT_SEC                 20      // command timeout in seconds
-#define DPSHM_ENABLE_TIMEOUT_SEC        10      // wait for dpshm interface enable time out
+#define CMD_TIMEOUT_SEC                 20          // command timeout in seconds
+#define CMD_TIMEOUT_LOOP_MSEC           10          // wait for dpshm interface enable time out
+#define CMD_TIMEOUT_LOOP_COUNT          (CMD_TIMEOUT_SEC * 1000U / CMD_TIMEOUT_LOOP_MSEC)     // loop count value
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -138,7 +139,7 @@ tOplkError ctrlucal_init(void)
         return kErrorNoResource;
     }
 
-    for (loopCount = 0; loopCount <= DPSHM_ENABLE_TIMEOUT_SEC; loopCount++)
+    for (loopCount = 0; loopCount <= CMD_TIMEOUT_LOOP_MSEC; loopCount++)
     {
         target_msleep(1000U);
         dualRet = dualprocshm_checkShmIntfState(instance_l.dualProcDrvInst);
@@ -242,9 +243,9 @@ tOplkError ctrlucal_executeCmd(tCtrlCmdType cmd_p,
         return kErrorGeneralError;
 
     // wait for response
-    for (timeout = 0; timeout < CMD_TIMEOUT_SEC; timeout++)
+    for (timeout = 0; timeout < CMD_TIMEOUT_LOOP_COUNT; timeout++)
     {
-        target_msleep(1000U);
+        target_msleep(CMD_TIMEOUT_LOOP_MSEC);
 
         dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                              offsetof(tCtrlBuf, ctrlCmd),
