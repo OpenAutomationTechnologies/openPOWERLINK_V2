@@ -47,9 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 /* Memory size */
-#define MAX_COMMON_MEM_SIZE         2048                         ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT      20                           ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
+#define MAX_COMMON_MEM_SIZE         2048                           ///< Max common memory size
+#define MAX_DYNAMIC_BUFF_COUNT      20                             ///< Number of maximum dynamic buffers
+#define MAX_DYNAMIC_BUFF_SIZE       (MAX_DYNAMIC_BUFF_COUNT * 4)   ///< Max dynamic buffer size
 
 /* BASE ADDRESSES */
 
