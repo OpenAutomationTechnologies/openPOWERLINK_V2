@@ -500,6 +500,12 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
                 if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
                     return ret;
 
+                /* start cycle timer to send frames */
+                ret = edrvcyclic_startCycle(TRUE);
+                if(ret != kErrorOk) {
+                    return ret;
+                }
+
                 dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
                 // initialize SoAReq number for ProcessSync (cycle preparation)
                 dllkInstance_g.syncLastSoaReq = dllkInstance_g.curLastSoaReq;

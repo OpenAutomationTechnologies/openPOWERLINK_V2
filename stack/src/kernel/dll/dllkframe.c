@@ -2164,7 +2164,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
                                   dllkInstance_g.dllConfigParam.delayedSwitchOverTimeMn * 1000ULL,
                                   dllk_cbTimerSwitchOver, 0L, FALSE);
         }
-        if ((ret = edrvcyclic_startCycle()) != kErrorOk)
+        if ((ret = edrvcyclic_startCycle(FALSE)) != kErrorOk)
             return ret;
     }
     else

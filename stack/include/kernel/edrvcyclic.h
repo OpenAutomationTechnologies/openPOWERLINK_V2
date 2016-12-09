@@ -106,7 +106,7 @@ extern "C"
 tOplkError edrvcyclic_init(void);
 tOplkError edrvcyclic_exit(void);
 tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p);
-tOplkError edrvcyclic_startCycle(void);
+tOplkError edrvcyclic_startCycle(BOOL fredudancy_p);
 tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p);
 tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
 tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p) SECTION_EDRVCYC_SET_NEXT_TX;
