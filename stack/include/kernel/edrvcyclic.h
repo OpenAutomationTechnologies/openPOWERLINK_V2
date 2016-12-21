@@ -108,7 +108,7 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p);
 tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer* const* ppTxBuffer_p,
                                           UINT txBufferCount_p) SECTION_EDRVCYC_SET_NEXT_TX;
 tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p);
-tOplkError edrvcyclic_startCycle(void);
+tOplkError edrvcyclic_startCycle(BOOL fContinuousMode_p);
 tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p);
 tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnEdrvCyclicCbSync_p);
 tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnEdrvCyclicCbError_p);

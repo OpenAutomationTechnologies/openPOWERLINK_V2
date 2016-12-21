@@ -311,12 +311,15 @@ tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p)
 
 This function starts the cycles.
 
+\param  fContinuousMode_p   If TRUE, the timer will be called continuously
+                            Otherwise, it is a one-shot timer
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_startCycle(void)
+tOplkError edrvcyclic_startCycle(BOOL fContinuousMode_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -334,7 +337,7 @@ tOplkError edrvcyclic_startCycle(void)
 
     ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,
                                 edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
-                                timerHdlCycleCb, 0L, TRUE);
+                                timerHdlCycleCb, 0L, fContinuousMode_p);
 
 #if (EDRV_USE_TTTX == TRUE)
     edrvcyclicInstance_l.fNextCycleValid = FALSE;

@@ -2218,7 +2218,7 @@ static tOplkError processReceivedSoc(const tEdrvRxBuffer* pRxBuffer_p,
                                   dllk_cbTimerSwitchOver, 0L, FALSE);
         }
 
-        ret = edrvcyclic_startCycle();
+        ret = edrvcyclic_startCycle(FALSE);
         if (ret != kErrorOk)
             return ret;
     }

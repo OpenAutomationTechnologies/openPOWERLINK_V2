@@ -380,7 +380,7 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p,
                     if (ret != kErrorOk)
                         return ret;
 
-                    ret = edrvcyclic_startCycle();
+                    ret = edrvcyclic_startCycle(TRUE);
                     if (ret != kErrorOk)
                         return ret;
 
