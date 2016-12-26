@@ -200,7 +200,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_DESC_ADDR_OFFSET               0x00000000
 #define EDRV_DESC_CNTRL_OFFSET              0x00000004
 
-#define DRV_NAME                            "plk"
+#define DRV_NAME                            "plk_drv"
 
 #define EDRV_READ_REG(dwOffset)                         __raw_readl(edrvInstance_l.pIoAddr + dwOffset)
 #define EDRV_WRITE_REG(dwOffset, dwVal)                 __raw_writel(dwVal, edrvInstance_l.pIoAddr + dwOffset)
@@ -1204,6 +1204,11 @@ static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
     INT    loop;
 
+    // disble interrupts
+    EDRV_WRITE_REG(EDRV_INTR_DIS_REG, ~0x0);
+    // disable Tx and Rx circuit
+    EDRV_WRITE_REG(EDRV_NET_CNTRL_REG, 0x0);
+
     if (pDev_p != edrvInstance_l.pPlatformDev)
     {
         BUG_ON(edrvInstance_l.pPlatformDev != pDev_p);
@@ -1252,7 +1257,12 @@ static int removeOnePlatformDev(struct platform_device* pDev_p)
 
     free_irq(edrvInstance_l.resIrq, pDev_p);
     release_mem_region(edrvInstance_l.resMemAddr, edrvInstance_l.resMemSize);
-    iounmap(edrvInstance_l.pIoAddr);
+
+    if (edrvInstance_l.pIoAddr != NULL)
+    {
+        iounmap(edrvInstance_l.pIoAddr);
+        edrvInstance_l.pIoAddr = NULL;
+    }
 
     return 0;
 }

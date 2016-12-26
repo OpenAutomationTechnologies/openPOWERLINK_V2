@@ -64,6 +64,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
+// Update device name to avoid conflict in zynq emacps design
+// 267200 corresponds to Z7200 architecture of Zynq family. (Z is represented by 26)
+#if (CONFIG_EDRV == 267200)
+#define PLK_VETH_NAME                               "plk_veth"
+#endif
 
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
