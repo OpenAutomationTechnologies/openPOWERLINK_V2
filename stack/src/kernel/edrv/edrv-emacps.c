@@ -167,7 +167,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_RX_DESC_LEN                (EDRV_MAX_RX_DESCRIPTOR - 1)
 
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS                 42                                          // up-to 128 buffers are supported per frame
+#define EDRV_MAX_TX_BUFFERS                 128                                         // up-to 128 buffers are supported per frame
 #endif
 
 #ifndef EDRV_MAX_RX_BUFFERS
