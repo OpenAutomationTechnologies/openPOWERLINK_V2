@@ -252,7 +252,7 @@ tOplkError sdotestcom_sendFrame(UINT nodeId_p,
     // Get frame buffer
     pFrame = (tPlkFrame*)OPLK_MALLOC(frameSize);
     if (pFrame == NULL)
-        ret = kErrorNoResource;
+        return kErrorNoResource;
 
     // Generate frame
     pSdoComDst = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;

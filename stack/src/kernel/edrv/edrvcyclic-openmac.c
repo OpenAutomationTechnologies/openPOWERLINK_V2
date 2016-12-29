@@ -212,14 +212,14 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         }
 
         instance_l.apTxBufferList = (tEdrvTxBuffer**)OPLK_MALLOC(sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
-        if (instance_l.apTxBufferList == NULL)
+        if (instance_l.apTxBufferList != NULL)
         {
-            ret = kErrorEdrvNoFreeBufEntry;
+            instance_l.currrentTxBufferList = 0;
+
+            OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
         }
-
-        instance_l.currrentTxBufferList = 0;
-
-        OPLK_MEMSET(instance_l.apTxBufferList, 0, sizeof(*instance_l.apTxBufferList) * maxListSize_p * 2);
+        else
+            ret = kErrorEdrvNoFreeBufEntry;
     }
 
     return ret;

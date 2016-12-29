@@ -215,14 +215,14 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         }
 
         edrvcyclicInstance_l.ppTxBufferList = (tEdrvTxBuffer**)OPLK_MALLOC(sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
-        if (edrvcyclicInstance_l.ppTxBufferList == NULL)
+        if (edrvcyclicInstance_l.ppTxBufferList != NULL)
         {
-            ret = kErrorEdrvNoFreeBufEntry;
+            edrvcyclicInstance_l.curTxBufferList = 0;
+
+            OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         }
-
-        edrvcyclicInstance_l.curTxBufferList = 0;
-
-        OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        else
+            ret = kErrorEdrvNoFreeBufEntry;
     }
 
     return ret;
