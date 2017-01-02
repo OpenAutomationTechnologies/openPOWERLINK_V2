@@ -521,16 +521,34 @@ static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
     UINT8 memId = 0;
 
-    //TODO: Cleanup check
-    free_irq(instance_l.irqResource.irqNumber, pDev_p);
+    /* Remove interrupt handler */
+    if (instance_l.irqResource.irqNumber != 0)
+    {
+        free_irq(instance_l.irqResource.irqNumber, pDev_p);
+        instance_l.irqResource.irqNumber = 0;
+    }
 
     for (memId = 0; memId < kIoMemRegionLast; memId++)
     {
         tIoMemoryResource* pMemResource = &instance_l.aIoMemRes[memId];
-        iounmap(pMemResource->pBase);
-        release_mem_region(pMemResource->pResource->start,
-                           pMemResource->size);
+
+        if (pMemResource->pBase != NULL)
+        {
+            iounmap(pMemResource->pBase);
+            pMemResource->pBase = NULL;
+        }
+
+        if (pMemResource->pResource != NULL)
+        {
+            release_mem_region(pMemResource->pResource->start,
+                               pMemResource->size);
+            pMemResource->pResource = NULL;
+        }
     }
+
+    /* Bring Microblaze to reset */
+    gpio_free(MB_RESET_PIN);
+    instance_l.pPlatformDev = NULL;
 
     return 0;
 }
