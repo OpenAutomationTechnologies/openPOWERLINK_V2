@@ -51,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_DYNAMIC_BUFF_COUNT      20                              ///< Number of maximum dynamic buffers
 #define MAX_DYNAMIC_BUFF_SIZE       (MAX_DYNAMIC_BUFF_COUNT * 4)    ///< Max dynamic buffer size
 
-
 #if defined(__arm__)
 
     #include <dualprocshm-linuxkernel.h>
@@ -65,8 +64,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
     #define MEM_ADDR_TABLE_OFFSET   MAX_COMMON_MEM_SIZE             ///< Offset of the address table from the start of common memory
     #define MEM_INTR_OFFSET         MAX_DYNAMIC_BUFF_SIZE           ///< Offset of the interrupt register from the start of common memory
-
-    #define MEM_BASE_OFFSET         0x10000000
 
 #elif defined(__MICROBLAZE__)
 

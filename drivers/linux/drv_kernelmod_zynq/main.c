@@ -105,8 +105,6 @@ atomic_t                openCount_g;
 #define QUEUE_WAIT_TIMEOUT          (10 * HZ / 1000)    // 10ms timeout
 #define K2U_EVENT_WAIT_TIMEOUT      (500 * HZ / 1000)
 
-// TODO: Already defined in dualprocshm-zynq.h
-#define SHARED_MEM_BASE             0x30000000
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -327,7 +325,6 @@ static int plkIntfOpen(struct inode* pInode_p,
         return -ENOTTY;
     }
 
-
     instance_l.bufPageOffset = 0;
     instance_l.pPdoMem = NULL;
     instance_l.fSyncEnabled = FALSE;
@@ -501,7 +498,6 @@ static int plkIntfIoctl(struct inode* pInode_p,
 #endif
     UNUSED_PARAMETER(pFile_p);
 
-
     DEBUG_LVL_ALWAYS_TRACE("PLK: + %s() (cmd=%d type=%d)...\n",
                            __func__,
                            _IOC_NR(cmd_p),
@@ -645,7 +641,7 @@ static int plkIntfMmap(struct file* pFile_p,
         instance_l.pdoMemSize = memSize;
         instance_l.pdoVmaStartAddr = pVmArea_p->vm_start;
         // Get the bus address of the pdo memory
-        pageAddr = (UINT8*)SHARED_MEM_BASE + ((UINT8*)pPciMem - (UINT8*)zynqdrv_getMemRegionAddr(1));
+        pageAddr = zynqdrv_getMemPhyAddr(kIoMemRegionShared) + (pPciMem - zynqdrv_getMemRegionAddr(kIoMemRegionShared));
     }
     else
     {
@@ -659,7 +655,7 @@ static int plkIntfMmap(struct file* pFile_p,
             return -ENOMEM;
 
         // Get the bus address of the passed memory
-        pageAddr = (UINT8*)SHARED_MEM_BASE + ((UINT8*)pageAddr - (UINT8*)zynqdrv_getMemRegionAddr(1));
+        pageAddr = zynqdrv_getMemPhyAddr(kIoMemRegionShared) + (pageAddr - zynqdrv_getMemRegionAddr(kIoMemRegionShared));
     }
 
     pVmArea_p->vm_pgoff = (ULONG)pageAddr >> PAGE_SHIFT;
