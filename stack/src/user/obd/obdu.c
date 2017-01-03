@@ -107,11 +107,13 @@ static tObdInstance                 obdInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   initWrite(UINT index_p,
-                              UINT subIndex_p,
-                              void** ppDstData_p,
-                              tObdSize size_p,
-                              UINT segmOffset_p);
+static tOplkError   initNonNumWrite(UINT index_p,
+                                    UINT subIndex_p,
+                                    void** ppDstData_p,
+                                    tObdSize size_p,
+                                    UINT segmOffset_p);
+static tOplkError   finishNonNumWrite(UINT index_p,
+                                      UINT subIndex_p);
 
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
 static tOplkError   reallocStringDomainObj(const tObdSubEntry* pSubEntry_p,
@@ -1314,9 +1316,9 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize write to OD
+\brief  Initialize non-numeric write to OD
 
-The function initializes write of data to an OBD entry.
+The function initializes write of data to an OD entry.
 It is used by SDO command layer to store segmented data.
 
 \param[in]      index_p             Index of object.
@@ -1328,11 +1330,11 @@ It is used by SDO command layer to store segmented data.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initWrite(UINT index_p,
-                            UINT subIndex_p,
-                            void** ppDstData_p,
-                            tObdSize size_p,
-                            UINT segmOffset_p)
+static tOplkError initNonNumWrite(UINT index_p,
+                                  UINT subIndex_p,
+                                  void** ppDstData_p,
+                                  tObdSize size_p,
+                                  UINT segmOffset_p)
 {
     tOplkError          ret;
     const tObdEntry*    pObdEntry;
@@ -1350,12 +1352,6 @@ static tOplkError initWrite(UINT index_p,
     // check access for write
     if ((access & kObdAccConst) != 0)
         return kErrorObdWriteViolation;
-
-    // To use the same callback function for ObdWriteEntry as well as for
-    // an SDO download call at first (kObdEvPre...) the callback function
-    // with the argument pointer to object size.
-    cbParam.index = index_p;
-    cbParam.subIndex = subIndex_p;
 
     // Because object size and object pointer are adapted by user callback
     // function, re-read this values.
@@ -1380,6 +1376,8 @@ static tOplkError initWrite(UINT index_p,
     if (pDstData == NULL)
        return kErrorObdAccessViolation;
 
+    cbParam.index = index_p;
+    cbParam.subIndex = subIndex_p;
     cbParam.pArg = &obdSize;
     cbParam.obdEvent = kObdEvInitWrite;
     ret = callObjectCallback(pObdEntry, &cbParam);
@@ -1391,6 +1389,43 @@ static tOplkError initWrite(UINT index_p,
 
     if (ppDstData_p)
         *ppDstData_p = pDstData;
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Finishes a non-numeric write to OD
+
+The function finishes a segmented write to an OD entry. It informs the user
+layer about the completion of the last segment transfer.
+This function is used by the SDO command layer.
+
+\param[in]      index_p             Index of object.
+\param[in]      subIndex_p          Sub-index of object.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError finishNonNumWrite(UINT index_p,
+                                    UINT subIndex_p)
+{
+    tOplkError          ret;
+    const tObdEntry*    pObdEntry;
+    const tObdSubEntry* pSubEntry;
+    tObdCbParam         cbParam;
+
+    ret = getEntry(index_p, subIndex_p, &pObdEntry, &pSubEntry);
+    if (ret != kErrorOk)
+        return ret;
+
+    cbParam.index = index_p;
+    cbParam.subIndex = subIndex_p;
+    cbParam.pArg = getObjectDataPtr(pSubEntry); // user can access object data
+    cbParam.obdEvent = kObdEvPostWrite;
+    ret = callObjectCallback(pObdEntry, &cbParam);
+    if (ret != kErrorOk)
+        return ret;
 
     return kErrorOk;
 }
@@ -1579,11 +1614,11 @@ static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
     tOplkError  ret = kErrorOk;
     void*       pDstData = NULL;
 
-    ret = initWrite(pSdoHdl_p->index,
-                    pSdoHdl_p->subIndex,
-                    &pDstData,
-                    pSdoHdl_p->totalPendSize,
-                    pSdoHdl_p->dataOffset);
+    ret = initNonNumWrite(pSdoHdl_p->index,
+                          pSdoHdl_p->subIndex,
+                          &pDstData,
+                          pSdoHdl_p->totalPendSize,
+                          pSdoHdl_p->dataOffset);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -1596,6 +1631,14 @@ static tOplkError writeSegm(tSdoObdConHdl* pSdoHdl_p)
     pDstData = (void*)((UINT8*)pDstData + pSdoHdl_p->dataOffset);
 
     OPLK_MEMCPY(pDstData, pSdoHdl_p->pSrcData, pSdoHdl_p->dataSize);
+
+    if (pSdoHdl_p->dataSize == pSdoHdl_p->totalPendSize)
+    {   /* this is the last segment, inform user layer */
+        ret = finishNonNumWrite(pSdoHdl_p->index,
+                                pSdoHdl_p->subIndex);
+        if (ret != kErrorOk)
+            goto Exit;
+    }
 
 Exit:
     return ret;
