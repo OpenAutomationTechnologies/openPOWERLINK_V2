@@ -1733,6 +1733,7 @@ static tOplkError serverInitWriteByIndex(tSdoComCon* pSdoComCon_p,
         pSrcData = &pSdoCom_p->aCommandData[SDO_CMDL_HDR_WRITEBYINDEX_SIZE];
         pSdoComCon_p->transferSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
         pSdoComCon_p->transferSize -= SDO_CMDL_HDR_WRITEBYINDEX_SIZE;
+        segmPayloadSize = pSdoComCon_p->transferSize;
         // next state assigned later, since no following segments are expected
     }
     else
