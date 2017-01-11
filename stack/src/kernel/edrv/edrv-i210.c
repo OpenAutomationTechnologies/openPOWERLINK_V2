@@ -2587,6 +2587,8 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     if (edrvInstance_l.pPciDev == NULL)
     {
         printk("%s pPciDev==NULL\n", __FUNCTION__);
+        result = -1;
+        goto Exit;
     }
 
     result = dma_set_mask(&edrvInstance_l.pPciDev->dev, DMA_BIT_MASK(64));
