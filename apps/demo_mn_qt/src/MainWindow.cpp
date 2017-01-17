@@ -7,7 +7,7 @@
 This file contains the implementation of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -76,8 +76,9 @@ Constructor of main window class.
 \param[in,out]  parent              Pointer to the parent window
 */
 //------------------------------------------------------------------------------
-MainWindow::MainWindow(QWidget* parent)
-    : QWidget(parent)
+MainWindow::MainWindow(QWidget* parent) :
+    QWidget(parent),
+    stackIsRunning(false)
 {
     this->pApi = NULL;
     this->pSdoDialog = NULL;
@@ -187,7 +188,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this->pStartStopOplk,
             SIGNAL(clicked()),
             this,
-            SLOT(startPowerlink()));
+            SLOT(startStopStack()));
 
     this->pShowSdoDialog = new QPushButton(tr("SDO..."));
     pFootRegion->addWidget(this->pShowSdoDialog);
@@ -253,6 +254,21 @@ void MainWindow::toggleWindowState()
 
 //------------------------------------------------------------------------------
 /**
+\brief  Start or stop POWERLINK
+
+Starts or stops the openPOWERLINK stack.
+*/
+//------------------------------------------------------------------------------
+void MainWindow::startStopStack()
+{
+    if (!this->stackIsRunning)
+        this->startPowerlink();
+    else
+        this->stopPowerlink();
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Start POWERLINK
 
 Starts the openPOWERLINK stack.
@@ -285,22 +301,18 @@ void MainWindow::startPowerlink()
     this->devName = "plk";
 #endif
 
-    this->pNodeIdEdit->setEnabled(false);
+    // Read the node ID
     nodeId = this->pNodeIdEdit->text().toUInt(&fConvOk);
     if (fConvOk == false)
         nodeId = Api::defaultNodeId();
 
+    // Update GUI elements to started stack
+    this->pNodeIdEdit->setEnabled(false);
     this->pNmtCmd->setEnabled(true);
-
-    // change the button to stop
     this->pStartStopOplk->setText(tr("Stop POWERLINK"));
-    this->pStartStopOplk->disconnect(this, SLOT(startPowerlink()));
-    connect(this->pStartStopOplk,
-            SIGNAL(clicked()),
-            this,
-            SLOT(stopPowerlink()));
 
-    this->pApi = new Api(this, nodeId, devName);
+    // Start the stack
+    this->pApi = new Api(this, nodeId, this->devName);
 
     if (pSdoDialog)
     {
@@ -314,6 +326,8 @@ void MainWindow::startPowerlink()
                          pSdoDialog,
                          SLOT(sdoFinished(tSdoComFinished)));
     }
+
+    this->stackIsRunning = true;
 }
 
 //------------------------------------------------------------------------------
@@ -325,15 +339,13 @@ Stops the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::stopPowerlink()
 {
+    this->stackIsRunning = false;
+
+    // Stop the stack
     delete this->pApi;
 
+    // Update GUI elements to stopped stack
     this->pStartStopOplk->setText(tr("Start POWERLINK"));
-    this->pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
-    connect(this->pStartStopOplk,
-            SIGNAL(clicked()),
-            this,
-            SLOT(startPowerlink()));
-
     this->pNodeIdEdit->setEnabled(true);
     this->pNmtCmd->setEnabled(false);
 }

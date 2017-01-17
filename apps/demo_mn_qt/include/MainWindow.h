@@ -7,7 +7,7 @@
 This file contains the definitions of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -83,8 +83,7 @@ public:
 
 private slots:
     void         toggleWindowState();
-    void         startPowerlink();
-    void         stopPowerlink();
+    void         startStopStack();
     void         showSdoDialog();
     void         printlog(const QString& str);
     void         execNmtCmd();
@@ -122,6 +121,11 @@ private:
     QString      devName;
 
     tNmtEvent    nmtEvent;
+    bool         stackIsRunning;
+
+    // Private methods
+    void startPowerlink();
+    void stopPowerlink();
 };
 
 #endif /* _INC_demo_MainWindow_H_ */
