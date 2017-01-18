@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
+class QVBoxLayout;
 class QHBoxLayout;
 class QPixmap;
 class QLabel;
@@ -74,12 +75,12 @@ class MainWindow : public QWidget
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* parent = 0);
+    MainWindow(QWidget* pParent_p = 0);
 
-    State*       getStateWidget() const {return this->pState;}
-    Output*      getOutputWidget() const {return this->pOutput;}
-    Input*       getInputWidget() const {return this->pInput;}
-    CnState*     getCnStateWidget() const {return this->pCnState;}
+    State*       getStateWidget() const {return this->pStateWidget;}
+    Output*      getOutputWidget() const {return this->pOutputWidget;}
+    Input*       getInputWidget() const {return this->pInputWidget;}
+    CnState*     getCnStateWidget() const {return this->pCnStateWidget;}
 
 private slots:
     void         toggleWindowState();
@@ -89,43 +90,60 @@ private slots:
     void         execNmtCmd();
 
 private:
-    QHBoxLayout* pHeadRegion;
-    QPixmap*     pLogo;
-    QLabel*      pLabel;
+    // General layout
+    QVBoxLayout*    pWindowLayout;
 
-    State*       pState;
-    CnState*     pCnState;
-    Input*       pInput;
-    Output*      pOutput;
+    // Head region
+    QHBoxLayout*    pHeadRegionLayout;
+    QLabel*         pLogo;
+    QLabel*         pVersionLabel;
 
-    QLineEdit*   pNodeIdEdit;
+    // Separator line
+    QFrame*         pFrameSepHeadMiddle;
 
-    QPushButton* pToggleMax;
-    QPushButton* pShowSdoDialog;
-    QPushButton* pStartStopOplk;
-    QPushButton* pNmtCmd;
+    // Middle region
+    QHBoxLayout*    pMiddleRegion;
+    CnState*        pCnStateWidget;
+    QFrame*         pFrameSepMiddle;    // Vertical separator line
+    Input*          pInputWidget;
+    QFrame*         pFrameSepMiddle2;   // Vertical separator line
+    Output*         pOutputWidget;
 
-    QFrame*      pFrameSepHeadMiddle;
-    QFrame*      pFrameSepMiddle;
-    QFrame*      pFrameSepMiddle2;
-    QFrame*      pFrameSepMiddleStatus;
-    QFrame*      pFrameSepStatusFoot;
+    // Separator line
+    QFrame*         pFrameSepMiddleStatus;
 
-    QTextEdit*   pTextEdit;
+    // Status region
+    QHBoxLayout*    pStatusRegion;
+    State*          pStateWidget;
 
-    Api*         pApi;
-    SdoDialog*   pSdoDialog;
+    // Separator line
+    QFrame*         pFrameSepStatusFoot;
 
-    UINT32       version;
+    // Foot region
+    QHBoxLayout*    pFootRegion;
+    QLabel*         pNodeIdLabel;
+    QLineEdit*      pNodeIdEdit;
+    QPushButton*    pStartStopOplk;
+    QPushButton*    pShowSdoDialog;
+    QPushButton*    pNmtCmd;
+    QPushButton*    pToggleMax;
+    QPushButton*    pQuitButton;
 
-    QString      devName;
+    // Text console region
+    QHBoxLayout*    pTextConsoleRegion;
+    QTextEdit*      pTextEdit;
 
-    tNmtEvent    nmtEvent;
-    bool         stackIsRunning;
+    Api*            pApi;
+    SdoDialog*      pSdoDialog;
+
+    QString         devName;
+    tNmtEvent       nmtEvent;
+    bool            stackIsRunning;
 
     // Private methods
     void startPowerlink();
     void stopPowerlink();
+    void setupUi();
 };
 
 #endif /* _INC_demo_MainWindow_H_ */
