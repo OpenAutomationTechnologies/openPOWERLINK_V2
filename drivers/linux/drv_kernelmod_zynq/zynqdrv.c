@@ -43,6 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+
 #include "zynqdrv.h"
 
 #include <common/driver.h>
@@ -95,32 +96,55 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define GPIO_PIN_NUM            960         // GPIO Pin number - Microblaze reset
-#define GPIO_PIN_RESET          1           // GPIO Pin - set value
+#define MB_RESET_PIN             960         // GPIO Pin number - Microblaze reset
+#define MICROBLAZE_RESET           1         // GPIO Pin - set value
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 /**
-\brief  Zynq kernel driver instance
 
-Provides all the necessary information used by the Zynq kernel driver module
-to interact with the device and interface with the stack above it.
-*/
+ \brief Platform device IO memory resource
 
+ The structure holds the information of the IO memory resource
+ and the size of the memory regions.
+
+ */
 typedef struct
 {
-    struct platform_device* pPlatformDev;   ///< Pointer to platform device structure for driver
-    void*                   pIoAddrreg1;    ///< Pointer to register space of Common Memory
-    void*                   pIoAddrreg2;    ///< Pointer to register space of Shared Memory
-    resource_size_t         resMemAddr;     ///< Address of the memory allocated for device by OS
-    resource_size_t         resMemSize;     ///< Size of the memory allocated for device
-    UINT32                  resIrq;         ///< Interrupt Id
-    tIrqCallback            pfnCbSync;      ///< Sync IRQ callback function of the upper user layer.
-    BOOL                    fSyncEnabled;   ///< Flag to check if sync IRQ for user has been enabled.
-} tPcpDrvInstance;
+    struct resource*             pResource;      ///< Pointer to the IO Memory resource allocated by Linux.
+    void*                        pBase;          ///< Virtual address of IO memory regions.
+    resource_size_t              size;           ///< Size of the memory allocated for the device.
+} tIoMemoryResource;
 
-tPcpDrvInstance             instance_l;
+/**
+
+ \brief Platform device Interrupt Resource
+
+ The structure holds the information of the Irq resource and
+ the IRQ number assigned to Zynq platform device.
+
+ */
+typedef struct
+{
+    struct resource*             pResource;         ///< Interrupt resource for the platform device.
+    UINT32                       irqNumber;       ///< Interrupt number assigned by Linux.
+} tIrqResource;
+
+/**
+ \brief  Zynq kernel driver instance
+
+ Provides all the necessary information used by the Zynq kernel driver module
+ to interact with the device and interface with the stack above it.
+ */
+typedef struct
+{
+    struct platform_device*      pPlatformDev;                          ///< Pointer to platform device structure for driver.
+    tIoMemoryResource            aIoMemRes[kIoMemRegionLast];           ///< Memory instances of the platform device.
+    tIrqResource                 irqResource;                           ///< Interrupt resource for the platform device.
+    tIrqCallback                 pfnCbSync;                             ///< Sync irq callback function of the upper user layer.
+    BOOL                         fSyncEnabled;                          ///< Flag to check if sync irq for user has been enabled.
+} tPcpDrvInstance;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -137,10 +161,9 @@ static irqreturn_t  pcpIrqHandler(int irqNum_p,
 #if defined(CONFIG_OF)
 static struct of_device_id  drv_of_match[] =
 {
-    {   .compatible = "my_driver,DDR", },               // __devinitdata creates warning!
-    { /* end of table */}                               // keep devinit in separate data section,
-                                                        // linker is not able to link
-};
+    {   .compatible = "plk_driver,DDR", },               // __devinitdata creates warning!
+    { /* end of table */}                                // keep devinit in separate data section,
+};                                                       // linker is not able to link
 
 MODULE_DEVICE_TABLE(of, drv_of_match);
 #else
@@ -153,11 +176,13 @@ static struct platform_driver   pcpDriver_l =
     .remove     = removeOnePlatformDev,
     .suspend    = NULL,                                     // Not handling power management functions
     .resume     = NULL,                                     // Not handling power management functions
-    .driver     = { .name = "my-platform-device",
+    .driver     = { .name = "zynq-platform-device",
                     .owner = THIS_MODULE,
                     .of_match_table = drv_of_match,         // This function is to check the device
                   },                                        // from the device tree
 };
+
+static tPcpDrvInstance instance_l;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -182,7 +207,8 @@ tOplkError zynqdrv_init(void)
     // Clear instance structure
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
-    DEBUG_LVL_ALWAYS_TRACE("%s(): Registering the driver to the kernel...", __func__);
+    DEBUG_LVL_ALWAYS_TRACE("%s(): Registering the driver to the kernel...",
+                           __func__);
 
     /*
      * TODO: This function can be replaced with platform_driver_probe
@@ -209,7 +235,8 @@ This function shuts down the openPOWERLINK zynq driver.
 //------------------------------------------------------------------------------
 tOplkError zynqdrv_exit(void)
 {
-    DEBUG_LVL_DRVINTF_TRACE("%s(): Calling platform_driver_unregister()\n", __func__);
+    DEBUG_LVL_DRVINTF_TRACE("%s(): Calling platform_driver_unregister()\n",
+                            __func__);
     platform_driver_unregister(&pcpDriver_l);
 
     return kErrorOk;
@@ -219,25 +246,43 @@ tOplkError zynqdrv_exit(void)
 /**
 \brief  Get common memory base virtual address
 
-This routine fetches the common memory base address
-of ARM and Microblaze.
+This routine fetches the common memory base address after
+its been remapped into Linux kernel virtual address space..
 
-\return Returns the base address of common memory.
+ \param[in]      memId_p          ID of the requested memory region.
+
+ \return Returns the base address of common memory.
 
 \ingroup module_driver_linux_kernel_zynq
 */
 //------------------------------------------------------------------------------
-void* zynqdrv_getMemRegionAddr(UINT8 memId_p)
+void* zynqdrv_getMemRegionAddr(tIoMemRegions memId_p)
 {
-    void*   pVirtAddr = NULL;
+    if (memId_p >= kIoMemRegionLast)
+        return NULL;
 
-    if (memId_p == DEVICE_IO_MEM_REG1_IDX)
-        pVirtAddr = instance_l.pIoAddrreg1;
+    return instance_l.aIoMemRes[memId_p].pBase;
+}
 
-    if (memId_p == DEVICE_IO_MEM_REG2_IDX)
-        pVirtAddr = instance_l.pIoAddrreg2;
+//------------------------------------------------------------------------------
+/**
+\brief  Get shared memory physical address
 
-    return pVirtAddr;
+This routine fetches the physical address of shared Memory.
+
+ \param[in]      memId_p          ID of the requested memory region.
+
+ \return Returns the physical address of Shared Memory.
+
+\ingroup module_driver_linux_kernel_zynq
+*/
+//------------------------------------------------------------------------------
+void* zynqdrv_getMemPhyAddr(tIoMemRegions memId_p)
+{
+    if (memId_p >= kIoMemRegionLast)
+        return NULL;
+
+    return (void*)instance_l.aIoMemRes[memId_p].pResource->start;
 }
 
 //------------------------------------------------------------------------------
@@ -333,16 +378,34 @@ This function initializes one Zynq device.
 //------------------------------------------------------------------------------
 static int initOnePlatformDev(struct platform_device* pDev_p)
 {
-    int                 result = 0;
-    struct resource*    pResMemreg1;
-    struct resource*    pResMemreg2;
-    struct resource*    pResIrq;
+    INT     result = 0;
+    UINT8   memId = 0;
+
+    /* checking if Microblaze Reset pin number is valid */
+    if (!gpio_is_valid(MB_RESET_PIN))
+    {
+        DEBUG_LVL_DRVINTF_TRACE("Microblaze Reset pin not valid\n");
+        result = -EIO;
+        goto Exit;
+    }
+
+    gpio_request(MB_RESET_PIN, "Reset Button");
+
+    gpio_export(MB_RESET_PIN, false);
+
+    gpio_direction_output(MB_RESET_PIN, MICROBLAZE_RESET);
+
+    /* Reset Microblaze */
+    gpio_set_value(MB_RESET_PIN, MICROBLAZE_RESET);
+
+    /* Wait for Microblaze to come out of reset */
+    msleep(500);
 
     if (pDev_p == NULL)
     {
         DEBUG_LVL_DRVINTF_TRACE("%s(): Device discarded\n", __func__);
         result = -ENODEV;
-        goto Exit;
+        goto ExitClean;
     }
 
     if (instance_l.pPlatformDev != NULL)
@@ -351,116 +414,97 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
                                 __func__,
                                 pDev_p->name);
         result = -ENODEV;
-        goto Exit;
+        goto ExitClean;
     }
 
     // Save the handle for the platform device
     instance_l.pPlatformDev = pDev_p;
 
-    DEBUG_LVL_DRVINTF_TRACE("%s(): IOMEM resource initialization...", __func__);
-    pResMemreg1 = platform_get_resource(pDev_p, IORESOURCE_MEM, 0);
-    if (pResMemreg1 == NULL)
+    for (memId = 0; memId < kIoMemRegionLast; memId++)
     {
-        result = -ENODEV;
-        goto Exit;
-    }
-    DEBUG_LVL_DRVINTF_TRACE("Done\n");
+        tIoMemoryResource* pMemResource = &instance_l.aIoMemRes[memId];
 
-    DEBUG_LVL_DRVINTF_TRACE("%s(): IOMEM resource initialization...", __func__);
-    pResMemreg2 = platform_get_resource(pDev_p, IORESOURCE_MEM, 1);
-    if (pResMemreg2 == NULL)
-    {
-        result = -ENODEV;
-        goto Exit;
+        DEBUG_LVL_DRVINTF_TRACE("%s(): IOMEM resource initialization...%s",
+                                __func__,
+                                ((memId == 0) ? "Common Memory" : "Shared Memory"));
+
+        pMemResource->pResource =
+                  platform_get_resource(pDev_p, IORESOURCE_MEM, memId);
+
+        if (pMemResource->pResource == NULL)
+        {
+            result = -ENODEV;
+            goto ExitClean;
+        }
+
+        pMemResource->size = (pMemResource->pResource->end -
+                              pMemResource->pResource->start + 1);
+
+        /* Mark the region exclusively for Zynq device */
+        if (!request_mem_region(pMemResource->pResource->start,
+                                pMemResource->size,
+                                PLK_DRV_NAME))
+        {
+            DEBUG_LVL_DRVINTF_TRACE("Request memory region failed for %s \n",
+                                    ((memId == 0) ? "Common Memory" : "Shared Memory"));
+            result = -ENOMEM;
+            goto ExitClean;
+        }
+
+        DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X) \n",
+                                pMemResource->pResource->start,
+                                pMemResource->pResource->end);
+
+        /* Remap Io memory regions into Linux virtual address space */
+        pMemResource->pBase = ioremap(pMemResource->pResource->start,
+                                      pMemResource->size);
+
+        if (pMemResource->pBase == NULL)
+        {
+            DEBUG_LVL_DRVINTF_TRACE("Ioremap failed for %s\n",
+                                    ((memId == 0) ? "Common Memory" : "Shared Memory"));
+            result = -EIO;
+            goto ExitClean;
+        }
     }
-    DEBUG_LVL_DRVINTF_TRACE("Done\n");
 
     DEBUG_LVL_DRVINTF_TRACE("%s(): IRQ resource initialization...", __func__);
-    pResIrq = platform_get_resource(pDev_p, IORESOURCE_IRQ, 0);
-    if (pResIrq == NULL)
+
+    /* Get Interrupt resource for device */
+    instance_l.irqResource.pResource = platform_get_resource(pDev_p,
+                                                             IORESOURCE_IRQ,
+                                                             0);
+
+    if (instance_l.irqResource.pResource == NULL)
     {
         DEBUG_LVL_DRVINTF_TRACE("Failed\n");
         result = -ENODEV;
-        goto Exit;
-    }
-    DEBUG_LVL_DRVINTF_TRACE("Done\n");
-
-    /* Local instance copy to clear mem*/
-    instance_l.resMemAddr = pResMemreg1->start;
-    instance_l.resMemSize = (pResMemreg2->end - pResMemreg1->start + 1);
-
-    /* Obtain the region exclusively for Edrv*/
-    if (!request_mem_region(instance_l.resMemAddr,
-                            instance_l.resMemSize,
-                            PLK_DRV_NAME))
-    {
-        DEBUG_LVL_DRVINTF_TRACE("Req mem region failed \n");
-        result = -ENOMEM;
-        goto Exit;
-    }
-    DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X)\n",
-                            pResMemreg1->start,
-                            pResMemreg1->end);
-    DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X)\n",
-                            pResMemreg2->start,
-                            pResMemreg2->end);
-
-    /* checking if GPIO_PIN_NUM is valid */
-    if (!gpio_is_valid(GPIO_PIN_NUM))
-    {
-        DEBUG_LVL_DRVINTF_TRACE("invalid GPIO\n");
-        return 0;
+        goto ExitClean;
     }
 
-    /* Request GPIO, returning 0 or negative errno, non-null labels may be useful for diagnostics. */
-    gpio_request(GPIO_PIN_NUM, "Reset Button");
-
-    /* Set as input or output, returning 0 or negative errno */
-    gpio_direction_output(GPIO_PIN_NUM, GPIO_PIN_RESET);
-
-    /* GPIO OUTPUT - Resetting Microblaze */
-    gpio_set_value(GPIO_PIN_NUM, GPIO_PIN_RESET);
-
-    gpio_export(GPIO_PIN_NUM, false);
-
-    msleep(500);
-
-    /* Physical memory mapped to virtual memory */
-    instance_l.pIoAddrreg1 = ioremap(pResMemreg1->start,
-                                    (pResMemreg1->end - pResMemreg1->start + 1));
-
-    if (instance_l.pIoAddrreg1 == NULL)
-    {
-        DEBUG_LVL_DRVINTF_TRACE("Ioremap reg1 failed\n");
-        result = -EIO;
-        goto Exit;
-    }
-
-    instance_l.pIoAddrreg2 = ioremap(pResMemreg2->start,
-                                    (pResMemreg2->end - pResMemreg2->start + 1));
-
-    if (instance_l.pIoAddrreg2 == NULL)
-    {
-        DEBUG_LVL_DRVINTF_TRACE("Ioremap reg2 failed\n");
-        result = -EIO;
-        goto Exit;
-    }
-
-    // Request IRQ
+    /* Request IRQ */
     DEBUG_LVL_DRVINTF_TRACE("Requesting IRQ resource...");
 
-    if (request_irq(pResIrq->start, pcpIrqHandler, 0, "my_driver", pDev_p))
+    if (request_irq(instance_l.irqResource.pResource->start,
+                    pcpIrqHandler,
+                    0,
+                    PLK_DRV_NAME,
+                    pDev_p))
     {
-        DEBUG_LVL_DRVINTF_TRACE("Failed \n");
+        DEBUG_LVL_DRVINTF_TRACE("Request IRQ failed \n");
         result = -EIO;
-        goto Exit;
+        goto ExitClean;
     }
 
-    instance_l.resIrq = pResIrq->start;
-    DEBUG_LVL_DRVINTF_TRACE("Done\n");
+    instance_l.irqResource.irqNumber = instance_l.irqResource.pResource->start;
 
 Exit:
     DEBUG_LVL_DRVINTF_TRACE("%s(): finished with %d\n", __func__, result);
+    return result;
+
+ExitClean:
+    DEBUG_LVL_DRVINTF_TRACE("%s(): finished with %d\n", __func__, result);
+    removeOnePlatformDev(pDev_p);
     return result;
 }
 
@@ -475,13 +519,36 @@ This function removes one zynq device.
 //------------------------------------------------------------------------------
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
-    //TODO: Cleanup check
-    free_irq(instance_l.resIrq, pDev_p);
-    release_mem_region(instance_l.resMemAddr, instance_l.resMemSize);
-    iounmap(instance_l.pIoAddrreg1);
-    iounmap(instance_l.pIoAddrreg2);
+    UINT8 memId = 0;
 
+    /* Remove interrupt handler */
+    if (instance_l.irqResource.irqNumber != 0)
+    {
+        free_irq(instance_l.irqResource.irqNumber, pDev_p);
+        instance_l.irqResource.irqNumber = 0;
+    }
+
+    for (memId = 0; memId < kIoMemRegionLast; memId++)
+    {
+        tIoMemoryResource* pMemResource = &instance_l.aIoMemRes[memId];
+
+        if (pMemResource->pBase != NULL)
+        {
+            iounmap(pMemResource->pBase);
+            pMemResource->pBase = NULL;
+        }
+
+        if (pMemResource->pResource != NULL)
+        {
+            release_mem_region(pMemResource->pResource->start,
+                               pMemResource->size);
+            pMemResource->pResource = NULL;
+        }
+    }
+
+    /* Bring Microblaze to reset */
+    gpio_free(MB_RESET_PIN);
+    instance_l.pPlatformDev = NULL;
     return 0;
 }
-
 /// \}
