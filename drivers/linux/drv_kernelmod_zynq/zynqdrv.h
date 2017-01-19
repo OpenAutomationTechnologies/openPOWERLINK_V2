@@ -45,14 +45,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-/* Shared memory interface IO memory regions */
-#define DEVICE_IO_MEM_COUNT         2
-#define DEVICE_IO_MEM_REG1_IDX      0
-#define DEVICE_IO_MEM_REG2_IDX      1
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+*  \brief Platform device IO memory regions
+*
+*  The enumeration defines the platform device IO memory regions
+*/
+typedef enum
+{
+    kCommonMemRegion = 0,
+    kSharedMemRegion,
+    kIoMemRegionLast
+} eIoMemRegions;
+
+/**
+\brief Platform device IO memory regions data type
+
+Data type for the enumerator \ref eIoMemRegions.
+*/
+typedef UINT8 tIoMemRegions;
+
 typedef tOplkError (*tIrqCallback)(void);   ///< Function signature of ISR callback for upper layer
 
 //------------------------------------------------------------------------------
@@ -67,6 +82,7 @@ tOplkError  zynqdrv_init(void);
 tOplkError  zynqdrv_exit(void);
 
 void*       zynqdrv_getMemRegionAddr(UINT8 memId_p);
+void*       zynqdrv_getMemPhyAddr(UINT8 memId_p);
 tOplkError  zynqdrv_regSyncHandler(tIrqCallback cbSync_p);
 tOplkError  zynqdrv_enableSync(BOOL fEnable_p);
 

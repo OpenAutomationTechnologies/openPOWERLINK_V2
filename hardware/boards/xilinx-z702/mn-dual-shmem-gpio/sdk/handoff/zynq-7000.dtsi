@@ -319,6 +319,7 @@
                 reg = <0x700 0x200>;
                 syscon = <&slcr>;
             };
+    };
 
     };
 
@@ -410,14 +411,13 @@
             reg = <0xf8005000 0x1000>;
             timeout-sec = <10>;
         };
-    };
 
-     my_driver: my_driver@30000000{
-                compatible = "my_driver,DDR";
-            interrupt-parent = <&intc>;
-                // 1 = SPI interrupt; 71 = 87 - 16;
-                interrupts = <0 29 1>;
-            reg = <0x2C000000 0x4000000>,
-                          <0x30000000 0xFFFFFFF>;
-             };
+    plk_driver: plk_driver@30000000 {
+        compatible = "plk_driver,DDR";
+        interrupt-parent = <&intc>;
+        // 1 = SPI interrupt; 71 = 87 - 16;
+        interrupts = <0 29 1>;
+        reg = <0x2C000000 0x4000000>,
+              <0x30000000 0xFFFFFFF>;
+    };
 };
