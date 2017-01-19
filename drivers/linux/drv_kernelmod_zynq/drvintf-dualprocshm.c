@@ -322,7 +322,7 @@ tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p)
 
 #if defined(CONFIG_INCLUDE_VETH)
     // Initialize virtual Ethernet interface
-    if (drvIntfInstance_l.fVEthActive == FALSE)
+    if (!drvIntfInstance_l.fVEthActive)
     {
         ret = veth_init(pInitParam_p->aMacAddress);
         if (ret != kErrorOk)

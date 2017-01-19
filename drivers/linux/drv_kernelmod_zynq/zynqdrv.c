@@ -110,14 +110,15 @@ to interact with the device and interface with the stack above it.
 
 typedef struct
 {
-    struct platform_device* pPlatformDev;   ///< Pointer to platform device structure for driver
-    void*                   pIoAddrreg1;    ///< Pointer to register space of Common Memory
-    void*                   pIoAddrreg2;    ///< Pointer to register space of Shared Memory
-    resource_size_t         resMemAddr;     ///< Address of the memory allocated for device by OS
-    resource_size_t         resMemSize;     ///< Size of the memory allocated for device
-    UINT32                  resIrq;         ///< Interrupt Id
-    tIrqCallback            pfnCbSync;      ///< Sync IRQ callback function of the upper user layer.
-    BOOL                    fSyncEnabled;   ///< Flag to check if sync IRQ for user has been enabled.
+    struct platform_device* pPlatformDev;               ///< Pointer to platform device structure for driver.
+    void*                   pIoAddrReg[kIoMemRegCount]; ///< Pointer to register space of Common and Shared Memory.
+    struct resource*        pResMemReg[kIoMemRegCount]; ///< IOMEM register resource for the platform device.
+    struct resource*        pResIrq;                    ///< Interrupt resource for the platform device.
+    resource_size_t         resMemAddr;                 ///< Address of the memory allocated for device by OS.
+    resource_size_t         resMemSize;                 ///< Size of the memory allocated for device.
+    UINT32                  resIrq;                     ///< Interrupt Id.
+    tIrqCallback            pfnCbSync;                  ///< Sync irq callback function of the upper user layer.
+    BOOL                    fSyncEnabled;               ///< Flag to check if sync irq for user has been enabled.
 } tPcpDrvInstance;
 
 tPcpDrvInstance             instance_l;
@@ -137,10 +138,9 @@ static irqreturn_t  pcpIrqHandler(int irqNum_p,
 #if defined(CONFIG_OF)
 static struct of_device_id  drv_of_match[] =
 {
-    {   .compatible = "my_driver,DDR", },               // __devinitdata creates warning!
-    { /* end of table */}                               // keep devinit in separate data section,
-                                                        // linker is not able to link
-};
+    {   .compatible = "plk_driver,DDR", },               // __devinitdata creates warning!
+    { /* end of table */}                                // keep devinit in separate data section,
+};                                                       // linker is not able to link
 
 MODULE_DEVICE_TABLE(of, drv_of_match);
 #else
@@ -153,7 +153,7 @@ static struct platform_driver   pcpDriver_l =
     .remove     = removeOnePlatformDev,
     .suspend    = NULL,                                     // Not handling power management functions
     .resume     = NULL,                                     // Not handling power management functions
-    .driver     = { .name = "my-platform-device",
+    .driver     = { .name = "zynq-platform-device",
                     .owner = THIS_MODULE,
                     .of_match_table = drv_of_match,         // This function is to check the device
                   },                                        // from the device tree
@@ -219,8 +219,8 @@ tOplkError zynqdrv_exit(void)
 /**
 \brief  Get common memory base virtual address
 
-This routine fetches the common memory base address
-of ARM and Microblaze.
+This routine fetches the common memory base address of ARM and
+Microblaze, after its been remapped into Linux kernel virtual address.
 
 \return Returns the base address of common memory.
 
@@ -229,15 +229,29 @@ of ARM and Microblaze.
 //------------------------------------------------------------------------------
 void* zynqdrv_getMemRegionAddr(UINT8 memId_p)
 {
-    void*   pVirtAddr = NULL;
+    if (memId_p >= kIoMemRegCount)
+        return 0;
 
-    if (memId_p == DEVICE_IO_MEM_REG1_IDX)
-        pVirtAddr = instance_l.pIoAddrreg1;
+    return instance_l.pIoAddrReg[memId_p];
+}
 
-    if (memId_p == DEVICE_IO_MEM_REG2_IDX)
-        pVirtAddr = instance_l.pIoAddrreg2;
+//------------------------------------------------------------------------------
+/**
+\brief  Get shared memory physical address
 
-    return pVirtAddr;
+This routine fetches the physical address of shared Memory.
+
+\return Returns the physical address of Shared Memory.
+
+\ingroup module_driver_linux_kernel_zynq
+*/
+//------------------------------------------------------------------------------
+void* zynqdrv_getMemPhyAddr(UINT8 memId_p)
+{
+    if (memId_p >= kIoMemRegCount)
+        return 0;
+
+    return (void*)instance_l.pResMemReg[memId_p]->start;
 }
 
 //------------------------------------------------------------------------------
@@ -333,10 +347,7 @@ This function initializes one Zynq device.
 //------------------------------------------------------------------------------
 static int initOnePlatformDev(struct platform_device* pDev_p)
 {
-    int                 result = 0;
-    struct resource*    pResMemreg1;
-    struct resource*    pResMemreg2;
-    struct resource*    pResIrq;
+    INT                 result = 0;
 
     if (pDev_p == NULL)
     {
@@ -358,8 +369,8 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     instance_l.pPlatformDev = pDev_p;
 
     DEBUG_LVL_DRVINTF_TRACE("%s(): IOMEM resource initialization...", __func__);
-    pResMemreg1 = platform_get_resource(pDev_p, IORESOURCE_MEM, 0);
-    if (pResMemreg1 == NULL)
+    instance_l.pResMemReg[kIoMemReg1] = platform_get_resource(pDev_p, IORESOURCE_MEM, kIoMemReg1);
+    if (instance_l.pResMemReg[kIoMemReg1] == NULL)
     {
         result = -ENODEV;
         goto Exit;
@@ -367,8 +378,8 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     DEBUG_LVL_DRVINTF_TRACE("Done\n");
 
     DEBUG_LVL_DRVINTF_TRACE("%s(): IOMEM resource initialization...", __func__);
-    pResMemreg2 = platform_get_resource(pDev_p, IORESOURCE_MEM, 1);
-    if (pResMemreg2 == NULL)
+    instance_l.pResMemReg[kIoMemReg2] = platform_get_resource(pDev_p, IORESOURCE_MEM, kIoMemReg2);
+    if (instance_l.pResMemReg[kIoMemReg2] == NULL)
     {
         result = -ENODEV;
         goto Exit;
@@ -376,8 +387,8 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     DEBUG_LVL_DRVINTF_TRACE("Done\n");
 
     DEBUG_LVL_DRVINTF_TRACE("%s(): IRQ resource initialization...", __func__);
-    pResIrq = platform_get_resource(pDev_p, IORESOURCE_IRQ, 0);
-    if (pResIrq == NULL)
+    instance_l.pResIrq = platform_get_resource(pDev_p, IORESOURCE_IRQ, 0);
+    if (instance_l.pResIrq == NULL)
     {
         DEBUG_LVL_DRVINTF_TRACE("Failed\n");
         result = -ENODEV;
@@ -386,8 +397,9 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     DEBUG_LVL_DRVINTF_TRACE("Done\n");
 
     /* Local instance copy to clear mem*/
-    instance_l.resMemAddr = pResMemreg1->start;
-    instance_l.resMemSize = (pResMemreg2->end - pResMemreg1->start + 1);
+    instance_l.resMemAddr = instance_l.pResMemReg[kIoMemReg1]->start;
+    instance_l.resMemSize = instance_l.pResMemReg[kIoMemReg2]->end -
+                            instance_l.pResMemReg[kIoMemReg1]->start + 1;
 
     /* Obtain the region exclusively for Edrv*/
     if (!request_mem_region(instance_l.resMemAddr,
@@ -398,12 +410,9 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
         result = -ENOMEM;
         goto Exit;
     }
-    DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X)\n",
-                            pResMemreg1->start,
-                            pResMemreg1->end);
-    DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X)\n",
-                            pResMemreg2->start,
-                            pResMemreg2->end);
+
+    DEBUG_LVL_DRVINTF_TRACE("MEM_RESOURCE: Start 0x(%X), End 0x(%X) \n", instance_l.pResMemReg[kIoMemReg1]->start,
+                            instance_l.pResMemReg[kIoMemReg2]->end);
 
     /* checking if GPIO_PIN_NUM is valid */
     if (!gpio_is_valid(GPIO_PIN_NUM))
@@ -412,34 +421,32 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
         return 0;
     }
 
-    /* Request GPIO, returning 0 or negative errno, non-null labels may be useful for diagnostics. */
     gpio_request(GPIO_PIN_NUM, "Reset Button");
 
-    /* Set as input or output, returning 0 or negative errno */
+    gpio_export(GPIO_PIN_NUM, false);
+
     gpio_direction_output(GPIO_PIN_NUM, GPIO_PIN_RESET);
 
     /* GPIO OUTPUT - Resetting Microblaze */
     gpio_set_value(GPIO_PIN_NUM, GPIO_PIN_RESET);
 
-    gpio_export(GPIO_PIN_NUM, false);
-
     msleep(500);
 
     /* Physical memory mapped to virtual memory */
-    instance_l.pIoAddrreg1 = ioremap(pResMemreg1->start,
-                                    (pResMemreg1->end - pResMemreg1->start + 1));
+    instance_l.pIoAddrReg[kIoMemReg1] = ioremap(instance_l.pResMemReg[kIoMemReg1]->start,
+                                               (instance_l.pResMemReg[kIoMemReg1]->end - instance_l.pResMemReg[kIoMemReg1]->start + 1));
 
-    if (instance_l.pIoAddrreg1 == NULL)
+    if (instance_l.pIoAddrReg[kIoMemReg1] == NULL)
     {
         DEBUG_LVL_DRVINTF_TRACE("Ioremap reg1 failed\n");
         result = -EIO;
         goto Exit;
     }
 
-    instance_l.pIoAddrreg2 = ioremap(pResMemreg2->start,
-                                    (pResMemreg2->end - pResMemreg2->start + 1));
+    instance_l.pIoAddrReg[kIoMemReg2] = ioremap(instance_l.pResMemReg[kIoMemReg2]->start,
+                                               (instance_l.pResMemReg[kIoMemReg2]->end - instance_l.pResMemReg[kIoMemReg2]->start + 1));
 
-    if (instance_l.pIoAddrreg2 == NULL)
+    if (instance_l.pIoAddrReg[kIoMemReg2] == NULL)
     {
         DEBUG_LVL_DRVINTF_TRACE("Ioremap reg2 failed\n");
         result = -EIO;
@@ -449,14 +456,14 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     // Request IRQ
     DEBUG_LVL_DRVINTF_TRACE("Requesting IRQ resource...");
 
-    if (request_irq(pResIrq->start, pcpIrqHandler, 0, "my_driver", pDev_p))
+    if (request_irq(instance_l.pResIrq->start, pcpIrqHandler, 0, "plk_driver", pDev_p))
     {
         DEBUG_LVL_DRVINTF_TRACE("Failed \n");
         result = -EIO;
         goto Exit;
     }
 
-    instance_l.resIrq = pResIrq->start;
+    instance_l.resIrq = instance_l.pResIrq->start;
     DEBUG_LVL_DRVINTF_TRACE("Done\n");
 
 Exit:
@@ -475,12 +482,32 @@ This function removes one zynq device.
 //------------------------------------------------------------------------------
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
-    //TODO: Cleanup check
-    free_irq(instance_l.resIrq, pDev_p);
-    release_mem_region(instance_l.resMemAddr, instance_l.resMemSize);
-    iounmap(instance_l.pIoAddrreg1);
-    iounmap(instance_l.pIoAddrreg2);
+    if (instance_l.resIrq != 0)
+    {
+        free_irq(instance_l.resIrq, pDev_p);
+        instance_l.resIrq = 0;
+    }
 
+    if (instance_l.pIoAddrReg[kIoMemReg1] != NULL)
+    {
+        iounmap(instance_l.pIoAddrReg[kIoMemReg1]);
+        instance_l.pIoAddrReg[kIoMemReg1] = NULL;
+    }
+
+    if (instance_l.pIoAddrReg[kIoMemReg2] != NULL)
+    {
+        iounmap(instance_l.pIoAddrReg[kIoMemReg2]);
+        instance_l.pIoAddrReg[kIoMemReg2] = NULL;
+    }
+
+    if (instance_l.resMemAddr != 0)
+    {
+        release_mem_region(instance_l.resMemAddr, instance_l.resMemSize);
+        instance_l.resMemAddr = 0;
+    }
+
+    gpio_free(GPIO_PIN_NUM);
+    instance_l.pPlatformDev = NULL;
     return 0;
 }
 
