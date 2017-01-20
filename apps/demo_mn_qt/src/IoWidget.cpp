@@ -102,7 +102,7 @@ Add a controlled node to the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void IoWidget::addNode(int nodeId_p)
+void IoWidget::addNode(unsigned int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
         (nodeId_p <= IoWidget::MAX_NODE_ID))
@@ -122,7 +122,7 @@ Removes a controlled node from the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void IoWidget::removeNode(int nodeId_p)
+void IoWidget::removeNode(unsigned int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
         (nodeId_p <= IoWidget::MAX_NODE_ID))
@@ -141,7 +141,7 @@ application.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void IoWidget::disableNode(int nodeId_p)
+void IoWidget::disableNode(unsigned int nodeId_p)
 {
     this->leds[nodeId_p]->setValue(BinaryLedWidget::UNDEFINED_VALUE);
 }
@@ -156,7 +156,7 @@ Sets the value of a CN
 \param[in]      dataIn_p            Value to set
 */
 //------------------------------------------------------------------------------
-void IoWidget::setValue(int nodeId_p,
+void IoWidget::setValue(unsigned int nodeId_p,
                         unsigned int dataIn_p)
 {
     this->leds[nodeId_p]->setValue((int)dataIn_p);

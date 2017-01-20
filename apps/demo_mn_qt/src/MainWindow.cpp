@@ -295,7 +295,7 @@ Handle an NMT state change of another node in the network.
 \param[in]      state_p             State of CN
 */
 //------------------------------------------------------------------------------
-void MainWindow::nodeNmtStateChanged(int nodeId_p, tNmtState state_p)
+void MainWindow::nodeNmtStateChanged(unsigned int nodeId_p, tNmtState state_p)
 {
     // Show the new state in the widget
     this->ui.pCnListWidget->setState(nodeId_p, state_p);

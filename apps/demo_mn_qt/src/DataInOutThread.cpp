@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 DataInOutThread*        pDataInOutThread_g;
 
-static int              aUsedNodeIds_l[] = {1, 32, 110, 0};
+static unsigned int     aUsedNodeIds_l[] = {1, 32, 110, 0};
 
 /* process images, structures defined in xap.h from openCONFIGURATOR */
 static PI_IN*           pProcessImageIn_l;
@@ -225,7 +225,7 @@ inChanged() signals that there are changes in the input process image.
 \param[in]      input_p             Input data
 */
 //------------------------------------------------------------------------------
-void DataInOutThread::inChanged(int usedNodeId_p,
+void DataInOutThread::inChanged(unsigned int usedNodeId_p,
                                 unsigned int input_p)
 {
     emit processImageInChanged(usedNodeId_p, input_p);
@@ -241,7 +241,7 @@ The function signals that there are changes in the output process image.
 \param[in]      output_p            Output data
 */
 //------------------------------------------------------------------------------
-void DataInOutThread::outChanged(int usedNodeId_p,
+void DataInOutThread::outChanged(unsigned int usedNodeId_p,
                                  unsigned int output_p)
 {
     emit processImageOutChanged(usedNodeId_p, output_p);

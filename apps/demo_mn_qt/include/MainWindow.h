@@ -76,7 +76,7 @@ private slots:
     void execNmtCmd();
     void printLogMessage(const QString& msg_p);
     void nmtStateChanged(tNmtState nmtState_p);
-    void nodeNmtStateChanged(int nodeId_p,
+    void nodeNmtStateChanged(unsigned int nodeId_p,
                              tNmtState state_p);
 
 private:

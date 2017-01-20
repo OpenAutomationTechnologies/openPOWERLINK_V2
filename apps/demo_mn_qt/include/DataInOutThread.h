@@ -71,9 +71,9 @@ public:
 
     void run();
     void acknowledge();
-    void inChanged(int usedNodeId_p,
+    void inChanged(unsigned int usedNodeId_p,
                    unsigned int input_p);
-    void outChanged(int usedNodeId_p,
+    void outChanged(unsigned int usedNodeId_p,
                     unsigned int output_p);
     tOplkError setupProcessImage();
     tSyncCb getSyncCbFunc() const;
@@ -86,11 +86,11 @@ public slots:
     void setMnActiveFlag(bool fMnActive_p);
 
 signals:
-    void processImageInChanged(int nodeId_p,
+    void processImageInChanged(unsigned int nodeId_p,
                                unsigned int data_p);
-    void processImageOutChanged(int nodeId_p,
+    void processImageOutChanged(unsigned int nodeId_p,
                                 unsigned int data_p);
-    void disableOutputs(int nodeId_p);
+    void disableOutputs(unsigned int nodeId_p);
 
 private:
     UINT    cnt;

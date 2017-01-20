@@ -69,10 +69,10 @@ public:
     IoWidget(QWidget* pParent_p = 0);
 
 public slots:
-    void addNode(int nodeId_p);
-    void removeNode(int nodeId_p);
-    void disableNode(int nodeId_p);
-    void setValue(int nodeId_p,
+    void addNode(unsigned int nodeId_p);
+    void removeNode(unsigned int nodeId_p);
+    void disableNode(unsigned int nodeId_p);
+    void setValue(unsigned int nodeId_p,
                   unsigned int dataIn_p);
     void removeAllNodes();
 

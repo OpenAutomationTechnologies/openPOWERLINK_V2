@@ -71,9 +71,9 @@ public:
     CnListWidget(QWidget* pParent_p = 0);
 
 public slots:
-    void addNode(int nodeId_p);
-    void removeNode(int nodeId_p);
-    void setState(int nodeId_p,
+    void addNode(unsigned int nodeId_p);
+    void removeNode(unsigned int nodeId_p);
+    void setState(unsigned int nodeId_p,
                   tNmtState state_p);
     void removeAllNodes();
 

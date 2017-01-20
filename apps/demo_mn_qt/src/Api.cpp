@@ -156,9 +156,9 @@ Api::Api(MainWindow* pMainWindow_p,
                      pMainWindow_p,
                      SLOT(nmtStateChanged(tNmtState)));
     QObject::connect(pProcessThread,
-                     SIGNAL(nodeStatusChanged(int, tNmtState)),
+                     SIGNAL(nodeStatusChanged(unsigned int, tNmtState)),
                      pMainWindow_p,
-                     SLOT(nodeNmtStateChanged(int, tNmtState)));
+                     SLOT(nodeNmtStateChanged(unsigned int, tNmtState)));
 
     // Connect other events
     QObject::connect(pProcessThread,
@@ -173,17 +173,17 @@ Api::Api(MainWindow* pMainWindow_p,
 
     pDataInOutThread = new DataInOutThread;
     QObject::connect(pDataInOutThread,
-                     SIGNAL(processImageOutChanged(int, unsigned int)),
+                     SIGNAL(processImageOutChanged(unsigned int, unsigned int)),
                      pOutput,
-                     SLOT(setValue(int, unsigned int)));
+                     SLOT(setValue(unsigned int, unsigned int)));
     QObject::connect(pDataInOutThread,
-                     SIGNAL(processImageInChanged(int, unsigned int)),
+                     SIGNAL(processImageInChanged(unsigned int, unsigned int)),
                      pInput,
-                     SLOT(setValue(int, unsigned int)));
+                     SLOT(setValue(unsigned int, unsigned int)));
     QObject::connect(pDataInOutThread,
-                     SIGNAL(disableOutputs(int)),
+                     SIGNAL(disableOutputs(unsigned int)),
                      pOutput,
-                     SLOT(disableNode(int)));
+                     SLOT(disableNode(unsigned int)));
     QObject::connect(pProcessThread,
                      SIGNAL(isMnActive(bool)),
                      pDataInOutThread,

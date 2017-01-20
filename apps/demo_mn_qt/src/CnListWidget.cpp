@@ -100,7 +100,7 @@ Adds a controlled node to the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void CnListWidget::addNode(int nodeId_p)
+void CnListWidget::addNode(unsigned int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
         (nodeId_p <= CnListWidget::MAX_NODE_ID))
@@ -119,7 +119,7 @@ Removes a controlled node from the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void CnListWidget::removeNode(int nodeId_p)
+void CnListWidget::removeNode(unsigned int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
         (nodeId_p <= CnListWidget::MAX_NODE_ID))
@@ -138,7 +138,7 @@ Sets the state of the CN
 \param[in]      state_p             State of CN
 */
 //------------------------------------------------------------------------------
-void CnListWidget::setState(int nodeId_p, tNmtState state_p)
+void CnListWidget::setState(unsigned int nodeId_p, tNmtState state_p)
 {
     this->nodeStates[nodeId_p]->setNmtState(state_p);
 }
