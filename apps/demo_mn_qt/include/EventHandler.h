@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   ProcessThread.h
+\file   EventHandler.h
 
-\brief  Header file for POWERLINK process thread
+\brief  Header file for the openPOWERLINK event handler
 
-The file contains the definitions for the POWERLINK process thread.
+The file contains the definitions for the openPOWERLINK event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,18 +34,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_ProcessThread_H_
-#define _INC_demo_ProcessThread_H_
+#ifndef _INC_demo_EventHandler_H_
+#define _INC_demo_EventHandler_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-
-#include <QThread>
+#include <QObject>
 #include <QString>
 #include <QMutex>
 #include <QWaitCondition>
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -54,75 +54,62 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QWidget;
 class MainWindow;
 class EventLog;
 
 //------------------------------------------------------------------------------
 /**
-\brief  ProcessThread class
+\brief  EventHandler class
 
-The class implements the thread used to control the POWERLINK
-network (NMT).
+The class implements the event handler of the openPOWERLINK stack.
 */
 //------------------------------------------------------------------------------
-class ProcessThread : public QThread
+class EventHandler : public QObject
 {
     Q_OBJECT
 
 public:
-    ProcessThread(EventLog* pEventLog_p);
-
-    void              run();
-    void              sigNmtStateChanged(tNmtState status_p);
-    void              sigMnActive(bool fMnActive_p);
-    void              sigNodeStatus(unsigned int nodeId_p, tNmtState status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
-
-    tOplkApiCbEvent   getEventCbFunc(void);
-
-    void              waitForNmtStateOff();
-    void              reachedNmtStateOff();
-
-signals:
-    void              nmtStateChanged(tNmtState status_p);
-    void              isMnActive(bool fMnActive_p);
-    void              nodeStatusChanged(unsigned int nodeId_p, tNmtState status_p);
-    void              userDefEvent(void* pUserArg_p);
-    void              sdoFinished(tSdoComFinished sdoInfo_p);
-
-private:
     static tOplkError appCbEvent(tOplkApiEventType eventType_p,
                                  const tOplkApiEventArg* pEventArg_p,
                                  void* pUserArg_p);
+    EventHandler(EventLog* pEventLog_p);
+    void awaitNmtGsOff();
 
-    tOplkError processEvent(tOplkApiEventType eventType_p,
-                            const tOplkApiEventArg* pEventArg_p,
-                            void* pUserArg_p);
-    tOplkError processStateChangeEvent(const tEventNmtStateChange* pNmtStateChange_p,
-                                       void* pUserArg_p);
-    tOplkError processErrorWarningEvent(const tEventError* pInternalError_p,
-                                        void* pUserArg_p);
-    tOplkError processPdoChangeEvent(const tOplkApiEventPdoChange* pPdoChange_p,
-                                     void* pUserArg_p);
-    tOplkError processHistoryEvent(const tErrHistoryEntry* pHistoryEntry_p,
-                                   void* pUserArg_p);
-    tOplkError processNodeEvent(const tOplkApiEventNode* pNode_p,
-                                void* pUserArg_p);
-    tOplkError processCfmProgressEvent(const tCfmEventCnProgress* pCfmProgress_p,
-                                       void* pUserArg_p);
-    tOplkError processCfmResultEvent(const tOplkApiEventCfmResult* pCfmResult_p,
-                                     void* pUserArg_p);
-    tOplkError processSdoEvent(const tSdoComFinished* pSdo_p,
-                               void* pUserArg_p);
-    tOplkError setDefaultNodeAssignment(void);
+signals:
+    void nmtStateChanged(tNmtState status_p);
+    void nodeStatusChanged(unsigned int nodeId_p, tNmtState status_p);
+    void isMnActive(bool fMnActive_p);
 
-    QMutex            mutex;
-    QWaitCondition    nmtStateOff;
-    EventLog*         pEventLog;
+    void userDefEvent(void* pUserArg_p);
+    void sdoFinished(tSdoComFinished sdoInfo_p);
 
-    int               status;
-    tNmtState         currentNmtState;
-    bool              fMnActive;
+protected:
+    virtual tOplkError userDefinedEvent(void* pUserArg_p);
+    virtual tOplkError nmtStateChangeEvent(const tEventNmtStateChange& nmtStateChange_p);
+    virtual tOplkError criticalErrorEvent(const tEventError& internalError_p);
+    virtual tOplkError warningEvent(const tEventError& internalError_p);
+    virtual tOplkError historyEntryEvent(const tErrHistoryEntry& historyEntry_p);
+    virtual tOplkError nodeEvent(const tOplkApiEventNode& nodeEvent_p);
+    virtual tOplkError bootEvent(const tOplkApiEventBoot& bootEvent_p);
+    virtual tOplkError sdoCommandFinishedEvent(const tSdoComFinished& sdoEvent_p);
+    virtual tOplkError obdAccessEvent(const tObdCbParam& obdEvent_p);
+    virtual tOplkError cfmProgressEvent(const tCfmEventCnProgress& cfmProgress_p);
+    virtual tOplkError cfmResultEvent(const tOplkApiEventCfmResult& cfmResult_p);
+    virtual tOplkError asndReceivedEvent(const tOplkApiEventRcvAsnd& receivedAsnd_p);
+    virtual tOplkError pdoChangeEvent(const tOplkApiEventPdoChange& pdoChange_p);
+    virtual tOplkError presReceivedEvent(const tOplkApiEventReceivedPres& receivedPres_p);
+    virtual tOplkError nonPlkReceivedEvent(const tOplkApiEventReceivedNonPlk& receivedEth_p);
+    virtual tOplkError defaultGwChangedEvent(const tOplkApiEventDefaultGwChange& defaultGw_p);
+    virtual tOplkError sdoComReceived(const tOplkApiEventReceivedSdoCom& receivedSdoCom_p);
+    virtual tOplkError sdoSeqReceived(const tOplkApiEventReceivedSdoSeq& receivedSdoSeq_p);
+
+private:
+    void sigMnActive(bool fMnActive_p);
+
+    EventLog*       pEventLog;
+    bool            fMnActive;
+    QMutex          mutex;
+    QWaitCondition  nmtGsOff;
 };
 
-#endif /* _INC_demo_ProcessThread_H_ */
+#endif /* _INC_demo_EventHandler_H_ */

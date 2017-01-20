@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class QWidget;
 
 class MainWindow;
-class ProcessThread;
+class EventHandler;
 class EventLog;
 class DataInOutThread;
 
@@ -82,7 +82,7 @@ private:
     tOplkApiInitParam   initParam;
 
     EventLog*           pEventLog;
-    ProcessThread*      pProcessThread;
+    EventHandler*       pEventHandler;
     DataInOutThread*    pDataInOutThread;
 
     const char*         pCdcFilename;

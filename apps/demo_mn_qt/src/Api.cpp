@@ -47,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <MainWindow.h>
 #include <EventLog.h>
-#include <ProcessThread.h>
+#include <EventHandler.h>
 #include <DataInOutThread.h>
 #include <NmtStateWidget.h>
 #include <IoWidget.h>
@@ -150,23 +150,23 @@ Api::Api(MainWindow* pMainWindow_p,
                      SLOT(printLogMessage(const QString&)));
 
     // Connect process thread
-    pProcessThread = new ProcessThread(this->pEventLog);
-    QObject::connect(pProcessThread,
+    this->pEventHandler = new EventHandler(this->pEventLog);
+    QObject::connect(this->pEventHandler,
                      SIGNAL(nmtStateChanged(tNmtState)),
                      pMainWindow_p,
                      SLOT(nmtStateChanged(tNmtState)));
-    QObject::connect(pProcessThread,
+    QObject::connect(this->pEventHandler,
                      SIGNAL(nodeStatusChanged(unsigned int, tNmtState)),
                      pMainWindow_p,
                      SLOT(nodeNmtStateChanged(unsigned int, tNmtState)));
 
     // Connect other events
-    QObject::connect(pProcessThread,
+    QObject::connect(this->pEventHandler,
                      SIGNAL(userDefEvent(void*)),
                      this,
                      SIGNAL(userDefEvent(void*)),
                      Qt::DirectConnection);
-    QObject::connect(pProcessThread,
+    QObject::connect(this->pEventHandler,
                      SIGNAL(sdoFinished(tSdoComFinished)),
                      this,
                      SIGNAL(sdoFinished(tSdoComFinished)));
@@ -184,7 +184,7 @@ Api::Api(MainWindow* pMainWindow_p,
                      SIGNAL(disableOutputs(unsigned int)),
                      pOutput,
                      SLOT(disableNode(unsigned int)));
-    QObject::connect(pProcessThread,
+    QObject::connect(this->pEventHandler,
                      SIGNAL(isMnActive(bool)),
                      pDataInOutThread,
                      SLOT(setMnActiveFlag(bool)));
@@ -223,7 +223,8 @@ Api::Api(MainWindow* pMainWindow_p,
     initParam.fSyncOnPrcNode = FALSE;
 
     // set callback functions
-    initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
+    initParam.pEventUserArg = this->pEventHandler;
+    initParam.pfnCbEvent = EventHandler::appCbEvent;
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
     memcpy(initParam.aMacAddress, aMacAddr_l, sizeof(initParam.aMacAddress));
@@ -311,9 +312,6 @@ Api::Api(MainWindow* pMainWindow_p,
         goto Exit;
     }
 
-    // start process thread
-    pProcessThread->start();
-
 #if !defined(CONFIG_KERNELSTACK_DIRECTLINK)
     // start data in out thread
     pDataInOutThread->start();
@@ -336,14 +334,17 @@ Api::~Api()
     pDataInOutThread->stop();
     pDataInOutThread->wait(100);            // wait until thread terminates (max 100ms)
 
+    // Signal the stack to switch off
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
-    pProcessThread->waitForNmtStateOff();
+    // And wait until the stack has really shut down (reached state "NMT_GS_OFF")
+    this->pEventHandler->awaitNmtGsOff();
 
     ret = oplk_freeProcessImage();
     ret = oplk_destroy();
     oplk_exit();
 
     // Cleanup
+    delete this->pEventHandler;
     delete this->pEventLog;
 }
 
