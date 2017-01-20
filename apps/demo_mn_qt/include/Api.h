@@ -53,7 +53,7 @@ class QWidget;
 class MainWindow;
 class EventHandler;
 class EventLog;
-class DataInOutThread;
+class SyncEventHandler;
 
 //------------------------------------------------------------------------------
 /**
@@ -83,7 +83,7 @@ private:
 
     EventLog*           pEventLog;
     EventHandler*       pEventHandler;
-    DataInOutThread*    pDataInOutThread;
+    SyncEventHandler*   pSyncEventHandler;
 
     const char*         pCdcFilename;
 };

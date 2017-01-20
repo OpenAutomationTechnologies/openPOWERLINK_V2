@@ -1,14 +1,15 @@
 /**
 ********************************************************************************
-\file   DataInOutThread.h
+\file   SyncEventHandler.h
 
-\brief  Header file for Data Input/Output class
+\brief  openPOWERLINK sync event handler
 
-This file implements the header file of the Data Input/Output class.
+This file contains the declaration of the synchronous event handler of the
+openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,56 +35,51 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_DataInOutThread_H_
-#define _INC_demo_DataInOutThread_H_
+#ifndef _INC_demo_SyncEventHandler_H_
+#define _INC_demo_SyncEventHandler_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <QThread>
+#include <QMutex>
+#include <QWaitCondition>
+#include <QMap>
 
 #include <oplk/oplk.h>
+#include <xap.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define MAX_NODES       255
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
 
-
 //------------------------------------------------------------------------------
 /**
-\brief  DataInOutThread class
+\brief  SyncEventHandler class
 
 The Class implements the thread used to transfer synchronous
 data between the CNs and the MN.
 */
 //------------------------------------------------------------------------------
-class DataInOutThread : public QThread
+class SyncEventHandler : public QThread
 {
     Q_OBJECT
 
 public:
-    DataInOutThread();
+    tOplkError  setupProcessImage();
+    ulong       getMinSyncPeriod() const;
+    void        setMinSyncPeriod(ulong minSyncPeriod_p);
 
-    void run();
-    void acknowledge();
-    void inChanged(unsigned int usedNodeId_p,
-                   unsigned int input_p);
-    void outChanged(unsigned int usedNodeId_p,
-                    unsigned int output_p);
-    tOplkError setupProcessImage();
-    tSyncCb getSyncCbFunc() const;
-    tOplkError processSync(void);
-    void stop();
-
-    static tOplkError appCbSync(void);
+    // static members
+    static tOplkError           appCbSync();
+    static SyncEventHandler&    getInstance();
 
 public slots:
-    void setMnActiveFlag(bool fMnActive_p);
+    void setOperational(bool fOperational_p);
 
 signals:
     void processImageInChanged(unsigned int nodeId_p,
@@ -92,16 +88,33 @@ signals:
                                 unsigned int data_p);
     void disableOutputs(unsigned int nodeId_p);
 
+protected:
+    virtual ~SyncEventHandler();
+    virtual void run() Q_DECL_OVERRIDE;
+
 private:
-    UINT    cnt;
-    UINT    aLeds[MAX_NODES];
-    UINT    aLedsOld[MAX_NODES];
-    UINT    aInput[MAX_NODES];
-    UINT    aInputOld[MAX_NODES];
-    UINT    aPeriod[MAX_NODES];
-    int     aToggle[MAX_NODES];
-    bool    fStop;
-    bool    fMnActive;
+    SyncEventHandler();
+    Q_DISABLE_COPY(SyncEventHandler)
+
+    void processSyncEvent();
+
+    bool                fOperational;
+    QMutex              mutex;              ///< Mutex for locking the thread until the wait condition is met
+    QWaitCondition      stackSync;          ///< Wait condition for a stack synchronization event
+    ulong               minSyncPeriod;
+
+    // process images, structures defined in xap.h from openCONFIGURATOR
+    PI_IN*              pProcessImageIn;
+    const PI_OUT*       pProcessImageOut;
+
+    // App specific
+    uint                cnt;
+    QMap<uint, uint>    leds;
+    QMap<uint, uint>    input;
+    QMap<uint, bool>    toggle;
+
+    static const uint   aUsedNodeIds[];
+    static const uint   APP_LED_COUNT;
 };
 
-#endif //_INC_demo_DataInOutThread_H_
+#endif //_INC_demo_SyncEventHandler_H_

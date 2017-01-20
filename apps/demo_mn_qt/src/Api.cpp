@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <MainWindow.h>
 #include <EventLog.h>
 #include <EventHandler.h>
-#include <DataInOutThread.h>
+#include <SyncEventHandler.h>
 #include <NmtStateWidget.h>
 #include <IoWidget.h>
 #include <CnListWidget.h>
@@ -171,23 +171,24 @@ Api::Api(MainWindow* pMainWindow_p,
                      this,
                      SIGNAL(sdoFinished(tSdoComFinished)));
 
-    pDataInOutThread = new DataInOutThread;
-    QObject::connect(pDataInOutThread,
+    // Connect sync event handler
+    this->pSyncEventHandler = &SyncEventHandler::getInstance();
+    QObject::connect(this->pSyncEventHandler,
                      SIGNAL(processImageOutChanged(unsigned int, unsigned int)),
                      pOutput,
                      SLOT(setValue(unsigned int, unsigned int)));
-    QObject::connect(pDataInOutThread,
+    QObject::connect(this->pSyncEventHandler,
                      SIGNAL(processImageInChanged(unsigned int, unsigned int)),
                      pInput,
                      SLOT(setValue(unsigned int, unsigned int)));
-    QObject::connect(pDataInOutThread,
+    QObject::connect(this->pSyncEventHandler,
                      SIGNAL(disableOutputs(unsigned int)),
                      pOutput,
                      SLOT(disableNode(unsigned int)));
     QObject::connect(this->pEventHandler,
                      SIGNAL(isMnActive(bool)),
-                     pDataInOutThread,
-                     SLOT(setMnActiveFlag(bool)));
+                     this->pSyncEventHandler,
+                     SLOT(setOperational(bool)));
 
     memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
@@ -234,7 +235,7 @@ Api::Api(MainWindow* pMainWindow_p,
     initParam.hwParam.pDevName = devName_l;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
-    initParam.pfnCbSync = pDataInOutThread->getSyncCbFunc();
+    initParam.pfnCbSync = SyncEventHandler::appCbSync;
 #else
     initParam.pfnCbSync = NULL;
 #endif
@@ -289,7 +290,7 @@ Api::Api(MainWindow* pMainWindow_p,
         goto Exit;
     }
 
-    ret = pDataInOutThread->setupProcessImage();
+    ret = this->pSyncEventHandler->setupProcessImage();
     if (ret != kErrorOk)
     {
         QMessageBox::critical(0,
@@ -312,10 +313,9 @@ Api::Api(MainWindow* pMainWindow_p,
         goto Exit;
     }
 
-#if !defined(CONFIG_KERNELSTACK_DIRECTLINK)
-    // start data in out thread
-    pDataInOutThread->start();
-#endif
+    // Start synchronous data handler
+    this->pSyncEventHandler->setMinSyncPeriod(1000);
+    this->pSyncEventHandler->start();
 
 Exit:
     return;
@@ -331,8 +331,12 @@ Api::~Api()
 {
     tOplkError  ret;
 
-    pDataInOutThread->stop();
-    pDataInOutThread->wait(100);            // wait until thread terminates (max 100ms)
+    // Stop the sync event handler
+    if (this->pSyncEventHandler->isRunning())
+    {
+        this->pSyncEventHandler->requestInterruption();
+        this->pSyncEventHandler->wait(100);          // wait until thread terminates (max 100ms)
+    }
 
     // Signal the stack to switch off
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);

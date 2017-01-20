@@ -68,7 +68,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/SdoTransferDialog.cpp
     ${DEMO_SOURCE_DIR}/Api.cpp
     ${DEMO_SOURCE_DIR}/CnListWidget.cpp
-    ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
+    ${DEMO_SOURCE_DIR}/SyncEventHandler.cpp
     ${DEMO_SOURCE_DIR}/IoWidget.cpp
     ${DEMO_SOURCE_DIR}/EventHandler.cpp
     ${DEMO_SOURCE_DIR}/MultiColorLed.cpp
@@ -89,7 +89,7 @@ SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
 SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/Api.h
     ${DEMO_INCLUDE_DIR}/CnListWidget.h
-    ${DEMO_INCLUDE_DIR}/DataInOutThread.h
+    ${DEMO_INCLUDE_DIR}/SyncEventHandler.h
     ${DEMO_INCLUDE_DIR}/IoWidget.h
     ${DEMO_INCLUDE_DIR}/EventHandler.h
     ${DEMO_INCLUDE_DIR}/MultiColorLed.h
