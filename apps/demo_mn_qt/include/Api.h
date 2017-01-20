@@ -48,8 +48,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class declarations
 //------------------------------------------------------------------------------
-class QWidget;
-
 class MainWindow;
 class EventHandler;
 class EventLog;
@@ -67,12 +65,16 @@ class Api : public QObject
     Q_OBJECT
 
 public:
-    Api(MainWindow* pMainWindow_p,
-        UINT nodeId_p,
-        const QString& rDevName_p);
+    Api(MainWindow* pMainWindow_p);
     ~Api();
 
-    static UINT defaultNodeId();
+    void start(unsigned int nodeId_p,
+               const QString& devName_p);
+    void stop();
+
+    // static members
+    static UINT32 getVersion();
+    static void   execNmtCommand(tNmtEvent nmtEvent_p);
 
 signals:
     void userDefEvent(void* pUserArg_p);
@@ -86,6 +88,14 @@ private:
     SyncEventHandler*   pSyncEventHandler;
 
     const char*         pCdcFilename;
+    char                devName[256];
+
+    // static members
+    static const UINT32 IP_ADDR;
+    static const UINT32 SUBNET_MASK;
+    static const UINT32 DEFAULT_GATEWAY;
+    static const UINT32 CYCLE_LEN;
+    static const UINT8  aMacAddr[];
 };
 
 #endif /*_INC_demo_Api_H_*/

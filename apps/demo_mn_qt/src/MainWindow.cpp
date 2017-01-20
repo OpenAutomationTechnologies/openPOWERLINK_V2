@@ -65,14 +65,13 @@ Constructor of main window class.
 MainWindow::MainWindow(QWidget* pParent_p) :
     QMainWindow(pParent_p),
     fStackIsRunning(false),
-    pApi(NULL),
     pSdoDialog(NULL)
 {
     // Setup UI elements
     this->ui.setupUi(this);
 
     // Set dynamic GUI information
-    UINT32 oplkVersion = oplk_getVersion();
+    UINT32 oplkVersion = Api::getVersion();
     QString versionString = QString("Version " +
                             QString::number(PLK_STACK_VER(oplkVersion)) + "." +
                             QString::number(PLK_STACK_REF(oplkVersion)) + "." +
@@ -80,6 +79,21 @@ MainWindow::MainWindow(QWidget* pParent_p) :
     this->ui.pVersionLabel->setText(versionString);
 
     this->ui.pNmtStateWidget->showNmtStateText();
+
+    // Init stack
+    this->pApi = new Api(this);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Destructor
+
+Destructs the main window class.
+*/
+//------------------------------------------------------------------------------
+MainWindow::~MainWindow()
+{
+    delete this->pApi;
 }
 
 //------------------------------------------------------------------------------
@@ -154,7 +168,7 @@ void MainWindow::startPowerlink()
     this->ui.pStartStopOplk->setText(tr("Stop POWERLINK"));
 
     // Start the stack
-    this->pApi = new Api(this, (unsigned int)this->ui.pNodeIdInput->value(), this->devName);
+    this->pApi->start((unsigned int)this->ui.pNodeIdInput->value(), this->devName);
 
     // Connect some signals/slots for the SDO dialog
     if (this->pSdoDialog)
@@ -185,7 +199,7 @@ void MainWindow::stopPowerlink()
     this->fStackIsRunning = false;
 
     // Stop the stack
-    delete this->pApi;
+    this->pApi->stop();
 
     // Update GUI elements to stopped stack
     this->ui.pStartStopOplk->setText(tr("Start POWERLINK"));
@@ -209,7 +223,7 @@ void MainWindow::execNmtCmd()
         tNmtEvent   nmtCommand = nmtCommandDialog.getNmtEvent();
 
         if (nmtCommand != kNmtEventNoEvent)
-            oplk_execNmtCommand(nmtCommand);
+            Api::execNmtCommand(nmtCommand);
     }
 }
 

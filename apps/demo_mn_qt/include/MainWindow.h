@@ -65,6 +65,7 @@ class MainWindow : public QMainWindow
 
 public:
     MainWindow(QWidget* pParent_p = 0);
+    ~MainWindow();
 
     IoWidget*       getOutputWidget() const {return this->ui.pCnOutputWidget;}
     IoWidget*       getInputWidget() const {return this->ui.pCnInputWidget;}
