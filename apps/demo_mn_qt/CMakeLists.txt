@@ -73,6 +73,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/Output.cpp
     ${DEMO_SOURCE_DIR}/ProcessThread.cpp
     ${DEMO_SOURCE_DIR}/State.cpp
+    ${DEMO_SOURCE_DIR}/MultiColorLed.cpp
     ${DEMO_SOURCE_DIR}/Leds.cpp
     ${DEMO_SOURCE_DIR}/NodeState.cpp
     ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
@@ -89,6 +90,7 @@ SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/Output.h
     ${DEMO_INCLUDE_DIR}/ProcessThread.h
     ${DEMO_INCLUDE_DIR}/State.h
+    ${DEMO_INCLUDE_DIR}/MultiColorLed.h
     ${DEMO_INCLUDE_DIR}/Leds.h
     ${DEMO_INCLUDE_DIR}/MainWindow.h
     ${DEMO_INCLUDE_DIR}/SdoDialog.h
