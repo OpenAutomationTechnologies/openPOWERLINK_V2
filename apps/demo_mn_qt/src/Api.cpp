@@ -6,8 +6,9 @@
 
 This file implements the openPOWERLINK API class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -47,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <MainWindow.h>
 #include <ProcessThread.h>
 #include <DataInOutThread.h>
-#include <State.h>
+#include <NmtStateWidget.h>
 #include <Output.h>
 #include <Input.h>
 #include <CnState.h>
@@ -134,26 +135,22 @@ Api::Api(MainWindow* pMainWindow_p,
          const QString& rDevName_p)
     : pCdcFilename("mnobd.cdc")
 {
-    tOplkError  ret;
-    State*      pState;
-    Output*     pOutput;
-    Input*      pInput;
-    CnState*    pCnState;
+    tOplkError      ret;
+    NmtStateWidget* pState;
+    Output*         pOutput;
+    Input*          pInput;
+    CnState*        pCnState;
 
-    pState = pMainWindow_p->getStateWidget();
+    pState = pMainWindow_p->getNmtStateWidget();
     pOutput = pMainWindow_p->getOutputWidget();
     pInput = pMainWindow_p->getInputWidget();
     pCnState = pMainWindow_p->getCnStateWidget();
 
     pProcessThread = new ProcessThread(pMainWindow_p);
     QObject::connect(pProcessThread,
-                     SIGNAL(oplkStatusChanged(int)),
+                     SIGNAL(nmtStateChanged(tNmtState)),
                      pState,
-                     SLOT(setStatusLed(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(nmtStateChanged(const QString&)),
-                     pState,
-                     SLOT(setNmtStateText(const QString&)));
+                     SLOT(setNmtState(tNmtState)));
 
     QObject::connect(pProcessThread,
                      SIGNAL(nodeAppeared(int)),

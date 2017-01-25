@@ -6,8 +6,9 @@
 
 The file contains the definitions for the POWERLINK process thread.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -74,13 +75,12 @@ public:
     ~ProcessThread();
 
     void              run();
-    void              sigOplkStatus(int status_p);
-    void              sigNmtState(tNmtState state_p);
+    void              sigNmtStateChanged(tNmtState status_p);
     void              sigMnActive(bool fMnActive_p);
     void              sigPrintLog(const QString& rLog_p);
     void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
     void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
-    void              sigNodeStatus(int nodeId_p, int status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
+    void              sigNodeStatus(int nodeId_p, tNmtState status_p) { emit nodeStatusChanged(nodeId_p, (int)status_p); };
 
     tOplkApiCbEvent   getEventCbFunc(void);
 
@@ -88,8 +88,7 @@ public:
     void              reachedNmtStateOff();
 
 signals:
-    void              oplkStatusChanged(int status_p);
-    void              nmtStateChanged(const QString& strState_p);
+    void              nmtStateChanged(tNmtState status_p);
     void              isMnActive(bool fMnActive_p);
     void              nodeAppeared(int nodeId_p);
     void              nodeDisappeared(int nodeId_p);

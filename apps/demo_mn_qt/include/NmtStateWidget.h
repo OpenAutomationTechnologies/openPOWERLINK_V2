@@ -1,13 +1,15 @@
 /**
 ********************************************************************************
-\file   State.h
+\file   NmtStateWidget.h
 
-\brief  Header file for POWERLINK MN state widget
+\brief  Header file for the NMT state widget
 
-This file contains the definitions for the POWERLINK MN state widget.
+The file contains the definitions for the NMT state widget.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,61 +35,55 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_State_H_
-#define _INC_demo_State_H_
+#ifndef _INC_demo_NmtStateWidget_H_
+#define _INC_demo_NmtStateWidget_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
-
 #include <QWidget>
 #include <QString>
-#include <QPalette>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LED_NUM         8
-#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
 class QHBoxLayout;
 class QLabel;
-class QToolButton;
-class Leds;
-class QPixmap;
-
+class MultiColorLed;
 //------------------------------------------------------------------------------
 /**
-\brief  State widget class
+\brief  NmtStateWidget class
 
-The class implements the POWERLINK MN state widget.
+The Class implements the node state widget.
 */
 //------------------------------------------------------------------------------
-class State : public QWidget
+class NmtStateWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    State(QWidget* parent = 0);
+    NmtStateWidget(QWidget* pParent_p = 0);
+
+    void setWidgetLabel(const QString& text_p);
+    void showNmtStateText();
+    void hideNmtStateText();
 
 public slots:
-    void setStatusLed(int status_p);
-    void setNmtStateText(const QString& strState_p);
+    void setNmtState(tNmtState nmtState_p);
 
 private:
-    QLabel*     pStatusLed;
-    QLabel*     pNmtStateLabel;
-    Leds*       pLeds;
+    void setupUi();
 
-    QLabel*     pNmtSectionLabel;
-
-    QPixmap*    pRedLed;
-    QPixmap*    pYellowLed;
-    QPixmap*    pGreenLed;
+    // General layout
+    QHBoxLayout*    pWidgetLayout;
+    QLabel*         pWidgetLabel;
+    MultiColorLed*  pCurrentNmtStateLed;
+    QLabel*         pCurrentNmtStateText;
 };
 
-#endif /* _INC_demo_State_H_ */
+#endif /* _INC_demo_NmtStateWidget_H_ */

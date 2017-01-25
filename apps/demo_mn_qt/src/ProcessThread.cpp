@@ -6,8 +6,9 @@
 
 This file contains the implementation of the ProcessThread class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -48,6 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/debugstr.h>
 
 Q_DECLARE_METATYPE(tSdoComFinished)
+Q_DECLARE_METATYPE(tNmtState)
 
 //------------------------------------------------------------------------------
 // global variables
@@ -94,6 +96,7 @@ Constructs a ProcessThread object
 ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
 {
     qRegisterMetaType<tSdoComFinished>();
+    qRegisterMetaType<tNmtState>("tNmtState");
 
     pProcessThread_g = this;
 
@@ -146,11 +149,11 @@ The function signals the POWERLINK status
 \param[in]      status_p            POWERLINK status
 */
 //------------------------------------------------------------------------------
-void ProcessThread::sigOplkStatus(int status_p)
+void ProcessThread::sigNmtStateChanged(tNmtState status_p)
 {
     if (status_p != this->status)
     {
-        emit oplkStatusChanged(status_p);
+        emit nmtStateChanged(status_p);
         this->status = status_p;
     }
 }
@@ -173,103 +176,6 @@ void ProcessThread::sigPrintLog(const QString& rLog_p)
     str.append(rLog_p);
 
     emit printLog(str);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Signal POWERLINK NMT state
-
-sigNmtState() signals the POWERLINK NMT state
-
-\param[in]      state_p             POWERLINK NMT state
-*/
-//------------------------------------------------------------------------------
-void ProcessThread::sigNmtState(tNmtState state_p)
-{
-    QString strState;
-
-    switch (state_p)
-    {
-        case kNmtGsOff:
-            strState = "Off";
-            break;
-
-        case kNmtGsInitialising:
-            strState = "Initializing";
-            break;
-
-        case kNmtGsResetApplication:
-            strState = "Reset Application";
-            break;
-
-        case kNmtGsResetCommunication:
-            strState = "Reset Communication";
-            break;
-
-        case kNmtGsResetConfiguration:
-            strState = "Reset Configuration";
-            break;
-
-        case kNmtCsNotActive:
-            strState = "CN Not Active";
-            break;
-
-        case kNmtCsPreOperational1:
-            strState = "CN Pre-Operational 1";
-            break;
-
-        case kNmtCsPreOperational2:
-            strState = "CN Pre-Operational 2";
-            break;
-
-        case kNmtCsReadyToOperate:
-            strState = "CN ReadyToOperate";
-            break;
-
-        case kNmtCsOperational:
-            strState = "CN Operational";
-            break;
-
-        case kNmtCsBasicEthernet:
-            strState = "CN Basic Ethernet";
-            break;
-
-        case kNmtMsNotActive:
-            strState = "MN Not Active";
-            break;
-
-        case kNmtMsPreOperational1:
-            strState = "MN Pre-Operational 1";
-            break;
-
-        case kNmtMsPreOperational2:
-            strState = "MN Pre-Operational 2";
-            break;
-
-        case kNmtMsReadyToOperate:
-            strState = "MN ReadyToOperate";
-            break;
-
-        case kNmtMsOperational:
-            strState = "MN Operational";
-            break;
-
-        case kNmtMsBasicEthernet:
-            strState = "MN Basic Ethernet";
-            break;
-
-        case kNmtRmsNotActive:
-            strState = "RMN Not Active";
-            break;
-
-        default:
-            strState = "??? (0x";
-            strState += QString::number(state_p, 16);
-            strState += ")";
-            break;
-    }
-
-    emit nmtStateChanged(strState);
 }
 
 //------------------------------------------------------------------------------
@@ -425,15 +331,13 @@ tOplkError ProcessThread::processStateChangeEvent(const tEventNmtStateChange* pN
     UNUSED_PARAMETER(pUserArg_p);
 
     this->currentNmtState = pNmtStateChange_p->newNmtState;
-    this->sigNmtState(pNmtStateChange_p->newNmtState);
+    this->sigNmtStateChanged(pNmtStateChange_p->newNmtState);
 
     this->pEventLog->printEvent(pNmtStateChange_p);
 
     switch (pNmtStateChange_p->newNmtState)
     {
         case kNmtGsOff:
-            pProcessThread_g->sigOplkStatus(0);
-
             // NMT state machine was shut down,
             // because of user signal (CTRL-C) or critical POWERLINK stack error
             // -> also shut down oplk_process()
@@ -446,12 +350,10 @@ tOplkError ProcessThread::processStateChangeEvent(const tEventNmtStateChange* pN
             break;
 
         case kNmtGsResetCommunication:
-            pProcessThread_g->sigOplkStatus(1);
             this->sigMnActive(false);
             break;
 
         case kNmtGsResetConfiguration:
-            this->sigOplkStatus(1);
             this->sigMnActive(false);
             break;
 
@@ -467,24 +369,20 @@ tOplkError ProcessThread::processStateChangeEvent(const tEventNmtStateChange* pN
         case kNmtCsReadyToOperate:
         case kNmtCsBasicEthernet:
         case kNmtMsBasicEthernet:
-            this->sigOplkStatus(1);
             this->sigMnActive(false);
             break;
 
         case kNmtCsOperational:
-            this->sigOplkStatus(2);
             this->sigMnActive(false);
             break;
 
         case kNmtMsReadyToOperate:
         case kNmtMsOperational:
-            this->sigOplkStatus(2);
             this->sigMnActive(true);
             break;
 
 
         default:
-            this->sigOplkStatus(-1);
             this->sigMnActive(false);
             break;
     }
@@ -634,18 +532,18 @@ tOplkError ProcessThread::processNodeEvent(const tOplkApiEventNode* pNode_p,
                 case kNmtCsPreOperational2:
                 case kNmtCsReadyToOperate:
                     pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, 1);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
                     break;
 
                 case kNmtCsOperational:
                     pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, 2);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
                     break;
 
                 case kNmtCsBasicEthernet:
                 case kNmtCsStopped:
                 default:
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, -1);
+                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
                     break;
             }
             break;

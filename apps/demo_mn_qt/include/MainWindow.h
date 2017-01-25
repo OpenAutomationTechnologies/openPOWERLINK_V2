@@ -6,6 +6,7 @@
 
 This file contains the definitions of the main window class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
@@ -56,7 +57,7 @@ class QPushButton;
 class QFrame;
 class QTextEdit;
 
-class State;
+class NmtStateWidget;
 class Output;
 class Input;
 class CnState;
@@ -77,10 +78,10 @@ class MainWindow : public QWidget
 public:
     MainWindow(QWidget* pParent_p = 0);
 
-    State*       getStateWidget() const {return this->pStateWidget;}
-    Output*      getOutputWidget() const {return this->pOutputWidget;}
-    Input*       getInputWidget() const {return this->pInputWidget;}
-    CnState*     getCnStateWidget() const {return this->pCnStateWidget;}
+    NmtStateWidget* getNmtStateWidget() const {return this->pNmtStateWidget;}
+    Output*         getOutputWidget() const {return this->pOutputWidget;}
+    Input*          getInputWidget() const {return this->pInputWidget;}
+    CnState*        getCnStateWidget() const {return this->pCnStateWidget;}
 
 private slots:
     void         toggleWindowState();
@@ -114,7 +115,8 @@ private:
 
     // Status region
     QHBoxLayout*    pStatusRegion;
-    State*          pStateWidget;
+    QLabel*         pNmtStateLabel;
+    NmtStateWidget* pNmtStateWidget;
 
     // Separator line
     QFrame*         pFrameSepStatusFoot;

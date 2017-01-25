@@ -6,8 +6,9 @@
 
 This file contains the definitions of the CnState class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -50,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Class declarations
 //------------------------------------------------------------------------------
 class QVBoxLayout;
-class NodeState;
+class NmtStateWidget;
 
 //------------------------------------------------------------------------------
 /**
@@ -74,8 +75,8 @@ public slots:
     void removeAllNodes(void);
 
 private:
-    QVBoxLayout*    pStateLayout;
-    NodeState**     ppNodeState;
+    QVBoxLayout*        pStateLayout;
+    NmtStateWidget**    ppNodeState;
 };
 
 #endif // _INC_demo_CnState_h_

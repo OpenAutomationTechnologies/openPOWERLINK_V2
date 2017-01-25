@@ -6,8 +6,9 @@
 
 This file implements the CnState class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -38,8 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <CnState.h>
-#include <NodeState.h>
-
+#include <NmtStateWidget.h>
 #include <QVBoxLayout>
 #include <QLabel>
 
@@ -70,10 +70,11 @@ CnState::CnState(QWidget* parent)
     pStateLabel->setFont(LabelFont);
     this->pStateLayout->addWidget(pStateLabel);
 
-    this->ppNodeState = new NodeState*[NODE_ID_MAX];
+    this->ppNodeState = new NmtStateWidget*[NODE_ID_MAX];
     for (int i = 0; i < NODE_ID_MAX; i++)
     {
-        this->ppNodeState[i] = new NodeState(QString("CN%1").arg(i));
+        this->ppNodeState[i] = new NmtStateWidget();
+        this->ppNodeState[i]->setWidgetLabel(QString("CN%1").arg(i));
         this->ppNodeState[i]->hide();
         this->pStateLayout->addWidget(this->ppNodeState[i]);
     }
@@ -94,7 +95,7 @@ Sets the state of the CN
 void CnState::setState(int nodeId_p,
                        int state_p)
 {
-    this->ppNodeState[nodeId_p]->setState(state_p);
+    this->ppNodeState[nodeId_p]->setNmtState(state_p);
 }
 
 //------------------------------------------------------------------------------

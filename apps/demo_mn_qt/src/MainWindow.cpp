@@ -6,6 +6,7 @@
 
 This file contains the implementation of the main window class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
@@ -50,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMessageBox>
 
 
-#include <State.h>
+#include <NmtStateWidget.h>
 #include <Output.h>
 #include <Input.h>
 #include <CnState.h>
@@ -97,6 +98,8 @@ MainWindow::MainWindow(QWidget* pParent_p) :
     this->pVersionLabel->setText(versionString);
 
     this->pNodeIdEdit->setText(QString::number(Api::defaultNodeId()));
+
+    this->pNmtStateWidget->showNmtStateText();
 }
 
 //------------------------------------------------------------------------------
@@ -187,9 +190,14 @@ void MainWindow::setupUi()
     this->pStatusRegion = new QHBoxLayout();
     this->pStatusRegion->setObjectName("StatusRegion");
 
+    // NMT state label
+    this->pNmtStateLabel = new QLabel("NMT State:");
+    this->pNmtStateLabel->setFont(QFont("Arial", 18, QFont::Bold));
+    this->pStatusRegion->addWidget(this->pNmtStateLabel);
+
     // Current node network state
-    this->pStateWidget = new State();
-    this->pStatusRegion->addWidget(this->pStateWidget);
+    this->pNmtStateWidget = new NmtStateWidget();
+    this->pStatusRegion->addWidget(this->pNmtStateWidget);
 
     // Add region to layout
     this->pWindowLayout->addLayout(this->pStatusRegion, 0);
