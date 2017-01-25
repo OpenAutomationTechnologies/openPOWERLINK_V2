@@ -9,22 +9,21 @@ The following page describes the directory structure of the openPOWERLINK stack 
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
-apps                          | Demo applications for evaluating the openPOWERLINK stack
+apps                          | \ref sect_directories_examples for evaluating the openPOWERLINK stack
 bin                           | Installation directory for binaries (drivers and applications)
 cmake                         | Common files for the CMake build tool
-contrib                       | Additional libraries used by the openPOWERLINK stack
+contrib                       | \ref sect_directories_libraries used by the openPOWERLINK stack
 doc                           | Documentation of the openPOWERLINK stack
 drivers                       | openPOWERLINK drivers (kernel layer of a split-stack design)
 hardware                      | Hardware specific sources like IP cores, VHDL code and board specific software
-stack                         | openPOWERLINK stack sources
+stack                         | \ref sect_directories_stack
 tools                         | Miscellaneous tools and utilities
 unittests                     | CUnit Unit test framework
 
 
-## Apps {#sect_directories_examples}
-A set of demo applications is included in the openPOWERLINK distribution. The
-demos contain examples of how to implement an MN or CN using the openPOWERLINK
-stack.
+## Demo applications {#sect_directories_examples}
+In the __apps__ folder, a set of demo applications is included in the openPOWERLINK distribution.
+The demos contain examples of how to implement an MN or CN using the openPOWERLINK stack.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
@@ -34,10 +33,20 @@ demo_mn_console               | Console application which implements an MN
 demo_mn_embedded              | Application which implements an MN on an embedded board
 demo_mn_qt                    | QT based application which implements an MN
 common                        | Contains common configuration and source code used by all demos
-common/objdicts               | CANopen object dictionaries used by the demos
+common/objdicts               | \ref sect_directories_objdict used by the demos
 
 
-## Additional Libraries {#sect_directories_libraries}
+## Object dictionaries {#sect_directories_objdict}
+
+The __apps/common/objdicts__ directory contains the CANopen object dictionaries used by the demos.
+
+Directory                     | Description
+----------------------------- | -----------------------------------------------
+CiA302-4_MN                   | Object dictionary according to the CiA profile 302-4 for MN implementations
+CiA401_CN                     | Object dictionary according to the CiA 401 profile for I/O CN implementations
+
+
+## Additional libraries {#sect_directories_libraries}
 The __contrib__ directory contains additional libraries used by the openPOWERLINK stack.
 
 Directory                     | Description
@@ -51,19 +60,10 @@ trace                         | Functions for handling trace output
 dualprocshm                   | Shared memory library for dual processor systems
 ndislib                       | NDIS library for Windows kernel space drivers
 
-## Object dictionaries {#sect_directories_objdict}
 
-The directory contains the CANopen object dictionaries used by the demos.
+## openPOWERLINK stack sources {#sect_directories_stack}
 
-Directory                     | Description
------------------------------ | -----------------------------------------------
-CiA302-4_MN                   | Object dictionary according to the CiA profile 302-4 for MN implementations
-CiA401_CN                     | Object dictionary according to the CiA 401 profile for I/O CN implementations
-
-
-## Stack sources {#sect_directories_stack}
-
-This directory contains the whole openPOWERLINK stack sources.
+The __stack__ directory contains the whole openPOWERLINK stack sources.
 
 Directory                     | Description
 ----------------------------- | -----------------------------------------------
