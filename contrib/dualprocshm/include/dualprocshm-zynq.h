@@ -46,11 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-/* Memory size */
-#define MAX_COMMON_MEM_SIZE         2048                            ///< Max common memory size
-#define MAX_DYNAMIC_BUFF_COUNT      20                              ///< Number of maximum dynamic buffers
-#define MAX_DYNAMIC_BUFF_SIZE       (MAX_DYNAMIC_BUFF_COUNT * 4)    ///< Max dynamic buffer size
-
 #if defined(__arm__)
 
     #include <dualprocshm-linuxkernel.h>
@@ -58,6 +53,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     #define COMMON_MEM_BASE         0x2C000000
     #define SHARED_MEM_BASE         0x30000000
     #define SHARED_MEM_SPAN         0xFFFFFFE
+
+    /* Memory size */
+    #define MAX_COMMON_MEM_SIZE     2048                            ///< Max common memory size
+    #define MAX_DYNAMIC_BUFF_COUNT  20                              ///< Number of maximum dynamic buffers
+    #define MAX_DYNAMIC_BUFF_SIZE   (MAX_DYNAMIC_BUFF_COUNT * 4)    ///< Max dynamic buffer size
 
     #define MEM_ADDR_TABLE_BASE     COMMON_MEM_BASE
     #define MEM_INTR_BASE           MEM_ADDR_TABLE_BASE
