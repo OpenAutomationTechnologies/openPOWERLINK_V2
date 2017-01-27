@@ -1,13 +1,14 @@
 /**
 ********************************************************************************
-\file   Input.h
+\file   IoWidget.h
 
-\brief  Header file for Input Widget
+\brief  Header file for the I/O widget
 
-This file contains the definitions for the Input Widget
+This file contains the definitions for the I/O widget.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -34,19 +35,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_Input_H_
-#define _INC_demo_Input_H_
+#ifndef _INC_demo_IoWidget_H_
+#define _INC_demo_IoWidget_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <QWidget>
+#include <QVector>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LED_NUM         8
-#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // class definitions
@@ -56,27 +56,35 @@ class Leds;
 
 //------------------------------------------------------------------------------
 /**
-\brief  Input class
+\brief  IoWidget class
 
-The Class implements the input data widget.
+The class implements the I/O widget.
 */
 //------------------------------------------------------------------------------
-class Input : public QWidget
+class IoWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Input(QWidget* parent = 0);
+    IoWidget(QWidget* pParent_p = 0);
 
 public slots:
-    void setLeds(int dataIn_p, int nodeId_p);
     void addNode(int nodeId_p);
     void removeNode(int nodeId_p);
+    void disableNode(int nodeId_p);
+    void setValue(int nodeId_p,
+                  unsigned int dataIn_p);
     void removeAllNodes();
 
 private:
-    QVBoxLayout* pInputLayout;
-    Leds**       ppLeds;
+    void setupUi();
+
+    // General layout
+    QVBoxLayout*        pWidgetLayout;
+    QVector<Leds*>      leds;
+
+    static const int    LED_COUNT;
+    static const int    MAX_NODE_ID;
 };
 
-#endif // _INC_demo_Input_H_
+#endif /* _INC_demo_IoWidget_H_ */

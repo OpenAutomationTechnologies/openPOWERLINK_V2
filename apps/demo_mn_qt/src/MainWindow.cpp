@@ -52,8 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #include <NmtStateWidget.h>
-#include <Output.h>
-#include <Input.h>
+#include <IoWidget.h>
 #include <CnListWidget.h>
 #include <Api.h>
 #include <SdoDialog.h>
@@ -167,18 +166,32 @@ void MainWindow::setupUi()
     this->pFrameSepMiddle->setFrameStyle(QFrame::VLine);
     this->pMiddleRegion->addWidget(this->pFrameSepMiddle);
 
-    // CN input widget
-    this->pInputWidget = new Input();
-    this->pMiddleRegion->addWidget(this->pInputWidget);
+    // CN input region
+    this->pCnInputRegion = new QWidget();
+    this->pCnInputLayout = new QVBoxLayout();
+    this->pCnInputWidgetLabel = new QLabel("Digital Inputs:");
+    this->pCnInputWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
+    this->pCnInputLayout->addWidget(this->pCnInputWidgetLabel);
+    this->pInputWidget = new IoWidget();
+    this->pCnInputLayout->addWidget(this->pInputWidget);
+    this->pCnInputRegion->setLayout(this->pCnInputLayout);
+    this->pMiddleRegion->addWidget(this->pCnInputRegion);
 
     // Vertical separator line
     this->pFrameSepMiddle2 = new QFrame();
     this->pFrameSepMiddle2->setFrameStyle(QFrame::VLine);
     this->pMiddleRegion->addWidget(this->pFrameSepMiddle2);
 
-    // CN output widget
-    this->pOutputWidget = new Output();
-    this->pMiddleRegion->addWidget(this->pOutputWidget);
+    // CN output region
+    this->pCnOutputRegion = new QWidget();
+    this->pCnOutputLayout = new QVBoxLayout();
+    this->pCnOutputWidgetLabel = new QLabel("Digital Outputs:");
+    this->pCnOutputWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
+    this->pCnOutputLayout->addWidget(this->pCnOutputWidgetLabel);
+    this->pOutputWidget = new IoWidget();
+    this->pCnOutputLayout->addWidget(this->pOutputWidget);
+    this->pCnOutputRegion->setLayout(this->pCnOutputLayout);
+    this->pMiddleRegion->addWidget(this->pCnOutputRegion);
 
     // Add region to layout
     this->pWindowLayout->addLayout(this->pMiddleRegion, 8);

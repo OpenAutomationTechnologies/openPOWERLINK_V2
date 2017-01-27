@@ -1,13 +1,14 @@
 /**
 ********************************************************************************
-\file   Input.cpp
+\file   IoWidget.cpp
 
-\brief  Implementation of input widget
+\brief  Implementation of the I/O widget
 
-The file contains the implementation of the input widget.
+The file contains the implementation of the I/O widget.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,125 +38,79 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Input.h>
+#include <IoWidget.h>
 #include <Leds.h>
 
 #include <QVBoxLayout>
-#include <QLabel>
-
-
-//============================================================================//
-//            G L O B A L   D E F I N I T I O N S                             //
-//============================================================================//
-
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// module global vars
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// global function prototypes
-//------------------------------------------------------------------------------
-
+const int IoWidget::LED_COUNT = 8;      // Number of LEDs = Bits of 1 Byte
+const int IoWidget::MAX_NODE_ID = 255;
 
 //============================================================================//
-//            P R I V A T E   D E F I N I T I O N S                           //
-//============================================================================//
-
-//------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
-
-//============================================================================//
-//            P U B L I C   M E M B E R   F U N C T I O N S                   //
+//            P U B L I C    M E M B E R    F U N C T I O N S                 //
 //============================================================================//
 
 //------------------------------------------------------------------------------
 /**
 \brief  constructor
 
-Constructs an Input widget.
+Constructs an IoWidget.
 
-\param  parent                  pointer to parent widget
+\param[in]      pParent_p           Pointer to parent widget
 */
 //------------------------------------------------------------------------------
-Input::Input(QWidget* parent)
-    : QWidget(parent)
+IoWidget::IoWidget(QWidget* pParent_p) :
+    QWidget(pParent_p)
 {
-    QFont   LabelFont;
-
-    LabelFont.setBold(true);
-    LabelFont.setPointSize(18);
-
-    this->pInputLayout = new QVBoxLayout;
-    setLayout(this->pInputLayout);
-
-    this->pInputLayout->addStretch(0);
-
-    QLabel* pDigiInLabel = new QLabel("Digital Inputs:");
-    pDigiInLabel->setFont(LabelFont);
-    this->pInputLayout->addWidget(pDigiInLabel);
-
-    this->ppLeds = new Leds*[NODE_ID_MAX];
-    for (int i = 0; i < NODE_ID_MAX; i++)
-    {
-        this->ppLeds[i] = new Leds(LED_NUM);
-        this->ppLeds[i]->hide();
-        this->pInputLayout->addWidget(this->ppLeds[i]);
-    }
-
-    this->pInputLayout->addStretch(1);
+    this->setupUi();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set LEDs
+\brief  Setup the user interface
 
-Sets the input LEDs of a CN.
-
-\param[in]      dataIn_p            Input data to show on LEDs
-\param[in]      nodeId_p            Node ID for which to set LEDs
+Initializes the GUI elements of the user interface
 */
 //------------------------------------------------------------------------------
-void Input::setLeds(int dataIn_p, int nodeId_p)
+void IoWidget::setupUi()
 {
-    this->ppLeds[nodeId_p]->setLeds(dataIn_p);
+    // ---------------------------------------------------------------------
+    // General widget settings
+    // ---------------------------------------------------------------------
+    this->pWidgetLayout = new QVBoxLayout(this);
+
+    // LEDs for CN I/Os
+    for (int i = 0; i < IoWidget::MAX_NODE_ID; i++)
+    {
+        Leds* leds = new Leds(IoWidget::LED_COUNT);
+        leds->hide();
+        this->pWidgetLayout->addWidget(leds);
+        this->leds.append(leds);
+    }
+
+    // Add stretch to left-align the widgets
+    this->pWidgetLayout->addStretch();
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Add a CN
 
-Adds a controlled node to the node list.
+Add a controlled node to the node list.
 
 \param[in]      nodeId_p            Node ID of CN
-
-\ingroup module_demo_mn_qt
 */
 //------------------------------------------------------------------------------
-void Input::addNode(int nodeId_p)
+void IoWidget::addNode(int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
-        (nodeId_p <= NODE_ID_MAX))
+        (nodeId_p <= IoWidget::MAX_NODE_ID))
     {
-        this->ppLeds[nodeId_p]->show();
-        this->ppLeds[nodeId_p]->disableLeds();
-        this->pInputLayout->update();
+        this->leds[nodeId_p]->show();
+        this->leds[nodeId_p]->disableLeds();
+        this->pWidgetLayout->update();
     }
 }
 
@@ -168,13 +123,44 @@ Removes a controlled node from the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void Input::removeNode(int nodeId_p)
+void IoWidget::removeNode(int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
-        (nodeId_p <= NODE_ID_MAX))
+        (nodeId_p <= IoWidget::MAX_NODE_ID))
     {
-        this->ppLeds[nodeId_p]->hide();
+        this->leds[nodeId_p]->hide();
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Disable a CN
+
+Disable the LEDs to show that they are not actively controlled by the
+application.
+
+\param[in]      nodeId_p            Node ID of CN
+*/
+//------------------------------------------------------------------------------
+void IoWidget::disableNode(int nodeId_p)
+{
+    this->leds[nodeId_p]->disableLeds();
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set the value
+
+Sets the value of a CN
+
+\param[in]      nodeId_p            Node ID of CN
+\param[in]      dataIn_p            Value to set
+*/
+//------------------------------------------------------------------------------
+void IoWidget::setValue(int nodeId_p,
+                        unsigned int dataIn_p)
+{
+    this->leds[nodeId_p]->setLeds(dataIn_p);
 }
 
 //------------------------------------------------------------------------------
@@ -184,13 +170,8 @@ void Input::removeNode(int nodeId_p)
 Removes all controlled nodes from the node list.
 */
 //------------------------------------------------------------------------------
-void Input::removeAllNodes()
+void IoWidget::removeAllNodes()
 {
-    int nIdx;
-
-    // count() gives all widgets (hidden ones too)
-    for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
-    {
-        this->ppLeds[nIdx]->hide();
-    }
+    for (int i = 0; i < this->leds.size(); i++)
+        this->leds[i]->hide();
 }

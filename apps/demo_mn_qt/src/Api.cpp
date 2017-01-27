@@ -49,8 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <ProcessThread.h>
 #include <DataInOutThread.h>
 #include <NmtStateWidget.h>
-#include <Output.h>
-#include <Input.h>
+#include <IoWidget.h>
 #include <CnListWidget.h>
 
 #include <oplk/debugstr.h>
@@ -138,8 +137,8 @@ Api::Api(MainWindow* pMainWindow_p,
 {
     tOplkError      ret;
     NmtStateWidget* pState;
-    Output*         pOutput;
-    Input*          pInput;
+    IoWidget*       pOutput;
+    IoWidget*       pInput;
     CnListWidget*   pCnState;
 
     qRegisterMetaType<tNmtState>("tNmtState");
@@ -216,17 +215,17 @@ Api::Api(MainWindow* pMainWindow_p,
 
     pDataInOutThread = new DataInOutThread;
     QObject::connect(pDataInOutThread,
-                     SIGNAL(processImageOutChanged(int, int)),
+                     SIGNAL(processImageOutChanged(int, unsigned int)),
                      pOutput,
-                     SLOT(setValue(int, int)));
+                     SLOT(setValue(int, unsigned int)));
     QObject::connect(pDataInOutThread,
-                     SIGNAL(processImageInChanged(int, int)),
+                     SIGNAL(processImageInChanged(int, unsigned int)),
                      pInput,
-                     SLOT(setLeds(int, int)));
+                     SLOT(setValue(int, unsigned int)));
     QObject::connect(pDataInOutThread,
                      SIGNAL(disableOutputs(int)),
                      pOutput,
-                     SLOT(disable(int)));
+                     SLOT(disableNode(int)));
     QObject::connect(pProcessThread,
                      SIGNAL(isMnActive(bool)),
                      pDataInOutThread,

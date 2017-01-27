@@ -6,6 +6,7 @@
 
 This file implements the data Input/Output thread clas.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
@@ -160,7 +161,7 @@ tOplkError DataInOutThread::processSync(void)
                 }
             }
 
-            this->outChanged(this->aLeds[i], aUsedNodeIds_l[i]);
+            this->outChanged(aUsedNodeIds_l[i], this->aLeds[i]);
             this->aLedsOld[i] = this->aLeds[i];
         }
         else
@@ -169,7 +170,7 @@ tOplkError DataInOutThread::processSync(void)
             emit disableOutputs(aUsedNodeIds_l[i]);
         }
 
-        this->inChanged(this->aInput[i], aUsedNodeIds_l[i]);
+        this->inChanged(aUsedNodeIds_l[i], this->aInput[i]);
         this->aInputOld[i] = this->aInput[i];
     }
 
@@ -220,13 +221,14 @@ tOplkError DataInOutThread::setupProcessImage()
 
 inChanged() signals that there are changes in the input process image.
 
-\param[in]      input_p             Input data
 \param[in]      usedNodeId_p        Node ID the data belongs to
+\param[in]      input_p             Input data
 */
 //------------------------------------------------------------------------------
-void DataInOutThread::inChanged(int input_p, int usedNodeId_p)
+void DataInOutThread::inChanged(int usedNodeId_p,
+                                unsigned int input_p)
 {
-    emit processImageInChanged(input_p, usedNodeId_p);
+    emit processImageInChanged(usedNodeId_p, input_p);
 }
 
 //------------------------------------------------------------------------------
@@ -235,13 +237,14 @@ void DataInOutThread::inChanged(int input_p, int usedNodeId_p)
 
 The function signals that there are changes in the output process image.
 
-\param[in]      led_p               Output data
 \param[in]      usedNodeId_p        Node ID the data belongs to
+\param[in]      output_p            Output data
 */
 //------------------------------------------------------------------------------
-void DataInOutThread::outChanged(int led_p, int usedNodeId_p)
+void DataInOutThread::outChanged(int usedNodeId_p,
+                                 unsigned int output_p)
 {
-    emit processImageOutChanged(led_p, usedNodeId_p);
+    emit processImageOutChanged(usedNodeId_p, output_p);
 }
 
 //------------------------------------------------------------------------------

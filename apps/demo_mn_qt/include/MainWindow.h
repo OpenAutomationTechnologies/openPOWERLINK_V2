@@ -58,8 +58,7 @@ class QFrame;
 class QTextEdit;
 
 class NmtStateWidget;
-class Output;
-class Input;
+class IoWidget;
 class CnListWidget;
 class Api;
 class SdoDialog;
@@ -79,8 +78,8 @@ public:
     MainWindow(QWidget* pParent_p = 0);
 
     NmtStateWidget* getNmtStateWidget() const {return this->pNmtStateWidget;}
-    Output*         getOutputWidget() const {return this->pOutputWidget;}
-    Input*          getInputWidget() const {return this->pInputWidget;}
+    IoWidget*       getOutputWidget() const {return this->pOutputWidget;}
+    IoWidget*       getInputWidget() const {return this->pInputWidget;}
     CnListWidget*   getCnStateWidget() const {return this->pCnStateWidget;}
 
 private slots:
@@ -111,9 +110,18 @@ private:
     CnListWidget*   pCnStateWidget;
 
     QFrame*         pFrameSepMiddle;    // Vertical separator line
-    Input*          pInputWidget;
+
+    QWidget*        pCnInputRegion;
+    QVBoxLayout*    pCnInputLayout;
+    QLabel*         pCnInputWidgetLabel;
+    IoWidget*       pInputWidget;
+
     QFrame*         pFrameSepMiddle2;   // Vertical separator line
-    Output*         pOutputWidget;
+
+    QWidget*        pCnOutputRegion;
+    QVBoxLayout*    pCnOutputLayout;
+    QLabel*         pCnOutputWidgetLabel;
+    IoWidget*       pOutputWidget;
 
     // Separator line
     QFrame*         pFrameSepMiddleStatus;

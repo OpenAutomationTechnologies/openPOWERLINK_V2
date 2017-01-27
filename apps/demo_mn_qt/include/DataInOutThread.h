@@ -6,6 +6,7 @@
 
 This file implements the header file of the Data Input/Output class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
@@ -70,8 +71,10 @@ public:
 
     void run();
     void acknowledge();
-    void inChanged(int input_p, int usedNodeId_p);
-    void outChanged(int led_p, int usedNodeId_p);
+    void inChanged(int usedNodeId_p,
+                   unsigned int input_p);
+    void outChanged(int usedNodeId_p,
+                    unsigned int output_p);
     tOplkError setupProcessImage();
     tSyncCb getSyncCbFunc() const;
     tOplkError processSync(void);
@@ -83,10 +86,10 @@ public slots:
     void setMnActiveFlag(bool fMnActive_p);
 
 signals:
-    void processImageInChanged(int data_p,
-                               int nodeId_p);
-    void processImageOutChanged(int data_p,
-                                int nodeId_p);
+    void processImageInChanged(int nodeId_p,
+                               unsigned int data_p);
+    void processImageOutChanged(int nodeId_p,
+                                unsigned int data_p);
     void disableOutputs(int nodeId_p);
 
 private:
