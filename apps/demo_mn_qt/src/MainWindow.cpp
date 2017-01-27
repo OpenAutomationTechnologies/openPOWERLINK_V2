@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <NmtStateWidget.h>
 #include <Output.h>
 #include <Input.h>
-#include <CnState.h>
+#include <CnListWidget.h>
 #include <Api.h>
 #include <SdoDialog.h>
 #include <NmtCommandDialog.h>
@@ -151,9 +151,16 @@ void MainWindow::setupUi()
     this->pMiddleRegion = new QHBoxLayout();
     this->pMiddleRegion->setObjectName("MiddleRegion");
 
-    // CN state widget
-    this->pCnStateWidget = new CnState();
-    this->pMiddleRegion->addWidget(this->pCnStateWidget);
+    // CN state region
+    this->pCnStateRegion = new QWidget();
+    this->pCnStateLayout = new QVBoxLayout();
+    this->pCnStateWidgetLabel = new QLabel("Node / NMT State:");
+    this->pCnStateWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
+    this->pCnStateLayout->addWidget(this->pCnStateWidgetLabel);
+    this->pCnStateWidget = new CnListWidget();
+    this->pCnStateLayout->addWidget(this->pCnStateWidget);
+    this->pCnStateRegion->setLayout(this->pCnStateLayout);
+    this->pMiddleRegion->addWidget(this->pCnStateRegion);
 
     // Vertical separator line
     this->pFrameSepMiddle = new QFrame();

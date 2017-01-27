@@ -60,7 +60,7 @@ class QTextEdit;
 class NmtStateWidget;
 class Output;
 class Input;
-class CnState;
+class CnListWidget;
 class Api;
 class SdoDialog;
 
@@ -81,7 +81,7 @@ public:
     NmtStateWidget* getNmtStateWidget() const {return this->pNmtStateWidget;}
     Output*         getOutputWidget() const {return this->pOutputWidget;}
     Input*          getInputWidget() const {return this->pInputWidget;}
-    CnState*        getCnStateWidget() const {return this->pCnStateWidget;}
+    CnListWidget*   getCnStateWidget() const {return this->pCnStateWidget;}
 
 private slots:
     void         toggleWindowState();
@@ -104,7 +104,12 @@ private:
 
     // Middle region
     QHBoxLayout*    pMiddleRegion;
-    CnState*        pCnStateWidget;
+
+    QWidget*        pCnStateRegion;
+    QVBoxLayout*    pCnStateLayout;
+    QLabel*         pCnStateWidgetLabel;
+    CnListWidget*   pCnStateWidget;
+
     QFrame*         pFrameSepMiddle;    // Vertical separator line
     Input*          pInputWidget;
     QFrame*         pFrameSepMiddle2;   // Vertical separator line

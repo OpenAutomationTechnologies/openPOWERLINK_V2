@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   CnState.cpp
+\file   CnListWidget.cpp
 
-\brief  openPOWERLINK CnState class
+\brief  Implementation of the CN list widget
 
-This file implements the CnState class.
+This file implements the CN list widget.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -38,64 +38,57 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <CnState.h>
-#include <NmtStateWidget.h>
+#include <CnListWidget.h>
+
 #include <QVBoxLayout>
-#include <QLabel>
+#include <NmtStateWidget.h>
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+const int CnListWidget::MAX_NODE_ID = 255;
 
 //------------------------------------------------------------------------------
 /**
 \brief  Constructor
 
-Constructs an CnState widget.
+Constructs a CnListWidget.
 
-\param[in]      parent              Pointer to the parent window
+\param[in]      pParent_p           Pointer to the parent window
 */
 //------------------------------------------------------------------------------
-CnState::CnState(QWidget* parent)
-    : QWidget(parent)
+CnListWidget::CnListWidget(QWidget* pParent_p) :
+    QWidget(pParent_p)
 {
-    QFont   LabelFont;
-
-    LabelFont.setBold(true);
-    LabelFont.setPointSize(18);
-
-    this->pStateLayout = new QVBoxLayout;
-    setLayout(this->pStateLayout);
-
-    this->pStateLayout->addStretch(0);
-
-    // process value LEDs at upper half
-    QLabel* pStateLabel = new QLabel("Node/State");
-    pStateLabel->setFont(LabelFont);
-    this->pStateLayout->addWidget(pStateLabel);
-
-    this->ppNodeState = new NmtStateWidget*[NODE_ID_MAX];
-    for (int i = 0; i < NODE_ID_MAX; i++)
-    {
-        this->ppNodeState[i] = new NmtStateWidget();
-        this->ppNodeState[i]->setWidgetLabel(QString("CN%1").arg(i));
-        this->ppNodeState[i]->hide();
-        this->pStateLayout->addWidget(this->ppNodeState[i]);
-    }
-
-    this->pStateLayout->addStretch(1);
+    this->setupUi();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set CN state
+\brief  Setup the user interface
 
-Sets the state of the CN
-
-\param[in]      nodeId_p            Node ID of CN
-\param[in]      state_p             State of CN
+Initializes the GUI elements of the user interface
 */
 //------------------------------------------------------------------------------
-void CnState::setState(int nodeId_p,
-                       int state_p)
+void CnListWidget::setupUi()
 {
-    this->ppNodeState[nodeId_p]->setNmtState(state_p);
+    // ---------------------------------------------------------------------
+    // General widget settings
+    // ---------------------------------------------------------------------
+    this->pStateLayout = new QVBoxLayout(this);
+
+    // LEDs for CN states
+    for (int i = 0; i < CnListWidget::MAX_NODE_ID; i++)
+    {
+        NmtStateWidget* nmtStateWidget = new NmtStateWidget();
+        nmtStateWidget->setWidgetLabel(QString("CN#: %1").arg(i));
+        nmtStateWidget->hide();
+        this->pStateLayout->addWidget(nmtStateWidget);
+        this->nodeStates.append(nmtStateWidget);
+    }
+
+    // Add stretch to left-align the widgets
+    this->pStateLayout->addStretch();
 }
 
 //------------------------------------------------------------------------------
@@ -107,12 +100,12 @@ Adds a controlled node to the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void CnState::addNode(int nodeId_p)
+void CnListWidget::addNode(int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
-        (nodeId_p <= NODE_ID_MAX))
+        (nodeId_p <= CnListWidget::MAX_NODE_ID))
     {
-        this->ppNodeState[nodeId_p]->show();
+        this->nodeStates[nodeId_p]->show();
         this->pStateLayout->update();
     }
 }
@@ -126,13 +119,28 @@ Removes a controlled node from the node list.
 \param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
-void CnState::removeNode(int nodeId_p)
+void CnListWidget::removeNode(int nodeId_p)
 {
     if ((nodeId_p >= 0) &&
-        (nodeId_p <= NODE_ID_MAX))
+        (nodeId_p <= CnListWidget::MAX_NODE_ID))
     {
-        this->ppNodeState[nodeId_p]->hide();
+        this->nodeStates[nodeId_p]->hide();
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set CN state
+
+Sets the state of the CN
+
+\param[in]      nodeId_p            Node ID of CN
+\param[in]      state_p             State of CN
+*/
+//------------------------------------------------------------------------------
+void CnListWidget::setState(int nodeId_p, tNmtState state_p)
+{
+    this->nodeStates[nodeId_p]->setNmtState(state_p);
 }
 
 //------------------------------------------------------------------------------
@@ -142,13 +150,8 @@ void CnState::removeNode(int nodeId_p)
 Removes all controlled nodes from the node list.
 */
 //------------------------------------------------------------------------------
-void CnState::removeAllNodes(void)
+void CnListWidget::removeAllNodes()
 {
-    int nIdx;
-
-    // count() gives all widgets (hidden ones too)
-    for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
-    {
-        this->ppNodeState[nIdx]->hide();
-    }
+    for (int i = 0; i < this->nodeStates.size(); i++)
+        this->nodeStates[i]->hide();
 }

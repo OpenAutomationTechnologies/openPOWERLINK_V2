@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <NmtStateWidget.h>
 #include <Output.h>
 #include <Input.h>
-#include <CnState.h>
+#include <CnListWidget.h>
 
 #include <oplk/debugstr.h>
 #include <obdcreate/obdcreate.h>
@@ -100,6 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CYCLE_LEN           5000
 
 Q_DECLARE_METATYPE(tSdoComFinished)
+Q_DECLARE_METATYPE(tNmtState)
 
 //------------------------------------------------------------------------------
 // local types
@@ -139,7 +140,9 @@ Api::Api(MainWindow* pMainWindow_p,
     NmtStateWidget* pState;
     Output*         pOutput;
     Input*          pInput;
-    CnState*        pCnState;
+    CnListWidget*   pCnState;
+
+    qRegisterMetaType<tNmtState>("tNmtState");
 
     pState = pMainWindow_p->getNmtStateWidget();
     pOutput = pMainWindow_p->getOutputWidget();
@@ -192,9 +195,9 @@ Api::Api(MainWindow* pMainWindow_p,
                      SLOT(removeAllNodes()));
 
     QObject::connect(pProcessThread,
-                     SIGNAL(nodeStatusChanged(int, int)),
+                     SIGNAL(nodeStatusChanged(int, tNmtState)),
                      pCnState,
-                     SLOT(setState(int, int)));
+                     SLOT(setState(int, tNmtState)));
 
     QObject::connect(pProcessThread,
                      SIGNAL(printLog(const QString&)),

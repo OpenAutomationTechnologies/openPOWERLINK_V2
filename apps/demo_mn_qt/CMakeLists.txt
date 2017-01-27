@@ -67,7 +67,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/MainWindow.cpp
     ${DEMO_SOURCE_DIR}/SdoDialog.cpp
     ${DEMO_SOURCE_DIR}/Api.cpp
-    ${DEMO_SOURCE_DIR}/CnState.cpp
+    ${DEMO_SOURCE_DIR}/CnListWidget.cpp
     ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
     ${DEMO_SOURCE_DIR}/Input.cpp
     ${DEMO_SOURCE_DIR}/Output.cpp
@@ -83,7 +83,7 @@ SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
 
 SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/Api.h
-    ${DEMO_INCLUDE_DIR}/CnState.h
+    ${DEMO_INCLUDE_DIR}/CnListWidget.h
     ${DEMO_INCLUDE_DIR}/DataInOutThread.h
     ${DEMO_INCLUDE_DIR}/Input.h
     ${DEMO_INCLUDE_DIR}/Output.h

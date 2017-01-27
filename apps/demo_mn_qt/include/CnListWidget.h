@@ -1,10 +1,10 @@
 /**
 ********************************************************************************
-\file   CnState.h
+\file   CnListWidget.h
 
-\brief  Definitions for CnState class
+\brief  Definitions for the CN list widget
 
-This file contains the definitions of the CnState class.
+This file contains the definitions of the CN list widget.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,18 +34,20 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_CnState_h_
-#define _INC_demo_CnState_h_
+#ifndef _INC_demo_CnListWidget_h_
+#define _INC_demo_CnListWidget_h_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplk.h>
+
 #include <QWidget>
+#include <QVector>
 
 //------------------------------------------------------------------------------
 // Definitions
 //------------------------------------------------------------------------------
-#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // Class declarations
@@ -55,28 +57,34 @@ class NmtStateWidget;
 
 //------------------------------------------------------------------------------
 /**
-\brief  CnState class
+\brief  CnListWidget class
 
-Class CnState implements the CN state widget. It represents the state of a CN.
+Class CnListWidget implements the widget listing the connected CNs.
+It also shows the current NMT state of each CN.
 */
 //------------------------------------------------------------------------------
-class CnState : public QWidget
+class CnListWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    CnState(QWidget* parent = 0);
+    CnListWidget(QWidget* pParent_p = 0);
 
 public slots:
-    void setState(int nodeId_p,
-                  int state_p);
     void addNode(int nodeId_p);
     void removeNode(int nodeId_p);
-    void removeAllNodes(void);
+    void setState(int nodeId_p,
+                  tNmtState state_p);
+    void removeAllNodes();
 
 private:
-    QVBoxLayout*        pStateLayout;
-    NmtStateWidget**    ppNodeState;
+    void setupUi();
+
+    // General layout
+    QVBoxLayout*                pStateLayout;
+    QVector<NmtStateWidget*>    nodeStates;
+
+    static const int            MAX_NODE_ID;
 };
 
-#endif // _INC_demo_CnState_h_
+#endif // _INC_demo_CnListWidget_h_
