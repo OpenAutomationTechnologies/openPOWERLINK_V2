@@ -134,7 +134,7 @@ The following demo application are supported on Linux:
 
 ### Drivers  {#sect_zynq_linux_components_drivers}
 
-Please refer to [Linux Drivers] (\ref sect_linux_components_drivers) for information
+Please refer to [Linux Drivers](\ref sect_linux_components_drivers) for information
 about the available drivers.
 
 ## Building {#sect_zynq_linux_build}
@@ -147,27 +147,6 @@ steps for this section. The following build steps are valid for Linux on Zynq AR
 * [Build Linux PCAP User Space Daemon](\ref sect_build_drivers_build_linux_pcap)
 * [BUild Linux Edrv Kernel Driver](\ref sect_build_drivers_build_linux_edrv)
 * [Build your application (or a delivered demo application)](\ref sect_build_demos_build_linux)
-
-## Running openPOWERLINK {#sect_zynq_linux_running}
-
-The following section will explain the steps required to run the Linux
-implementation of openPOWERLINK on the Zynq ARM.
-
-### Linux MN/CN console demo
-
-In order to run the openPOWERLINK Linux demo applications on theZynq ARM,
-follow the steps listed below:
-
-* Prepare the SD Card for boot-up with following:
-  - uImage : Linux kernel image
-  - uramdisk.image.gz : Initramfs file
-  - devicetree.dtb : Device tree blob
-  - boot.bin : Zynq boot image (generated using first stage bootloader(fsbl.elf),
-               u-boot binary (u-boot-elf) and system.bit)
-* Copy the stack binaries to the SD card.
-* Connect the host PC to the Zynq board using the serial interface on board.
-* Use a terminal program to connect to the Linux console on Zynq.
-* For starting the application, refer to [running openPOWERLINK on Linux] (\ref sect_linux_running).
 
 # Zynq Hybrid Design {#sect_zynq_hybrid}
 
@@ -244,13 +223,17 @@ The following build steps can be carried out:
 * [Build boot loader](\ref sect_zynq_hybrid_build_fsbl)
 * [Generate device tree](\ref sect_generate_device_tree_blob)
 * [Generate boot.bin](\ref sect_zynq_hybrid_generate_boot_bin)
+* [Generate uImage](\ref sect_generate_uimage)
 
 ### Build FSBL {#sect_zynq_hybrid_build_fsbl}
 
-* Generate fsbl from SDK for the Vivado hardware.
+To generate the fsbl from SDK for the Vivado hardware the following steps need to be done:
+
 * Create new application project and set the name to fsbl
 * Ask for hardware path and get file from `<OPLK>/hardware/lib/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio/hw_platform/system.hdf`
 * Generate fsbl application and copy the fsbl.elf into bin for generating BOOT.bin
+
+__NOTE__: Alternatively, the fsbl.elf file supplied with the pre-built Linux ZC702 image from the prior step can be used.
 
 ### Generate BOOT.bin {#sect_zynq_hybrid_generate_boot_bin}
 
@@ -265,7 +248,7 @@ Run the following steps to generate the BOOT.bin. Note that the driver daemon fo
 should be compiled and installed into `<OPLK>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio`!
 
     > cd <OPLK>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio
-    > cp <OPK>/tools/xilinx-zynqvivado/bootimage.bif .
+    > cp <OPLK>/tools/xilinx-zynqvivado/bootimage.bif .
     > cp /path/to/fsbl.elf .
     > cp /path/to/u-boot.elf .
     > bootgen -image bootimage.big -o BOOT.bin
@@ -279,6 +262,14 @@ Run the following steps to generate the device tree blob:
 
     > cd <OPLK>/hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/handoff
     > <XILINX_LINUX_DIR>/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb system.dts
+
+
+### Generate an uncompressed kernel image {#sect_generate_uimage}
+
+To create the uImage file needed for booting the Zynq board execute the following commands:
+
+    > cd <XILINX_LINUX_DIR>
+    > make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage CROSS_COMPILE=<XILINX_VIVADO_DIR>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linuxgnueabihf-
 
 ## Running openPOWERLINK  {#sect_zynq_hybrid_running}
 
@@ -302,17 +293,17 @@ Follow the steps below to start the MN demo on the board:
 - Start minicom from the shell (sudo minicom -s)
 - Go to the serial port setup
 - Change the serial device to the USB device (/dev/ttyUSB0)
-- Keep the hardware flow control settings to *NO*
+- Set the hardware flow control settings to *NO*
 - Save setup as dfl and exit
 - Once autoboot finishes enter the user-name as *root*
 - Mount the SD card using the following command:
 
-    `mount /dev/mmcblk0p1 /mnt`
+    > mount /dev/mmcblk0p1 /mnt
 
 - Change directory to /mnt/oplkdrv_kernelmodule_zynq
 
-    `insmod oplkmnzynqintf.ko`
+    > insmod oplkmnzynqintf.ko
 
 - Change directory to /mnt/demo_mn_console
 
-    `./demo_mn_console`
+    > ./demo_mn_console
