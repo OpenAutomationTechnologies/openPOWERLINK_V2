@@ -39,13 +39,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <IoWidget.h>
-#include <Leds.h>
+#include <BinaryLedWidget.h>
 
 #include <QVBoxLayout>
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-const int IoWidget::LED_COUNT = 8;      // Number of LEDs = Bits of 1 Byte
 const int IoWidget::MAX_NODE_ID = 255;
 
 //============================================================================//
@@ -84,10 +83,10 @@ void IoWidget::setupUi()
     // LEDs for CN I/Os
     for (int i = 0; i < IoWidget::MAX_NODE_ID; i++)
     {
-        Leds* leds = new Leds(IoWidget::LED_COUNT);
-        leds->hide();
-        this->pWidgetLayout->addWidget(leds);
-        this->leds.append(leds);
+        BinaryLedWidget* binaryLedWidget = new BinaryLedWidget();
+        binaryLedWidget->hide();
+        this->pWidgetLayout->addWidget(binaryLedWidget);
+        this->leds.append(binaryLedWidget);
     }
 
     // Add stretch to left-align the widgets
@@ -109,7 +108,7 @@ void IoWidget::addNode(int nodeId_p)
         (nodeId_p <= IoWidget::MAX_NODE_ID))
     {
         this->leds[nodeId_p]->show();
-        this->leds[nodeId_p]->disableLeds();
+        this->leds[nodeId_p]->setValue(BinaryLedWidget::UNDEFINED_VALUE);
         this->pWidgetLayout->update();
     }
 }
@@ -144,7 +143,7 @@ application.
 //------------------------------------------------------------------------------
 void IoWidget::disableNode(int nodeId_p)
 {
-    this->leds[nodeId_p]->disableLeds();
+    this->leds[nodeId_p]->setValue(BinaryLedWidget::UNDEFINED_VALUE);
 }
 
 //------------------------------------------------------------------------------
@@ -160,7 +159,7 @@ Sets the value of a CN
 void IoWidget::setValue(int nodeId_p,
                         unsigned int dataIn_p)
 {
-    this->leds[nodeId_p]->setLeds(dataIn_p);
+    this->leds[nodeId_p]->setValue((int)dataIn_p);
 }
 
 //------------------------------------------------------------------------------

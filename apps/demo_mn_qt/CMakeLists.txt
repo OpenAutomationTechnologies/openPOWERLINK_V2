@@ -72,7 +72,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/IoWidget.cpp
     ${DEMO_SOURCE_DIR}/ProcessThread.cpp
     ${DEMO_SOURCE_DIR}/MultiColorLed.cpp
-    ${DEMO_SOURCE_DIR}/Leds.cpp
+    ${DEMO_SOURCE_DIR}/BinaryLedWidget.cpp
     ${DEMO_SOURCE_DIR}/NmtStateWidget.cpp
     ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
     ${DEMO_SOURCE_DIR}/EventLog.cpp
@@ -87,7 +87,7 @@ SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/IoWidget.h
     ${DEMO_INCLUDE_DIR}/ProcessThread.h
     ${DEMO_INCLUDE_DIR}/MultiColorLed.h
-    ${DEMO_INCLUDE_DIR}/Leds.h
+    ${DEMO_INCLUDE_DIR}/BinaryLedWidget.h
     ${DEMO_INCLUDE_DIR}/MainWindow.h
     ${DEMO_INCLUDE_DIR}/SdoDialog.h
     ${DEMO_INCLUDE_DIR}/NmtStateWidget.h

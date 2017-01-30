@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // class definitions
 //------------------------------------------------------------------------------
 class QVBoxLayout;
-class Leds;
+class BinaryLedWidget;
 
 //------------------------------------------------------------------------------
 /**
@@ -80,11 +80,10 @@ private:
     void setupUi();
 
     // General layout
-    QVBoxLayout*        pWidgetLayout;
-    QVector<Leds*>      leds;
+    QVBoxLayout*                pWidgetLayout;
+    QVector<BinaryLedWidget*>   leds;
 
-    static const int    LED_COUNT;
-    static const int    MAX_NODE_ID;
+    static const int            MAX_NODE_ID;
 };
 
 #endif /* _INC_demo_IoWidget_H_ */

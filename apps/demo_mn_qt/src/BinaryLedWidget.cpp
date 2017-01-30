@@ -1,15 +1,16 @@
 /**
 ********************************************************************************
-\file   Leds.cpp
+\file   BinaryLedWidget.cpp
 
-\brief  Implementation of the LED widget class
+\brief  Implementation of the binary LED widget class
 
-The file contains the implementation of the LED widget class.
+The file contains the implementation of the binary LED widget class.
 
 \ingroup module_demo_mn_qt
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -39,12 +40,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <Leds.h>
+#include <BinaryLedWidget.h>
+#include <MultiColorLed.h>
 
-#include <QLabel>
-#include <QPixmap>
 #include <QHBoxLayout>
 
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+const int BinaryLedWidget::UNDEFINED_VALUE = -1;    // Undefined value
+const int BinaryLedWidget::LED_COUNT = 8;           // Number of LEDs = Bits of 1 Byte
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -54,76 +59,68 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Constructor
 
-Constructs a LED widget
+Constructs a binary LED widget
 
-\param[in]      count_p             Number of LEDs to show
-\param[in]      parent_p            Pointer to parent widget
+\param[in]      pParent_p           Pointer to parent widget
 */
 //------------------------------------------------------------------------------
-Leds::Leds(int count_p, QWidget* parent_p)
-    : QWidget(parent_p)
+BinaryLedWidget::BinaryLedWidget(QWidget* pParent_p) :
+    QWidget(pParent_p)
 {
-    int nIdx;
-
-    this->count = count_p;
-
-    QHBoxLayout* pLedsLayout = new QHBoxLayout;
-    setLayout(pLedsLayout);
-    setContentsMargins(0, 0, 0, 0);
-
-    // create array for pointers to LedButtons
-    this->ppLedLabels = new QLabel*[count_p];
-
-    this->pActiveLed  = new QPixmap(":/img/ledred.png");
-    this->pInactiveLed = new QPixmap(":/img/ledgreen.png");
-    this->pNoLed = new QPixmap(":/img/ledgray.png");
-
-    for (nIdx = 0; nIdx < count_p; nIdx++)
-    {
-        this->ppLedLabels[nIdx] = new QLabel(parent_p);
-        this->ppLedLabels[nIdx]->setPixmap(*this->pNoLed);
-        pLedsLayout->addWidget(this->ppLedLabels[nIdx]);
-    }
-
-    pLedsLayout->update();
+    this->setupUi();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set LEDs
+\brief  Setup the user interface
 
-setLeds() sets the LEDs according to the data value.
-
-\param[in]      dataIn_p            Data value to show
+Initializes the GUI elements of the user interface
 */
 //------------------------------------------------------------------------------
-void Leds::setLeds(unsigned int dataIn_p)
+void BinaryLedWidget::setupUi()
 {
-    int nIdx;
+    // ---------------------------------------------------------------------
+    // General widget settings
+    // ---------------------------------------------------------------------
+    this->setContentsMargins(0, 0, 0, 0);
+    this->pWidgetLayout = new QHBoxLayout(this);
 
-    for (nIdx = 0; nIdx < count; nIdx++)
+    // Add LEDs
+    for (int i = 0; i < BinaryLedWidget::LED_COUNT; i++)
     {
-        if (dataIn_p & (1 << nIdx))
-            this->ppLedLabels[nIdx]->setPixmap(*this->pActiveLed);
-        else
-            this->ppLedLabels[nIdx]->setPixmap(*this->pInactiveLed);
+        MultiColorLed* led = new MultiColorLed();
+        this->pWidgetLayout->addWidget(led);
+        this->leds.append(led);
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Disable all LEDs
+\brief  Sets a value
 
-Disables all LEDs.
+Sets a value to visualize on the LEDs.
 
+\param[in]      value_p             Value to show
 */
 //------------------------------------------------------------------------------
-void Leds::disableLeds(void)
+void BinaryLedWidget::setValue(int value_p)
 {
-    int nIdx;
-
-    for (nIdx = 0; nIdx < count; nIdx++)
+    // Only show values that are in the defined range
+    if ((value_p >= 0) &&
+        (value_p < (1 << BinaryLedWidget::LED_COUNT)))
     {
-        this->ppLedLabels[nIdx]->setPixmap(*this->pNoLed);
+        for (int i = 0; i < this->leds.size(); i++)
+        {
+            if (value_p & (1 << i))
+                this->leds[i]->setColor(MultiColorLed::Green);
+            else
+                this->leds[i]->setColor(MultiColorLed::Red);
+        }
+    }
+    else
+    {
+        // Indicate an undefined value
+        for (int i = 0; i < this->leds.size(); i++)
+            this->leds[i]->setColor(MultiColorLed::Gray);
     }
 }

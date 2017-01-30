@@ -1,13 +1,14 @@
 /**
 ********************************************************************************
-\file   Leds.h
+\file   BinaryLedWidget.h
 
-\brief  Header file for LED widget
+\brief  Header file for the binary LED widget
 
-This file contains the definitions for the LED widget.
+This file contains the definitions for the binary LED widget.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,13 +34,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_Leds_H_
-#define _INC_demo_Leds_H_
+#ifndef _INC_demo_BinaryLedWidget_H_
+#define _INC_demo_BinaryLedWidget_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <QWidget>
+#include <QVector>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -48,32 +50,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLabel;
-class QPixmap;
+class QHBoxLayout;
+class MultiColorLed;
 
 //------------------------------------------------------------------------------
 /**
-\brief  LED widget class
+\brief  Binary LED widget class
 
-The class implements the LED widget.
+The class implements the binary LED widget.
 */
 //------------------------------------------------------------------------------
-class Leds : public QWidget
+class BinaryLedWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    Leds(int count_p, QWidget* parent = 0);
+    BinaryLedWidget(QWidget* pParent_p = 0);
 
-    void setLeds(unsigned int dataIn_p);
-    void disableLeds(void);
+    // Static members
+    static const int        UNDEFINED_VALUE;
+
+public slots:
+    void setValue(int value_p);
 
 private:
-    QLabel**    ppLedLabels;
-    QPixmap*    pActiveLed;
-    QPixmap*    pInactiveLed;
-    QPixmap*    pNoLed;
-    int         count;
+    void setupUi();
+
+    // General layout
+    QHBoxLayout*            pWidgetLayout;
+    QVector<MultiColorLed*> leds;
+
+    // Static members
+    static const int        LED_COUNT;
 };
 
-#endif /* _INC_demo_Leds_H_ */
+#endif /* _INC_demo_BinaryLedWidget_H_ */
