@@ -33,7 +33,7 @@ The documentation of the openPOWERLINK protocol stack can be found in the
 subdirectory "doc". It is written in _markdown_ markup format.
 The openPOWERLINK software manual can be generated from the markdown
 documentation and the in-source documentation with the tool
-[Doxygen](http://www.doxygen.org). Doxygen version 1.8 or higher is required.
+[Doxygen](http://www.doxygen.org). Doxygen version 1.8.11 or higher is required.
 
 To generate the software manual:
 
