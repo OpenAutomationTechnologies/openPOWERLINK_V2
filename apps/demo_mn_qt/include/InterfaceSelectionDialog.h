@@ -1,14 +1,14 @@
 /**
 ********************************************************************************
-\file   SdoDialog.h
+\file   InterfaceSelectionDialog.h
 
-\brief  Header file for SDO execution dialog
+\brief  Header file for interface selection dialog
 
-The file contains the definitions for the SDO execution dialog
+The file contains the definitions for the interface selection dialog
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, SYSTEC electronic GmbH
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,17 +33,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_demo_SdoDialog_H_
-#define _INC_demo_SdoDialog_H_
+#ifndef _INC_demo_InterfaceSelectDialog_H_
+#define _INC_demo_InterfaceSelectDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-
 #include <QDialog>
-#include <QString>
-#include <QByteArray>
+#include "ui_InterfaceSelectionDialog.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -52,54 +49,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QPushButton;
-class QLineEdit;
-class QComboBox;
-class QLabel;
-
 
 //------------------------------------------------------------------------------
 /**
-\brief  SdoDialog class
+\brief  InterfaceSelectDialog class
 
-The class implements the SDO execution dialog.
+The class implements the PCAP interface selection dialog.
 */
 //------------------------------------------------------------------------------
-class SdoDialog : public QDialog
+class InterfaceSelectionDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    SdoDialog();
+    InterfaceSelectionDialog(QWidget* pParent_p = 0);
 
-signals:
-    void sigUpdateData(const QString& abortCode_p);
-
-private slots:
-    void startWrite();
-    void startRead();
-    void dataTypeChanged(int index);
-    void userDefEvent(void* pUserArg_p);
-    void sdoFinished(tSdoComFinished sdoInfo_p);
-    void updateData(const QString& abortCode_p);
+    int             fillList();
+    void            setActive(const QString& devName_p);
+    const QString   getDevName() const;
 
 private:
-    QPushButton*    readButton;
-    QPushButton*    writeButton;
-    QLineEdit*      pNodeIdEdit;
-    QLineEdit*      pObjectEdit;
-    QLineEdit*      pDataEdit;
-    QComboBox*      pDataTypeBox;
-    QComboBox*      pSdoTypeBox;
-    QLabel*         pAbortCodeLabel;
-    QByteArray      data;
-    UINT            targetNodeId;
-    UINT            targetIndex;
-    UINT            targetSubindex;
-    eSdoType        sdoType;
-
-    void enableFields(bool enable_p);
-    bool readFields(void);
+    Ui::InterfaceSelectionDialog    ui;
 };
 
-#endif /* _INC_demo_SdoDialog_H_ */
+#endif /* _INC_demo_InterfaceSelectDialog_H_ */

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>NmtCommandDialog</class>
+ <widget class="QDialog" name="NmtCommandDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>237</width>
+    <height>93</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Enter NMT command...</string>
+  </property>
+  <widget class="QLabel" name="pNmtEventLabel">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>211</width>
+     <height>13</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Enter NMT event number (type tNmtEvent):</string>
+   </property>
+   <property name="buddy">
+    <cstring>pNmtEventEdit</cstring>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="pNmtEventEdit">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>30</y>
+     <width>211</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="inputMask">
+    <string>\0\xHH</string>
+   </property>
+   <property name="text">
+    <string>0x11</string>
+   </property>
+  </widget>
+  <widget class="QDialogButtonBox" name="pButtonBox">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>60</y>
+     <width>161</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <property name="standardButtons">
+    <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+   </property>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pButtonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>NmtCommandDialog</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>118</x>
+     <y>72</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>39</x>
+     <y>55</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pButtonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>NmtCommandDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>163</x>
+     <y>68</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>27</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

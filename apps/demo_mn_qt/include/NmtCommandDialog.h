@@ -8,7 +8,7 @@ The file contains the definitions for the NMT command dialog
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -40,9 +40,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
-
 #include <QDialog>
+#include "ui_NmtCommandDialog.h"
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,7 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLineEdit;
 
 //------------------------------------------------------------------------------
 /**
@@ -65,11 +65,15 @@ class NmtCommandDialog : public QDialog
     Q_OBJECT
 
 public:
-    NmtCommandDialog(tNmtEvent nmtEvent_p = kNmtEventNoEvent);
-    tNmtEvent getNmtEvent(void) const;
+    NmtCommandDialog(QWidget* pParent_p = 0);
+
+    tNmtEvent getNmtEvent() const;
 
 private:
-    QLineEdit*  pNmtCmdEdit;
+    Ui::NmtCommandDialog    ui;
+
+    // Static members
+    static const int        NUMBER_BASE_HEX;
 };
 
 #endif /* _INC_demo_NmtCommandDialog_H_ */

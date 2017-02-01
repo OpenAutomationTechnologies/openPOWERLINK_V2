@@ -41,11 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <MainWindow.h>
 #include <QMessageBox>
 #include <Api.h>
-#include <SdoDialog.h>
+#include <SdoTransferDialog.h>
 #include <NmtCommandDialog.h>
 
 #if defined(CONFIG_USE_PCAP)
-#include <InterfaceSelectDialog.h>
+#include <InterfaceSelectionDialog.h>
 #endif
 
 
@@ -64,13 +64,10 @@ Constructor of main window class.
 //------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget* pParent_p) :
     QMainWindow(pParent_p),
-    stackIsRunning(false)
+    fStackIsRunning(false),
+    pApi(NULL),
+    pSdoDialog(NULL)
 {
-    // Initialize
-    this->pApi = NULL;
-    this->pSdoDialog = NULL;
-    this->nmtEvent = kNmtEventResetNode;
-
     // Setup UI elements
     this->ui.setupUi(this);
 
@@ -113,7 +110,7 @@ Starts or stops the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::startStopStack()
 {
-    if (!this->stackIsRunning)
+    if (!this->fStackIsRunning)
         this->startPowerlink();
     else
         this->stopPowerlink();
@@ -130,8 +127,9 @@ void MainWindow::startPowerlink()
 {
 #if defined(CONFIG_USE_PCAP)
     // start the selection dialog
-    InterfaceSelectDialog* pInterfaceDialog = new InterfaceSelectDialog();
-    if (pInterfaceDialog->fillList(this->devName) < 0)
+    InterfaceSelectionDialog    interfaceDialog;
+
+    if (interfaceDialog.fillList() < 0)
     {
         QMessageBox::warning(this,
                              "PCAP not working!",
@@ -141,13 +139,13 @@ void MainWindow::startPowerlink()
         return;
     }
 
-    if (pInterfaceDialog->exec() == QDialog::Rejected)
+    interfaceDialog.setActive(this->devName);
+    if (interfaceDialog.exec() == QDialog::Rejected)
         return;
 
-    this->devName = pInterfaceDialog->getDevName();
-    delete pInterfaceDialog;
+    this->devName = interfaceDialog.getDevName();
 #else
-    this->devName = "plk";
+    this->devName = QString("plk");
 #endif
 
     // Update GUI elements to started stack
@@ -158,20 +156,21 @@ void MainWindow::startPowerlink()
     // Start the stack
     this->pApi = new Api(this, (unsigned int)this->ui.pNodeIdInput->value(), this->devName);
 
-    if (pSdoDialog)
+    // Connect some signals/slots for the SDO dialog
+    if (this->pSdoDialog)
     {
         QObject::connect(this->pApi,
                          SIGNAL(userDefEvent(void*)),
-                         pSdoDialog,
+                         this->pSdoDialog,
                          SLOT(userDefEvent(void*)),
                          Qt::DirectConnection);
         QObject::connect(this->pApi,
                          SIGNAL(sdoFinished(tSdoComFinished)),
-                         pSdoDialog,
+                         this->pSdoDialog,
                          SLOT(sdoFinished(tSdoComFinished)));
     }
 
-    this->stackIsRunning = true;
+    this->fStackIsRunning = true;
 }
 
 //------------------------------------------------------------------------------
@@ -183,7 +182,7 @@ Stops the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::stopPowerlink()
 {
-    this->stackIsRunning = false;
+    this->fStackIsRunning = false;
 
     // Stop the stack
     delete this->pApi;
@@ -203,21 +202,15 @@ Execute NMT command/event entered in dialog.
 //------------------------------------------------------------------------------
 void MainWindow::execNmtCmd()
 {
-    NmtCommandDialog* pDialog = new NmtCommandDialog(this->nmtEvent);
+    NmtCommandDialog    nmtCommandDialog;
 
-    if (pDialog->exec() == QDialog::Rejected)
+    if (nmtCommandDialog.exec() == QDialog::Accepted)
     {
-        delete pDialog;
-        return;
+        tNmtEvent   nmtCommand = nmtCommandDialog.getNmtEvent();
+
+        if (nmtCommand != kNmtEventNoEvent)
+            oplk_execNmtCommand(nmtCommand);
     }
-
-    this->nmtEvent = pDialog->getNmtEvent();
-    delete pDialog;
-
-    if (this->nmtEvent == kNmtEventNoEvent)
-        return;
-
-    oplk_execNmtCommand(this->nmtEvent);
 }
 
 //------------------------------------------------------------------------------
@@ -231,7 +224,7 @@ void MainWindow::showSdoDialog()
 {
     if (!this->pSdoDialog)
     {
-        this->pSdoDialog = new SdoDialog();
+        this->pSdoDialog = new SdoTransferDialog();
         if (this->pApi)
         {
             QObject::connect(this->pApi,

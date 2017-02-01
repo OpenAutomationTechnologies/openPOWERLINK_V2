@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SdoTransferDialog</class>
+ <widget class="QDialog" name="SdoTransferDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>324</width>
+    <height>232</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Perform SDO transfer</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="pParametersBox">
+     <property name="title">
+      <string>Parameters for the SDO transfer</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="3" column="0">
+       <widget class="QLabel" name="pMethodLabel">
+        <property name="text">
+         <string>Method:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pMethod</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QSpinBox" name="pObject">
+        <property name="toolTip">
+         <string>Index of the object to be read/written.</string>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>65535</number>
+        </property>
+        <property name="value">
+         <number>4102</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="pObjectLabel">
+        <property name="text">
+         <string>Object:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pObject</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="3">
+       <widget class="QComboBox" name="pMethod"/>
+      </item>
+      <item row="1" column="3">
+       <widget class="QSpinBox" name="pSubobject">
+        <property name="toolTip">
+         <string>Subindex of the object to be read/written.</string>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::UpDownArrows</enum>
+        </property>
+        <property name="prefix">
+         <string>0x</string>
+        </property>
+        <property name="maximum">
+         <number>255</number>
+        </property>
+        <property name="displayIntegerBase">
+         <number>16</number>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="pSubobjectLabel">
+        <property name="text">
+         <string>Subobject:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+        <property name="buddy">
+         <cstring>pSubobject</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="pNodeId">
+        <property name="toolTip">
+         <string>Target Node ID. Local node is addressed with Node ID 0.</string>
+        </property>
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>254</number>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="3">
+       <widget class="QComboBox" name="pDatatype"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="pDatatypeLabel">
+        <property name="text">
+         <string>Data type:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pDatatype</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="pNodeIdLabel">
+        <property name="text">
+         <string>Node ID:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pNodeId</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="pDataLabel">
+        <property name="text">
+         <string>Data:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pData</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1" colspan="3">
+       <widget class="QLineEdit" name="pData"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="pAbortCodeLabel">
+        <property name="text">
+         <string>Abort Code:</string>
+        </property>
+        <property name="buddy">
+         <cstring>pAbortCode</cstring>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1" colspan="3">
+       <widget class="QLineEdit" name="pAbortCode">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="pReadButton">
+       <property name="text">
+        <string>&amp;Read</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pWriteButton">
+       <property name="text">
+        <string>&amp;Write</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pCloseButton">
+       <property name="text">
+        <string>&amp;Close</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <tabstops>
+  <tabstop>pNodeId</tabstop>
+  <tabstop>pObject</tabstop>
+  <tabstop>pSubobject</tabstop>
+  <tabstop>pDatatype</tabstop>
+  <tabstop>pMethod</tabstop>
+  <tabstop>pData</tabstop>
+  <tabstop>pAbortCode</tabstop>
+  <tabstop>pReadButton</tabstop>
+  <tabstop>pWriteButton</tabstop>
+  <tabstop>pCloseButton</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>pCloseButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SdoTransferDialog</receiver>
+   <slot>close()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>313</x>
+     <y>221</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>296</x>
+     <y>4</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pReadButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SdoTransferDialog</receiver>
+   <slot>startRead()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>211</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>70</x>
+     <y>0</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pWriteButton</sender>
+   <signal>clicked()</signal>
+   <receiver>SdoTransferDialog</receiver>
+   <slot>startWrite()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>155</x>
+     <y>208</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>195</x>
+     <y>7</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pDatatype</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>SdoTransferDialog</receiver>
+   <slot>dataTypeChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>95</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>6</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>startRead()</slot>
+  <slot>startWrite()</slot>
+  <slot>dataTypeChanged(int)</slot>
+ </slots>
+</ui>

@@ -65,7 +65,7 @@ SET_PROPERTY(CACHE CFG_DEMO_PROJECT PROPERTY STRINGS Demo_3CN Demo_RMN_3CN)
 SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.cpp
     ${DEMO_SOURCE_DIR}/MainWindow.cpp
-    ${DEMO_SOURCE_DIR}/SdoDialog.cpp
+    ${DEMO_SOURCE_DIR}/SdoTransferDialog.cpp
     ${DEMO_SOURCE_DIR}/Api.cpp
     ${DEMO_SOURCE_DIR}/CnListWidget.cpp
     ${DEMO_SOURCE_DIR}/DataInOutThread.cpp
@@ -80,6 +80,8 @@ SET(DEMO_SOURCES
 
 SET(DEMO_FORMS
     ${DEMO_SOURCE_DIR}/MainWindow.ui
+    ${DEMO_SOURCE_DIR}/NmtCommandDialog.ui
+    ${DEMO_SOURCE_DIR}/SdoTransferDialog.ui
     )
 
 SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
@@ -93,7 +95,7 @@ SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/MultiColorLed.h
     ${DEMO_INCLUDE_DIR}/BinaryLedWidget.h
     ${DEMO_INCLUDE_DIR}/MainWindow.h
-    ${DEMO_INCLUDE_DIR}/SdoDialog.h
+    ${DEMO_INCLUDE_DIR}/SdoTransferDialog.h
     ${DEMO_INCLUDE_DIR}/NmtStateWidget.h
     ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
     ${DEMO_INCLUDE_DIR}/EventLog.h
@@ -136,8 +138,9 @@ ENDIF(CFG_INCLUDE_MN_REDUNDANCY)
 # Setup compile definitions depending on configuration
 
 IF(CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
-    SET(DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_SOURCE_DIR}/InterfaceSelectDialog.cpp)
-    SET(DEMO_HEADERS ${DEMO_HEADERS} ${DEMO_INCLUDE_DIR}/InterfaceSelectDialog.h)
+    SET(DEMO_FORMS ${DEMO_FORMS} ${DEMO_SOURCE_DIR}/InterfaceSelectionDialog.ui)
+    SET(DEMO_SOURCES ${DEMO_SOURCES} ${DEMO_SOURCE_DIR}/InterfaceSelectionDialog.cpp)
+    SET(DEMO_HEADERS ${DEMO_HEADERS} ${DEMO_INCLUDE_DIR}/InterfaceSelectionDialog.h)
     ADD_DEFINITIONS(-DCONFIG_USE_PCAP)
 ENDIF(CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 

@@ -8,7 +8,7 @@ This file contains the implementation of the NMT command dialog class.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -38,22 +38,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QtGui>
 #include <NmtCommandDialog.h>
 
-#include <QLineEdit>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
-
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+const int   NmtCommandDialog::NUMBER_BASE_HEX = 16;
 
 //------------------------------------------------------------------------------
-// class definitions
+// local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local function prototypes
 //------------------------------------------------------------------------------
 
 //============================================================================//
@@ -64,42 +69,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Constructor
 
-\param[in]      nmtEvent_p          The NMT event which is used to initialize the
-                                    NMT command dialog.
-
 Constructs an NMT command dialog.
+
+\param[in]      pParent_p           Pointer to parent widget
+
 */
 //------------------------------------------------------------------------------
-NmtCommandDialog::NmtCommandDialog(tNmtEvent nmtEvent_p)
+NmtCommandDialog::NmtCommandDialog(QWidget* pParent_p) :
+    QDialog(pParent_p)
 {
-    QVBoxLayout* mainLayout = new QVBoxLayout;
-
-    /* create labels */
-    QLabel*      label = new QLabel("Enter NMT event number (type tNmtEvent):");
-    QPushButton* okButton = new QPushButton("OK");
-    QPushButton* cancelButton = new QPushButton("Cancel");
-
-
-    /* create lineedit */
-    this->pNmtCmdEdit = new QLineEdit(QString::number((UINT)nmtEvent_p, 16).prepend("0x"));
-
-    /* create buttons */
-    QHBoxLayout* buttonLayout = new QHBoxLayout();
-    buttonLayout->addStretch(1);
-    buttonLayout->addWidget(okButton);
-    buttonLayout->addWidget(cancelButton);
-
-    connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-
-    /* create main layout */
-    mainLayout->addWidget(label);
-    mainLayout->addWidget(this->pNmtCmdEdit);
-    mainLayout->addStretch(0);
-    mainLayout->addLayout(buttonLayout);
-
-    setLayout(mainLayout);
-    setWindowTitle("Select NMT command to execute");
+    this->ui.setupUi(this);
 }
 
 //------------------------------------------------------------------------------
@@ -112,15 +91,7 @@ state machine.
 \return The function returns the NMT event to be executed.
 */
 //------------------------------------------------------------------------------
-tNmtEvent NmtCommandDialog::getNmtEvent(void) const
+tNmtEvent NmtCommandDialog::getNmtEvent() const
 {
-    bool fConvOk;
-    UINT nmtEventId;
-
-    nmtEventId = this->pNmtCmdEdit->text().toUInt(&fConvOk, 0);
-
-    if (fConvOk)
-        return (tNmtEvent)nmtEventId;
-    else
-        return kNmtEventNoEvent;
+    return static_cast<tNmtEvent>(this->ui.pNmtEventEdit->text().toUInt(Q_NULLPTR, NmtCommandDialog::NUMBER_BASE_HEX));
 }

@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // class definitions
 //------------------------------------------------------------------------------
 class Api;
-class SdoDialog;
+class SdoTransferDialog;
 
 //------------------------------------------------------------------------------
 /**
@@ -79,13 +79,12 @@ private slots:
     void printLogMessage(const QString& msg_p);
 
 private:
-    Ui::MainWindow  ui;
+    Ui::MainWindow      ui;
 
-    Api*            pApi;
-    SdoDialog*      pSdoDialog;
-    QString         devName;
-    tNmtEvent       nmtEvent;
-    bool            stackIsRunning;
+    Api*                pApi;
+    SdoTransferDialog*  pSdoDialog;
+    QString             devName;
+    bool                fStackIsRunning;
 
     // Private methods
     void startPowerlink();
