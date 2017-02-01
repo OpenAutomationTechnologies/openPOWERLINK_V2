@@ -45,6 +45,11 @@ set_false_path -from [get_registers *]      -to [get_ports EPCS_SDO]
 set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
 
 # ------------------------------------------------------------------------------
+# CFI flash
+set_false_path -from *                      -to [get_ports CFI_FLASH*]
+set_false_path -from [get_ports CFI_FLASH*] -to *
+
+# ------------------------------------------------------------------------------
 # Node switch
 # -> Cut path
 set_false_path -from [get_ports NODE_SWITCH[*]] -to *
