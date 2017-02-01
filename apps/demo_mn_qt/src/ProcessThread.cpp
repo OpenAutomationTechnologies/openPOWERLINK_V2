@@ -106,7 +106,7 @@ ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
     QObject::connect(pEventLog,
                      SIGNAL(printLog(const QString&)),
                      pMainWindow,
-                     SLOT(printlog(const QString&)));
+                     SLOT(printLogMessage(const QString&)));
 
     this->status = -1;
     this->currentNmtState = kNmtGsOff;

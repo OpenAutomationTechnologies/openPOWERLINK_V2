@@ -40,26 +40,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QString>
+#include <QMainWindow>
+#include "ui_MainWindow.h"
 
+#include <QString>
 #include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QVBoxLayout;
-class QHBoxLayout;
-class QPixmap;
-class QLabel;
-class QLineEdit;
-class QPushButton;
-class QFrame;
-class QTextEdit;
-
-class NmtStateWidget;
-class IoWidget;
-class CnListWidget;
 class Api;
 class SdoDialog;
 
@@ -70,87 +59,30 @@ class SdoDialog;
 Class MainWindow implements the main window class of the demo application.
 */
 //------------------------------------------------------------------------------
-class MainWindow : public QWidget
+class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
     MainWindow(QWidget* pParent_p = 0);
 
-    NmtStateWidget* getNmtStateWidget() const {return this->pNmtStateWidget;}
-    IoWidget*       getOutputWidget() const {return this->pOutputWidget;}
-    IoWidget*       getInputWidget() const {return this->pInputWidget;}
-    CnListWidget*   getCnStateWidget() const {return this->pCnStateWidget;}
+    NmtStateWidget* getNmtStateWidget() const {return this->ui.pNmtStateWidget;}
+    IoWidget*       getOutputWidget() const {return this->ui.pCnOutputWidget;}
+    IoWidget*       getInputWidget() const {return this->ui.pCnInputWidget;}
+    CnListWidget*   getCnStateWidget() const {return this->ui.pCnListWidget;}
 
 private slots:
-    void         toggleWindowState();
-    void         startStopStack();
-    void         showSdoDialog();
-    void         printlog(const QString& str);
-    void         execNmtCmd();
+    void toggleWindowState();
+    void startStopStack();
+    void showSdoDialog();
+    void execNmtCmd();
+    void printLogMessage(const QString& msg_p);
 
 private:
-    // General layout
-    QVBoxLayout*    pWindowLayout;
-
-    // Head region
-    QHBoxLayout*    pHeadRegionLayout;
-    QLabel*         pLogo;
-    QLabel*         pVersionLabel;
-
-    // Separator line
-    QFrame*         pFrameSepHeadMiddle;
-
-    // Middle region
-    QHBoxLayout*    pMiddleRegion;
-
-    QWidget*        pCnStateRegion;
-    QVBoxLayout*    pCnStateLayout;
-    QLabel*         pCnStateWidgetLabel;
-    CnListWidget*   pCnStateWidget;
-
-    QFrame*         pFrameSepMiddle;    // Vertical separator line
-
-    QWidget*        pCnInputRegion;
-    QVBoxLayout*    pCnInputLayout;
-    QLabel*         pCnInputWidgetLabel;
-    IoWidget*       pInputWidget;
-
-    QFrame*         pFrameSepMiddle2;   // Vertical separator line
-
-    QWidget*        pCnOutputRegion;
-    QVBoxLayout*    pCnOutputLayout;
-    QLabel*         pCnOutputWidgetLabel;
-    IoWidget*       pOutputWidget;
-
-    // Separator line
-    QFrame*         pFrameSepMiddleStatus;
-
-    // Status region
-    QHBoxLayout*    pStatusRegion;
-    QLabel*         pNmtStateLabel;
-    NmtStateWidget* pNmtStateWidget;
-
-    // Separator line
-    QFrame*         pFrameSepStatusFoot;
-
-    // Foot region
-    QHBoxLayout*    pFootRegion;
-    QLabel*         pNodeIdLabel;
-    QLineEdit*      pNodeIdEdit;
-    QPushButton*    pStartStopOplk;
-    QPushButton*    pShowSdoDialog;
-    QPushButton*    pNmtCmd;
-    QPushButton*    pToggleMax;
-    QPushButton*    pQuitButton;
-
-    // Text console region
-    QHBoxLayout*    pTextConsoleRegion;
-    QTextEdit*      pTextEdit;
+    Ui::MainWindow  ui;
 
     Api*            pApi;
     SdoDialog*      pSdoDialog;
-
     QString         devName;
     tNmtEvent       nmtEvent;
     bool            stackIsRunning;
@@ -158,7 +90,6 @@ private:
     // Private methods
     void startPowerlink();
     void stopPowerlink();
-    void setupUi();
 };
 
 #endif /* _INC_demo_MainWindow_H_ */

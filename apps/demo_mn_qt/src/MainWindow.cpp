@@ -38,22 +38,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QtGui>
 #include <MainWindow.h>
-
-#include <QHBoxLayout>
-#include <QPixmap>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QFrame>
-#include <QTextEdit>
 #include <QMessageBox>
-
-
-#include <NmtStateWidget.h>
-#include <IoWidget.h>
-#include <CnListWidget.h>
 #include <Api.h>
 #include <SdoDialog.h>
 #include <NmtCommandDialog.h>
@@ -77,7 +63,7 @@ Constructor of main window class.
 */
 //------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget* pParent_p) :
-    QWidget(pParent_p),
+    QMainWindow(pParent_p),
     stackIsRunning(false)
 {
     // Initialize
@@ -86,244 +72,36 @@ MainWindow::MainWindow(QWidget* pParent_p) :
     this->nmtEvent = kNmtEventResetNode;
 
     // Setup UI elements
-    this->setupUi();
+    this->ui.setupUi(this);
 
     // Set dynamic GUI information
     UINT32 oplkVersion = oplk_getVersion();
-    QString versionString = QString("openPOWERLINK MN QT Demo\nVersion " +
+    QString versionString = QString("Version " +
                             QString::number(PLK_STACK_VER(oplkVersion)) + "." +
                             QString::number(PLK_STACK_REF(oplkVersion)) + "." +
                             QString::number(PLK_STACK_REL(oplkVersion)));
-    this->pVersionLabel->setText(versionString);
+    this->ui.pVersionLabel->setText(versionString);
 
-    this->pNodeIdEdit->setText(QString::number(Api::defaultNodeId()));
-
-    this->pNmtStateWidget->showNmtStateText();
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Setup the user interface
-
-Initializes the GUI elements of the user interface
-*/
-//------------------------------------------------------------------------------
-void MainWindow::setupUi()
-{
-    // ---------------------------------------------------------------------
-    // General window settings
-    // ---------------------------------------------------------------------
-    this->resize(1000, 600);
-
-    this->pWindowLayout = new QVBoxLayout(this);
-    this->pWindowLayout->setObjectName("MainLayout");
-
-    // ---------------------------------------------------------------------
-    // Head Region
-    // ---------------------------------------------------------------------
-    this->pHeadRegionLayout = new QHBoxLayout();
-    this->pHeadRegionLayout->setObjectName("HeadRegion");
-
-    // Logo
-    this->pLogo = new QLabel();
-    this->pLogo->setPixmap(QPixmap(":/img/powerlink_open_source.png"));
-    this->pHeadRegionLayout->addWidget(this->pLogo, 1, Qt::AlignLeft);
-
-    // Version information
-    this->pVersionLabel = new QLabel();
-    this->pHeadRegionLayout->addWidget(this->pVersionLabel, Qt::AlignCenter, Qt::AlignLeft);
-
-    // Add region to layout
-    this->pWindowLayout->addLayout(this->pHeadRegionLayout);
-    this->pWindowLayout->addSpacing(10);
-
-    // ---------------------------------------------------------------------
-    // Separator line
-    // ---------------------------------------------------------------------
-    this->pFrameSepHeadMiddle = new QFrame();
-    this->pFrameSepHeadMiddle->setFrameStyle(QFrame::HLine);
-    this->pWindowLayout->addWidget(this->pFrameSepHeadMiddle);
-
-    // ---------------------------------------------------------------------
-    // Middle Region
-    // ---------------------------------------------------------------------
-    this->pMiddleRegion = new QHBoxLayout();
-    this->pMiddleRegion->setObjectName("MiddleRegion");
-
-    // CN state region
-    this->pCnStateRegion = new QWidget();
-    this->pCnStateLayout = new QVBoxLayout();
-    this->pCnStateWidgetLabel = new QLabel("Node / NMT State:");
-    this->pCnStateWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
-    this->pCnStateLayout->addWidget(this->pCnStateWidgetLabel);
-    this->pCnStateWidget = new CnListWidget();
-    this->pCnStateLayout->addWidget(this->pCnStateWidget);
-    this->pCnStateRegion->setLayout(this->pCnStateLayout);
-    this->pMiddleRegion->addWidget(this->pCnStateRegion);
-
-    // Vertical separator line
-    this->pFrameSepMiddle = new QFrame();
-    this->pFrameSepMiddle->setFrameStyle(QFrame::VLine);
-    this->pMiddleRegion->addWidget(this->pFrameSepMiddle);
-
-    // CN input region
-    this->pCnInputRegion = new QWidget();
-    this->pCnInputLayout = new QVBoxLayout();
-    this->pCnInputWidgetLabel = new QLabel("Digital Inputs:");
-    this->pCnInputWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
-    this->pCnInputLayout->addWidget(this->pCnInputWidgetLabel);
-    this->pInputWidget = new IoWidget();
-    this->pCnInputLayout->addWidget(this->pInputWidget);
-    this->pCnInputRegion->setLayout(this->pCnInputLayout);
-    this->pMiddleRegion->addWidget(this->pCnInputRegion);
-
-    // Vertical separator line
-    this->pFrameSepMiddle2 = new QFrame();
-    this->pFrameSepMiddle2->setFrameStyle(QFrame::VLine);
-    this->pMiddleRegion->addWidget(this->pFrameSepMiddle2);
-
-    // CN output region
-    this->pCnOutputRegion = new QWidget();
-    this->pCnOutputLayout = new QVBoxLayout();
-    this->pCnOutputWidgetLabel = new QLabel("Digital Outputs:");
-    this->pCnOutputWidgetLabel->setFont(QFont("Arial", 18, QFont::Bold));
-    this->pCnOutputLayout->addWidget(this->pCnOutputWidgetLabel);
-    this->pOutputWidget = new IoWidget();
-    this->pCnOutputLayout->addWidget(this->pOutputWidget);
-    this->pCnOutputRegion->setLayout(this->pCnOutputLayout);
-    this->pMiddleRegion->addWidget(this->pCnOutputRegion);
-
-    // Add region to layout
-    this->pWindowLayout->addLayout(this->pMiddleRegion, 8);
-    this->pWindowLayout->addStretch(10);
-
-    // ---------------------------------------------------------------------
-    // Separator line
-    // ---------------------------------------------------------------------
-    this->pFrameSepMiddleStatus = new QFrame();
-    this->pFrameSepMiddleStatus->setFrameStyle(QFrame::HLine);
-    this->pWindowLayout->addWidget(this->pFrameSepMiddleStatus);
-
-    // ---------------------------------------------------------------------
-    // Status Region
-    // ---------------------------------------------------------------------
-    this->pStatusRegion = new QHBoxLayout();
-    this->pStatusRegion->setObjectName("StatusRegion");
-
-    // NMT state label
-    this->pNmtStateLabel = new QLabel("NMT State:");
-    this->pNmtStateLabel->setFont(QFont("Arial", 18, QFont::Bold));
-    this->pStatusRegion->addWidget(this->pNmtStateLabel);
-
-    // Current node network state
-    this->pNmtStateWidget = new NmtStateWidget();
-    this->pStatusRegion->addWidget(this->pNmtStateWidget);
-
-    // Add region to layout
-    this->pWindowLayout->addLayout(this->pStatusRegion, 0);
-
-    // ---------------------------------------------------------------------
-    // Separator line
-    // ---------------------------------------------------------------------
-    this->pFrameSepStatusFoot = new QFrame();
-    this->pFrameSepStatusFoot->setFrameStyle(QFrame::HLine);
-    this->pWindowLayout->addWidget(this->pFrameSepStatusFoot);
-
-    // ---------------------------------------------------------------------
-    // Foot Region
-    // ---------------------------------------------------------------------
-    this->pFootRegion = new QHBoxLayout();
-    this->pFootRegion->setObjectName("FootRegion");
-
-    // Node ID label
-    this->pNodeIdLabel = new QLabel("Node-ID:");
-    this->pFootRegion->addWidget(this->pNodeIdLabel);
-
-    // Node ID edit
-    this->pNodeIdEdit = new QLineEdit();
-    this->pNodeIdEdit->setValidator(new QIntValidator(1, 254, this->pNodeIdEdit));
-    this->pFootRegion->addWidget(this->pNodeIdEdit);
-
-    // Add spacing
-    this->pFootRegion->addSpacing(20);
-
-    // Add start/stop button
-    this->pStartStopOplk = new QPushButton(tr("Start POWERLINK"));
-    this->pFootRegion->addWidget(this->pStartStopOplk);
-    QObject::connect(this->pStartStopOplk,
-                     SIGNAL(clicked()),
-                     this,
-                     SLOT(startStopStack()));
-
-    // Add SDO dialog button
-    this->pShowSdoDialog = new QPushButton(tr("SDO..."));
-    this->pFootRegion->addWidget(this->pShowSdoDialog);
-    QObject::connect(this->pShowSdoDialog,
-                     SIGNAL(clicked()),
-                     this,
-                     SLOT(showSdoDialog()));
-
-    // Add NMT command button
-    this->pNmtCmd = new QPushButton(tr("Exec NMT command"));
-    this->pNmtCmd->setEnabled(false);
-    this->pFootRegion->addWidget(this->pNmtCmd);
-    QObject::connect(this->pNmtCmd,
-                     SIGNAL(clicked()),
-                     this,
-                     SLOT(execNmtCmd()));
-
-    // Add a stretch
-    this->pFootRegion->addStretch();
-
-    // Add full screen button
-    this->pToggleMax = new QPushButton(tr("Full Screen"));
-    this->pFootRegion->addWidget(this->pToggleMax);
-    QObject::connect(this->pToggleMax,
-                     SIGNAL(clicked()),
-                     this,
-                     SLOT(toggleWindowState()));
-
-    // Quit button
-    this->pQuitButton = new QPushButton(tr("Quit"));
-    this->pFootRegion->addWidget(this->pQuitButton);
-    QObject::connect(this->pQuitButton,
-                     SIGNAL(clicked()),
-                     qApp,
-                     SLOT(quit()));
-
-    // Add region to layout
-    this->pWindowLayout->addLayout(this->pFootRegion, 0);
-
-    // ---------------------------------------------------------------------
-    // Text Console Region
-    // ---------------------------------------------------------------------
-    this->pTextConsoleRegion = new QHBoxLayout();
-    this->pTextConsoleRegion->setObjectName("TextRegion");
-
-    // Text edit
-    this->pTextEdit = new QTextEdit();
-    this->pTextConsoleRegion->addWidget(this->pTextEdit);
-    this->pTextEdit->setReadOnly(true);
-
-    // Add region to layout
-    this->pWindowLayout->addLayout(this->pTextConsoleRegion, 0);
+    this->ui.pNmtStateWidget->showNmtStateText();
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Toggle window state
 
-toggleWindowState() toggles between fullscreen and normal window state.
+Toggles between fullscreen and normal window state.
 */
 //------------------------------------------------------------------------------
 void MainWindow::toggleWindowState()
 {
+    // Toggle the window state
     this->setWindowState(this->windowState() ^ Qt::WindowFullScreen);
 
+    // Change the labeling of the button
     if (this->windowState() & Qt::WindowFullScreen)
-        this->pToggleMax->setText(tr("Window"));
+        this->ui.pToggleMax->setText(tr("Window"));
     else
-        this->pToggleMax->setText(tr("Full Screen"));
+        this->ui.pToggleMax->setText(tr("Full Screen"));
 }
 
 //------------------------------------------------------------------------------
@@ -350,9 +128,6 @@ Starts the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::startPowerlink()
 {
-    bool            fConvOk;
-    unsigned int    nodeId;
-
 #if defined(CONFIG_USE_PCAP)
     // start the selection dialog
     InterfaceSelectDialog* pInterfaceDialog = new InterfaceSelectDialog();
@@ -375,18 +150,13 @@ void MainWindow::startPowerlink()
     this->devName = "plk";
 #endif
 
-    // Read the node ID
-    nodeId = this->pNodeIdEdit->text().toUInt(&fConvOk);
-    if (fConvOk == false)
-        nodeId = Api::defaultNodeId();
-
     // Update GUI elements to started stack
-    this->pNodeIdEdit->setEnabled(false);
-    this->pNmtCmd->setEnabled(true);
-    this->pStartStopOplk->setText(tr("Stop POWERLINK"));
+    this->ui.pNodeIdInput->setEnabled(false);
+    this->ui.pExecNmtCmd->setEnabled(true);
+    this->ui.pStartStopOplk->setText(tr("Stop POWERLINK"));
 
     // Start the stack
-    this->pApi = new Api(this, nodeId, this->devName);
+    this->pApi = new Api(this, (unsigned int)this->ui.pNodeIdInput->value(), this->devName);
 
     if (pSdoDialog)
     {
@@ -419,9 +189,9 @@ void MainWindow::stopPowerlink()
     delete this->pApi;
 
     // Update GUI elements to stopped stack
-    this->pStartStopOplk->setText(tr("Start POWERLINK"));
-    this->pNodeIdEdit->setEnabled(true);
-    this->pNmtCmd->setEnabled(false);
+    this->ui.pStartStopOplk->setText(tr("Start POWERLINK"));
+    this->ui.pNodeIdInput->setEnabled(true);
+    this->ui.pExecNmtCmd->setEnabled(false);
 }
 
 //------------------------------------------------------------------------------
@@ -487,14 +257,14 @@ void MainWindow::showSdoDialog()
 
 //------------------------------------------------------------------------------
 /**
-\brief  Print a log entry
+\brief  Print a log message
 
-The function prints a log entry.
+The function prints a log message.
 
-\param[in]      str                 String to print.
+\param[in]      msg_p               String to print.
 */
 //------------------------------------------------------------------------------
-void MainWindow::printlog(const QString& str)
+void MainWindow::printLogMessage(const QString& msg_p)
 {
-    this->pTextEdit->append(str);
+    this->ui.pTextEdit->append(msg_p);
 }

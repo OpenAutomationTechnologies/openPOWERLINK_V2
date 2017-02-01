@@ -201,7 +201,7 @@ Api::Api(MainWindow* pMainWindow_p,
     QObject::connect(pProcessThread,
                      SIGNAL(printLog(const QString&)),
                      pMainWindow_p,
-                     SLOT(printlog(const QString&)));
+                     SLOT(printLogMessage(const QString&)));
 
     QObject::connect(pProcessThread,
                      SIGNAL(userDefEvent(void*)),

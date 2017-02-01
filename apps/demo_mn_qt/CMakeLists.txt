@@ -78,6 +78,10 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/EventLog.cpp
     )
 
+SET(DEMO_FORMS
+    ${DEMO_SOURCE_DIR}/MainWindow.ui
+    )
+
 SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
 
 SET(DEMO_HEADERS
@@ -166,14 +170,17 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 
 # Setup QT5 Wrappers
 QT5_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
+QT5_WRAP_UI(UI_HEADERS ${DEMO_FORMS})
 
 ################################################################################
 # Group Source Files
 
+SOURCE_GROUP("Form Files" FILES ${DEMO_FORMS})
 SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
 SOURCE_GROUP("Common Source Files" FILES ${COMMON_SOURCES})
 SOURCE_GROUP("Common Source Files" FILES ${DEMO_ARCH_SOURCES})
 SOURCE_GROUP("Generated Files" FILES ${DEMO_RESOURCES_RCC})
+SOURCE_GROUP("Generated Files" FILES ${UI_HEADERS})
 SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
 SOURCE_GROUP("Object Dictionary" FILES
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
@@ -187,8 +194,9 @@ SOURCE_GROUP("Object Dictionary" FILES
 # Set the executable
 ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
                           ${DEMO_ARCH_SOURCES}
-                          ${DEMO_HEADERS}
                           ${COMMON_SOURCES}
+                          ${DEMO_HEADERS}
+                          ${UI_HEADERS}
                           ${DEMO_RESOURCES_RCC}
                           ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
               )
