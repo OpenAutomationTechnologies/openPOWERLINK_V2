@@ -6,8 +6,9 @@
 
 This file contains the definitions of the event logger class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,13 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <eventlog/eventlogstring.h>
 
 //------------------------------------------------------------------------------
-// const defines
-//------------------------------------------------------------------------------
-
-
-const UINT32    EVENTLOG_MAX_LENGTH = 256;
-
-//------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
 
@@ -67,14 +61,16 @@ class EventLog : public QObject
     Q_OBJECT
 
 public:
-    EventLog();
+    EventLog(tEventlogLevel filterLevel_p = 0xFFFFFFFFUL,
+             tEventlogCategory filterCategory_p = 0xFFFFFFFFUL,
+             tEventlogFormat logFormat_p = kEventlogFormatParsable);
 
-    void printEvent(const tOplkApiEventNode* pNodeEvent_p);
-    void printEvent(const tErrHistoryEntry* pHistory_p);
-    void printEvent(const tEventError* pError_p);
-    void printEvent(const tEventNmtStateChange* pNmtStateChange_p);
-    void printEvent(const tOplkApiEventPdoChange* pPdoChange_p);
-    void printEvent(const tCfmEventCnProgress* pCfmProgress_p);
+    void printEvent(const tOplkApiEventNode& nodeEvent_p);
+    void printEvent(const tErrHistoryEntry& history_p);
+    void printEvent(const tEventError& error_p);
+    void printEvent(const tEventNmtStateChange& nmtStateChange_p);
+    void printEvent(const tOplkApiEventPdoChange& pdoChange_p);
+    void printEvent(const tCfmEventCnProgress& cfmProgress_p);
     void printEvent(UINT nodeId_p,
                     tNmtNodeCommand nodeCommand_p);
     void printMessage(tEventlogLevel level_p,
@@ -86,14 +82,16 @@ public:
                      UINT64 mapping_p);
 
 signals:
-    void printLog(const QString& strState_p);
+    void printLog(const QString& logMessage_p);
 
 private:
-    UINT32          filterLevel;                ///< The level filter. It contains a bitmask with all
+    static const size_t     EVENTLOG_MAX_LENGTH;
+
+    const tEventlogLevel    filterLevel;        ///< The level filter. It contains a bitmask with all
                                                 ///< levels to be printed.
-    UINT32          filterCategory;             ///< The category filter. It contains a bitmask with all
+    const tEventlogCategory filterCategory;     ///< The category filter. It contains a bitmask with all
                                                 ///< categories to be printed.
-    tEventlogFormat logFormat;
+    const tEventlogFormat   logFormat;
 };
 
 #endif /* _INC_demo_EventLog_H_ */

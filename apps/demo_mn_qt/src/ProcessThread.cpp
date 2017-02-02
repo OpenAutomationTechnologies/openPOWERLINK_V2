@@ -90,39 +90,21 @@ tOplkError ProcessThread::appCbEvent(tOplkApiEventType eventType_p,
 
 Constructs a ProcessThread object
 
-\param[in,out]  pMainWindow_p       Pointer to main window object
+\param[in,out]  pEventLog_p         Pointer to event logger object
 */
 //------------------------------------------------------------------------------
-ProcessThread::ProcessThread(MainWindow* pMainWindow_p)
+ProcessThread::ProcessThread(EventLog* pEventLog_p)
 {
     qRegisterMetaType<tSdoComFinished>();
     qRegisterMetaType<tNmtState>("tNmtState");
 
     pProcessThread_g = this;
 
-    this->pMainWindow = pMainWindow_p;
-    this->pEventLog = new EventLog();
-
-    QObject::connect(pEventLog,
-                     SIGNAL(printLog(const QString&)),
-                     pMainWindow,
-                     SLOT(printLogMessage(const QString&)));
+    this->pEventLog = pEventLog_p;
 
     this->status = -1;
     this->currentNmtState = kNmtGsOff;
     this->fMnActive = false;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Destructor
-
-Destructs a ProcessThread object
-*/
-//------------------------------------------------------------------------------
-ProcessThread::~ProcessThread()
-{
-    delete this->pEventLog;
 }
 
 //------------------------------------------------------------------------------
@@ -156,26 +138,6 @@ void ProcessThread::sigNmtStateChanged(tNmtState status_p)
         emit nmtStateChanged(status_p);
         this->status = status_p;
     }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Signal a log message
-
-The function signals a log message entry to the text edit of the main window.
-
-\param[in]      rLog_p              Log entry to print.
-*/
-//------------------------------------------------------------------------------
-void ProcessThread::sigPrintLog(const QString& rLog_p)
-{
-    QString str;
-
-    str.append(QDateTime::currentDateTime().toString("yyyy/MM/dd-hh:mm:ss.zzz"));
-    str.append(" - ");
-    str.append(rLog_p);
-
-    emit printLog(str);
 }
 
 //------------------------------------------------------------------------------
@@ -333,7 +295,7 @@ tOplkError ProcessThread::processStateChangeEvent(const tEventNmtStateChange* pN
     this->currentNmtState = pNmtStateChange_p->newNmtState;
     this->sigNmtStateChanged(pNmtStateChange_p->newNmtState);
 
-    this->pEventLog->printEvent(pNmtStateChange_p);
+    this->pEventLog->printEvent(*pNmtStateChange_p);
 
     switch (pNmtStateChange_p->newNmtState)
     {
@@ -407,7 +369,7 @@ tOplkError ProcessThread::processErrorWarningEvent(const tEventError* pInternalE
 {
     UNUSED_PARAMETER(pUserArg_p);
 
-    this->pEventLog->printEvent(pInternalError_p);
+    this->pEventLog->printEvent(*pInternalError_p);
 
     return kErrorOk;
 }
@@ -434,7 +396,7 @@ tOplkError ProcessThread::processPdoChangeEvent(const tOplkApiEventPdoChange* pP
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    this->pEventLog->printEvent(pPdoChange_p);
+    this->pEventLog->printEvent(*pPdoChange_p);
 
     for (subIndex = 1; subIndex <= pPdoChange_p->mappObjectCount; subIndex++)
     {
@@ -477,7 +439,7 @@ tOplkError ProcessThread::processHistoryEvent(const tErrHistoryEntry* pHistoryEn
 {
     UNUSED_PARAMETER(pUserArg_p);
 
-    this->pEventLog->printEvent(pHistoryEntry_p);
+    this->pEventLog->printEvent(*pHistoryEntry_p);
 
     return kErrorOk;
 }
@@ -501,7 +463,7 @@ tOplkError ProcessThread::processNodeEvent(const tOplkApiEventNode* pNode_p,
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    this->pEventLog->printEvent(pNode_p);
+    this->pEventLog->printEvent(*pNode_p);
 
     // check additional argument
     switch (pNode_p->nodeEvent)
@@ -579,7 +541,7 @@ tOplkError ProcessThread::processCfmProgressEvent(const tCfmEventCnProgress* pCf
 {
     UNUSED_PARAMETER(pUserArg_p);
 
-    this->pEventLog->printEvent(pCfmProgress_p);
+    this->pEventLog->printEvent(*pCfmProgress_p);
 
     return kErrorOk;
 }

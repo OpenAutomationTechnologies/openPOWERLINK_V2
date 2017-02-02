@@ -6,8 +6,9 @@
 
 This file contains the definitions of the openPOWERLINK API class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -51,6 +52,7 @@ class QWidget;
 
 class MainWindow;
 class ProcessThread;
+class EventLog;
 class DataInOutThread;
 
 //------------------------------------------------------------------------------
@@ -79,6 +81,7 @@ signals:
 private:
     tOplkApiInitParam   initParam;
 
+    EventLog*           pEventLog;
     ProcessThread*      pProcessThread;
     DataInOutThread*    pDataInOutThread;
 

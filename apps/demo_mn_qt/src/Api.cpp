@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QMessageBox>
 
 #include <MainWindow.h>
+#include <EventLog.h>
 #include <ProcessThread.h>
 #include <DataInOutThread.h>
 #include <NmtStateWidget.h>
@@ -148,7 +149,15 @@ Api::Api(MainWindow* pMainWindow_p,
     pInput = pMainWindow_p->getInputWidget();
     pCnState = pMainWindow_p->getCnStateWidget();
 
-    pProcessThread = new ProcessThread(pMainWindow_p);
+    // Event logger
+    this->pEventLog = new EventLog();
+    QObject::connect(this->pEventLog,
+                     SIGNAL(printLog(const QString&)),
+                     pMainWindow_p,
+                     SLOT(printLogMessage(const QString&)));
+
+    // Connect process thread
+    pProcessThread = new ProcessThread(this->pEventLog);
     QObject::connect(pProcessThread,
                      SIGNAL(nmtStateChanged(tNmtState)),
                      pState,
@@ -197,11 +206,6 @@ Api::Api(MainWindow* pMainWindow_p,
                      SIGNAL(nodeStatusChanged(int, tNmtState)),
                      pCnState,
                      SLOT(setState(int, tNmtState)));
-
-    QObject::connect(pProcessThread,
-                     SIGNAL(printLog(const QString&)),
-                     pMainWindow_p,
-                     SLOT(printLogMessage(const QString&)));
 
     QObject::connect(pProcessThread,
                      SIGNAL(userDefEvent(void*)),
@@ -384,6 +388,9 @@ Api::~Api()
     ret = oplk_freeProcessImage();
     ret = oplk_destroy();
     oplk_exit();
+
+    // Cleanup
+    delete this->pEventLog;
 }
 
 /**

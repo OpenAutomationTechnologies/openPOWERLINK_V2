@@ -71,13 +71,11 @@ class ProcessThread : public QThread
     Q_OBJECT
 
 public:
-    ProcessThread(MainWindow* pMainWindow_p);
-    ~ProcessThread();
+    ProcessThread(EventLog* pEventLog_p);
 
     void              run();
     void              sigNmtStateChanged(tNmtState status_p);
     void              sigMnActive(bool fMnActive_p);
-    void              sigPrintLog(const QString& rLog_p);
     void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
     void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
     void              sigNodeStatus(int nodeId_p, tNmtState status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
@@ -94,7 +92,6 @@ signals:
     void              nodeDisappeared(int nodeId_p);
     void              allNodesRemoved();
     void              nodeStatusChanged(int nodeId_p, tNmtState status_p);
-    void              printLog(const QString &strState_p);
     void              userDefEvent(void* pUserArg_p);
     void              sdoFinished(tSdoComFinished sdoInfo_p);
 
@@ -126,7 +123,6 @@ private:
 
     QMutex            mutex;
     QWaitCondition    nmtStateOff;
-    MainWindow*       pMainWindow;
     EventLog*         pEventLog;
 
     int               status;

@@ -6,8 +6,9 @@
 
 This file implements the data event logger class.
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,6 +42,48 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cstdarg>
 
 //============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+const size_t EventLog::EVENTLOG_MAX_LENGTH = 256;
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            S T A T I C   M E M B E R   F U N C T I O N S                   //
+//============================================================================//
+
+
+//============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
@@ -49,13 +92,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \brief  Default Constructor
 
 The function implements the default constructor of the EventLog class.
+
+\param[in]      filterLevel_p       The filter level of the log messages.
+\param[in]      filterCategory_p    The filter category of the log messages.
+\param[in]      logFormat_p         The format of the logging.
 */
 //------------------------------------------------------------------------------
-EventLog::EventLog()
+EventLog::EventLog(tEventlogLevel filterLevel_p,
+                   tEventlogCategory filterCategory_p,
+                   tEventlogFormat logFormat_p) :
+    filterLevel(filterLevel_p),
+    filterCategory(filterCategory_p),
+    logFormat(logFormat_p)
 {
-    this->filterLevel = 0xffffffff;
-    this->filterCategory = 0xffffffff;
-    this->logFormat = kEventlogFormatParsable;
 }
 
 //------------------------------------------------------------------------------
@@ -64,21 +113,21 @@ EventLog::EventLog()
 
 The function is used to log openPOWERLINK node events.
 
-\param[in]      pNodeEvent_p        The node event information to be logged.
+\param[in]      nodeEvent_p         The node event information to be logged.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tOplkApiEventNode* pNodeEvent_p)
+void EventLog::printEvent(const tOplkApiEventNode& nodeEvent_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryNodeEvent))))
         return;
 
-    eventlog_createNodeEventString(pNodeEvent_p,
+    eventlog_createNodeEventString(&nodeEvent_p,
                                    this->logFormat,
                                    cstring,
-                                   EVENTLOG_MAX_LENGTH);
+                                   EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -89,21 +138,21 @@ void EventLog::printEvent(const tOplkApiEventNode* pNodeEvent_p)
 
 The function is used to log openPOWERLINK history events.
 
-\param[in]      pHistory_p          The information about the history event to log.
+\param[in]      history_p           The information about the history event to log.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tErrHistoryEntry* pHistory_p)
+void EventLog::printEvent(const tErrHistoryEntry& history_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryHistoryEvent))))
         return;
 
-    eventlog_createHistoryEventString(pHistory_p,
+    eventlog_createHistoryEventString(&history_p,
                                       this->logFormat,
                                       cstring,
-                                      EVENTLOG_MAX_LENGTH);
+                                      EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -114,21 +163,21 @@ void EventLog::printEvent(const tErrHistoryEntry* pHistory_p)
 
 The function is used to log openPOWERLINK error/warning events.
 
-\param[in]      pError_p            The information about the error event to log.
+\param[in]      error_p             The information about the error event to log.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tEventError* pError_p)
+void EventLog::printEvent(const tEventError& error_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryErrorEvent))))
         return;
 
-    eventlog_createErrorEventString(pError_p,
+    eventlog_createErrorEventString(&error_p,
                                     this->logFormat,
                                     cstring,
-                                    EVENTLOG_MAX_LENGTH);
+                                    EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -139,21 +188,21 @@ void EventLog::printEvent(const tEventError* pError_p)
 
 The function is used to log openPOWERLINK state change events.
 
-\param[in]      pStateChangeEvent_p The state change event information to be logged.
+\param[in]      stateChangeEvent_p  The state change event information to be logged.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tEventNmtStateChange* pNmtStateChange_p)
+void EventLog::printEvent(const tEventNmtStateChange& nmtStateChange_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryStateChangeEvent))))
         return;
 
-    eventlog_createStateEventString(pNmtStateChange_p,
+    eventlog_createStateEventString(&nmtStateChange_p,
                                     this->logFormat,
                                     cstring,
-                                    EVENTLOG_MAX_LENGTH);
+                                    EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -164,22 +213,22 @@ void EventLog::printEvent(const tEventNmtStateChange* pNmtStateChange_p)
 
 The function is used to log openPOWERLINK PDO change events.
 
-\param[in]      pPdoChange_p        The information about the received event.
+\param[in]      pdoChange_p        The information about the received event.
 
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tOplkApiEventPdoChange* pPdoChange_p)
+void EventLog::printEvent(const tOplkApiEventPdoChange& pdoChange_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryPdoEvent))))
         return;
 
-    eventlog_createPdoEventString(pPdoChange_p,
+    eventlog_createPdoEventString(&pdoChange_p,
                                   this->logFormat,
                                   cstring,
-                                  EVENTLOG_MAX_LENGTH);
+                                  EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -190,21 +239,21 @@ void EventLog::printEvent(const tOplkApiEventPdoChange* pPdoChange_p)
 
 The function is used to log openPOWERLINK CFM progress events.
 
-\param[in]      pCfmProgress_p      The information about the received event.
+\param[in]      cfmProgress_p       The information about the received event.
 */
 //------------------------------------------------------------------------------
-void EventLog::printEvent(const tCfmEventCnProgress* pCfmProgress_p)
+void EventLog::printEvent(const tCfmEventCnProgress& cfmProgress_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryCfmProgressEvent))))
         return;
 
-    eventlog_createCfmProgressEventString(pCfmProgress_p,
+    eventlog_createCfmProgressEventString(&cfmProgress_p,
                                           this->logFormat,
                                           cstring,
-                                          EVENTLOG_MAX_LENGTH);
+                                          EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -223,7 +272,7 @@ The function is used to log openPOWERLINK CFM result events.
 void EventLog::printEvent(UINT nodeId_p,
                           tNmtNodeCommand nodeCommand_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelEvent)) &&
           (this->filterCategory & (1 << kEventlogCategoryCfmResultEvent))))
@@ -233,7 +282,7 @@ void EventLog::printEvent(UINT nodeId_p,
                                         nodeCommand_p,
                                         this->logFormat,
                                         cstring,
-                                        EVENTLOG_MAX_LENGTH);
+                                        EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
@@ -257,7 +306,7 @@ void EventLog::printMessage(tEventlogLevel level_p,
                             const char* fmt_p,
                             ...)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
     va_list arglist;
 
     if (!((this->filterLevel & (1 << level_p)) &&
@@ -266,14 +315,14 @@ void EventLog::printMessage(tEventlogLevel level_p,
 
     va_start(arglist, fmt_p);
     eventlog_createMessageString(cstring,
-                                 EVENTLOG_MAX_LENGTH,
+                                 EventLog::EVENTLOG_MAX_LENGTH,
                                  level_p,
                                  category_p,
                                  fmt_p,
                                  arglist);
     va_end(arglist);
 
-    emit printLog(QString::fromLatin1(cstring, EVENTLOG_MAX_LENGTH));
+    emit printLog(QString::fromLatin1(cstring, EventLog::EVENTLOG_MAX_LENGTH));
 }
 
 //------------------------------------------------------------------------------
@@ -291,7 +340,7 @@ void EventLog::printPdoMap(UINT16 mapObject_p,
                            UINT8 subIndex_p,
                            UINT64 mapping_p)
 {
-    char    cstring[EVENTLOG_MAX_LENGTH];
+    char    cstring[EventLog::EVENTLOG_MAX_LENGTH];
 
     if (!((this->filterLevel & (1 << kEventlogLevelInfo)) &&
           (this->filterCategory & (1 << kEventlogCategoryPdoMap))))
@@ -301,7 +350,7 @@ void EventLog::printPdoMap(UINT16 mapObject_p,
                                 subIndex_p, mapping_p,
                                 this->logFormat,
                                 cstring,
-                                EVENTLOG_MAX_LENGTH);
+                                EventLog::EVENTLOG_MAX_LENGTH);
 
     emit printLog(QString::fromLatin1(cstring));
 }
