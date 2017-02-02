@@ -81,7 +81,7 @@ OBD_BEGIN()
            OBD_SUBINDEX_RAM_VSTRING(0x100A, 0x00, kObdAccR, software_version, OBD_MAX_STRING_SIZE, PLK_PRODUCT_NAME" "PLK_PRODUCT_VERSION)
         OBD_END_INDEX(0x100A)
 
-#if defined(CONFIG_OBD_USE_STORE_RESTORE)
+#if defined(CONFIG_APP_STORE_RESTORE)
         // Object 1010h: NMT_StoreParam_REC
         OBD_BEGIN_INDEX_RAM(0x1010, 0x05, FALSE)
             OBD_SUBINDEX_RAM_VAR(0x1010, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x04)
