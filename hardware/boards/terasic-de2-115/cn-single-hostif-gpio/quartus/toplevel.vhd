@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2015
+--    (c) B&R, 2017
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -56,6 +56,15 @@ entity toplevel is
         EPCS_SCE            : out   std_logic;
         EPCS_SDO            : out   std_logic;
         EPCS_DATA0          : in    std_logic;
+        -- FLASH 8Mx8
+        CFI_FLASH_ADDR      : out std_logic_vector(22 downto 0);
+        CFI_FLASH_DATA      : inout std_logic_vector(7 downto 0);
+        CFI_FLASH_WE_n      : out std_logic;
+        CFI_FLASH_CE_n      : out std_logic;
+        CFI_FLASH_OE_n      : out std_logic;
+        CFI_FLASH_RESET_n   : out std_logic;
+        CFI_FLASH_WP_n      : out std_logic;
+        CFI_FLASH_RY        : in std_logic;
         -- 64 MBx2 SDRAM
         SDRAM_CLK           : out   std_logic;
         SDRAM_CAS_n         : out   std_logic;
@@ -106,49 +115,46 @@ architecture rtl of toplevel is
 
     component cnSingleHostifGpio is
         port (
-            clk25_clk                                   : in    std_logic;
-            clk50_clk                                   : in    std_logic                     := 'X';
-            clk100_clk                                  : in    std_logic;
-            reset_reset_n                               : in    std_logic                     := 'X';
-
-            host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);
-
-            node_switch_pio_export                      : in    std_logic_vector(7 downto 0)  := (others => 'X');
-
-            epcs_flash_dclk                             : out   std_logic;
-            epcs_flash_sce                              : out   std_logic;
-            epcs_flash_sdo                              : out   std_logic;
-            epcs_flash_data0                            : in    std_logic                     := 'X';
-
-            sdram_0_addr                                : out   std_logic_vector(12 downto 0);
-            sdram_0_ba                                  : out   std_logic_vector(1 downto 0);
-            sdram_0_cas_n                               : out   std_logic;
-            sdram_0_cke                                 : out   std_logic;
-            sdram_0_cs_n                                : out   std_logic;
-            sdram_0_dq                                  : inout std_logic_vector(31 downto 0) := (others => 'X');
-            sdram_0_dqm                                 : out   std_logic_vector(3 downto 0);
-            sdram_0_ras_n                               : out   std_logic;
-            sdram_0_we_n                                : out   std_logic;
-
-            lcd_data                                    : inout std_logic_vector(7 downto 0)  := (others => 'X');
-            lcd_E                                       : out   std_logic;
-            lcd_RS                                      : out   std_logic;
-            lcd_RW                                      : out   std_logic;
-
-            sync_irq_irq                                : in    std_logic                     := 'X';
-
-            prl0_oPrlMst_cs                             : out   std_logic;
-            prl0_iPrlMst_ad_i                           : in    std_logic_vector(16 downto 0) := (others => 'X');
-            prl0_oPrlMst_ad_o                           : out   std_logic_vector(16 downto 0);
-            prl0_oPrlMst_ad_oen                         : out   std_logic;
-            prl0_oPrlMst_be                             : out   std_logic_vector(1 downto 0);
-            prl0_oPrlMst_ale                            : out   std_logic;
-            prl0_oPrlMst_wr                             : out   std_logic;
-            prl0_oPrlMst_rd                             : out   std_logic;
-            prl0_iPrlMst_ack                            : in    std_logic                     := 'X';
-            -- Application ports
-            app_pio_in_port                             : in    std_logic_vector(31 downto 0) := (others => 'X');
-            app_pio_out_port                            : out   std_logic_vector(31 downto 0)
+            clk50_clk                                   : in    std_logic                     := 'X';             -- clk
+            clk100_clk                                  : in    std_logic                     := 'X';             -- clk
+            clk25_clk                                   : in    std_logic                     := 'X';             -- clk
+            reset_reset_n                               : in    std_logic                     := 'X';             -- reset_n
+            host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);                     -- export
+            epcs_flash_dclk                             : out   std_logic;                                        -- dclk
+            epcs_flash_sce                              : out   std_logic;                                        -- sce
+            epcs_flash_sdo                              : out   std_logic;                                        -- sdo
+            epcs_flash_data0                            : in    std_logic                     := 'X';             -- data0
+            lcd_RS                                      : out   std_logic;                                        -- RS
+            lcd_RW                                      : out   std_logic;                                        -- RW
+            lcd_data                                    : inout std_logic_vector(7 downto 0)  := (others => 'X'); -- data
+            lcd_E                                       : out   std_logic;                                        -- E
+            sdram_0_addr                                : out   std_logic_vector(12 downto 0);                    -- addr
+            sdram_0_ba                                  : out   std_logic_vector(1 downto 0);                     -- ba
+            sdram_0_cas_n                               : out   std_logic;                                        -- cas_n
+            sdram_0_cke                                 : out   std_logic;                                        -- cke
+            sdram_0_cs_n                                : out   std_logic;                                        -- cs_n
+            sdram_0_dq                                  : inout std_logic_vector(31 downto 0) := (others => 'X'); -- dq
+            sdram_0_dqm                                 : out   std_logic_vector(3 downto 0);                     -- dqm
+            sdram_0_ras_n                               : out   std_logic;                                        -- ras_n
+            sdram_0_we_n                                : out   std_logic;                                        -- we_n
+            node_switch_pio_export                      : in    std_logic_vector(7 downto 0)  := (others => 'X'); -- export
+            sync_irq_irq                                : in    std_logic;
+            prl0_oPrlMst_cs                             : out   std_logic;                                        -- oPrlMst_cs
+            prl0_iPrlMst_ad_i                           : in    std_logic_vector(16 downto 0) := (others => 'X'); -- iPrlMst_ad_i
+            prl0_oPrlMst_ad_o                           : out   std_logic_vector(16 downto 0);                    -- oPrlMst_ad_o
+            prl0_oPrlMst_ad_oen                         : out   std_logic;                                        -- oPrlMst_ad_oen
+            prl0_oPrlMst_be                             : out   std_logic_vector(1 downto 0);                     -- oPrlMst_be
+            prl0_oPrlMst_ale                            : out   std_logic;                                        -- oPrlMst_ale
+            prl0_oPrlMst_wr                             : out   std_logic;                                        -- oPrlMst_wr
+            prl0_oPrlMst_rd                             : out   std_logic;                                        -- oPrlMst_rd
+            prl0_iPrlMst_ack                            : in    std_logic                     := 'X';             -- iPrlMst_ack
+            app_pio_in_port                             : in    std_logic_vector(31 downto 0) := (others => 'X'); -- in_port
+            app_pio_out_port                            : out   std_logic_vector(31 downto 0);                    -- out_port
+            tristate_cfi_flash_0_tcm_address_out        : out   std_logic_vector(22 downto 0);                    -- tcm_address_out
+            tristate_cfi_flash_0_tcm_read_n_out         : out   std_logic;                                        -- tcm_read_n_out
+            tristate_cfi_flash_0_tcm_write_n_out        : out   std_logic;                                        -- tcm_write_n_out
+            tristate_cfi_flash_0_tcm_data_out           : inout std_logic_vector(7 downto 0)  := (others => 'X'); -- tcm_data_out
+            tristate_cfi_flash_0_tcm_chipselect_n_out   : out  std_logic                                          -- tcm_chipselect_n_out
         );
     end component cnSingleHostifGpio;
 
@@ -206,6 +212,8 @@ begin
 
     hostifIrq       <= not HOSTIF_IRQ_n;
 
+    CFI_FLASH_RESET_n   <= cnInactivated;
+    CFI_FLASH_WP_n      <= cnInactivated;
     ---------------------------------------------------------------------------
     -- Green LED assignments
     LEDG        <= (others => '0'); -- Reserved
@@ -270,7 +278,13 @@ begin
             sync_irq_irq                                => hostifIrq,
 
             app_pio_in_port                             => app_input,
-            app_pio_out_port                            => app_output
+            app_pio_out_port                            => app_output,
+
+            tristate_cfi_flash_0_tcm_address_out        => CFI_FLASH_ADDR,
+            tristate_cfi_flash_0_tcm_read_n_out         => CFI_FLASH_OE_n,
+            tristate_cfi_flash_0_tcm_write_n_out        => CFI_FLASH_WE_n,
+            tristate_cfi_flash_0_tcm_data_out           => CFI_FLASH_DATA,
+            tristate_cfi_flash_0_tcm_chipselect_n_out   => CFI_FLASH_CE_n
         );
 
     -- Pll Instance

@@ -25,6 +25,14 @@
          type = "boolean";
       }
    }
+   element cfi_flash_0
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+   }
    element clk100
    {
       datum _sortIndex
@@ -166,6 +174,19 @@
          type = "String";
       }
    }
+   element sdram_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
    element app_pio.s1
    {
       datum baseAddress
@@ -174,12 +195,12 @@
          type = "String";
       }
    }
-   element sdram_0.s1
+   element node_switch_pio.s1
    {
-      datum _lockedAddress
+      datum baseAddress
       {
          value = "0";
-         type = "boolean";
+         type = "String";
       }
    }
    element sdram_0
@@ -221,6 +242,22 @@
          type = "boolean";
       }
    }
+   element tristate_cfi_flash_0
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+   }
+   element cfi_flash_0.uas
+   {
+      datum baseAddress
+      {
+         value = "8388608";
+         type = "String";
+      }
+   }
 }
 ]]></parameter>
  <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
@@ -236,7 +273,7 @@
  <parameter name="projectName">cn-single-hostif-gpio.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1460372752409" />
+ <parameter name="timeStamp" value="1485783312406" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -269,6 +306,11 @@
  <interface
    name="app_pio"
    internal="app_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="tristate_cfi_flash_0"
+   internal="tristate_cfi_flash_0.out"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -403,6 +445,72 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="32" />
   <parameter name="clockRate" value="50000000" />
+ </module>
+ <module
+   kind="altera_generic_tristate_controller"
+   version="13.0"
+   enabled="1"
+   name="cfi_flash_0">
+  <parameter name="TCM_ADDRESS_W" value="23" />
+  <parameter name="TCM_DATA_W" value="8" />
+  <parameter name="TCM_BYTEENABLE_W" value="1" />
+  <parameter name="TCM_READ_WAIT" value="160" />
+  <parameter name="TCM_WRITE_WAIT" value="160" />
+  <parameter name="TCM_SETUP_WAIT" value="60" />
+  <parameter name="TCM_DATA_HOLD" value="60" />
+  <parameter name="TCM_MAX_PENDING_READ_TRANSACTIONS" value="3" />
+  <parameter name="TCM_TURNAROUND_TIME" value="2" />
+  <parameter name="TCM_TIMING_UNITS" value="0" />
+  <parameter name="TCM_READLATENCY" value="2" />
+  <parameter name="TCM_SYMBOLS_PER_WORD" value="1" />
+  <parameter name="USE_READDATA" value="1" />
+  <parameter name="USE_WRITEDATA" value="1" />
+  <parameter name="USE_READ" value="1" />
+  <parameter name="USE_WRITE" value="1" />
+  <parameter name="USE_BEGINTRANSFER" value="0" />
+  <parameter name="USE_BYTEENABLE" value="0" />
+  <parameter name="USE_CHIPSELECT" value="1" />
+  <parameter name="USE_LOCK" value="0" />
+  <parameter name="USE_ADDRESS" value="1" />
+  <parameter name="USE_WAITREQUEST" value="0" />
+  <parameter name="USE_WRITEBYTEENABLE" value="0" />
+  <parameter name="USE_OUTPUTENABLE" value="0" />
+  <parameter name="USE_RESETREQUEST" value="0" />
+  <parameter name="USE_IRQ" value="0" />
+  <parameter name="USE_RESET_OUTPUT" value="0" />
+  <parameter name="ACTIVE_LOW_READ" value="1" />
+  <parameter name="ACTIVE_LOW_LOCK" value="0" />
+  <parameter name="ACTIVE_LOW_WRITE" value="1" />
+  <parameter name="ACTIVE_LOW_CHIPSELECT" value="1" />
+  <parameter name="ACTIVE_LOW_BYTEENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_OUTPUTENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WRITEBYTEENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WAITREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_BEGINTRANSFER" value="0" />
+  <parameter name="ACTIVE_LOW_RESETREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_IRQ" value="0" />
+  <parameter name="ACTIVE_LOW_RESET_OUTPUT" value="0" />
+  <parameter name="CHIPSELECT_THROUGH_READLATENCY" value="0" />
+  <parameter name="IS_MEMORY_DEVICE" value="1" />
+  <parameter name="MODULE_ASSIGNMENT_KEYS">embeddedsw.configuration.hwClassnameDriverSupportList,embeddedsw.configuration.hwClassnameDriverSupportDefault,embeddedsw.CMacro.SETUP_VALUE,embeddedsw.CMacro.WAIT_VALUE,embeddedsw.CMacro.HOLD_VALUE,embeddedsw.CMacro.TIMING_UNITS,embeddedsw.CMacro.SIZE,embeddedsw.memoryInfo.MEM_INIT_DATA_WIDTH,embeddedsw.memoryInfo.HAS_BYTE_LANE,embeddedsw.memoryInfo.IS_FLASH,embeddedsw.memoryInfo.GENERATE_DAT_SYM,embeddedsw.memoryInfo.GENERATE_FLASH,embeddedsw.memoryInfo.DAT_SYM_INSTALL_DIR,embeddedsw.memoryInfo.FLASH_INSTALL_DIR</parameter>
+  <parameter name="MODULE_ASSIGNMENT_VALUES">altera_avalon_lan91c111:altera_avalon_cfi_flash,altera_avalon_cfi_flash,60,160,60,ns,8388608u,8,1,1,1,1,SIM_DIR,APP_DIR</parameter>
+  <parameter name="INTERFACE_ASSIGNMENT_KEYS">embeddedsw.configuration.isFlash,embeddedsw.configuration.isMemoryDevice,embeddedsw.configuration.isNonVolatileStorage</parameter>
+  <parameter name="INTERFACE_ASSIGNMENT_VALUES" value="1,1,1" />
+  <parameter name="CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_TRISTATECONDUIT_MASTERS" value="" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+ </module>
+ <module
+   kind="altera_tristate_conduit_bridge"
+   version="13.0"
+   enabled="1"
+   name="tristate_cfi_flash_0">
+  <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="cfi_flash_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="address" width="23" type="Output" output_name="tcm_address_out" output_enable_name="" input_name="" /><pin role="write_n" width="1" type="Output" output_name="tcm_write_n_out" output_enable_name="" input_name="" /><pin role="data" width="8" type="Bidirectional" output_name="tcm_data_out" output_enable_name="tcm_data_outen" input_name="tcm_data_in" /><pin role="read_n" width="1" type="Output" output_name="tcm_read_n_out" output_enable_name="" input_name="" /><pin role="chipselect_n" width="1" type="Output" output_name="tcm_chipselect_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <connection
    kind="reset"
@@ -659,6 +767,36 @@
    version="13.0"
    start="clk25.clk_reset"
    end="app_pio.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="cfi_flash_0.clk" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="tristate_cfi_flash_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="tristate_cfi_flash_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.flash_bridge"
+   end="cfi_flash_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00800000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="tristate_conduit"
+   version="13.0"
+   start="cfi_flash_0.tcm"
+   end="tristate_cfi_flash_0.tcs" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>
