@@ -261,3 +261,69 @@ void MainWindow::printLogMessage(const QString& msg_p)
 {
     this->ui.pTextEdit->append(msg_p);
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  NMT state changed
+
+Handle an NMT state change of this node.
+
+\param[in]      nmtState_p          New NMT state
+*/
+//------------------------------------------------------------------------------
+void MainWindow::nmtStateChanged(tNmtState nmtState_p)
+{
+    // Show the new state in the widget
+    this->ui.pNmtStateWidget->setNmtState(nmtState_p);
+
+    // Handle the new NMT state
+    if (nmtState_p == kNmtGsOff)
+    {
+        this->ui.pCnListWidget->removeAllNodes();
+        this->ui.pCnInputWidget->removeAllNodes();
+        this->ui.pCnOutputWidget->removeAllNodes();
+    }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  NMT state of another node changed
+
+Handle an NMT state change of another node in the network.
+
+\param[in]      nodeId_p            Node ID of CN
+\param[in]      state_p             State of CN
+*/
+//------------------------------------------------------------------------------
+void MainWindow::nodeNmtStateChanged(int nodeId_p, tNmtState state_p)
+{
+    // Show the new state in the widget
+    this->ui.pCnListWidget->setState(nodeId_p, state_p);
+
+    // Reflect the changes on the other widgets
+    switch (state_p)
+    {
+        case kNmtCsBasicEthernet:
+        case kNmtCsStopped:
+        case kNmtGsInitialising:
+        case kNmtGsResetApplication:
+        case kNmtGsResetCommunication:
+        case kNmtGsResetConfiguration:
+        case kNmtCsPreOperational1:
+        case kNmtCsPreOperational2:
+        case kNmtCsReadyToOperate:
+        case kNmtCsOperational:
+            this->ui.pCnListWidget->addNode(nodeId_p);
+            this->ui.pCnInputWidget->addNode(nodeId_p);
+            this->ui.pCnOutputWidget->addNode(nodeId_p);
+            break;
+
+        case kNmtCsNotActive:
+        case kNmtGsOff:
+        default:
+            this->ui.pCnListWidget->removeNode(nodeId_p);
+            this->ui.pCnInputWidget->removeNode(nodeId_p);
+            this->ui.pCnOutputWidget->removeNode(nodeId_p);
+            break;
+    }
+}

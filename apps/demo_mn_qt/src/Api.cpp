@@ -137,17 +137,10 @@ Api::Api(MainWindow* pMainWindow_p,
     : pCdcFilename("mnobd.cdc")
 {
     tOplkError      ret;
-    NmtStateWidget* pState;
-    IoWidget*       pOutput;
-    IoWidget*       pInput;
-    CnListWidget*   pCnState;
+    IoWidget*       pOutput = pMainWindow_p->getOutputWidget();
+    IoWidget*       pInput = pMainWindow_p->getInputWidget();
 
     qRegisterMetaType<tNmtState>("tNmtState");
-
-    pState = pMainWindow_p->getNmtStateWidget();
-    pOutput = pMainWindow_p->getOutputWidget();
-    pInput = pMainWindow_p->getInputWidget();
-    pCnState = pMainWindow_p->getCnStateWidget();
 
     // Event logger
     this->pEventLog = new EventLog();
@@ -160,53 +153,14 @@ Api::Api(MainWindow* pMainWindow_p,
     pProcessThread = new ProcessThread(this->pEventLog);
     QObject::connect(pProcessThread,
                      SIGNAL(nmtStateChanged(tNmtState)),
-                     pState,
-                     SLOT(setNmtState(tNmtState)));
-
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeAppeared(int)),
-                     pInput,
-                     SLOT(addNode(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(allNodesRemoved()),
-                     pInput,
-                     SLOT(removeAllNodes()));
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeDisappeared(int)),
-                     pInput,
-                     SLOT(removeNode(int)));
-
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeAppeared(int)),
-                     pOutput,
-                     SLOT(addNode(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeDisappeared(int)),
-                     pOutput,
-                     SLOT(removeNode(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(allNodesRemoved()),
-                     pOutput,
-                     SLOT(removeAllNodes()));
-
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeAppeared(int)),
-                     pCnState,
-                     SLOT(addNode(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(nodeDisappeared(int)),
-                     pCnState,
-                     SLOT(removeNode(int)));
-    QObject::connect(pProcessThread,
-                     SIGNAL(allNodesRemoved()),
-                     pCnState,
-                     SLOT(removeAllNodes()));
-
+                     pMainWindow_p,
+                     SLOT(nmtStateChanged(tNmtState)));
     QObject::connect(pProcessThread,
                      SIGNAL(nodeStatusChanged(int, tNmtState)),
-                     pCnState,
-                     SLOT(setState(int, tNmtState)));
+                     pMainWindow_p,
+                     SLOT(nodeNmtStateChanged(int, tNmtState)));
 
+    // Connect other events
     QObject::connect(pProcessThread,
                      SIGNAL(userDefEvent(void*)),
                      this,

@@ -66,10 +66,8 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget* pParent_p = 0);
 
-    NmtStateWidget* getNmtStateWidget() const {return this->ui.pNmtStateWidget;}
     IoWidget*       getOutputWidget() const {return this->ui.pCnOutputWidget;}
     IoWidget*       getInputWidget() const {return this->ui.pCnInputWidget;}
-    CnListWidget*   getCnStateWidget() const {return this->ui.pCnListWidget;}
 
 private slots:
     void toggleWindowState();
@@ -77,6 +75,9 @@ private slots:
     void showSdoDialog();
     void execNmtCmd();
     void printLogMessage(const QString& msg_p);
+    void nmtStateChanged(tNmtState nmtState_p);
+    void nodeNmtStateChanged(int nodeId_p,
+                             tNmtState state_p);
 
 private:
     Ui::MainWindow      ui;

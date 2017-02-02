@@ -185,8 +185,6 @@ is reached.
 //------------------------------------------------------------------------------
 void ProcessThread::reachedNmtStateOff()
 {
-    emit allNodesRemoved();
-
     this->mutex.lock();
     this->nmtStateOff.wakeAll();
     this->mutex.unlock();
@@ -475,39 +473,10 @@ tOplkError ProcessThread::processNodeEvent(const tOplkApiEventNode* pNode_p,
             break;
 
         case kNmtNodeEventFound:
-            pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
             break;
 
         case kNmtNodeEventNmtState:
-            switch (pNode_p->nmtState)
-            {
-                case kNmtGsOff:
-                case kNmtGsInitialising:
-                case kNmtGsResetApplication:
-                case kNmtGsResetCommunication:
-                case kNmtGsResetConfiguration:
-                case kNmtCsNotActive:
-                    pProcessThread_g->sigNodeDisappeared(pNode_p->nodeId);
-                    break;
-
-                case kNmtCsPreOperational1:
-                case kNmtCsPreOperational2:
-                case kNmtCsReadyToOperate:
-                    pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
-                    break;
-
-                case kNmtCsOperational:
-                    pProcessThread_g->sigNodeAppeared(pNode_p->nodeId);
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
-                    break;
-
-                case kNmtCsBasicEthernet:
-                case kNmtCsStopped:
-                default:
-                    pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
-                    break;
-            }
+            pProcessThread_g->sigNodeStatus(pNode_p->nodeId, pNode_p->nmtState);
             break;
 
         case kNmtNodeEventError:

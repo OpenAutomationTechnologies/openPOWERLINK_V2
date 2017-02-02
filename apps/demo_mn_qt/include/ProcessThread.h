@@ -76,8 +76,6 @@ public:
     void              run();
     void              sigNmtStateChanged(tNmtState status_p);
     void              sigMnActive(bool fMnActive_p);
-    void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
-    void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
     void              sigNodeStatus(int nodeId_p, tNmtState status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
 
     tOplkApiCbEvent   getEventCbFunc(void);
@@ -88,9 +86,6 @@ public:
 signals:
     void              nmtStateChanged(tNmtState status_p);
     void              isMnActive(bool fMnActive_p);
-    void              nodeAppeared(int nodeId_p);
-    void              nodeDisappeared(int nodeId_p);
-    void              allNodesRemoved();
     void              nodeStatusChanged(int nodeId_p, tNmtState status_p);
     void              userDefEvent(void* pUserArg_p);
     void              sdoFinished(tSdoComFinished sdoInfo_p);
