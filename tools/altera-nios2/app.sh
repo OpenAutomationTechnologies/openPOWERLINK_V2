@@ -153,7 +153,6 @@ BSP_GEN_ARGS="${SEL_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.enable_c_plus_plus false \
 --set hal.enable_clean_exit false \
 --set hal.enable_exit false \
---set hal.enable_reduced_device_drivers true \
 --set hal.enable_small_c_library false \
 --set hal.enable_lightweight_device_driver_api true \
 --cpu-name ${SEL_CPU_NAME} \
@@ -165,6 +164,12 @@ then
     BSP_GEN_ARGS+="--cmd add_section_mapping .tc_mem ${SEL_TC_MEM_NAME} \
                    --set hal.linker.enable_alt_load_copy_exceptions false "
     echo "INFO: tc_mem is used by the system!"
+fi
+
+if echo ${APP_CFLAGS} | grep -c "\-DCONFIG_APP_STORE_RESTORE"; then
+    BSP_GEN_ARGS+="--set hal.enable_reduced_device_drivers false "
+else
+    BSP_GEN_ARGS+="--set hal.enable_reduced_device_drivers true "
 fi
 
 if [ -z "${DEBUG}" ]; then

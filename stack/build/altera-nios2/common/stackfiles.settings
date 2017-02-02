@@ -66,6 +66,7 @@ ${USER_SOURCE_DIR}/api/service.c \
 ${USER_SOURCE_DIR}/api/processimage.c \
 ${USER_SOURCE_DIR}/obd/obdu.c \
 ${USER_SOURCE_DIR}/obd/obdal.c \
+${USER_SOURCE_DIR}/obd/obdconfcrc-generic.c \
 ${USER_SOURCE_DIR}/dll/dllucal.c \
 ${USER_SOURCE_DIR}/event/eventu.c \
 ${USER_SOURCE_DIR}/nmt/nmtu.c \
@@ -381,6 +382,7 @@ ${ARCH_SOURCE_DIR}/altera-nios2/lock-localnoos.c \
 
 TARGET_NIOS2_DUAL_SOURCES="\
 ${ARCH_SOURCE_DIR}/altera-nios2/lock-dualprocnoos.c \
+${ARCH_SOURCE_DIR}/altera-nios2/obdconf-nios2.c \
 "
 
 TARGET_NIOS2_OPENMAC_SOURCES="\
