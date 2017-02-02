@@ -97,6 +97,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // callback function (called event kObdEvWrStringDomain)
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM         TRUE
 
+// Set this string to true if OD configuration save and load feature is
+// supported by the device
+#ifdef CONFIG_INCLUDE_STORE_RESTORE
+#define CONFIG_OBD_USE_STORE_RESTORE                TRUE
+#define CONFIG_OBD_CALC_OD_SIGNATURE                TRUE
+#endif
+
 //==============================================================================
 // SDO module specific defines
 //==============================================================================
