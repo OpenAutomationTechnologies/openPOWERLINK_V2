@@ -28,7 +28,7 @@ hardware-dependent drivers.
 
 -# Initialize the hardware platform build system
 
-        > cd openPOWERLINK/hardware/build/xilinx-microblaze
+        > cd <openPOWERLINK_dir>/hardware/build/xilinx-microblaze
         > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../..
 
   After this command CMake will search for available hardware platforms and
@@ -76,12 +76,12 @@ hardware-dependent drivers.
 
   * On a Windows host platform
 
-        > cd openPOWERLINK/hardware/build/xilinx-microblaze
+        > cd <openPOWERLINK_dir>/hardware/build/xilinx-microblaze
         > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
 
   * On a Linux host platform
 
-        > cd openPOWERLINK/hardware/build/xilinx-microblaze
+        > cd <openPOWERLINK_dir>/hardware/build/xilinx-microblaze
         > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
 
   After this command CMake will search for available hardware platforms and
@@ -116,7 +116,7 @@ For Cyclone V SoC ARM bsp and preloader generation, execute the following steps 
 
 -# Initialize the hardware platform build system
 
-        > cd openPOWERLINK/hardware/build/altera-c5socarm
+        > cd <openPOWERLINK_dir>/hardware/build/altera-c5socarm
         > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-altera-c5socarm-eabi-gnu.cmake ../..
 
   After this command CMake will search for available hardware platforms and

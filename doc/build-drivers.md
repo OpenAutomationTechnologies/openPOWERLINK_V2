@@ -55,7 +55,7 @@ To build the kernel PCIe interface driver:
       > make
       > make install
 
-The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
+The default driver installation path is: `<openPOWERLINK_dir>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
 
 ## Building a Linux Kernel Interface Driver for Zynq Hybrid Design {#sect_build_drivers_build_linux_zynq}
 
@@ -70,7 +70,7 @@ To build the kernel interface driver for Zynq hybrid:
       > make
       > make install
 
-The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_zynq`
+The default driver installation path is: `<openPOWERLINK_dir>/bin/linux/<ARCH>/oplkdrv_kernelmodule_zynq`
 
 ## Building a Windows NDIS driver {#sect_build_drivers_build_windows_ndis}
 
@@ -92,20 +92,20 @@ Open a Visual Studio command line and enter the following commands:
 
 * Build driver for Windows 7 (64 bit) in debug mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
 
 * Build driver for Windows 7 (64 bit) in release mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
 
 `Platform` and `Configuration` parameters can be modified to compile the driver for
 a different platform and Windows version.
 
-The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
+The default driver installation path is: `<openPOWERLINK_dir>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
 ## Building a PCP daemon for Microblaze (ISE) {#sect_build_drivers_build_daemon_microblazeise}
 
@@ -216,7 +216,7 @@ Following options are available for a PCP daemon of a dual processor design:
 
 - **CFG_HW_LIB_DIR**
   Path to the hardware platform installation directory your daemon should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 

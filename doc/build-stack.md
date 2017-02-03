@@ -23,19 +23,19 @@ generates Makefiles by default.
 
 * Create debug libraries
 
-      > cd openPOWERLINK/stack/build/linux
+      > cd <openPOWERLINK_dir>/stack/build/linux
       > cmake -DCMAKE_BUILD_TYPE=Debug ../..
       > make
       > make install
 
 * Create release libraries
 
-      > cd openPOWERLINK/stack/build/linux
+      > cd <openPOWERLINK_dir>/stack/build/linux
       > cmake -DCMAKE_BUILD_TYPE=Release ../..
       > make
       > make install
 
-The default library installation path is: `<openPOWERLINK_DIR>/lib/linux/<ARCH>`
+The default library installation path is: `<openPOWERLINK_dir>/lib/linux/<ARCH>`
 
 
 ## Windows {#sect_build_stack_build_windows}
@@ -45,19 +45,19 @@ Open a Visual Studio command line and enter the following commands:
 
 * Create debug libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\windows
+      > cd <openPOWERLINK_dir>\stack\build\windows
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..\..
       > nmake
       > nmake install
 
 * Create release libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\windows
+      > cd <openPOWERLINK_dir>\stack\build\windows
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..\..
       > nmake
       > nmake install
 
-The default library installation path is: `<openPOWERLINK_DIR>\lib\windows\<ARCH>`
+The default library installation path is: `<openPOWERLINK_dir>\lib\windows\<ARCH>`
 
 __NOTE:__ You can also generate a Visual Studio Solution and compile the
 libraries in Visual Studio. Please refer to the CMAKE documentation for
@@ -76,7 +76,7 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create debug libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
@@ -88,7 +88,7 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create release libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+      > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
@@ -99,7 +99,7 @@ Follow the steps below to build the stack library on your host platform:
   Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
 The default library installation path is:
-`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+`<openPOWERLINK_dir>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
 
 ### Xilinx Microblaze (Vivado) {#sect_build_stack_build_microblaze}
 
@@ -121,14 +121,14 @@ Follow the steps below to build the stack library on your host platform:
 
   * On a Windows host platform
 
-        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
         > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
         > make all
         > make install
 
   * On a Linux host platform
 
-        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
         > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
         > make all
         > make install
@@ -142,14 +142,14 @@ Follow the steps below to build the stack library on your host platform:
 
   * On a Windows host platform
 
-        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
         > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
         > make all
         > make install
 
   * On a Linux host platform
 
-        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cd <openPOWERLINK_dir>\stack\build\xilinx-microblaze
         > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
         > make all
         > make install
@@ -160,7 +160,7 @@ Follow the steps below to build the stack library on your host platform:
   Refer to \ref sect_build_stack_options_noos_microblaze for details!
 
 The default library installation path is:
-`<openPOWERLINK_DIR>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
+`<openPOWERLINK_dir>/stack/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`
 
 ### Altera Cyclone V SoC ARM {#sect_build_stack_build_c5socarm-altera}
 
@@ -170,7 +170,7 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create debug libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\altera-c5socarm
+      > cd <openPOWERLINK_dir>\stack\build\altera-c5socarm
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-altera-c5socarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
@@ -182,7 +182,7 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create release libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\altera-c5socarm
+      > cd <openPOWERLINK_dir>\stack\build\altera-c5socarm
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../toolchain-altera-c5socarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
       > make all
       > make install
@@ -193,7 +193,7 @@ Follow the steps below to build the stack library on your host platform:
   Refer to \ref sect_build_stack_options_noos_c5socarm for details!
 
 The default library installation path is:
-`<openPOWERLINK_DIR>/stack/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`
+`<openPOWERLINK_dir>/stack/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`
 
 # Configuration Options {#sect_build_stack_options}
 
@@ -211,7 +211,7 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
   Specifies the installation directory where your files will be installed.
 
-  Default directory is: `<openPOWERLINK_DIR>/lib/${SYSTEM_DIR_NAME}/${CMAKE_SYSTEM_PROCESSOR}`
+  Default directory is: `<openPOWERLINK_dir>/lib/${SYSTEM_DIR_NAME}/${CMAKE_SYSTEM_PROCESSOR}`
 
 - **CMAKE_BUILD_TYPE**
 
@@ -375,7 +375,7 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
     Specify the path to the hardware platform the CN library should refer to.
     The path to the hardware platform should point to the export folder of the hardware
-    project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+    project. (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_COMPILE_LIB_MNDRV_HOSTIF**
 
@@ -390,7 +390,7 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
   Specify the path to the hardware platform the driver library should refer to.
   The path to the hardware platform should point to the export folder of the hardware
-  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+  project. (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 ### Altera Cyclone V SoC ARM Configuration Options {#sect_build_stack_options_noos_c5socarm}
 
@@ -409,4 +409,4 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
 
   Specifies the path to the hardware platform the application library should refer to.
   The path to the hardware platform should point to the export folder of the hardware
-  project. (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
+  project. (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)

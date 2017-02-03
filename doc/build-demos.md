@@ -7,7 +7,7 @@ Building openPOWERLINK Demo Applications {#page_build_demos}
 
 The following section describes how the delivered demo applications can be
 built. The demo applications are located in the directory `apps`. The default
-binary installation path is: `<openPOWERLINK_DIR>/bin/<platform>/<ARCH>`
+binary installation path is: `<openPOWERLINK_dir>/bin/<platform>/<ARCH>`
 
 __NOTE:__ In order to be able to build an application, the Debug or the
 Release library versions must be available, depending on your CMAKE_BUILD_TYPE.
@@ -170,7 +170,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 - **CFG_HW_LIB_DIR**
 
   Path to the hardware platform install directory your application should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -194,7 +194,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 - **CFG_HW_LIB_DIR**
 
   Path to the hardware platform install directory that the application should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -211,7 +211,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 - **CFG_DRV_BLD_PATH**
 
   Path to the driver daemon build location that the application should refer to.
-   (e.g: `<openPOWERLINK_DIR>/drivers/altera-nios2/drv_daemon/build`)
+   (e.g: `<openPOWERLINK_dir>/drivers/altera-nios2/drv_daemon/build`)
 
 - **CFG_DRV_BIN**
 
