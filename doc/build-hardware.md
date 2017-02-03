@@ -74,8 +74,15 @@ hardware-dependent drivers.
 
 -# Initialize the hardware platform build system
 
+  * On a Windows host platform
+
         > cd openPOWERLINK/hardware/build/xilinx-microblaze
-        > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
+
+  * On a Linux host platform
+
+        > cd openPOWERLINK/hardware/build/xilinx-microblaze
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
 
   After this command CMake will search for available hardware platforms and
   report all found platforms by the following messages:

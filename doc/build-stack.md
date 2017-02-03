@@ -119,10 +119,19 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create debug libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
-      > make all
-      > make install
+  * On a Windows host platform
+
+        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+        > make all
+        > make install
+
+  * On a Linux host platform
+
+        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+        > make all
+        > make install
 
   This will create the `[LIB_NAME]` stack library (debug) for the hardware library in `[PATH_TO_HW_LIB]`.
   Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`
@@ -131,10 +140,19 @@ Follow the steps below to build the stack library on your host platform:
 
 * Create release libraries
 
-      > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
-      > make all
-      > make install
+  * On a Windows host platform
+
+        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+        > make all
+        > make install
+
+  * On a Linux host platform
+
+        > cd <openPOWERLINK_directory>\stack\build\xilinx-microblaze
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_[LIB_NAME]=ON -DCFG_COMPILE_LIB_[LIB_NAME]_LIB_DIR=[PATH_TO_HW_LIB]
+        > make all
+        > make install
 
   This will create the `[LIB_NAME]` stack library for the hardware library in `[PATH_TO_HW_LIB]`.
   Multiple stack libraries can be built together by passing the define pairs (`CFG_COMPILE_LIB_[LIB_NAME]`

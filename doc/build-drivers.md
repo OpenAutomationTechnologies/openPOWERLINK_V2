@@ -128,10 +128,19 @@ The PCP daemon uses the driver library for the host interface (`liboplkmndrv-dua
 
 To build the PCP daemon:
 
-      > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
-      > make
-      > make install
+  * On a Windows host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > make
+        > make install
+
+  * On a Linux host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > make
+        > make install
 
 # Configuration Options {#sect_build_drivers_options}
 
