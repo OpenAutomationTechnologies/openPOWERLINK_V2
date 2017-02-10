@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake macro for installing the bitstream for Vivado Microblaze
+# Generate hardware configuration files without bitstream for Zynq Vivado design
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -27,25 +27,45 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ################################################################################
+# Getting the argument to set the path
+if { $argc != 1 } {
+        puts "The script requires 1 input."
+        puts "Please try again."
+        exit -1
+    } else {
+        #puts [expr [lindex $argv 0] + [lindex $argv 1]]
+    }
 
-MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION SKIP_BITSTREAM)
+# Local parameters
+set proj_name system
+set bd_source "${proj_name}/${proj_name}.srcs/sources_1/bd/${proj_name}"
+set hdl_source hdl
+set sdk_path "${proj_name}/${proj_name}.sdk"
+set constrs_path "${proj_name}/${proj_name}.srcs/constrs_1"
+set imp_path "${proj_name}/${proj_name}.runs/impl_1"
 
-SET(SDK_EXPORT ${EXAMPLE_ROOT}/vivado/system/system.runs/impl_1)
+# create block design
+source [lindex $argv 0]/${proj_name}_bd.tcl
 
-    IF(SKIP_BITSTREAM)
-        INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/hw_platform/
-                DESTINATION ${BITS_DESTINATION}
-                PATTERN "*.in" EXCLUDE
-               )
-    ELSE()
-        INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/hw_platform/
-                DESTINATION ${BITS_DESTINATION}
-                PATTERN "*.in" EXCLUDE
-               )
+# Validate the block design:
+validate_bd_design
 
-        INSTALL(FILES ${SDK_EXPORT}/system_wrapper_bd.bmm
-                DESTINATION ${BITS_DESTINATION}
-               )
-    ENDIF()
+# Save block design:
+save_bd_design
 
-ENDMACRO()
+# Generate Block design:
+generate_target all [get_files  [lindex $argv 0]/${bd_source}/${proj_name}.bd]
+
+# Create HDL file:
+make_wrapper -files [get_files [lindex $argv 0]/${bd_source}/${proj_name}.bd] -top
+
+# Add HDL wrapper file:
+add_files -norecurse [lindex $argv 0]/${bd_source}/${hdl_source}/${proj_name}_wrapper.vhd
+
+# Add constraint
+file mkdir [lindex $argv 0]/${constrs_path}
+add_files -fileset constrs_1 -norecurse [lindex $argv 0]/${proj_name}.xdc
+
+# Export Hardware design without bitstream
+file mkdir  [lindex $argv 0]/${sdk_path}
+write_hwdef -force  -file [lindex $argv 0]/${sdk_path}/${proj_name}_wrapper.hdf
