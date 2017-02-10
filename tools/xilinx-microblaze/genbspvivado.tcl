@@ -2,7 +2,7 @@
 #
 # Generate the bsp for Zynq Vivado design
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -36,13 +36,18 @@ if { $argc != 4 } {
         #puts [expr [lindex $argv 0] + [lindex $argv 1]]
     }
 
-#Local parameters
+# Local parameters
 set hw_project hw_platform
 set platform standalone
 
+# To avoid error during recompilation of bsp
+file delete -force [lindex $argv 0]/../.metadata
+file delete -force [lindex $argv 0]/../.xil
+file delete -force [lindex $argv 0]
+
 # Create workspace
 # Already set from CMake
-setws [lindex $argv 0]
+setws [lindex $argv 0]/..
 
 # Set local repo
 repo -set [lindex $argv 1]
