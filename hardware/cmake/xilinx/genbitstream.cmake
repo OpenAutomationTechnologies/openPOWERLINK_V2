@@ -2,7 +2,7 @@
 #
 # CMake macro for generating the bitstream for Microblaze Vivado
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,8 @@ MACRO(GENERATE_BITS EXAMPLE_NAME HW_DEMO_DIR SKIP_BITSTREAM)
 
         IF(SKIP_BITSTREAM)
             ADD_CUSTOM_COMMAND(
-                COMMAND ${XIL_VIVADO} -mode batch -source ${ARCH_TOOLS_DIR}/genbitvivado.tcl -tclargs ${VIVADO_DEMO_DIR}
+                OUTPUT ${VIVADO_DEMO_DIR}/system/system.runs/impl_1/system_wrapper_timing_summary_routed.rpt
+                COMMAND ${XIL_VIVADO} -mode batch -source ${ARCH_TOOLS_DIR}/gennobitvivado.tcl -tclargs ${VIVADO_DEMO_DIR}
                 WORKING_DIRECTORY ${VIVADO_DEMO_DIR}
             )
 
@@ -67,6 +68,8 @@ MACRO(GENERATE_BITS EXAMPLE_NAME HW_DEMO_DIR SKIP_BITSTREAM)
 
         # Add all generated files to clean target
         SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
+                            ${VIVADO_DEMO_DIR}/vivado.jou
+                            ${VIVADO_DEMO_DIR}/vivado.log
                             ${VIVADO_DEMO_DIR}/system
            )
     ELSE()
