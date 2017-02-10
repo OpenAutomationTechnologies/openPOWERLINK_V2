@@ -45,7 +45,6 @@ ADD_CUSTOM_COMMAND(
     TARGET ${EXECUTABLE_NAME}
     POST_BUILD
     COMMAND mb-size ${EXECUTABLE_NAME} | tee "${PROJECT_NAME}.size"
-    COMMAND data2mem -bm ${XIL_HW_SPEC}/system_wrapper_bd.bmm -bt ${XIL_HW_SPEC}/system_wrapper.bit -bd ${EXECUTABLE_NAME} tag system_i_pcp -o b ${XIL_HW_SPEC}/download.bit
     COMMAND arm-xilinx-eabi-objcopy -I elf32-little -O elf32-little -R .local_memory -R .vectors.* ${EXECUTABLE_NAME} ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
 )
 
@@ -57,7 +56,16 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
 SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
                     ${EXECUTABLE_NAME}
                     ${PROJECT_NAME}.size
+                    ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
    )
+
+##############################################################################
+# Add targets for the generating bitstream
+ADD_CUSTOM_TARGET(
+    create-bit
+    COMMAND data2mem -bm ${XIL_HW_SPEC}/system_wrapper_bd.bmm -bt ${XIL_HW_SPEC}/system_wrapper.bit -bd ${PROJECT_BINARY_DIR}/oplkdrv_daemon.elf tag system_i_pcp -o b ${XIL_HW_SPEC}/download.bit
+    WORKING_DIRECTORY ${XIL_HW_SPEC}
+)
 
 ################################################################################
 # Set architecture specific installation files

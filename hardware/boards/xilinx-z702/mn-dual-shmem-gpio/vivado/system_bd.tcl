@@ -48,7 +48,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 # Create project
 set proj_name system
-create_project $proj_name system -part xc7z020clg484-1
+create_project -force $proj_name system -part xc7z020clg484-1
 
 # Set project properties
 set obj [get_projects $proj_name]
