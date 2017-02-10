@@ -2,7 +2,7 @@
 #
 # Generate the bsp for Zynq Vivado design
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,8 +47,12 @@ setws [lindex $argv 0]
 # Set local repo
 repo -set [lindex $argv 1]
 
-# Create Hardware project
-createhw -name ${hw_project} -hwspec [lindex $argv 2]
-
-# Create bsp
-createbsp -name bsp[lindex $argv 3] -hwproject ${hw_project} -proc [lindex $argv 3] -os ${platform}
+#To avoid recompilation of Hardware project
+if { [file isdirectory ${hw_project}] == 0} {
+   # Create Hardware project
+   createhw -name ${hw_project} -hwspec [lindex $argv 2]
+   # Create bsp
+   createbsp -name bsp[lindex $argv 3] -hwproject ${hw_project} -proc [lindex $argv 3] -os ${platform}
+} else {
+   exit;
+}

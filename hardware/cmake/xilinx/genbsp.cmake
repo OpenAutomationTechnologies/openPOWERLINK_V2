@@ -2,7 +2,7 @@
 #
 # CMake macro for generating the board support package for Vivado Microblaze
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,7 +49,7 @@ MACRO(GENERATE_BSP EXAMPLE_NAME XIL_DEMO_DIR XIL_BSP_TARGET_DIR PROCESSOR_NAME T
         ADD_CUSTOM_COMMAND(
             OUTPUT ${XIL_BSP_TARGET_DIR}/${PROCESSOR_NAME}/lib/libxil.a
             DEPENDS ${VIVADO_DEMO_DIR}/system/system.sdk/${BITS_SYSTEM_NAME}.hdf
-            COMMAND xsdk -batch -source ${ARCH_TOOLS_DIR}/genbspvivado.tcl ${XIL_BSP_TARGET_DIR}/.. ${XIL_DEMO_DIR}/../../../ipcore/xilinx ${BSP_VIVADO_DIR}/system/system.sdk/${BITS_SYSTEM_NAME}.hdf ${PROCESSOR_NAME}
+            COMMAND xsdk -batch -source ${ARCH_TOOLS_DIR}/genbspvivado.tcl ${XIL_BSP_TARGET_DIR}/.. ${XIL_PLK_IPCORE_REPO}/components/drivers ${BSP_VIVADO_DIR}/system/system.sdk/${BITS_SYSTEM_NAME}.hdf ${PROCESSOR_NAME}
             COMMAND make -C ${XIL_BSP_TARGET_DIR}
             WORKING_DIRECTORY ${XIL_BSP_TARGET_DIR}/..
         )
@@ -61,7 +61,14 @@ MACRO(GENERATE_BSP EXAMPLE_NAME XIL_DEMO_DIR XIL_BSP_TARGET_DIR PROCESSOR_NAME T
         )
 
         # Add all generated files to clean target
-        SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES} ${XIL_BSP_TARGET_DIR})
+        SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
+                            ${XIL_BSP_TARGET_DIR}/../hw_platform
+                            ${XIL_BSP_TARGET_DIR}/../SDK.log
+                            ${XIL_BSP_TARGET_DIR}/../.metadata
+                            ${XIL_BSP_TARGET_DIR}/../.xil
+                            ${XIL_BSP_TARGET_DIR}/../system.mss
+                            ${XIL_BSP_TARGET_DIR}
+           )
     ELSE()
         MESSAGE(FATAL_ERROR "libgen was not found in system PATH or ISE installation")
     ENDIF()
