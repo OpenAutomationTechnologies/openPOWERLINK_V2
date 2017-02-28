@@ -12,7 +12,7 @@ interface for posting and receiving events to/from other user modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -369,7 +369,8 @@ tOplkError eventu_postError(tEventSource eventSource_p,
     tEvent      event;
 
     // Check parameter validity
-    ASSERT(pArg_p != NULL);
+    ASSERT((argSize_p == 0) ||
+           (pArg_p != NULL));
 
     // create argument
     eventError.eventSource = eventSource_p;
