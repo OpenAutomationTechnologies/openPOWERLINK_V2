@@ -79,6 +79,8 @@ ${USER_SOURCE_DIR}/pdo/pdou.c \
 ${USER_SOURCE_DIR}/pdo/pdoucal.c \
 ${USER_SOURCE_DIR}/pdo/pdoucal-triplebufshm.c \
 ${USER_SOURCE_DIR}/sdo/sdocom-std.c \
+${USER_SOURCE_DIR}/sdo/sdocomsrv.c \
+${USER_SOURCE_DIR}/sdo/sdocomclt.c \
 ${USER_SOURCE_DIR}/sdo/sdoseq.c \
 ${USER_SOURCE_DIR}/sdo/sdoasnd.c \
 ${USER_SOURCE_DIR}/sdo/sdoudp.c \

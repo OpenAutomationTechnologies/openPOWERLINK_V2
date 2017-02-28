@@ -101,6 +101,8 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdocom-dummy.c
     ${USER_SOURCE_DIR}/sdo/sdocom.c
     ${USER_SOURCE_DIR}/sdo/sdocom-std.c
+    ${USER_SOURCE_DIR}/sdo/sdocomsrv.c
+    ${USER_SOURCE_DIR}/sdo/sdocomclt.c
     ${USER_SOURCE_DIR}/sdo/sdoseq.c
     ${USER_SOURCE_DIR}/sdo/sdoasnd.c
     ${USER_SOURCE_DIR}/sdo/sdoudp.c

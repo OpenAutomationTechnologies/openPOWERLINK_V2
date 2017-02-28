@@ -101,6 +101,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_CMDL_HDR_VAR_SIZE               4       // size of variable header part
 #define SDO_CMDL_HDR_WRITEBYINDEX_SIZE      4       // size of write by index header (index + subindex + reserved)
 #define SDO_CMDL_HDR_READBYINDEX_SIZE       4       // size of read by index header (index + subindex + reserved)
+#define SDO_CMDL_HDR_WRITEMULTBYINDEX_SIZE  8       // size of write multiple parameters by index sub-header (index + subindex + reserved)
 
 // defines for SDO command layer flags
 #define SDO_CMDL_FLAG_RESPONSE       0x80
@@ -110,6 +111,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SDO_CMDL_FLAG_SEGMENTED      0x20
 #define SDO_CMDL_FLAG_SEGMCOMPL      0x30
 #define SDO_CMDL_FLAG_SEGM_MASK      0x30
+#define SDO_CMDL_FLAG_PADSIZE_MASK   0x03
 
 // defines for NMT command data of NMTGoToStandby
 #define NMT_CMD_DATA_FLAG_DELAY             0x01    // include MNSwitchOverDelay_U32
@@ -380,6 +382,51 @@ typedef struct
     UINT16                  reserved2;                      ///< Reserved
     UINT8                   aCommandData[8];                ///< Reserves a minimum number of bytes as a placeholder
 } PACK_STRUCT tAsySdoCom;
+
+/**
+ * \brief SDO Command Layer Write Multiple Parameter by Index Request or Read Multiple by Index response sub-header
+ *
+ * This structure defines the sub-header of a WriteMultParam request or ReadMultParam response command
+ *
+ * For more information consult the POWERLINK specification document "EPSG DS 301 V1.3.0" chapter 6.3.2.4.2.3
+ */
+typedef struct
+{
+    UINT32                  byteOffsetNext;                 ///< Byte Offset of the next data set, counting from the beginning of the fixed command header. If the value is 0, the last data set has been reached.
+    UINT16                  index;                          ///< Specifies an entry of the device object dictionary
+    UINT8                   subIndex;                       ///< Specifies a component of a device object dictionary entry
+    UINT8                   info;                           ///< Reserved (alignment-padding) and 2 LSB bits as info for padding bytes after payload data. For mulit-read the MSB is additionally a sub-abort flag.
+    UINT8                   aCommandData[4];                ///< Payload data or sub-abort code
+} PACK_STRUCT tAsySdoComMultWriteReqReadResp;
+
+/**
+ * \brief SDO Command Layer Write Multiple Parameter by Index Response sub-header
+ *
+ * This structure defines the sub-header of a WriteMultParam command response
+ *
+ * For more information consult the POWERLINK specification document "EPSG DS 301 V1.3.0" chapter 6.3.2.4.2.3
+ */
+typedef struct
+{
+    UINT16                  index;                          ///< Specifies an entry of the device object dictionary
+    UINT8                   subIndex;                       ///< Specifies a component of a device object dictionary entry
+    UINT8                   abortFlag;                      ///< Flag is 1-bit MSB; 0: transfer ok 1: abort transfer
+    UINT32                  subAbortCode;                   ///< Reason of the sub-abort
+} PACK_STRUCT tAsySdoComWriteMultResp;
+
+/**
+ * \brief SDO Command Layer Read Multiple Parameter by Index request sub-header
+ *
+ * This structure defines the sub-header of a ReadMultParam command request
+ *
+ * For more information consult the POWERLINK specification document "EPSG DS 301 V1.3.0" chapter 6.3.2.4.2.3
+ */
+typedef struct
+{
+    UINT16                  index;                          ///< Specifies an entry of the device object dictionary
+    UINT8                   subIndex;                       ///< Specifies a component of a device object dictionary entry
+    UINT8                   reserved;                       ///< alignment for next sub-header
+} PACK_STRUCT tAsySdoComReadMultReq;
 
 /** \brief Asynchronous SDO Sequence Header
 *

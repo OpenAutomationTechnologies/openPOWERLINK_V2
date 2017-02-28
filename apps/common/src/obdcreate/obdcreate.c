@@ -162,8 +162,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_FF_SDO_RW_ALL                0
 #endif
 
-// Set to true if SDO Read/Write Multiple Parameter By Index is used (not implemented in the stack)
-#if 0
+// Set to true if SDO Read/Write Multiple Parameter By Index is used
+#if defined(CONFIG_INCLUDE_SDO_RW_MULTIPLE)
 #define CONFIG_FF_SDO_RW_MULTIPLE           (NMT_FEATUREFLAGS_SDO_RW_MULTIPLE)
 #else
 #define CONFIG_FF_SDO_RW_MULTIPLE           0
