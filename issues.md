@@ -3,46 +3,6 @@ Known Issues of openPOWERLINK Protocol Stack {#page_known_issues}
 
 [TOC]
 
-# Zynq hybrid: Microblaze BSP build fails due to missing openmac_cfg.h {#sect_known_issues_zynqhybrid_bsp}
-
-## Description
-Building the Microblaze BSP for the Zynq hybrid design fails due to missing openmac_cfg.h file.
-
-        > In file included from /somewhere/stack/src/kernel/edrv/edrv-openmac.c:49:0:
-        > /somewhere/stack/include/target/openmac.h:45:25: fatal error: openmac_cfg.h: No such file or directory
-
-## Workaround
-Vivado selects the wrong openMAC IP-Core, thus, make sure that no openMAC IP-Core intended for ISE can be
-found by Vivado. In openPOWERLINK repository, simply remove the pcores directory:
-
-        > rm -rf <OPLK>/hardware/ipcore/xilinx/components/pcores
-
-# Zynq emacps: Kernel panic {#sect_known_issues_emacps_panic}
-
-## Description
-The openPOWERLINK kernel module results in a kernel panic if the application is restarted.
-
-# Zynq emacps: Driver load fails {#sect_known_issues_emacps_drvloadfail}
-
-## Description
-The openPOWERLINK kernel module fails to load while restarting the MN application.
-
-# Zynq emacps: MN fails in case of high PDO load {#sect_known_issues_emacps_mnhighpdoload}
-
-## Description
-The Linux openPOWERLINK MN on Zynq with emacps fails to run configurations with high PDO load.
-
-The following configuration was tested:
-
-MN              | CN               | CDC
-----------------| ---------------- | -------------------------
-demo-mn-console | X20 Bus couplers | 30CN/252TPDO/104RPDO/10ms
-
-Error:
-
-        > EVENT HISTORY Source = EventSourceEventk (0x06) OplkError = No free entry in internal buffer table for Tx frames (0x014) OrgSource = EventSourceNmtk 0x02
-        > EVENT STATE_CHANGE   NmtMsNotActive->NmtGsOff Originating event:NmtEventCriticalError
-
 # DE2i-150 board flash support {#sect_known_issues_de2i150_flash}
 
 ## Description
