@@ -5,6 +5,56 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.5.1 {#sect_revision_v2_5_1}
+
+This is the latest release of the V2.5 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.5.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Update documentation for Xilinx Zynq designs
+- Solve data freshness issue on Zynq Hybrid design
+- Fix wrong assertion in eventu_postError
+- Improve Nios II CN documentation
+- Fix SKIP_BITSTREAM enable in Zynq Hybrid design
+- Fix Microblaze BSP build in Zynq Hybrid design
+- Document update for Altera C5 SoC design
+- Fix build documentation for Vivado under Windows
+- Resolve xilinx-z702 PCP compiler warnings in Zynq hybrid
+- Resolve kernel panic for RMN
+- Remove unimportant targetsection assignments
+- Fix typo in known issues documentation
+- Reduce timeout steps in ctrlucal_executeCmd for dualprocshm CAL
+- Add support for VEth in Zynq hybrid design
+- Fix interface driver probe functions for Zynq hybrid design
+- Fix warnings in CMake version 3.3.x
+- Fix SDO server for non-numeric expedited WriteByIndex
+- Fix missing kObdEvPostWrite event for non-numeric objects
+- Fix NULL pointer used in edrv-i210 probe
+- Increase Tx buffer to handle higher PDO size in Zynq emacps
+- Fix driver probe functions for Zynq emacps
+- Update cmake configuration in edrv module
+- Fix NULL pointer used in edrvcyclic and sdotest-com
+- Remove unreachable break
+- Correct local variables
+- Add missing "_p" for parameters in obdconf
+- Add missing includes
+- Remove \return for functions that return nothing
+- Veth: Fix compilation on Linux kernels >= 4.7
+
+### Changes:
+- Consistency cleanup in build documentation
+- Update required Doxygen
+- Update Xilinx Zynq documentation
+- Improve readability of the directories documentation
+- Clean up kernel interface driver for Zynq hybrid design
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.5.0 {#sect_revision_v2_5_0}
 
 This is the first release of the V2.5 release series. It contains new features
