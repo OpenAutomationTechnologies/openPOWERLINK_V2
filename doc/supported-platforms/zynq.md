@@ -97,7 +97,7 @@ https://www.kernel.org/pub/linux/kernel/projects/rt/4.4/older/patch-4.4-rt2.patc
 
 Apply the patch using the following command:
 
-    > patch -p1 << (gunzip -c /path/to/patch-4.4-rt2.patch.gz)
+    > patch -p1 < <(gunzip -c /path/to/patch-4.4-rt2.patch.gz)
 
 # Linux on Zynq ARM {#sect_zynq_linux}
 
