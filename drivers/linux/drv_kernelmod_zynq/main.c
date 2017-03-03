@@ -661,6 +661,8 @@ static int plkIntfMmap(struct file* pFile_p,
     pVmArea_p->vm_pgoff = (ULONG)pageAddr >> PAGE_SHIFT;
     // Save the offset of the mapped memory address from the start of page boundary
     instance_l.bufPageOffset = ((ULONG)pageAddr - (pVmArea_p->vm_pgoff << PAGE_SHIFT));
+    // Disabled cache of the mapped memory address
+    pVmArea_p->vm_page_prot = pgprot_noncached(pVmArea_p->vm_page_prot);
 
     if (io_remap_pfn_range(pVmArea_p,
                            pVmArea_p->vm_start,
