@@ -2,7 +2,7 @@
 #
 # CMake file of CiA 302 MN QT demo application
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,7 @@ OPTION(CFG_INCLUDE_MN_REDUNDANCY "Use MN redundancy functions (if compiled into 
 SET(OBJDICT CiA302-4_MN)            # Set object dictionary to use
 FIND_OPLK_LIBRARY("mn")             # Find suitable openPOWERLINK library
 
-FIND_PACKAGE(Qt5Core REQUIRED)      # Find Qt5
-FIND_PACKAGE(Qt5Gui REQUIRED)
-FIND_PACKAGE(Qt5Widgets REQUIRED)
+FIND_PACKAGE(Qt5 COMPONENTS Core Widgets REQUIRED)     # Find Qt5
 
 # Instruct CMake to run moc automatically when needed.
 SET(CMAKE_AUTOMOC ON)
@@ -79,10 +77,6 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/NodeState.cpp
     ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
     ${DEMO_SOURCE_DIR}/EventLog.cpp
-    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
-    ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
-    ${CONTRIB_SOURCE_DIR}/console/printlog.c
-    ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     )
 
 SET(DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
@@ -101,6 +95,14 @@ SET(DEMO_HEADERS
     ${DEMO_INCLUDE_DIR}/NodeState.h
     ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
     ${DEMO_INCLUDE_DIR}/EventLog.h
+    )
+
+# Set common sources for this demo
+SET(COMMON_SOURCES
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+    ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
+    ${CONTRIB_SOURCE_DIR}/console/printlog.c
+    ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     )
 
 INCLUDE_DIRECTORIES(
@@ -164,7 +166,6 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 ################################################################################
 #
 
-
 # Setup QT5 Wrappers
 QT5_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 
@@ -172,9 +173,10 @@ QT5_ADD_RESOURCES(DEMO_RESOURCES_RCC ${DEMO_RESOURCES})
 # Group Source Files
 
 SOURCE_GROUP("Source Files" FILES ${DEMO_SOURCES})
-SOURCE_GROUP("QT-generated Files" FILES ${DEMO_RESOURCES_RCC})
+SOURCE_GROUP("Common Source Files" FILES ${COMMON_SOURCES})
+SOURCE_GROUP("Common Source Files" FILES ${DEMO_ARCH_SOURCES})
+SOURCE_GROUP("Generated Files" FILES ${DEMO_RESOURCES_RCC})
 SOURCE_GROUP("Header Files" FILES ${DEMO_HEADERS})
-SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Object Dictionary" FILES
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
     ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.h
@@ -188,6 +190,7 @@ SOURCE_GROUP("Object Dictionary" FILES
 ADD_EXECUTABLE(demo_mn_qt ${DEMO_SOURCES}
                           ${DEMO_ARCH_SOURCES}
                           ${DEMO_HEADERS}
+                          ${COMMON_SOURCES}
                           ${DEMO_RESOURCES_RCC}
                           ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc
               )
