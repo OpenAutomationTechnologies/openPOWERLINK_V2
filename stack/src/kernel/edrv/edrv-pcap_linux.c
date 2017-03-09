@@ -225,6 +225,7 @@ tOplkError edrv_exit(void)
 {
     // End the pcap loop and wait for the worker thread to terminate
     pcap_breakloop(edrvInstance_l.pPcapThread);
+    pthread_cancel(edrvInstance_l.hThread);
     pthread_join(edrvInstance_l.hThread, NULL);
 
     // Close pcap instance
@@ -566,8 +567,11 @@ static void* workerThread(void* pArgument_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
     int             pcapRet;
+    int             oldCancelType;
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
+
+    pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, &oldCancelType);
 
     // Set up and activate the pcap live capture handle
     pInstance->pPcapThread = startPcap();
