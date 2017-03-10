@@ -2842,7 +2842,9 @@ static tOplkError clientSend(tSdoComCon* pSdoComCon_p)
                     pPayload += 2;
                     ami_setUint8Le(pPayload, (UINT8)pSdoComCon_p->targetSubIndex);
                     sizeOfCmdFrame = SDO_CMDL_HDR_FIXED_SIZE + SDO_CMDL_HDR_READBYINDEX_SIZE;
-                    pSdoComCon_p->transferredBytes = 1;
+                    // size is reinitialized to 0 for the response frame later, but we need to
+                    // set a value != 0 here to indicate a started transfer
+                    pSdoComCon_p->transferredBytes = SDO_CMDL_HDR_READBYINDEX_SIZE;
                     break;
 
                 case kSdoServiceWriteByIndex:
@@ -3009,6 +3011,8 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p,
                     switch (flags)
                     {
                         case SDO_CMDL_FLAG_EXPEDITED:
+                            // re-init transfer sizes utilized by preceding request
+                            pSdoComCon->transferredBytes = 0;
                             // check size of buffer
                             segmentSize = ami_getUint16Le(&pSdoCom_p->segmentSizeLe);
                             if (segmentSize > pSdoComCon->transferSize)
@@ -3030,7 +3034,9 @@ static tOplkError clientProcessFrame(tSdoComConHdl sdoComConHdl_p,
                             transferSize -= SDO_CMDL_HDR_VAR_SIZE;
                             if (transferSize <= pSdoComCon->transferSize)
                             {   // buffer fits
+                                // re-init transfer sizes utilized by preceding request
                                 pSdoComCon->transferSize = (UINT)transferSize;
+                                pSdoComCon->transferredBytes = 0;
                             }
                             else
                             {   // buffer too small -> send abort
