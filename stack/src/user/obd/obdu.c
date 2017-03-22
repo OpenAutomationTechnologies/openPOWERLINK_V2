@@ -2369,6 +2369,9 @@ static tObdEntry* searchIndex(const tObdEntry* pObdEntry_p,
     UINT32  last;
     UINT32  middle;
 
+    if (numEntries_p == 0)
+        return NULL;
+
     first = 0;
     last = numEntries_p - 1;
 
