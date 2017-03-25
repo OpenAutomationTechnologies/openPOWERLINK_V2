@@ -14,6 +14,7 @@ The sync module is responsible to synchronize the user layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,6 +51,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <semaphore.h>
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -65,7 +71,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -83,6 +88,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static sem_t*           syncSem_l;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static int              fd_l;
+tTimesyncSharedMemory*  timesynckcal_sharedMemory;
+static size_t           memSize_p = sizeof(tTimesyncSharedMemory);
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -114,6 +125,38 @@ tOplkError timesynckcal_init(void)
         return kErrorNoResource;
     }
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    // Initialize shared memory for SOC timestamp
+    fd_l = shm_open(SOC_TIMESTAMP_SHM_BSDSEM, O_CREAT | O_RDWR , 0);
+
+    if (fd_l < 0)
+    {
+        return kErrorNoResource;
+    }
+
+    // Allocate shared memory for SOC timestamp
+    if (ftruncate(fd_l, memSize_p) < 0)
+    {
+        return kErrorNoResource;
+    }
+
+    timesynckcal_sharedMemory = (void*)mmap(NULL,
+                                            memSize_p,              // Memory size
+                                            PROT_READ | PROT_WRITE, // Map as read and write memory
+                                            MAP_SHARED,             // Map as shared memory
+                                            fd_l,                   // File descriptor
+                                            0);
+
+    // Check for valid memory mapping
+    if (timesynckcal_sharedMemory == MAP_FAILED)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
+        timesynckcal_sharedMemory = NULL;
+        return kErrorNoResource;
+    }
+
+#endif
+
     return kErrorOk;
 }
 
@@ -130,6 +173,17 @@ void timesynckcal_exit(void)
 {
     sem_close(syncSem_l);
     sem_unlink(TIMESYNC_SYNC_BSDSEM);
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    // Unmap SOC timestamp shared memory
+    if (munmap(timesynckcal_sharedMemory, memSize_p) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() munmap failed!\n", __func__);
+    }
+
+    // Uninitiaize SOC timestamp shared memory
+    shm_unlink(SOC_TIMESTAMP_SHM_BSDSEM);
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -184,8 +238,7 @@ The function returns the reference to the timesync shared memory.
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 {
-    // Not implemented yet
-    return NULL;
+    return timesynckcal_sharedMemory;
 }
 #endif
 
