@@ -8,6 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define TIMESYNC_SYNC_BSDSEM            "/semTimeSyncSync"
+#define TIMESYNC_TIMESTAMP_SHM          "/shmTimeSyncTimestamp"
 
 //------------------------------------------------------------------------------
 // typedef
