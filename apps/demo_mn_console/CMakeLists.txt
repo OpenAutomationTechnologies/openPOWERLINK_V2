@@ -43,6 +43,7 @@ IF (POLICY CMP0043)
 ENDIF()
 
 INCLUDE(../common/cmake/options.cmake)
+INCLUDE(../common/cmake/firmwaremanager.cmake)
 
 OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
 OPTION(CFG_INCLUDE_MN_REDUNDANCY "Use MN redundancy functions (if compiled into the libraries)" OFF)
@@ -68,6 +69,7 @@ SET(DEMO_SOURCES
     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
     ${CONTRIB_SOURCE_DIR}/getopt/getopt.c
+    ${FIRMWARE_MANAGER_SOURCES}
     )
 
 INCLUDE_DIRECTORIES(
