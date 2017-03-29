@@ -79,10 +79,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Event instance
+*/
+typedef struct
+{
+    tEventConfig config; ///< Configuration provided in initEvents()
+} tEventInstance;
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static BOOL*    pfGsOff_l;
+static tEventInstance instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -101,6 +109,9 @@ static tOplkError processCfmProgressEvent(const tCfmEventCnProgress* pCfmProgres
                                           void* pUserArg_p);
 static tOplkError processCfmResultEvent(const tOplkApiEventCfmResult* pCfmResult_p,
                                         void* pUserArg_p);
+static tOplkError processFirmwareManagerEvents(tOplkApiEventType eventType_p,
+                                               const tOplkApiEventArg* pEventArg_p,
+                                               void* pUserArg_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -118,9 +129,9 @@ The function initializes the applications event module
 */
 //------------------------------------------------------------------------------
 
-void initEvents(BOOL* pfGsOff_p)
+void initEvents(const tEventConfig* config)
 {
-    pfGsOff_l = pfGsOff_p;
+    memcpy(&instance_l, config, sizeof(tEventConfig));
 }
 
 //------------------------------------------------------------------------------
@@ -180,6 +191,11 @@ tOplkError processEvents(tOplkApiEventType eventType_p,
             break;
     }
 
+    if (ret == kErrorOk)
+    {
+        ret = processFirmwareManagerEvents(eventType_p, pEventArg_p, pUserArg_p);
+    }
+
     return ret;
 }
 
@@ -208,7 +224,7 @@ static tOplkError processStateChangeEvent(const tEventNmtStateChange* pNmtStateC
 
     UNUSED_PARAMETER(pUserArg_p);
 
-    if (pfGsOff_l == NULL)
+    if (instance_l.config.pfGsOff == NULL)
     {
         console_printlog("Application event module is not initialized!\n");
         return kErrorGeneralError;
@@ -227,7 +243,7 @@ static tOplkError processStateChangeEvent(const tEventNmtStateChange* pNmtStateC
             printf("Stack received kNmtGsOff!\n");
 
             // signal that stack is off
-            *pfGsOff_l = TRUE;
+            *instance_l.config.pfGsOff = TRUE;
             break;
 
         case kNmtGsResetCommunication:
@@ -344,6 +360,9 @@ static tOplkError processNodeEvent(const tOplkApiEventNode* pNode_p,
             break;
 
         case kNmtNodeEventAmniReceived:
+            break;
+
+        case kNmtNodeEventUpdateSw:
             break;
 
         default:
@@ -464,6 +483,37 @@ static tOplkError processCfmResultEvent(const tOplkApiEventCfmResult* pCfmResult
     }
 
     return kErrorOk;
+}
+
+static tOplkError processFirmwareManagerEvents(tOplkApiEventType eventType_p,
+                                               const tOplkApiEventArg* pEventArg_p,
+                                               void* pUserArg_p)
+{
+    tOplkError ret = kErrorOk;
+    BOOL fCallFirmwareManager = FALSE;
+    tOplkApiEventNode* pEventNode;
+
+    switch (eventType_p)
+    {
+        case kOplkApiEventSdo:
+            fCallFirmwareManager = TRUE;
+            break;
+
+        case kOplkApiEventNode:
+            pEventNode = (tOplkApiEventNode*)&pEventArg_p->nodeEvent;
+            fCallFirmwareManager = (pEventNode->nodeEvent == kNmtNodeEventUpdateSw);
+            break;
+
+        default:
+            break;
+    }
+
+    if (fCallFirmwareManager && (instance_l.config.pfnFirmwareManagerCallback != NULL))
+    {
+        ret = instance_l.config.pfnFirmwareManagerCallback(eventType_p, pEventArg_p, pUserArg_p);
+    }
+
+    return ret;
 }
 
 /// \}

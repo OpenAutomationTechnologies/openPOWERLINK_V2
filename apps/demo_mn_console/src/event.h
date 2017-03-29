@@ -51,6 +51,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+/**
+\brief Event configuration
+*/
+typedef struct
+{
+    BOOL*           pfGsOff;                    ///< Pointer to GsOff flag (determines if the stack is down)
+    tOplkApiCbEvent pfnFirmwareManagerCallback; ///< Callback function to firmware manager
+} tEventConfig;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -59,7 +68,7 @@ extern "C"
 {
 #endif
 
-void        initEvents(BOOL* pfGsOff_p);
+void        initEvents(const tEventConfig* config);
 tOplkError  processEvents(tOplkApiEventType eventType_p,
                           const tOplkApiEventArg* pEventArg_p,
                           void* pUserArg_p);

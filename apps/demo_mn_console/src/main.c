@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <getopt/getopt.h>
 #include <console/console.h>
 #include <eventlog/eventlog.h>
+#include <firmwaremanager/firmwaremanager.h>
 
 #if defined(CONFIG_USE_PCAP)
 #include <pcap/pcap-console.h>
@@ -97,6 +98,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     char            cdcFile[256];
+    char            fwInfoFile[256];
     char*           pLogFile;
     tEventlogFormat logFormat;
     UINT32          logLevel;
@@ -148,8 +150,10 @@ This is the main function of the openPOWERLINK console MN demo application.
 //------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-    tOplkError  ret = kErrorOk;
-    tOptions    opts;
+    tOplkError      ret = kErrorOk;
+    tOptions        opts;
+    tEventConfig    eventConfig;
+    tFirmwareRet    fwRet;
 
     if (getOptions(argc, argv, &opts) < 0)
         return 0;
@@ -160,12 +164,24 @@ int main(int argc, char* argv[])
         return 0;
     }
 
+    fwRet = firmwaremanager_init(opts.fwInfoFile);
+    if (fwRet != kFwReturnOk)
+    {
+        fprintf(stderr, "Error initializing firmware manager!");
+        return 0;
+    }
+
     eventlog_init(opts.logFormat,
                   opts.logLevel,
                   opts.logCategory,
                   (tEventlogOutputCb)console_printlogadd);
 
-    initEvents(&fGsOff_l);
+    memset(&eventConfig, 0, sizeof(tEventConfig));
+
+    eventConfig.pfGsOff = &fGsOff_l;
+    eventConfig.pfnFirmwareManagerCallback = firmwaremanager_processEvent;
+
+    initEvents(&eventConfig);
 
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console MN DEMO application\n");
@@ -199,6 +215,7 @@ int main(int argc, char* argv[])
 Exit:
     shutdownApp();
     shutdownPowerlink();
+    firmwaremanager_exit();
     system_exit();
 
     return 0;
@@ -542,6 +559,7 @@ static int getOptions(int argc_p,
 
     /* setup default parameters */
     strncpy(pOpts_p->cdcFile, "mnobd.cdc", 256);
+    strncpy(pOpts_p->fwInfoFile, "fw.info", 256);
     strncpy(pOpts_p->devName, "\0", 128);
     pOpts_p->pLogFile = NULL;
     pOpts_p->logFormat = kEventlogFormatReadable;
@@ -549,12 +567,16 @@ static int getOptions(int argc_p,
     pOpts_p->logLevel = 0xffffffff;
 
     /* get command line parameters */
-    while ((opt = getopt(argc_p, argv_p, "c:l:pv:t:d:")) != -1)
+    while ((opt = getopt(argc_p, argv_p, "c:f:l:pv:t:d:")) != -1)
     {
         switch (opt)
         {
             case 'c':
                 strncpy(pOpts_p->cdcFile, optarg, 256);
+                break;
+
+            case 'f':
+                strncpy(pOpts_p->fwInfoFile, optarg, 256);
                 break;
 
             case 'd':
@@ -575,10 +597,10 @@ static int getOptions(int argc_p,
 
             default: /* '?' */
 #if defined(CONFIG_USE_PCAP)
-                printf("Usage: %s [-c CDC-FILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+                printf("Usage: %s [-c CDC-FILE] [-f FWINFO-FILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
                 printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
 #else
-                printf("Usage: %s [-c CDC-FILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+                printf("Usage: %s [-c CDC-FILE] [-f FWINFO-FILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
 #endif
                 printf(" -p: Use parsable log format\n");
                 printf("              If option is skipped the program prompts for the interface.\n");
