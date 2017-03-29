@@ -2044,7 +2044,9 @@ static tOplkError cbNodeEvent(UINT nodeId_p,
     eventArg.nodeEvent.fMandatory = fMandatory_p;
 
     ret = ctrlu_callUserEventCallback(kOplkApiEventNode, &eventArg);
-    if (((nodeEvent_p == kNmtNodeEventCheckConf) || (nodeEvent_p == kNmtNodeEventUpdateConf)) &&
+    if (((nodeEvent_p == kNmtNodeEventCheckConf) ||
+        (nodeEvent_p == kNmtNodeEventUpdateConf) ||
+        (nodeEvent_p == kNmtNodeEventUpdateSw)) &&
         (ret != kErrorOk))
         return ret;
 
