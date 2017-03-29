@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   firmwaremanager.h
+\file   firmwareinfodecode.h
 
-\brief  Header file for the firmware manager modules
+\brief  Header file of the firmware info decode module
 
-This header file contains the general definitions for all firmware manager
-modules.
+This header file contains the definitions of the firware info decoe module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,13 +33,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_firmwaremanager_H_
-#define _INC_firmwaremanager_H_
+#ifndef _INC_firmwareinfodecode_H_
+#define _INC_firmwareinfodecode_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <firmwaremanager/firmwaremanager.h>
+#include <firmwaremanager/firmwarestore.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,18 +52,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
-\brief Enum with return values used by the firmware manager modules
-*/
-typedef enum
+\brief Information structure representing a module
+ */
+typedef struct
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
-    kFwReturnInvalidParameter,      ///< An invalid parameter was passed
-    kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
-    kFwReturnFileOperationFailed,   ///< A File operation failed
-    kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
-} tFirmwareRet;
+    UINT8 nodeId;       ///< ID of the node
+    UINT32 vendorId;    ///< Vendor ID of the module
+    UINT32 productId;   ///< Product ID of the module
+    UINT32 hwVariant;   ///< Hardware variant of the module
+} tFirmwareModuleInfo;
 
+/**
+\brief Structure containing information about the configured firmware
+ */
+typedef struct
+{
+    tFirmwareModuleInfo moduleInfo; ///< Info of the associated module
+    UINT32 appSwDate;               ///< Software date of the configured firmware
+    UINT32 appSwTime;               ///< Software time of the configured firmware
+    BOOL fFirmwareLocked;           ///< Flag for representation if the firmware
+                                    ///< should be locked, this functionality is
+                                    ///< currently not supported.
+    tFirmwareStoreHandle pFwImage;  ///< Handle of the firmware store instance for
+                                    ///< accessing the firmware
+} tFirmwareInfo;
+
+/**
+\brief List entry for a firmware info
+ */
+typedef struct tFirmwareInfoEntry
+{
+    tFirmwareInfo fwInfo;               ///< Firmware info structure
+    struct tFirmwareInfoEntry* pNext;   ///< Pointer to the next entry within list
+} tFirmwareInfoEntry;
+
+/**
+\brief List of firmware info entries
+ */
+typedef tFirmwareInfoEntry* tFirmwareInfoList;
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -72,8 +99,12 @@ extern "C"
 {
 #endif
 
+tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
+                                           tFirmwareInfoList* ppInfoList_p);
+tFirmwareRet firmwareinfodecode_freeInfo(tFirmwareInfoList pInfoList_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_firmwaremanager_H_ */
+#endif /* _INC_firmwareinfodecode_H_ */

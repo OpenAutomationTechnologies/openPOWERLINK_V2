@@ -38,4 +38,5 @@ SET(FIRMWARE_MANAGER_SOURCE_DIR ${COMMON_SOURCE_DIR}/firmwaremanager)
 
 SET(FIRMWARE_MANAGER_SOURCES
     ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwarestore-file.c
+    ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwareinfodecode-ascii.c
 )
