@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   firmwaremanager.h
+\file   firmwareinfo.h
 
-\brief  Header file for the firmware manager modules
+\brief  Header file of the firmware info module
 
-This header file contains the general definitions for all firmware manager
-modules.
+This header file contains the definitions of the firware info module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,13 +33,16 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_firmwaremanager_H_
-#define _INC_firmwaremanager_H_
+#ifndef _INC_firmwareinfo_H_
+#define _INC_firmwareinfo_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <firmwaremanager/firmwaremanager.h>
+#include <firmwaremanager/firmwareinfodecode.h>
+#include <firmwaremanager/firmwarestore.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,18 +53,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 /**
-\brief Enum with return values used by the firmware manager modules
-*/
-typedef enum
+ * \brief Handle to a firmware info instance
+ */
+typedef struct tFirmwareInfoInstance* tFirmwareInfoHandle;
+
+/**
+ * \brief Configuration structure for a firmware info instance
+ */
+typedef struct
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
-    kFwReturnInvalidParameter,      ///< An invalid parameter was passed
-    kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
-    kFwReturnFileOperationFailed,   ///< A File operation failed
-    kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
-    kFwReturnModuleNotFound,        ///< The requested module was not found
-} tFirmwareRet;
+    tFirmwareStoreHandle pFwStore; ///< Handle of the firmware store instance
+                                   ///< for accessing the firmware configuration
+} tFirmwareInfoConfig;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -73,8 +75,15 @@ extern "C"
 {
 #endif
 
+tFirmwareRet firmwareinfo_create(const tFirmwareInfoConfig* pConfig_p,
+                                 tFirmwareInfoHandle* ppHandle_p);
+tFirmwareRet firmwareinfo_destroy(tFirmwareInfoHandle pHandle_p);
+tFirmwareRet firmwareinfo_getInfoForNode(tFirmwareInfoHandle pHandle_p,
+                                         const tFirmwareModuleInfo * pModuleInfo_p,
+                                         tFirmwareInfo** ppFwInfo_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_firmwaremanager_H_ */
+#endif /* _INC_firmwareinfo_H_ */
