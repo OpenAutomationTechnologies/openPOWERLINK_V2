@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   firmwaremanager.h
+\file   firmwarestore.h
 
-\brief  Header file for the firmware manager modules
+\brief  Header file of the firmware store module
 
-This header file contains the general definitions for all firmware manager
-modules.
+This header file contains the definitions of the firware store module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,33 +33,47 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_firmwaremanager_H_
-#define _INC_firmwaremanager_H_
+#ifndef _INC_firmwarestore_H_
+#define _INC_firmwarestore_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <firmwaremanager/firmwaremanager.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
+#if defined(_WIN32)
+#define FIRMWARESTORE_PATH_DIR_SEP '\\'
+#else
+#define FIRMWARESTORE_PATH_DIR_SEP '/'
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
 /**
-\brief Enum with return values used by the firmware manager modules
-*/
-typedef enum
+ * \brief Handle to a firmware store instance
+ */
+typedef struct tFirmwareStoreInstance* tFirmwareStoreHandle;
+
+/**
+ * \brief Configuration structure for a firmware store instance
+ */
+typedef struct
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
-    kFwReturnInvalidParameter,      ///< An invalid parameter was passed
-    kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
-    kFwReturnFileOperationFailed,   ///< A File operation failed
-} tFirmwareRet;
+    const char* pFilename;          ///< Filename of the accessed file.
+                                    ///< This member is only used by the file
+                                    ///< system based implementation.
+    const void* pStorageBuffer;     ///< Pointer to the memory holding the
+                                    ///< accessed information. This member is
+                                    ///< only used by the non file system
+                                    ///< implementation.
+} tFirmwareStoreConfig;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -71,8 +84,18 @@ extern "C"
 {
 #endif
 
+tFirmwareRet firmwarestore_create (const tFirmwareStoreConfig* pConfig_p,
+                                   tFirmwareStoreHandle* pHandle_p);
+tFirmwareRet firmwarestore_destroy (tFirmwareStoreHandle pHandle_p);
+tFirmwareRet firmwarestore_loadData(tFirmwareStoreHandle pHandle_p);
+tFirmwareRet firmwarestore_flushData(tFirmwareStoreHandle pHandle_p);
+tFirmwareRet firmwarestore_getData(tFirmwareStoreHandle pHandle_p,
+                                   void** ppData_p, size_t* pDataSize_p);
+tFirmwareRet firmwarestore_getBase(tFirmwareStoreHandle pHandle_p,
+                                   void** ppBase_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_firmwaremanager_H_ */
+#endif /* _INC_firmwarestore_H_ */

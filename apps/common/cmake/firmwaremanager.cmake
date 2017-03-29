@@ -36,4 +36,6 @@ SET(FIRMWARE_MANAGER_SOURCE_DIR ${COMMON_SOURCE_DIR}/firmwaremanager)
 ################################################################################
 # Setup module sources
 
-SET(FIRMWARE_MANAGER_SOURCES )
+SET(FIRMWARE_MANAGER_SOURCES
+    ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwarestore-file.c
+)
