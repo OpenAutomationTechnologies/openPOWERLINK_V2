@@ -5,13 +5,16 @@
 \brief  Sync implementation for the user CAL timesync module using Linux ioctl
 
 This file contains a sync implementation for the user CAL timesync module. It
-uses a Linux ioctl call for synchronisation.
+uses a Linux ioctl call for synchronisation. In addition SoC timestamp
+forwarding feature implementation is done by creating a shared memory for the
+user and kernel.
 
 \ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,6 +53,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/ioctl.h>
 #include <time.h>
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#include <unistd.h>
+#include <sys/mman.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -66,7 +74,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -78,15 +85,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Instance for user timesync module
+
+This structure contains all necessary information needed by the timesync user
+CAL module for Linux ioctl design.
+*/
+typedef struct
+{
+    OPLK_FILE_HANDLE        fd;               ///< File descriptor.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;    ///< Shared timesync structure.
+    size_t                  memSize;          ///< Size of the timesync shared memory.
+#endif
+}tTimesynckcalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static OPLK_FILE_HANDLE fd_l;
+static tTimesynckcalInstance instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tOplkError getTimeSyncSharedMem(void);
+static tOplkError releaseTimeSyncSharedMem(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -109,8 +134,16 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     UNUSED_PARAMETER(pfnSyncCb_p);
 
-    fd_l = ctrlucal_getFd();
-
+    instance_l.fd = ctrlucal_getFd();
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.memSize = sizeof(tTimesyncSharedMemory);
+    if (getTimeSyncSharedMem() != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get timesync shared memory\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+#endif
     return kErrorOk;
 }
 
@@ -125,7 +158,16 @@ The function cleans up the user CAL timesync module
 //------------------------------------------------------------------------------
 void timesyncucal_exit(void)
 {
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tOplkError ret;
 
+    ret = releaseTimeSyncSharedMem();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() SoC Timestamp shm could not be released\n",
+                              __func__);
+    }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -148,11 +190,28 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
     int ret;
 
-    ret = ioctl(fd_l, PLK_CMD_TIMESYNC_SYNC, timeout_p);
+    ret = ioctl(instance_l.fd, PLK_CMD_TIMESYNC_SYNC, timeout_p);
     if (ret == 0)
         return kErrorOk;
 
     return kErrorGeneralError;
+}
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory base.
+
+\return The function returns a pointer to the timesync shared memory base.
+
+\ingroup module_timesyncucal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesyncucal_getSharedMemory(void)
+{
+    return instance_l.pSharedMemory;
 }
 
 //============================================================================//
@@ -160,5 +219,65 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function remaps the timesync shared memory into user space memory using the
+mmap function.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    mmap successful
+\retval kErrorNoResource            mmap failed
+*/
+//------------------------------------------------------------------------------
+static tOplkError getTimeSyncSharedMem(void)
+{
+    instance_l.pSharedMemory = mmap(NULL,                                   // Map at any address in vma
+                                    instance_l.memSize + 2 * sysconf(_SC_PAGE_SIZE),
+                                    PROT_READ | PROT_WRITE,                 // Map as read and write memory
+                                    MAP_SHARED,                             // Map as shared memory
+                                    instance_l.fd,                          // File descriptor
+                                    sysconf(_SC_PAGE_SIZE));
+
+    if (instance_l.pSharedMemory == MAP_FAILED)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
+        instance_l.pSharedMemory = NULL;
+        return kErrorNoResource;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Release timesync shared memory
+
+The function releases the remapped timesync shared memory into user memory.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    munmap successful
+\retval kErrorGeneralError          munmap failed
+*/
+//------------------------------------------------------------------------------
+static tOplkError releaseTimeSyncSharedMem(void)
+{
+    if (instance_l.pSharedMemory != NULL)
+    {
+        if (munmap(instance_l.pSharedMemory, instance_l.memSize) != 0)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() munmap failed\n", __func__);
+            return kErrorNoResource;
+        }
+
+        instance_l.pSharedMemory = NULL;
+        instance_l.memSize = 0;
+    }
+
+    return kErrorOk;
+}
+#endif
 
 /// \}

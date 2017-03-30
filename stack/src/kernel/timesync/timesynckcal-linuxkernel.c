@@ -5,7 +5,9 @@
 \brief  CAL kernel timesync module using the openPOWERLINK Linux kernel driver
 
 This file contains an implementation for the kernel CAL timesync module which
-uses the openPOWERLINK Linux kernel driver interface.
+uses the openPOWERLINK Linux kernel driver interface. In addition SoC timestamp
+forwarding feature implementation is done by creating a shared memory for the
+user and kernel.
 
 The sync module is responsible to synchronize the user layer.
 
@@ -14,6 +16,7 @@ The sync module is responsible to synchronize the user layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,11 +80,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Instance for kernel timesync module
+
+This structure contains all necessary information needed by the timesync CAL
+module for Linux kernel module.
+*/
 typedef struct
 {
-    wait_queue_head_t       syncWaitQueue;
-    BOOL                    fSync;
-    BOOL                    fInitialized;
+    wait_queue_head_t       syncWaitQueue;   ///< Wait queue for time sync event.
+    BOOL                    fSync;           ///< Flag for wait sync event.
+    BOOL                    fInitialized;    ///< Flag for timesynckcal module initialization.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;   ///< Shared timesync structure.
+    size_t                  memSize;         ///< Size of the timesync shared memory.
+#endif
 } tTimesynckCalInstance;
 
 //------------------------------------------------------------------------------
@@ -92,6 +105,10 @@ static tTimesynckCalInstance instance_l; ///< Instance variable of kernel timesy
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tOplkError allocateSocMem(UINT8** ppSocMem_p, size_t memSize_p);
+static tOplkError freeSocMem(UINT8* pMem_p, size_t memSize_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -110,10 +127,25 @@ The function initializes the kernel CAL timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_init(void)
 {
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    UINT8*  pMem;
+#endif
+
     OPLK_MEMSET(&instance_l, 0, sizeof(tTimesynckCalInstance));
 
     init_waitqueue_head(&instance_l.syncWaitQueue);
     instance_l.fInitialized = TRUE;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.memSize = sizeof(tTimesyncSharedMemory);
+    if (instance_l.pSharedMemory != NULL)
+        freeSocMem((UINT8*)instance_l.pSharedMemory, instance_l.memSize);
+
+    if (allocateSocMem(&pMem, instance_l.memSize) != kErrorOk)
+        return kErrorNoResource;
+
+    instance_l.pSharedMemory = (tTimesyncSharedMemory*)pMem;
+#endif
 
     return kErrorOk;
 }
@@ -130,6 +162,13 @@ The function cleans up the CAL timesync module
 void timesynckcal_exit(void)
 {
     instance_l.fInitialized = FALSE;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (instance_l.pSharedMemory != NULL)
+       {
+            freeSocMem((UINT8*)instance_l.pSharedMemory, instance_l.memSize);
+            instance_l.pSharedMemory = NULL;
+       }
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -218,10 +257,8 @@ The function returns the reference to the timesync shared memory.
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 {
-    // Not implemented yet
-    return NULL;
+    return instance_l.pSharedMemory;
 }
-#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -229,4 +266,62 @@ tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Free timesync shared memory
+
+The function frees shared memory which was allocated in the kernel layer for
+transferring the SoC timestamp.
+
+\param[in,out]  pMem_p              Pointer to the shared memory base.
+\param[in]      memSize_p           Size of timesync shared memory.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError freeSocMem(UINT8* pMem_p, size_t memSize_p)
+{
+    ULONG   order;
+
+    // Check parameter validity
+    ASSERT(pMem_p != NULL);
+
+    order = get_order(memSize_p);
+    free_pages((ULONG)pMem_p, order);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate timesync shared memory
+
+The function allocates shared memory required to transfer the SoC timestamp from
+the kernel layer to the user layer.
+
+\param[out]     ppSocMem_p          Pointer to store the timesync shared memory base address.
+\param[in]      memSize_p           Size of timesync shared memory.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError allocateSocMem(UINT8** ppSocMem_p, size_t memSize_p)
+{
+    ULONG   order;
+
+    // Check parameter validity
+    ASSERT(ppSocMem_p != NULL);
+
+    order = get_order(memSize_p);
+    *ppSocMem_p = (UINT8*)__get_free_pages(GFP_KERNEL, order);
+    if (*ppSocMem_p == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Memory for SoC could not be created\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+
+    return kErrorOk;
+}
+#endif
 /// \}
