@@ -222,8 +222,10 @@ typedef struct
     UINT8*              pData;               ///< Pointer to data
     UINT                transferSize;        ///< Number of bytes to transfer
     UINT                transferredBytes;    ///< Number of bytes already transferred
-    UINT                reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request
+    UINT                reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request for server or max. buffer size for client
     UINT                respSegmSize;        ///< Segment size of WriteMultParam or ReadMultParam response
+    tSdoMultiAccEntry*  paMultiAcc;          ///< Pointer to multi access array provided by user
+    UINT                multiAccCnt;         ///< Count of processed multi access array elements
 #if defined(CONFIG_INCLUDE_SDOS)
     tSdoComConHdl       sdoObdConHdl;        ///< OD connection handle (only valid if not 0)
     UINT                pendingTransferSize; ///< Due bytes waiting for confirmation from pending OD access

@@ -69,6 +69,12 @@ typedef struct
     UINT                timeout;                ///< Timeout: not supported in this version of openPOWERLINK
     tSdoAccessType      sdoAccessType;          ///< The SDO access type (Read or Write) for this transfer
     tSdoFinishedCb      pfnSdoFinishedCb;       ///< Pointer to callback function which will be called when transfer is finished.
+    tSdoMultiAccEntry*  paMultiAcc;             ///< Multiple object access array.
+                                                /**< Provided array has to remain unchanged until the transfer has finished. */
+    UINT                multiAccCnt;            ///< Count of multiple object access array elements aggregated in one transfered by local client
+    void*               pMultiBuffer;           ///< Pointer to buffer for multiple object transfer frame storage.
+                                                /**< Provided buffer has to remain unchanged until the transfer has finished. */
+    UINT                multiBufSize;           ///< Buffer size for multiple object transfer frame storage.
     void*               pUserArg;               ///< User definable argument pointer
 } tSdoComTransParamByIndex;
 
