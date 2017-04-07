@@ -11,7 +11,7 @@ This file contains the implementation of the user PDO module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -319,7 +319,7 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                      mapParamIndex++)
                 {
                     ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
-                    if (ret != kErrorOk)
+                    if ((ret != kErrorOk) && (ret != kErrorObdIndexNotExist))
                     {
                         DEBUG_LVL_ERROR_TRACE("%s() checkAndConfigurePdo for RPDO failed with 0x%X\n",
                                               __func__,
@@ -336,7 +336,7 @@ tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
                      mapParamIndex++)
                 {
                     ret = checkAndConfigurePdo(mapParamIndex, 0, &abortCode);
-                    if (ret != kErrorOk)
+                    if ((ret != kErrorOk) && (ret != kErrorObdIndexNotExist))
                     {
                         DEBUG_LVL_ERROR_TRACE("%s() checkAndConfigurePdo for TPDO failed with 0x%X\n",
                                               __func__,
