@@ -398,6 +398,8 @@ static void loopMain(void)
 
 #endif
 
+    system_startFirmwareManagerThread(firmwaremanager_thread, 5);
+
     // start stack processing by sending a NMT reset command
     ret = oplk_execNmtCommand(kNmtEventSwReset);
     if (ret != kErrorOk)
@@ -502,6 +504,8 @@ static void shutdownPowerlink(void)
 
     // NMT_GS_OFF state has not yet been reached
     fGsOff_l = FALSE;
+
+    system_stopFirmwareManagerThread();
 
 #if (!defined(CONFIG_KERNELSTACK_DIRECTLINK) && \
      defined(CONFIG_USE_SYNCTHREAD))

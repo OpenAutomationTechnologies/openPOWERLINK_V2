@@ -52,6 +52,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+typedef tOplkError (*tFirmwareManagerThreadCb)(void);
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -69,6 +71,10 @@ void system_msleep(unsigned int milliSeconds_p);
 void system_startSyncThread(tSyncCb pfnSync_p);
 void system_stopSyncThread(void);
 #endif
+
+void system_startFirmwareManagerThread(tFirmwareManagerThreadCb pfnFwmThreadCb_p,
+                                       unsigned int intervalSec_p);
+void system_stopFirmwareManagerThread(void);
 
 #ifdef __cplusplus
 }

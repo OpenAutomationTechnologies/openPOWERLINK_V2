@@ -88,6 +88,13 @@ typedef struct
 } tSyncThreadInstance;
 #endif
 
+typedef struct
+{
+    tFirmwareManagerThreadCb    pfnFwmCb;
+    BOOL                        fTerminate;
+    unsigned int                interval;
+} tFwmThreadInstance;
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
@@ -98,6 +105,8 @@ static pthread_t            syncThreadId_l;
 static tSyncThreadInstance  syncThreadInstance_l;
 #endif
 
+static tFwmThreadInstance   fwmThreadInstance_l;
+
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
@@ -106,6 +115,8 @@ static void handleTermSignal(int signum);
 #if defined(CONFIG_USE_SYNCTHREAD)
 static void* powerlinkSyncThread(void* arg);
 #endif
+
+static void* firmwareManagerThread(void* arg);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -293,6 +304,65 @@ void system_stopSyncThread(void)
 }
 #endif
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start firmware manager thread
+
+The function starts the thread used by the firmware manager.
+
+\param[in]      pfnFwmThreadCb_p    Pointer to firmware manager callback
+\param[in]      intervalSec_p       Thread execution interval in seconds
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_startFirmwareManagerThread(tFirmwareManagerThreadCb pfnFwmThreadCb_p,
+                                       unsigned int intervalSec_p)
+{
+    int ret;
+    pthread_t thread;
+    struct sched_param  schedParam;
+
+    fwmThreadInstance_l.fTerminate = FALSE;
+    fwmThreadInstance_l.pfnFwmCb = pfnFwmThreadCb_p;
+    fwmThreadInstance_l.interval = intervalSec_p;
+
+    ret = pthread_create(&thread, NULL, firmwareManagerThread, &fwmThreadInstance_l);
+    if (ret != 0)
+    {
+        fprintf(stderr, "%s() pthread_create() failed with \"%d\"\n",
+                __func__,
+                ret);
+        return;
+    }
+
+    schedParam.sched_priority = 0;
+    if (pthread_setschedparam(thread, SCHED_IDLE, &schedParam) != 0)
+    {
+        TRACE("%s() couldn't set thread scheduling parameters! %d\n",
+              __func__,
+              schedParam.sched_priority);
+    }
+
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
+    pthread_setname_np(thread, "oplkdemo-fwm");
+#endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Stop firmware manager thread
+
+The function stops the thread used by the firmware manager.
+
+\ingroup module_app_common
+*/
+//------------------------------------------------------------------------------
+void system_stopFirmwareManagerThread(void)
+{
+    fwmThreadInstance_l.fTerminate = TRUE;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -350,5 +420,28 @@ static void* powerlinkSyncThread(void* arg)
     return NULL;
 }
 #endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Firmware manager thread
+
+This function implements the firmware manager thread.
+
+\param[in,out]  arg                 Needed for thread interface not used
+*/
+//------------------------------------------------------------------------------
+static void* firmwareManagerThread(void* arg)
+{
+    tFwmThreadInstance* pInstance = (tFwmThreadInstance*)arg;
+
+    while (!pInstance->fTerminate)
+    {
+        pInstance->pfnFwmCb();
+
+        sleep(pInstance->interval);
+    }
+
+    return NULL;
+}
 
 /// \}
