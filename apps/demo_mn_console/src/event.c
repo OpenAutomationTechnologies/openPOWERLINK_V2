@@ -505,7 +505,8 @@ static tOplkError processFirmwareManagerEvents(tOplkApiEventType eventType_p,
 
         case kOplkApiEventNode:
             pEventNode = (tOplkApiEventNode*)&pEventArg_p->nodeEvent;
-            fCallFirmwareManager = (pEventNode->nodeEvent == kNmtNodeEventUpdateSw);
+            fCallFirmwareManager = ((pEventNode->nodeEvent == kNmtNodeEventUpdateSw) ||
+                    (pEventNode->nodeEvent == kNmtNodeEventConfDone));
             break;
 
         default:
