@@ -246,6 +246,7 @@ typedef enum
     kNmtNodeEventNmtState           = 0x06,     ///< Issued if the NMT state of the CN has changed.
     kNmtNodeEventError              = 0x07,     ///< NMT error of the CN.
     kNmtNodeEventAmniReceived       = 0x08,     ///< An AMNI frame was received.
+    kNmtNodeEventConfDone           = 0x09,     ///< Configuration done.
 } eNmtNodeEvent;
 
 /**

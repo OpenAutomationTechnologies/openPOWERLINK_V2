@@ -2787,7 +2787,15 @@ static INT processNodeEventBoot(UINT nodeId_p,
                                                   E_NO_ERROR,
                                                   (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
     }
-    else if (pNodeInfo->nodeState != kNmtMnuNodeStateResetConf)
+    else if (pNodeInfo->nodeState == kNmtMnuNodeStateResetConf)
+    {
+        *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p,
+                                                  kNmtNodeEventConfDone,
+                                                  nodeNmtState_p,
+                                                  E_NO_ERROR,
+                                                  (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
+    }
+    else
     {   // wrong CN state
         // ignore event
         return 0;

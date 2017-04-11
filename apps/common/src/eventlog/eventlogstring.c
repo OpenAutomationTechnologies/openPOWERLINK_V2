@@ -146,7 +146,8 @@ static const char* const sLogEventNodeEvent_l[] =
     "NmtNodeEventReadyToStart",
     "NmtNodeEventNmtState",
     "NmtNodeEventError",
-    "NmtNodeEventAmniReceived"
+    "NmtNodeEventAmniReceived",
+    "NmtNodeEventConfDone"
 };
 
 //------------------------------------------------------------------------------
