@@ -46,6 +46,7 @@ ADD_CUSTOM_COMMAND(
     POST_BUILD
     COMMAND mb-size ${EXECUTABLE_NAME} | tee "${PROJECT_NAME}.size"
     COMMAND arm-xilinx-eabi-objcopy -I elf32-little -O elf32-little -R .local_memory -R .vectors.* ${EXECUTABLE_NAME} ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
+    COMMAND make create-bit
 )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES

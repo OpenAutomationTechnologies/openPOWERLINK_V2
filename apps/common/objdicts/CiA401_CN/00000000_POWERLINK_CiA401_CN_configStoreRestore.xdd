@@ -78,8 +78,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2017-03-02"
-      fileModificationTime="09:00:00+01:00"
+      fileModificationDate="2017-04-11"
+      fileModificationTime="14:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -89,7 +89,7 @@
         <productName>openPOWERLINK device</productName>
         <version versionType="HW">1.00</version>
         <version versionType="SW">1.00</version>
-        <version versionType="FW">OPLK V2.5.1</version>
+        <version versionType="FW">OPLK V2.5.2</version>
       </DeviceIdentity>
       <DeviceFunction>
         <capabilities>
@@ -126,8 +126,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2017-03-02"
-      fileModificationTime="09:00:00+01:00"
+      fileModificationDate="2017-04-11"
+      fileModificationTime="14:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -228,7 +228,7 @@
           <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1000"/>
           <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device"/>
           <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.00"/>
-          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.5.1"/>
+          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.5.2"/>
           <Object index="1010" name="NMT_StoreParam_REC" objectType="9">
              <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="4"/>
              <SubObject subIndex="01" name="AllParam_U32" objectType="7" dataType="0007" accessType="rw" defaultValue="0"/>

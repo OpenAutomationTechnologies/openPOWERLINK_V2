@@ -213,7 +213,7 @@ tOplkError hrestimer_exit(void)
 
     for (index = 0; index < TIMER_COUNT; index++)
     {
-        pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
+        pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         pTimerInfo->pfnCallback = NULL;
         pTimerInfo->eventArg.timerHdl.handle = 0;
         /* In this case we can not just try to cancel the timer.

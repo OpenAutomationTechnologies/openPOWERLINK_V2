@@ -5,6 +5,26 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.5.2 {#sect_revision_v2_5_2}
+
+This is the latest release of the V2.5 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.5.2. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix access to aTimerInfo in hrestimer for Linux Kernel
+- Fix wrong size information provided by SDO callback
+- Use error handler posix memory sources in driver daemon
+- Fix contributor url
+- Avoid integer overflow in searchIndex
+- Resolve compilation issue in Zynq hybrid design
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.5.1 {#sect_revision_v2_5_1}
 
 This is the latest release of the V2.5 release series. This release is a stable
