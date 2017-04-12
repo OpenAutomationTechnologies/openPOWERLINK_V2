@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   firmwaremanager.h
+\file   firmwareupdate.h
 
-\brief  Header file for the firmware manager modules
+\brief  Header file of the firmware update module
 
-This header file contains the general definitions for all firmware manager
-modules.
+This header file contains the definitions of the firware update module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,13 +33,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_firmwaremanager_H_
-#define _INC_firmwaremanager_H_
+#ifndef _INC_firmwareupdate_H_
+#define _INC_firmwareupdate_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <firmwaremanager/firmwaremanager.h>
+#include <firmwaremanager/firmwareinfodecode.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -50,23 +51,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
-/**
-\brief Enum with return values used by the firmware manager modules
-*/
-typedef enum
+typedef tFirmwareRet (*tFirmwareUpdateNodeCb)(UINT nodeId_p,
+                                              tSdoComConHdl* pSdoConnection_p);
+
+typedef struct
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
-    kFwReturnInvalidParameter,      ///< An invalid parameter was passed
-    kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
-    kFwReturnFileOperationFailed,   ///< A File operation failed
-    kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
-    kFwReturnModuleNotFound,        ///< The requested module was not found
-    kFwReturnAlreadyInitialized,    ///< Firmware manager is already initialized
-    kFwReturnSdoWriteFailed,        ///< A SDO write command failed
-    kFwReturnInvalidSdoSize,        ///< A SDO event returned an invalid number of transferred bytes
-    kFwReturnInvalidSdoEvent,       ///< An invalid SDO finished event was passed
-} tFirmwareRet;
+    tFirmwareUpdateNodeCb pfnUpdateComplete;
+    tFirmwareUpdateNodeCb pfnError;
+} tFirmwareUpdateConfig;
+
+typedef struct tFirmwareUpdateEntry
+{
+    UINT                            nodeId;         ///< Node ID
+    UINT                            index;          ///< Index of remote domain object
+    UINT                            subindex;       ///< Subindex of remote domain object
+    tFirmwareStoreHandle            pStoreHandle;   ///< Handle to firmware update file
+    struct tFirmwareUpdateEntry*    pNext;          ///< Pointer to next update entry
+} tFirmwareUpdateEntry;
+
+typedef tFirmwareUpdateEntry* tFirmwareUpdateList;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -77,8 +80,13 @@ extern "C"
 {
 #endif
 
+tFirmwareRet    firmwareupdate_init(const tFirmwareUpdateConfig* pConfig_p);
+void            firmwareupdate_exit(void);
+tFirmwareRet    firmwareupdate_processUpdateList(tFirmwareUpdateList pList_p);
+tFirmwareRet    firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinished_p);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_firmwaremanager_H_ */
+#endif /* _INC_firmwareinfo_H_ */
