@@ -231,6 +231,7 @@ typedef enum
     kNmtMnuIntNodeEventTimerLonger          = 0x0D,
     kNmtMnuIntNodeEventError                = 0x0E,
     kNmtMnuIntNodeEventSwUpdated            = 0x0F,
+    kNmtMnuIntNodeEventSwOk                 = 0x10,
 } eNmtMnuIntNodeEvent;
 
 /**
@@ -256,6 +257,7 @@ typedef enum
     kNmtMnuNodeStateReadyToOp               = 0x05, // BootStep2 completed
     kNmtMnuNodeStateComChecked              = 0x06, // Communication checked successfully
     kNmtMnuNodeStateOperational             = 0x07, // CN is in NMT state OPERATIONAL
+    kNmtMnuNodeStateSwOk                    = 0x08, // CN software updated or already up-to-date
 } eNmtMnuNodeState;
 
 /**
@@ -488,6 +490,11 @@ static INT processNodeEventSwUpdated(UINT nodeId_p,
                                      tNmtState nmtState_p,
                                      UINT16 errorCode_p,
                                      tOplkError* pRet_p);
+static INT processNodeEventSwOk(UINT nodeId_p,
+                                tNmtState nodeNmtState_p,
+                                tNmtState nmtState_p,
+                                UINT16 errorCode_p,
+                                tOplkError* pRet_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -513,7 +520,8 @@ static tProcessNodeEventFunc apfnNodeEventFuncs_l[] =
     processNodeEventTimerStateMon,      // kNmtMnuIntNodeEventTimerStateMon
     processNodeEventTimerLonger,        // kNmtMnuIntNodeEventTimerLonger
     processNodeEventError,              // kNmtMnuIntNodeEventError
-    processNodeEventSwUpdated           // kNmtMnuIntNodeEventSwUpdated
+    processNodeEventSwUpdated,          // kNmtMnuIntNodeEventSwUpdated
+    processNodeEventSwOk,               // kNmtMnuIntNodeEventSwOk
 };
 
 //============================================================================//
@@ -1431,6 +1439,10 @@ tOplkError nmtmnu_processEvent(const tEvent* pEvent_p)
                 {
                     case kNmtNodeCommandBoot:
                         nodeEvent = kNmtMnuIntNodeEventBoot;
+                        break;
+
+                    case kNmtNodeCommandSwOk:
+                        nodeEvent = kNmtMnuIntNodeEventSwOk;
                         break;
 
                     case kNmtNodeCommandSwUpdated:
@@ -2718,7 +2730,7 @@ static INT processNodeEventBoot(UINT nodeId_p,
                                 UINT16 errorCode_p,
                                 tOplkError* pRet_p)
 {
-    const tNmtMnuNodeInfo*  pNodeInfo;
+    tNmtMnuNodeInfo*  pNodeInfo;
 
     UNUSED_PARAMETER(errorCode_p);
     UNUSED_PARAMETER(nmtState_p);
@@ -2734,23 +2746,29 @@ static INT processNodeEventBoot(UINT nodeId_p,
                                                       nodeNmtState_p,
                                                       E_NO_ERROR,
                                                       (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
-            if (*pRet_p == kErrorReject)
-            {   // interrupt boot process on user request
-                NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                            nodeId_p,
-                                            ((pNodeInfo->nodeState << 8) | *pRet_p));
-                *pRet_p = kErrorOk;
-                return 0;
-            }
-            else if (*pRet_p != kErrorOk)
+            if (*pRet_p == kErrorOk)
             {
-                NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                            nodeId_p,
-                                            ((pNodeInfo->nodeState << 8) | *pRet_p));
-                return 0;
+                pNodeInfo->nodeState = kNmtMnuNodeStateSwOk;
             }
         }
+        else
+        {
+            pNodeInfo->nodeState = kNmtMnuNodeStateSwOk;
+        }
 
+        if (pNodeInfo->nodeState == kNmtMnuNodeStateSwOk)
+        {
+            // check/start configuration
+            // inform application
+            *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p,
+                                                      kNmtNodeEventCheckConf,
+                                                      nodeNmtState_p,
+                                                      E_NO_ERROR,
+                                                      (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
+        }
+    }
+    else if (pNodeInfo->nodeState == kNmtMnuNodeStateSwOk)
+    {
         // check/start configuration
         // inform application
         *pRet_p = nmtMnuInstance_g.pfnCbNodeEvent(nodeId_p,
@@ -2758,21 +2776,6 @@ static INT processNodeEventBoot(UINT nodeId_p,
                                                   nodeNmtState_p,
                                                   E_NO_ERROR,
                                                   (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
-        if (*pRet_p == kErrorReject)
-        {   // interrupt boot process on user request
-            NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                        nodeId_p,
-                                        ((pNodeInfo->nodeState << 8) | *pRet_p));
-            *pRet_p = kErrorOk;
-            return 0;
-        }
-        else if (*pRet_p != kErrorOk)
-        {
-            NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                        nodeId_p,
-                                        ((pNodeInfo->nodeState << 8) | *pRet_p));
-            return 0;
-        }
     }
     else if (pNodeInfo->nodeState == kNmtMnuNodeStateConfRestored)
     {
@@ -2783,25 +2786,26 @@ static INT processNodeEventBoot(UINT nodeId_p,
                                                   nodeNmtState_p,
                                                   E_NO_ERROR,
                                                   (pNodeInfo->nodeCfg & NMT_NODEASSIGN_MANDATORY_CN) != 0);
-        if (*pRet_p == kErrorReject)
-        {   // interrupt boot process on user request
-            NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                        nodeId_p,
-                                        ((pNodeInfo->nodeState << 8) | *pRet_p));
-            *pRet_p = kErrorOk;
-            return 0;
-        }
-        else if (*pRet_p != kErrorOk)
-        {
-            NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
-                                        nodeId_p,
-                                        ((pNodeInfo->nodeState << 8) | *pRet_p));
-            return 0;
-        }
     }
     else if (pNodeInfo->nodeState != kNmtMnuNodeStateResetConf)
     {   // wrong CN state
         // ignore event
+        return 0;
+    }
+
+    if (*pRet_p == kErrorReject)
+    {   // interrupt boot process on user request
+        NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
+                                    nodeId_p,
+                                    ((pNodeInfo->nodeState << 8) | *pRet_p));
+        *pRet_p = kErrorOk;
+        return 0;
+    }
+    else if (*pRet_p != kErrorOk)
+    {
+        NMTMNU_DBG_POST_TRACE_VALUE(kNmtMnuIntNodeEventBoot,
+                                    nodeId_p,
+                                    ((pNodeInfo->nodeState << 8) | *pRet_p));
         return 0;
     }
 
@@ -2845,7 +2849,7 @@ static INT processNodeEventConfigured(UINT nodeId_p,
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if ((pNodeInfo->nodeState != kNmtMnuNodeStateIdentified) &&
+    if ((pNodeInfo->nodeState != kNmtMnuNodeStateSwOk) &&
         (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored) &&
         (pNodeInfo->nodeState != kNmtMnuNodeStateResetConf))
     {   // wrong CN state, ignore event
@@ -3087,6 +3091,7 @@ static INT processNodeEventError(UINT nodeId_p,
 
     // currently only issued on kNmtNodeCommandConfErr
     if ((pNodeInfo->nodeState != kNmtMnuNodeStateIdentified) &&
+        (pNodeInfo->nodeState != kNmtMnuNodeStateSwOk) &&
         (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored))
     {   // wrong CN state, ignore event
         return 0;
@@ -3146,6 +3151,52 @@ static INT processNodeEventSwUpdated(UINT nodeId_p,
 
 //------------------------------------------------------------------------------
 /**
+\brief  Process software update okay node event
+
+The function processes the internal node event kNmtMnuIntNodeEventSwOk.
+
+\param[in]      nodeId_p            Node ID to process.
+\param[in]      nodeNmtState_p      NMT state of the node.
+\param[in]      nmtState_p          NMT state of the MN
+\param[in]      errorCode_p         Error codes.
+\param[out]     pRet_p              Pointer to store return value
+
+\return The function returns 0 if the higher level event handler should continue
+        processing or -1 if it should exit.
+*/
+//------------------------------------------------------------------------------
+static INT processNodeEventSwOk(UINT nodeId_p,
+                                tNmtState nodeNmtState_p,
+                                tNmtState nmtState_p,
+                                UINT16 errorCode_p,
+                                tOplkError* pRet_p)
+{
+    tNmtMnuNodeInfo*    pNodeInfo;
+
+    UNUSED_PARAMETER(nodeNmtState_p);
+    UNUSED_PARAMETER(errorCode_p);
+    UNUSED_PARAMETER(nmtState_p);
+
+    pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
+
+    if (pNodeInfo->nodeState != kNmtMnuNodeStateIdentified)
+    {
+       return 0;
+    }
+
+    pNodeInfo->nodeState = kNmtMnuNodeStateSwOk;
+
+    processNodeEventBoot(nodeId_p,
+                         nodeNmtState_p,
+                         nmtState_p,
+                         errorCode_p,
+                         pRet_p);
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Process ExecResetNode node event
 
 The function processes the internal node event kNmtMnuIntNodeEventExecResetNode.
@@ -3174,7 +3225,8 @@ static INT processNodeEventExecResetNode(UINT nodeId_p,
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if (pNodeInfo->nodeState != kNmtMnuNodeStateIdentified)
+    if ((pNodeInfo->nodeState != kNmtMnuNodeStateIdentified) &&
+        (pNodeInfo->nodeState != kNmtMnuNodeStateSwOk))
     {   // wrong CN state, ignore event
         return 0;
     }
@@ -3220,7 +3272,7 @@ static INT processNodeEventExecResetConf(UINT nodeId_p,
 
     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
 
-    if ((pNodeInfo->nodeState != kNmtMnuNodeStateIdentified) &&
+    if ((pNodeInfo->nodeState != kNmtMnuNodeStateSwOk) &&
         (pNodeInfo->nodeState != kNmtMnuNodeStateConfRestored))
     {   // wrong CN state
        // ignore event
