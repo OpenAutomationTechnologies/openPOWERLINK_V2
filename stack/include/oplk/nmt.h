@@ -270,6 +270,7 @@ typedef enum
     kNmtNodeCommandConfReset        = 0x06,     ///< The application / Configuration Manager has successfully updated the configuration on the CN, and the CN needs ResetConf so that the configuration gets activated.
     kNmtNodeCommandConfErr          = 0x07,     ///< The application / Configuration Manager failed on updating configuration on the CN.
     kNmtNodeCommandStart            = 0x08,     ///< If NMT_STARTUP_NO_STARTNODE is set, this command must be issued after kNmtNodeEventReadyToStart.
+    kNmtNodeCommandSwErr            = 0x09,     ///< The application failed on updating the software on the CN.
 } eNmtNodeCommand;
 
 /**

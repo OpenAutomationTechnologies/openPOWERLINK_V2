@@ -230,6 +230,7 @@ typedef enum
     kNmtMnuIntNodeEventTimerStateMon        = 0x0C,
     kNmtMnuIntNodeEventTimerLonger          = 0x0D,
     kNmtMnuIntNodeEventError                = 0x0E,
+    kNmtMnuIntNodeEventSwUpdated            = 0x0F,
 } eNmtMnuIntNodeEvent;
 
 /**
@@ -482,6 +483,11 @@ static INT processNodeEventError(UINT nodeId_p,
                                  tNmtState nmtState_p,
                                  UINT16 errorCode_p,
                                  tOplkError* pRet_p);
+static INT processNodeEventSwUpdated(UINT nodeId_p,
+                                     tNmtState nodeNmtState_p,
+                                     tNmtState nmtState_p,
+                                     UINT16 errorCode_p,
+                                     tOplkError* pRet_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -506,7 +512,8 @@ static tProcessNodeEventFunc apfnNodeEventFuncs_l[] =
     processNodeEventTimerStatReq,       // kNmtMnuIntNodeEventTimerStatReq
     processNodeEventTimerStateMon,      // kNmtMnuIntNodeEventTimerStateMon
     processNodeEventTimerLonger,        // kNmtMnuIntNodeEventTimerLonger
-    processNodeEventError               // kNmtMnuIntNodeEventError
+    processNodeEventError,              // kNmtMnuIntNodeEventError
+    processNodeEventSwUpdated           // kNmtMnuIntNodeEventSwUpdated
 };
 
 //============================================================================//
@@ -1424,6 +1431,15 @@ tOplkError nmtmnu_processEvent(const tEvent* pEvent_p)
                 {
                     case kNmtNodeCommandBoot:
                         nodeEvent = kNmtMnuIntNodeEventBoot;
+                        break;
+
+                    case kNmtNodeCommandSwUpdated:
+                        nodeEvent = kNmtMnuIntNodeEventSwUpdated;
+                        break;
+
+                    case kNmtNodeCommandSwErr:
+                        nodeEvent = kNmtMnuIntNodeEventError;
+                        errorCode = E_NMT_BPO1_SW_UPDATE;
                         break;
 
                     case kNmtNodeCommandConfOk:
@@ -3084,6 +3100,46 @@ static INT processNodeEventError(UINT nodeId_p,
                             nmtState_p);
     if (*pRet_p == kErrorReject)
         *pRet_p = kErrorOk;
+
+    return 0;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Process software update done node event
+
+The function processes the internal node event kNmtMnuIntNodeEventSwUpdated.
+
+\param[in]      nodeId_p            Node ID to process.
+\param[in]      nodeNmtState_p      NMT state of the node.
+\param[in]      nmtState_p          NMT state of the MN
+\param[in]      errorCode_p         Error codes.
+\param[out]     pRet_p              Pointer to store return value
+
+\return The function returns 0 if the higher level event handler should continue
+        processing or -1 if it should exit.
+*/
+//------------------------------------------------------------------------------
+static INT processNodeEventSwUpdated(UINT nodeId_p,
+                                     tNmtState nodeNmtState_p,
+                                     tNmtState nmtState_p,
+                                     UINT16 errorCode_p,
+                                     tOplkError* pRet_p)
+{
+    tNmtMnuNodeInfo*    pNodeInfo;
+
+    UNUSED_PARAMETER(nodeNmtState_p);
+    UNUSED_PARAMETER(errorCode_p);
+    UNUSED_PARAMETER(nmtState_p);
+
+    pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
+
+    if (pNodeInfo->nodeState != kNmtMnuNodeStateIdentified)
+    {
+       return 0;
+    }
+
+    *pRet_p = nmtmnu_sendNmtCommand(nodeId_p, kNmtCmdSwReset);
 
     return 0;
 }

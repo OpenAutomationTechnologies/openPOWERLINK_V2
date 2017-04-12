@@ -543,6 +543,7 @@ static const tEmergErrCodeInfo emergErrCodeInfo_l[] =
     { E_NMT_BPO1_REVISION_NO,        "E_NMT_BPO1_REVISION_NO"   },
     { E_NMT_BPO1_SERIAL_NO,          "E_NMT_BPO1_SERIAL_NO"     },
     { E_NMT_BPO1_CF_VERIFY,          "E_NMT_BPO1_CF_VERIFY"     },
+    { E_NMT_BPO1_SW_UPDATE,          "E_NMT_BPO1_SW_UPDATE"     },
     { E_NMT_BPO2,                    "E_NMT_BPO2"               },
     { E_NMT_BRO,                     "E_NMT_BRO"                },
     { E_NMT_WRONG_STATE,             "E_NMT_WRONG_STATE"        },
@@ -628,6 +629,7 @@ static const tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
     { kNmtNodeCommandConfReset,    "NmtNodeCommandConfReset" },
     { kNmtNodeCommandConfErr,      "NmtNodeCommandConfErr" },
     { kNmtNodeCommandStart,        "NmtNodeCommandStart" },
+    { kNmtNodeCommandSwErr,        "kNmtNodeCommandSwErr" },
 };
 
 //============================================================================//

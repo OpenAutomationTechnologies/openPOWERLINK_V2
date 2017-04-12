@@ -97,6 +97,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define E_NMT_BPO1_REVISION_NO              0x8425  // wrong revision number
 #define E_NMT_BPO1_SERIAL_NO                0x8426  // wrong serial number
 #define E_NMT_BPO1_CF_VERIFY                0x8428  // verification of configuration failed
+#define E_NMT_BPO1_SW_UPDATE                0x842B  // CN software update failed
 #define E_NMT_BPO2                          0x8430  // mandatory CN failed in BootStep2
 #define E_NMT_BRO                           0x8440  // CheckCommunication failed for mandatory CN
 #define E_NMT_WRONG_STATE                   0x8480  // mandatory CN has wrong NMT state
