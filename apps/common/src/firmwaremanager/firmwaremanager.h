@@ -68,8 +68,12 @@ typedef enum
     kFwReturnInvalidSdoSize,        ///< A SDO event returned an invalid number of transferred bytes
     kFwReturnInvalidSdoEvent,       ///< An invalid SDO finished event was passed
     kFwReturnNoIdent,               ///< Failed to get ident for node
+    kFwReturnOdError,               ///< Failed to access local OD
     kFwReturnInterruptBoot,         ///< Signalize interruption of boot process
+    kFwReturnSdoWriteError,         ///< Failed to issue an SDO write
     kFwReturnSdoReadError,          ///< Failed to issue an SDO read
+    kFwReturnInvalidNodeInfo,       ///< An invalid node info was passed
+    kFwReturnResetNodeFailed,       ///< Failed to send reset node
     kFwReturnInvalidCheckState,     ///< Invalid state in firmware check module
 } tFirmwareRet;
 
@@ -81,6 +85,14 @@ typedef enum
 extern "C"
 {
 #endif
+
+tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p);
+void         firmwaremanager_exit(void);
+
+
+tOplkError   firmwaremanager_processEvent(tOplkApiEventType eventType_p,
+                                          const tOplkApiEventArg* pEventArg_p,
+                                          void* pUserArg_p);
 
 #ifdef __cplusplus
 }

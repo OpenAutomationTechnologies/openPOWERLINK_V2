@@ -42,4 +42,5 @@ SET(FIRMWARE_MANAGER_SOURCES
     ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwareinfo.c
     ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwareupdate.c
     ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwarecheck.c
+    ${FIRMWARE_MANAGER_SOURCE_DIR}/firmwaremanager.c
 )
