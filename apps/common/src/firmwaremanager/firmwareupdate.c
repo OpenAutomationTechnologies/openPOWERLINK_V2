@@ -107,8 +107,15 @@ static tFirmwareUpdateInstance instance_l;
 //------------------------------------------------------------------------------
 
 static tFirmwareRet checkPointerAndInstance(const void* pCheck_p);
+static tFirmwareUpdateTransmissionInfo* getInfo(UINT nodeId_p);
+static BOOL isExpectedSdoCompleteEvent(tFirmwareUpdateTransmissionInfo* pInfo_p,
+                                       const tSdoComFinished* pSdoComFinished_p);
 static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p);
-static tFirmwareRet finishTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p);
+static tFirmwareRet startTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p);
+
+static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p);
+static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo_p);
+static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p);
 static void cleanupInstance(void);
 
 //============================================================================//
@@ -169,47 +176,46 @@ void firmwareupdate_exit(void)
 
 This function processes the required firmware updates defined by the given list.
 
-\param pList_p [in]     List of required firmware updates
+\param ppList_p [in, out]   Pointer to List of required firmware updates, when
+                            an error occurs the returned list contains entries
+                            which were not freed.
 
 \return This functions returns a value of \ref tFirmwareRet.
 
 \ingroup module_app_firmwaremanager
 */
 //------------------------------------------------------------------------------
-tFirmwareRet firmwareupdate_processUpdateList(tFirmwareUpdateList pList_p)
+tFirmwareRet firmwareupdate_processUpdateList(tFirmwareUpdateList* ppList_p)
 {
     tFirmwareRet ret = kFwReturnOk;
     tFirmwareUpdateEntry** ppInsertIter;
     tFirmwareUpdateTransmissionInfo* pInfo;
 
-    ret = checkPointerAndInstance(pList_p);
+    ret = checkPointerAndInstance(ppList_p);
     if (ret != kFwReturnOk)
     {
         goto EXIT;
     }
 
-    pInfo = &instance_l.aTranmsissions[pList_p->nodeId];
+    pInfo = &instance_l.aTranmsissions[(*ppList_p)->nodeId];
 
     ppInsertIter = &pInfo->pUpdateList;
 
-    while ((*ppInsertIter != NULL) && ((*ppInsertIter)->pNext != NULL))
+    while (*ppInsertIter != NULL)
     {
         ppInsertIter = &(*ppInsertIter)->pNext;
     }
 
-    *ppInsertIter = pList_p;
+    *ppInsertIter = (*ppList_p);
+
+    *ppList_p = NULL;
 
     if (!pInfo->fTranmissionActive)
     {
         pInfo->sdoComCon = FIRMWARE_UPDATE_INVALID_SDO;
     }
 
-    ret = transmitFirmware(pInfo);
-    if (ret != kFwReturnOk)
-    {
-        FWM_ERROR("Transmission of the firmware failed with %d\n", ret);
-        goto EXIT;
-    }
+    ret = startTransmission(pInfo);
 
 EXIT:
     return ret;
@@ -234,6 +240,7 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
 {
     tFirmwareRet ret = kFwReturnOk;
     tFirmwareUpdateTransmissionInfo* pInfo = NULL;
+    BOOL fSucceeded = TRUE;
 
     ret = checkPointerAndInstance(pSdoComFinished_p);
     if (ret != kFwReturnOk)
@@ -241,79 +248,83 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
         goto EXIT;
     }
 
-    if (pSdoComFinished_p->pUserArg != &instance_l)
-    {
-        ret = kFwReturnInvalidSdoEvent;
-        goto EXIT;
-    }
-
     pInfo = &instance_l.aTranmsissions[pSdoComFinished_p->nodeId];
 
-    if (!pInfo->fTranmissionActive || (pInfo->pUpdateList == NULL))
+    if (!isExpectedSdoCompleteEvent(pInfo, pSdoComFinished_p))
     {
         ret = kFwReturnInvalidSdoEvent;
-        goto EXIT;
-    }
-
-    if ((pSdoComFinished_p->targetIndex != pInfo->pUpdateList->index) ||
-        (pSdoComFinished_p->targetSubIndex != pInfo->pUpdateList->subindex) ||
-        (pSdoComFinished_p->sdoComConHdl != pInfo->sdoComCon))
-    {
-        FWM_ERROR("SDO complete event does not match expected transmission:\n");
-        FWM_ERROR("  NodeId: %u - %u\n", pSdoComFinished_p->nodeId,
-                pInfo->pUpdateList->nodeId);
-        FWM_ERROR("  Index: 0x%x - 0x%x\n", pSdoComFinished_p->targetIndex,
-                pInfo->pUpdateList->index);
-        FWM_ERROR("  SubIndex: 0x%x - 0x%x\n", pSdoComFinished_p->targetSubIndex,
-                pInfo->pUpdateList->subindex);
-        FWM_ERROR("  sdoComConHdl: 0x%x - 0x%x\n", pSdoComFinished_p->sdoComConHdl,
-                pInfo->sdoComCon);
-        ret = kFwReturnInvalidSdoEvent;
-        goto EXIT;
-    }
-
-    if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
-    {
-        FWM_ERROR("SDO written number of byes does not match: %u - %zu\n",
-                pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
-        ret = kFwReturnInvalidSdoSize;
         goto EXIT;
     }
 
     if (pSdoComFinished_p->sdoComConState != kSdoComTransferFinished)
     {
-        FWM_ERROR("SDO write failed with state: %d\n",
-                pSdoComFinished_p->sdoComConState);
-        ret = kFwReturnSdoWriteFailed;
-        goto EXIT;
+        FWM_ERROR("SDO write failed with state: 0x%x and abort code 0x%x\n",
+                pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
+
+        fSucceeded = FALSE;
     }
 
-    ret = finishTransmission(pInfo);
-    if (ret != kFwReturnOk)
+    if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
-        goto EXIT;
+        FWM_ERROR("SDO written number of bytes does not match: %u - %zu\n",
+                pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+
+        fSucceeded = FALSE;
     }
 
-    if (pInfo->pUpdateList != NULL)
+    if (fSucceeded)
     {
-        ret = transmitFirmware(pInfo);
-        if (ret != kFwReturnOk)
-        {
-            FWM_ERROR("Transmission of the firmware failed with %d\n", ret);
-            goto EXIT;
-        }
+        ret = transmissionSucceeded(pInfo);
     }
+    else
+    {
+        transmissionFailed(pInfo);
+    }
+
+    ret = startTransmission(pInfo);
 
 EXIT:
     if (ret != kFwReturnOk)
     {
         cleanupInstance();
-        if ((instance_l.config.pfnError != NULL) && (pInfo != NULL))
-        {
-            ret = instance_l.config.pfnError(pSdoComFinished_p->nodeId, &pInfo->sdoComCon);
-        }
     }
 
+    return ret;
+}
+
+tFirmwareRet firmwareupdate_getTransmissionStatus(UINT nodeId_p,
+                                                  tFirmwareUpdateTransmissionStatus* pStatus_p)
+{
+    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareUpdateTransmissionInfo* pInfo;
+    tFirmwareUpdateEntry* pIter;
+    UINT count = 0u;
+
+    ret = checkPointerAndInstance(pStatus_p);
+    if (ret != kFwReturnOk)
+    {
+        goto EXIT;
+    }
+
+    pInfo = getInfo(nodeId_p);
+    if (pInfo == NULL)
+    {
+        ret = kFwReturnInvalidNodeId;
+        goto EXIT;
+    }
+
+    pIter = pInfo->pUpdateList;
+
+    while (pIter != NULL)
+    {
+        count++;
+        pIter = pIter->pNext;
+    }
+
+    pStatus_p->fTransmissionActive = pInfo->fTranmissionActive;
+    pStatus_p->numberOfPendingTransmissions = count;
+
+EXIT:
     return ret;
 }
 
@@ -339,6 +350,29 @@ static tFirmwareRet checkPointerAndInstance(const void* pCheck_p)
     return ret;
 }
 
+static tFirmwareUpdateTransmissionInfo* getInfo(UINT nodeId_p)
+{
+    tFirmwareUpdateTransmissionInfo* pInfo = NULL;
+
+    if (nodeId_p <= FIRMWARE_UPDATE_MAX_NODE_ID)
+    {
+        pInfo = &instance_l.aTranmsissions[nodeId_p];
+    }
+
+    return pInfo;
+}
+
+static BOOL isExpectedSdoCompleteEvent(tFirmwareUpdateTransmissionInfo* pInfo_p,
+                                       const tSdoComFinished* pSdoComFinished_p)
+{
+    return ((pSdoComFinished_p->pUserArg == &instance_l) &&
+            pInfo_p->fTranmissionActive &&
+            (pInfo_p->pUpdateList != NULL) &&
+            (pSdoComFinished_p->targetIndex == pInfo_p->pUpdateList->index) &&
+            (pSdoComFinished_p->targetSubIndex == pInfo_p->pUpdateList->subindex) &&
+            (pSdoComFinished_p->sdoComConHdl == pInfo_p->sdoComCon));
+}
+
 static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -356,8 +390,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
     ret = firmwarestore_loadData(pInfo_p->pUpdateList->pStoreHandle);
     if (ret != kFwReturnOk)
     {
-        FWM_ERROR(
-                "Loading image for transmission failed with %d and errno %d\n",
+        FWM_ERROR("Loading image for transmission failed with %d and errno %d\n",
                 ret, errno);
         goto EXIT;
     }
@@ -367,8 +400,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
                                 &pInfo_p->firmwareSize);
     if (ret != kFwReturnOk)
     {
-        FWM_ERROR(
-                "Getting the image for transmission failed with %d and errno %d\n",
+        FWM_ERROR("Getting the image for transmission failed with %d and errno %d\n",
                 ret, errno);
         goto EXIT;
     }
@@ -399,38 +431,88 @@ EXIT:
     return ret;
 }
 
-static tFirmwareRet finishTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
+static tFirmwareRet startTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
-    tFirmwareUpdateEntry* pRem;
-    UINT nodeId;
 
-    if (pInfo_p->pUpdateList != NULL)
+    while (pInfo_p->pUpdateList != NULL)
     {
-        nodeId = pInfo_p->pUpdateList->nodeId;
-
-        tFirmwareStoreHandle pFwStore = pInfo_p->pUpdateList->pStoreHandle;
-
-        FWM_TRACE("Update finished for node: %u index: 0x%x subindex: 0x%x\n",
-               pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
-               pInfo_p->pUpdateList->subindex);
-
-        pInfo_p->fTranmissionActive = FALSE;
-
-        pRem = pInfo_p->pUpdateList;
-        pInfo_p->pUpdateList = pInfo_p->pUpdateList->pNext;
-        free(pRem);
-
-        ret = firmwarestore_flushData(pFwStore);
-
-        if (pInfo_p->pUpdateList == NULL)
+        ret = transmitFirmware(pInfo_p);
+        if (ret == kFwReturnOk)
         {
-            // Callback
-            ret = instance_l.config.pfnUpdateComplete(nodeId, &pInfo_p->sdoComCon);
+            break;
+        }
+        else
+        {
+            FWM_ERROR("Transmission of the firmware failed with %d\n", ret);
+            transmissionFailed(pInfo_p);
         }
     }
 
     return ret;
+}
+
+static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
+{
+    if (pInfo_p->pUpdateList->fIsNode)
+    {
+        if (instance_l.config.pfnError != NULL)
+        {
+            (void)instance_l.config.pfnError(pInfo_p->pUpdateList->nodeId,
+                                             &pInfo_p->sdoComCon);
+        }
+    }
+
+    cleanupTransmission(pInfo_p);
+}
+
+static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo_p)
+{
+    tFirmwareRet ret = kFwReturnOk;
+
+    FWM_TRACE("Update finished for node: %u index: 0x%x subindex: 0x%x\n",
+           pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
+           pInfo_p->pUpdateList->subindex);
+
+
+    if (pInfo_p->pUpdateList->fIsNode)
+    {
+        // Node callback
+        if (instance_l.config.pfnNodeUpdateComplete != NULL)
+        {
+            ret = instance_l.config.pfnNodeUpdateComplete(pInfo_p->pUpdateList->nodeId,
+                                                          &pInfo_p->sdoComCon);
+        }
+    }
+    else if (pInfo_p->pUpdateList == NULL)
+    {
+        // Module callback
+        if (instance_l.config.pfnModuleUpdateComplete != NULL)
+        {
+            ret = instance_l.config.pfnModuleUpdateComplete(pInfo_p->pUpdateList->nodeId,
+                                                            &pInfo_p->sdoComCon);
+        }
+    }
+
+    cleanupTransmission(pInfo_p);
+
+    return ret;
+}
+
+
+static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
+{
+    tFirmwareUpdateEntry* pRem;
+    tFirmwareStoreHandle pFwStore;
+
+    pInfo_p->fTranmissionActive = FALSE;
+    pFwStore = pInfo_p->pUpdateList->pStoreHandle;
+
+    pRem = pInfo_p->pUpdateList;
+    pInfo_p->pUpdateList = pInfo_p->pUpdateList->pNext;
+    free(pRem);
+
+    (void)firmwarestore_flushData(pFwStore);
 }
 
 static void cleanupInstance(void)

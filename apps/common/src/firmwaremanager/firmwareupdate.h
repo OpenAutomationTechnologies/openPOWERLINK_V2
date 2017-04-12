@@ -56,7 +56,14 @@ typedef tFirmwareRet (*tFirmwareUpdateNodeCb)(UINT nodeId_p,
 
 typedef struct
 {
-    tFirmwareUpdateNodeCb pfnUpdateComplete;
+    UINT numberOfPendingTransmissions;
+    BOOL fTransmissionActive;
+} tFirmwareUpdateTransmissionStatus;
+
+typedef struct
+{
+    tFirmwareUpdateNodeCb pfnNodeUpdateComplete;
+    tFirmwareUpdateNodeCb pfnModuleUpdateComplete;
     tFirmwareUpdateNodeCb pfnError;
 } tFirmwareUpdateConfig;
 
@@ -66,6 +73,7 @@ typedef struct tFirmwareUpdateEntry
     UINT                            index;          ///< Index of remote domain object
     UINT                            subindex;       ///< Subindex of remote domain object
     tFirmwareStoreHandle            pStoreHandle;   ///< Handle to firmware update file
+    BOOL                            fIsNode;        ///< Flag for identification of node (Head) update
     struct tFirmwareUpdateEntry*    pNext;          ///< Pointer to next update entry
 } tFirmwareUpdateEntry;
 
@@ -82,8 +90,10 @@ extern "C"
 
 tFirmwareRet    firmwareupdate_init(const tFirmwareUpdateConfig* pConfig_p);
 void            firmwareupdate_exit(void);
-tFirmwareRet    firmwareupdate_processUpdateList(tFirmwareUpdateList pList_p);
+tFirmwareRet    firmwareupdate_processUpdateList(tFirmwareUpdateList* ppList_p);
 tFirmwareRet    firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinished_p);
+tFirmwareRet    firmwareupdate_getTransmissionStatus(UINT nodeId_p,
+                                                     tFirmwareUpdateTransmissionStatus* pStatus_p);
 
 #ifdef __cplusplus
 }

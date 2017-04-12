@@ -79,6 +79,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define FIRMWARE_CHECK_READ_SDO_TYPE kSdoTypeAsnd
 
+#define FIRMWARE_CHECK_START_MODULE_CHECK_RETRIES 5u
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -174,12 +176,14 @@ typedef struct
     UINT16*                             pNumbersOfFwDownloads;      ///< Field of Number of entries for each fw download object
     tFirmwareCheckNodeSdo               sdo;                        ///< Information about the current sdo tranmission
     BOOL                                fModuleListContainsHead;    ///< Flag for indicating if the head station was added to the module list
+    UINT                                startCounter;               ///< Counter for requested module check starts
 } tFirmwareCheckNodeInfo;
 
 typedef struct
 {
     BOOL                    fInitialized;
     tFirmwareCheckNodeInfo  aNodeInfo[FIRMWARECHECK_MAX_NODEID]; // TODO: replace by list
+    tFirmwareCheckNodeInfo* pNextNodeToCheck;
     tFirmwareInfoHandle     pFwInfo;
     tFirmwareCheckConfig    config;
 } tFirmwareCheckInstance;
@@ -200,7 +204,9 @@ static tFirmwareCheckNodeInfo* getNodeCheckInfo(UINT nodeId_p);
 static tFirmwareRet checkNodeInfo(tFirmwareCheckNodeInfo* pNodeInfo_p);
 static tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p);
 static BOOL isModularSupported(tFirmwareCheckNodeInfo* pNodeInfo_p);
-static tFirmwareRet starGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p);
+static tFirmwareRet startGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p);
+static BOOL isExpectedSdoCompleteEvent(tFirmwareCheckNodeInfo* pNodeInfo_p,
+                                       const tSdoComFinished* pSdoComFinished_p);
 
 static tFirmwareRet issueSdoRead(tFirmwareCheckNodeInfo* pNodeInfo_p);
 
@@ -217,7 +223,7 @@ static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
 static tFirmwareRet getNumberOfModuleFwDownload(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                                 size_t fwArray_p);
 
-static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo,
+static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                              const tSdoComFinished* pSdoComFinished_p);
 
 
@@ -232,9 +238,11 @@ static void calcFwObjectForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                   UINT* pIndex_p,
                                   UINT* pSubIndex_p);
 
+static void moduleCheckFailed(tFirmwareCheckNodeInfo* pNodeInfo_p);
 static void cleanupNode(tFirmwareCheckNodeInfo* pNodeInfo_p);
 static void finishCheckForNode(tFirmwareCheckNodeInfo* pNodeInfo_p);
-static tFirmwareRet updateError(tFirmwareCheckNodeInfo* pNodeInfo_p);
+
+static tFirmwareCheckNodeInfo* getNextNodeToCheck(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -323,15 +331,8 @@ tFirmwareRet firmwarecheck_processNodeEvent(UINT nodeId_p)
     pNodeInfo = getNodeCheckInfo(nodeId_p);
     if (pNodeInfo == NULL)
     {
-        ret = kFwReturnInvalidInstance; //TODO: Correct error code?
+        ret = kFwReturnInvalidInstance;
         goto EXIT;
-    }
-
-    if (pNodeInfo->checkState != kFwModuleCheckStateInit)
-    {
-        //FIXME: Cleanup pNodeInfo to restart check from beginning
-
-        pNodeInfo->checkState = kFwModuleCheckStateInit;
     }
 
     ret = checkNodeInfo(pNodeInfo);
@@ -371,8 +372,59 @@ tFirmwareRet firmwarecheck_processSdoEvent(const tSdoComFinished* pSdoComFinishe
     }
 
     pNodeInfo = getNodeCheckInfo(pSdoComFinished_p->nodeId);
+    if (pNodeInfo == NULL)
+    {
+        ret = kFwReturnInvalidInstance;
+        goto EXIT;
+    }
+
+    if (!isExpectedSdoCompleteEvent(pNodeInfo, pSdoComFinished_p))
+    {
+        ret = kFwReturnInvalidSdoEvent;
+        goto EXIT;
+    }
 
     ret = processSdoEventForModule(pNodeInfo, pSdoComFinished_p);
+
+EXIT:
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check firmware information of modules behind the next node
+
+This function gathers all required information about the available modules if
+a module requires a firmware update this is initiated after the check was
+completed. This function iterates over all modular nodes and proceeds with
+each call.
+
+\return This functions returns a value of \ref tFirmwareRet.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
+tFirmwareRet firmwarecheck_checkModulesOfNextNode(void)
+{
+    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareCheckNodeInfo* pNodeInfo;
+
+    pNodeInfo = getNextNodeToCheck();
+
+    if (pNodeInfo == NULL)
+    {
+        // No modular node to check
+        goto EXIT;
+    }
+
+    // check modular flag
+    if (isModularSupported(pNodeInfo))
+    {
+        FWM_TRACE("Checking firmware information of modules of Node: %d\n",
+                  pNodeInfo->nodeId);
+
+        ret = startGatheringModuleInfo(pNodeInfo);
+    }
 
 EXIT:
     return ret;
@@ -432,16 +484,7 @@ static tFirmwareRet checkNodeInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
     tOplkError      oplkRet;
     const tIdentResponse* pIdent;
     tFirmwareCheckModuleEntry* pEntry;
-
-    if (pNodeInfo_p->checkState != kFwModuleCheckStateInit)
-    {
-        FWM_TRACE("%s() State should be %i, but is %i!\n",
-                  __func__,
-                  kFwModuleCheckStateInit,
-                  pNodeInfo_p->checkState);
-        ret = kFwReturnInvalidCheckState;
-        goto EXIT;
-    }
+    BOOL fHeadUpdated = FALSE;
 
     oplkRet = oplk_getIdentResponse(pNodeInfo_p->nodeId, &pIdent);
     if (oplkRet != kErrorOk)
@@ -471,26 +514,26 @@ static tFirmwareRet checkNodeInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
         pEntry->fwInfo.subindex = FIMRWARE_CHECK_NODE_FIRMWARE_SUBINDEX;
         pNodeInfo_p->moduleList = pEntry;
         pNodeInfo_p->fModuleListContainsHead = TRUE;
+        fHeadUpdated = TRUE;
 
-        FWM_TRACE("Firmware update of head station required for node: %d\n", pNodeInfo_p->nodeId);
+        FWM_TRACE("Firmware update of head station required for node: %d\n",
+                  pNodeInfo_p->nodeId);
     }
 
     // check modular flag
     if (isModularSupported(pNodeInfo_p))
     {
         FWM_TRACE("Modular device detected, Node: %d\n", pNodeInfo_p->nodeId);
-
-        ret = starGatheringModuleInfo(pNodeInfo_p);
-        ret = kFwReturnOk;
     }
-    else
+
+    ret = finishCheck(pNodeInfo_p);
+    if (ret != kFwReturnOk)
     {
-        pNodeInfo_p->checkState = kFwModuleCheckStateComplete;
-
-        ret = finishCheck(pNodeInfo_p);
+        FWM_ERROR("Finishing check for node %u failed with return %d\n",
+                  pNodeInfo_p->nodeId, ret);
     }
 
-    if ((ret == kFwReturnOk) || (isModularSupported(pNodeInfo_p) && pNodeInfo_p->fModuleListContainsHead))
+    if (fHeadUpdated)
     {
         ret = kFwReturnInterruptBoot;
     }
@@ -503,7 +546,6 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
     tFirmwareCheckModuleEntry* pIter;
-    tFirmwareCheckModuleEntry* pRem;
     tFirmwareUpdateEntry* pList = NULL;
     tFirmwareUpdateEntry* pNew;
     tFirmwareUpdateEntry** ppIter = &pList;
@@ -527,6 +569,8 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
         pNew->subindex = pIter->fwInfo.subindex;
         pNew->pStoreHandle = pIter->fwInfo.pFwStoreHandle;
 
+        pNew->fIsNode = (pNew->index == FIRMWARE_CHECK_NODE_FIRWMARE_INDEX);
+
         *ppIter = pNew;
         ppIter = &pNew->pNext;
 
@@ -535,7 +579,7 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
 
     if (pList != NULL)
     {
-        ret = firmwareupdate_processUpdateList(pList);
+        ret = firmwareupdate_processUpdateList(&pList);
         if (ret != kFwReturnOk)
         {
             goto EXIT;
@@ -550,29 +594,19 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
         }
     }
 
-    pIter = pNodeInfo_p->moduleList;
-
-    while (pIter != NULL)
+    while (pList != NULL)
     {
-        pRem = pIter;
-
-        pIter = pIter->pNext;
-
-        free(pRem);
+        pUpdateRem = pList;
+        pList = pList->pNext;
+        free(pUpdateRem);
     }
-    pNodeInfo_p->moduleList = NULL;
 
-EXIT:
     finishCheckForNode(pNodeInfo_p);
 
+EXIT:
     if (ret != kFwReturnOk)
     {
-        while (pList != NULL)
-        {
-            pUpdateRem = pList;
-            pList = pList->pNext;
-            free(pUpdateRem);
-        }
+        moduleCheckFailed(pNodeInfo_p);
     }
 
     return ret;
@@ -583,12 +617,32 @@ static BOOL isModularSupported(tFirmwareCheckNodeInfo* pNodeInfo_p)
     return ((pNodeInfo_p->featureFlags & NMT_FEATUREFLAGS_MODULAR_DEVICE) != 0);
 }
 
-static tFirmwareRet starGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
+static tFirmwareRet startGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
 
-    ret = processCheckStateMachine(pNodeInfo_p);
+    if ((pNodeInfo_p->nextCheckState == kFwModuleCheckStateInit) || (pNodeInfo_p->startCounter == 0u))
+    {
+        pNodeInfo_p->startCounter = FIRMWARE_CHECK_START_MODULE_CHECK_RETRIES;
+        ret = processCheckStateMachine(pNodeInfo_p);
+    }
+    else
+    {
+        FWM_ERROR("Start of gathering module info requested, but next state should be %d, %u retries until reset\n",
+                  pNodeInfo_p->nextCheckState, pNodeInfo_p->startCounter);
+        pNodeInfo_p->startCounter--;
+    }
+
     return ret;
+}
+
+static BOOL isExpectedSdoCompleteEvent(tFirmwareCheckNodeInfo* pNodeInfo_p,
+                                       const tSdoComFinished* pSdoComFinished_p)
+{
+    return ((pSdoComFinished_p->sdoComConHdl == pNodeInfo_p->sdo.handle) &&
+            (pSdoComFinished_p->targetIndex == pNodeInfo_p->sdo.index) &&
+            (pSdoComFinished_p->targetSubIndex == pNodeInfo_p->sdo.subindex) &&
+            (pSdoComFinished_p->nodeId == pNodeInfo_p->nodeId));
 }
 
 static tFirmwareRet issueSdoRead(tFirmwareCheckNodeInfo* pNodeInfo_p)
@@ -763,34 +817,47 @@ static tFirmwareRet getNumberOfModuleFwDownload(tFirmwareCheckNodeInfo* pNodeInf
     return ret;
 }
 
-static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo,
+static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                              const tSdoComFinished* pSdoComFinished_p)
 {
-    tFirmwareRet ret = kFwReturnInvalidSdoEvent;
+    tFirmwareRet ret = kFwReturnOk;
+    BOOL fFailed = FALSE;
 
-    if ((pSdoComFinished_p->sdoComConHdl == pNodeInfo->sdo.handle) &&
-        (pSdoComFinished_p->targetIndex == pNodeInfo->sdo.index) &&
-        (pSdoComFinished_p->targetSubIndex == pNodeInfo->sdo.subindex) &&
-        (pSdoComFinished_p->transferredBytes == pNodeInfo->sdo.size) &&
-        (pSdoComFinished_p->nodeId == pNodeInfo->nodeId))
+    if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
+    {
+        FWM_ERROR("Unexpected transferred bytes %u instead of %u for node %u index 0x%X subindex 0x%X\n",
+                pSdoComFinished_p->transferredBytes,
+                pNodeInfo_p->sdo.size,
+                pNodeInfo_p->nodeId,
+                pNodeInfo_p->sdo.index,
+                pNodeInfo_p->sdo.subindex);
+
+        fFailed = TRUE;
+    }
+    else
     {
         if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
         {
-            ret = processCheckStateMachine(pNodeInfo);
+            ret = processCheckStateMachine(pNodeInfo_p);
 
             if (ret != kFwReturnOk)
             {
-                FWM_ERROR("FW check for node %u failed with %d, aborting...\n",
-                          pNodeInfo->nodeId, ret);
-                ret = updateError(pNodeInfo);
+                FWM_ERROR("FW check for node %u failed with %d\n",
+                          pNodeInfo_p->nodeId, ret);
+                fFailed = TRUE;
             }
         }
         else
         {
-            FWM_ERROR("Expected SDO event received with error state %d and abort code 0x%x\n",
+            FWM_ERROR("ERROR: Expected SDO event received with error state %d and abort code 0x%x\n",
                       pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
-            ret = updateError(pNodeInfo);
+            fFailed = TRUE;
         }
+    }
+
+    if (fFailed)
+    {
+        moduleCheckFailed(pNodeInfo_p);
     }
 
     return ret;
@@ -844,7 +911,7 @@ static tFirmwareRet processCheckStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p
                 {
                     FWM_ERROR("Number of ident indices for node %d equals 0, aborting...\n",
                               pNodeInfo_p->nodeId);
-                    ret = updateError(pNodeInfo_p);
+                    pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateComplete;
                 }
                 break;
 
@@ -993,7 +1060,7 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 else
                 {
                     FWM_ERROR("Number of fw download indices equals 0, aborting...\n");
-                    ret = updateError(pNodeInfo_p);
+                    pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateComplete;
                 }
                 break;
 
@@ -1021,7 +1088,7 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 else
                 {
                     FWM_ERROR("Number of fw download indices equals 0, aborting...\n");
-                    ret = updateError(pNodeInfo_p);
+                    pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateComplete;
                 }
                 break;
 
@@ -1074,6 +1141,10 @@ static BOOL isFirmwareUpdateRequired(tFirmwareCheckNodeInfo* pNodeInfo_p,
     moduleInfo.productId = pFwInfo_p->ident.productId;
     moduleInfo.hwVariant = pFwInfo_p->ident.revision;
 
+    FWM_TRACE("Check firmware for node %u vendor 0x%x product 0x%x revision 0x%x\n",
+              pNodeInfo_p->nodeId, moduleInfo.vendorId, moduleInfo.productId,
+              moduleInfo.hwVariant);
+
     fwReturn = firmwareinfo_getInfoForNode(instance_l.config.pFwInfo,
                                       &moduleInfo,
                                       &pFirmwareInfo);
@@ -1081,13 +1152,6 @@ static BOOL isFirmwareUpdateRequired(tFirmwareCheckNodeInfo* pNodeInfo_p,
     {
         goto EXIT;
     }
-
-    FWM_TRACE("Check firmware for node %u vendor 0x%x product 0x%x revision 0x%x\n",
-              pNodeInfo_p->nodeId, moduleInfo.vendorId, moduleInfo.productId, moduleInfo.hwVariant);
-    FWM_TRACE("Check firmware Date %u - %u\n",
-              pFirmwareInfo->appSwDate, pFwInfo_p->ident.softwareDate);
-    FWM_TRACE("Check firmware Time %u - %u\n",
-              pFirmwareInfo->appSwTime, pFwInfo_p->ident.softwareTime);
 
     if ((pFirmwareInfo->appSwDate != pFwInfo_p->ident.softwareDate) ||
         (pFirmwareInfo->appSwTime != pFwInfo_p->ident.softwareTime))
@@ -1123,14 +1187,43 @@ static void calcFwObjectForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
     }
 }
 
+static void moduleCheckFailed(tFirmwareCheckNodeInfo* pNodeInfo_p)
+{
+    cleanupNode(pNodeInfo_p);
+}
+
 static void cleanupNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    free(pNodeInfo_p->identIndices.pIndices);
-    free(pNodeInfo_p->fwDownloadIndices.pIndices);
-    free(pNodeInfo_p->pIdentArrays);
-    free(pNodeInfo_p->pNumbersOfFwDownloads);
-    memset(pNodeInfo_p, 0, sizeof(tFirmwareCheckNodeInfo));
+    tFirmwareCheckModuleEntry* pIter;
+    tFirmwareCheckModuleEntry* pRem;
 
+    free(pNodeInfo_p->identIndices.pIndices);
+    pNodeInfo_p->identIndices.pIndices = NULL;
+    free(pNodeInfo_p->fwDownloadIndices.pIndices);
+    pNodeInfo_p->fwDownloadIndices.pIndices = NULL;
+    free(pNodeInfo_p->pIdentArrays);
+    pNodeInfo_p->pIdentArrays = NULL;
+    free(pNodeInfo_p->pNumbersOfFwDownloads);
+    pNodeInfo_p->pNumbersOfFwDownloads = NULL;
+
+    pIter = pNodeInfo_p->moduleList;
+
+    while (pIter != NULL)
+    {
+        pRem = pIter;
+
+        pIter = pIter->pNext;
+
+        free(pRem);
+    }
+    pNodeInfo_p->moduleList = NULL;
+
+    pNodeInfo_p->fModuleListContainsHead = FALSE;
+    pNodeInfo_p->checkState = kFwModuleCheckStateInit;
+    pNodeInfo_p->nextCheckState= kFwModuleCheckStateInit;
+    pNodeInfo_p->checkState = kFwModuleUpdateStateInit;
+    pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateInit;
+    memset(&pNodeInfo_p->sdo, 0, sizeof(tFirmwareCheckNodeSdo));
     pNodeInfo_p->sdo.handle = FIRMWARECHECK_INVALID_SDO;
 }
 
@@ -1141,19 +1234,55 @@ static void finishCheckForNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
     cleanupNode(pNodeInfo_p);
 }
 
-
-static tFirmwareRet updateError(tFirmwareCheckNodeInfo* pNodeInfo_p)
+static tFirmwareCheckNodeInfo* getNextNodeToCheck(void)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    size_t i;
+    tFirmwareCheckNodeInfo* pNode = instance_l.pNextNodeToCheck;
 
-    if (instance_l.config.pfnError != NULL)
+    // TODO: replace by iterating through list
+
+    if (pNode == NULL)
     {
-        ret = instance_l.config.pfnError(pNodeInfo_p->nodeId,
-                                         &pNodeInfo_p->sdo.handle);
+        for (i = 0u; i < FIRMWARECHECK_MAX_NODEID; i++)
+        {
+            pNode = &instance_l.aNodeInfo[i];
+            if ((pNode->nodeId != FIRMWARECHECK_INVALID_NODEID) && (isModularSupported(pNode)))
+            {
+                instance_l.pNextNodeToCheck = pNode;
+                break;
+            }
+        }
+    }
+    else
+    {
+        do
+        {
+            pNode++;
+
+            if ((pNode->nodeId != FIRMWARECHECK_INVALID_NODEID) && (isModularSupported(pNode)))
+            {
+                instance_l.pNextNodeToCheck = pNode;
+                break;
+            }
+
+        } while (pNode != &instance_l.aNodeInfo[FIRMWARECHECK_MAX_NODEID -1]);
+
+        if (instance_l.pNextNodeToCheck != pNode)
+        {
+            for (i = 0u; i < FIRMWARECHECK_MAX_NODEID; i++)
+            {
+                pNode = &instance_l.aNodeInfo[i];
+                if ((pNode->nodeId != FIRMWARECHECK_INVALID_NODEID) && (isModularSupported(pNode)))
+                {
+                    instance_l.pNextNodeToCheck = pNode;
+                    break;
+                }
+            }
+        }
+
     }
 
-    finishCheckForNode(pNodeInfo_p);
-    return ret;
+    return instance_l.pNextNodeToCheck;
 }
 
 /// \}

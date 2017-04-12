@@ -110,8 +110,10 @@ static tFirmwareProcessSdoEvent apfnProcessSdoEvent_l[] =
 
 static tFirmwareRet firmwareUpdateNotRequired(UINT nodeId_p,
                                               tSdoComConHdl* pSdoConnection_p);
-static tFirmwareRet updateCompleteCb(UINT nodeId_p,
-                                     tSdoComConHdl* pSdoConnection_p);
+static tFirmwareRet nodeUpdateCompleteCb(UINT nodeId_p,
+                                         tSdoComConHdl* pSdoConnection_p);
+static tFirmwareRet moduleUpdateCompleteCb(UINT nodeId_p,
+                                           tSdoComConHdl* pSdoConnection_p);
 static tFirmwareRet errorDuringUpdate(UINT nodeId_p,
                                       tSdoComConHdl* pSdoConnection_p);
 
@@ -157,7 +159,6 @@ tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p)
 
     checkConfig.pFwInfo = instance_l.firmwareInfo;
     checkConfig.pfnNoUpdateRequired = firmwareUpdateNotRequired;
-    checkConfig.pfnError = errorDuringUpdate;
 
     ret = firmwarecheck_init(&checkConfig);
     if (ret != kFwReturnOk)
@@ -167,7 +168,8 @@ tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p)
 
     memset(&updateConfig, 0, sizeof(tFirmwareUpdateConfig));
 
-    updateConfig.pfnUpdateComplete = updateCompleteCb;
+    updateConfig.pfnNodeUpdateComplete = nodeUpdateCompleteCb;
+    updateConfig.pfnModuleUpdateComplete = moduleUpdateCompleteCb;
     updateConfig.pfnError = errorDuringUpdate;
 
     ret = firmwareupdate_init(&updateConfig);
@@ -287,7 +289,19 @@ static tFirmwareRet firmwareUpdateNotRequired(UINT nodeId_p,
     return ret;
 }
 
-static tFirmwareRet updateCompleteCb(UINT nodeId_p,
+static tFirmwareRet moduleUpdateCompleteCb(UINT nodeId_p,
+                                     tSdoComConHdl* pSdoConnection_p)
+{
+    tFirmwareRet ret = kFwReturnOk;
+
+    cleanupSdo(pSdoConnection_p);
+
+    FWM_TRACE("Firmware update of modules complete for node %d\n", nodeId_p);
+
+    return ret;
+}
+
+static tFirmwareRet nodeUpdateCompleteCb(UINT nodeId_p,
                                      tSdoComConHdl* pSdoConnection_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -295,7 +309,7 @@ static tFirmwareRet updateCompleteCb(UINT nodeId_p,
 
     cleanupSdo(pSdoConnection_p);
 
-    FWM_TRACE("Firmware update complete for node %d\n", nodeId_p);
+    FWM_TRACE("Firmware update of node %d complete\n", nodeId_p);
 
     result = oplk_triggerMnStateChange(nodeId_p, kNmtNodeCommandSwUpdated);
     if (result != kErrorOk)

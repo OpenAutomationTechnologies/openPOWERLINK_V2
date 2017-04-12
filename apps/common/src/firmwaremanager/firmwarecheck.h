@@ -69,7 +69,6 @@ typedef struct
     tFirmwareInfoHandle pFwInfo;    ///< Handle of the firmware store instance
                                     ///< for accessing the firmware configuration
     tNoFirmwareCheckNodeCb pfnNoUpdateRequired;
-    tNoFirmwareCheckNodeCb pfnError;
 } tFirmwareCheckConfig;
 
 //------------------------------------------------------------------------------
@@ -85,6 +84,7 @@ tFirmwareRet    firmwarecheck_init(const tFirmwareCheckConfig* pConfig_p);
 void            firmwarecheck_exit(void);
 tFirmwareRet    firmwarecheck_processNodeEvent(UINT nodeId_p);
 tFirmwareRet    firmwarecheck_processSdoEvent(const tSdoComFinished* pSdoComFinished_p);
+tFirmwareRet    firmwarecheck_checkModulesOfNextNode(void);
 
 //FIXME: Free update list forwarded to update module here or in update module after completion?
 
