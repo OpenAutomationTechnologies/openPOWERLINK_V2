@@ -1,11 +1,10 @@
 /**
 ********************************************************************************
-\file   firmwaremanager.h
+\file   firmwarecheck.h
 
-\brief  Header file for the firmware manager modules
+\brief  Header file of the firmware check module
 
-This header file contains the general definitions for all firmware manager
-modules.
+This header file contains the definitions of the firware check module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
@@ -34,44 +33,44 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_firmwaremanager_H_
-#define _INC_firmwaremanager_H_
+#ifndef _INC_firmwarecheck_H_
+#define _INC_firmwarecheck_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+#include <firmwaremanager/firmwaremanager.h>
+#include <firmwaremanager/firmwareinfo.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
 
+
+#define FIRMWARECHECK_INVALID_NODEID    C_ADR_INVALID
+#define FIRMWARECHECK_MAX_NODEID        C_ADR_BROADCAST
+#define FIRMWARECHECK_INVALID_SDO       ((UINT)-1)
+
+#ifndef tabentries
+#define tabentries(aVar_p)      (sizeof(aVar_p) / sizeof(*(aVar_p)))
+#endif
+
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
-/**
-\brief Enum with return values used by the firmware manager modules
-*/
-typedef enum
+typedef tFirmwareRet (*tNoFirmwareCheckNodeCb)(UINT nodeId_p,
+                                               tSdoComConHdl* pSdoConnection_p);
+
+typedef struct
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
-    kFwReturnInvalidParameter,      ///< An invalid parameter was passed
-    kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
-    kFwReturnFileOperationFailed,   ///< A File operation failed
-    kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
-    kFwReturnModuleNotFound,        ///< The requested module was not found
-    kFwReturnAlreadyInitialized,    ///< Firmware manager is already initialized
-    kFwReturnInvalidNodeId,         ///< An invalid node ID was passed
-    kFwReturnSdoWriteFailed,        ///< A SDO write command failed
-    kFwReturnInvalidSdoSize,        ///< A SDO event returned an invalid number of transferred bytes
-    kFwReturnInvalidSdoEvent,       ///< An invalid SDO finished event was passed
-    kFwReturnNoIdent,               ///< Failed to get ident for node
-    kFwReturnInterruptBoot,         ///< Signalize interruption of boot process
-    kFwReturnSdoReadError,          ///< Failed to issue an SDO read
-    kFwReturnInvalidCheckState,     ///< Invalid state in firmware check module
-} tFirmwareRet;
+    tFirmwareInfoHandle pFwInfo;    ///< Handle of the firmware store instance
+                                    ///< for accessing the firmware configuration
+    tNoFirmwareCheckNodeCb pfnNoUpdateRequired;
+    tNoFirmwareCheckNodeCb pfnError;
+} tFirmwareCheckConfig;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -82,8 +81,15 @@ extern "C"
 {
 #endif
 
+tFirmwareRet    firmwarecheck_init(const tFirmwareCheckConfig* pConfig_p);
+void            firmwarecheck_exit(void);
+tFirmwareRet    firmwarecheck_processNodeEvent(UINT nodeId_p);
+tFirmwareRet    firmwarecheck_processSdoEvent(const tSdoComFinished* pSdoComFinished_p);
+
+//FIXME: Free update list forwarded to update module here or in update module after completion?
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_firmwaremanager_H_ */
+#endif /* _INC_firmwareinfo_H_ */
