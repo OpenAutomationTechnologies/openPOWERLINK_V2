@@ -89,6 +89,7 @@ extern "C"
 tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p);
 void         firmwaremanager_exit(void);
 
+tOplkError   firmwaremanager_thread(void);
 
 tOplkError   firmwaremanager_processEvent(tOplkApiEventType eventType_p,
                                           const tOplkApiEventArg* pEventArg_p,

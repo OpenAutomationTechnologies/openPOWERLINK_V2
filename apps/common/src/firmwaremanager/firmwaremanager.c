@@ -79,6 +79,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define tabentries(aVar_p)      (sizeof(aVar_p) / sizeof(*(aVar_p)))
 #endif
 
+
+#define FIRMWARE_MANAGER_MAX_NODE_ID C_ADR_BROADCAST
+
+#define FIRMWARE_MANAGER_PRINT_LINE_LENGTH 80
+#define FIRMWARE_MANAGER_PRINT_NODE_LENGTH 6
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -200,6 +206,48 @@ void firmwaremanager_exit(void)
     instance_l.fInitialized = FALSE;
 }
 
+tOplkError firmwaremanager_thread(void)
+{
+    tOplkError ret = kErrorOk;
+    UINT nodeId;
+    tFirmwareRet fwReturn;
+    tFirmwareUpdateTransmissionStatus status;
+    char line[FIRMWARE_MANAGER_PRINT_LINE_LENGTH];
+    char node[FIRMWARE_MANAGER_PRINT_NODE_LENGTH];
+    BOOL fFinalPrint = FALSE;
+
+    ret = oplk_postUserEvent((void*)&instance_l);
+
+    memset(line, 0, FIRMWARE_MANAGER_PRINT_LINE_LENGTH);
+    strcpy(line, "Updating node");
+
+    for (nodeId = 0u; nodeId < FIRMWARE_MANAGER_MAX_NODE_ID; nodeId++)
+    {
+        fwReturn = firmwareupdate_getTransmissionStatus(nodeId, &status);
+        if ((fwReturn == kFwReturnOk) && status.fTransmissionActive)
+        {
+            fFinalPrint = TRUE;
+            sprintf(node, " 0x%02X", (UINT8)(nodeId & 0xFF));
+            strcat(line, node);
+
+            if (strlen(line) > FIRMWARE_MANAGER_PRINT_LINE_LENGTH - FIRMWARE_MANAGER_PRINT_NODE_LENGTH)
+            {
+                FWM_TRACE("%s\n", line);
+                memset(line, 0, FIRMWARE_MANAGER_PRINT_LINE_LENGTH);
+                strcpy(line, "Updating node");
+                fFinalPrint = FALSE;
+            }
+        }
+    }
+
+    if (fFinalPrint)
+    {
+        FWM_TRACE("%s\n", line);
+    }
+
+    return ret;
+}
+
 tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
                                         const tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p)
@@ -212,6 +260,13 @@ tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
 
     switch (eventType_p)
     {
+        case kOplkApiEventUserDef:
+            if (pEventArg_p->pUserArg == &instance_l)
+            {
+                //TODO: Implement user event
+            }
+            break;
+
         case kOplkApiEventSdo:
             for (iter = 0; iter < tabentries(apfnProcessSdoEvent_l); iter++)
             {

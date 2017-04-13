@@ -495,6 +495,10 @@ static tOplkError processFirmwareManagerEvents(tOplkApiEventType eventType_p,
 
     switch (eventType_p)
     {
+        case kOplkApiEventUserDef:
+            fCallFirmwareManager = TRUE;
+            break;
+
         case kOplkApiEventSdo:
             fCallFirmwareManager = TRUE;
             break;
