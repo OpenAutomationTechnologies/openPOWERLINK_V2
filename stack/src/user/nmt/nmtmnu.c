@@ -288,6 +288,8 @@ typedef struct
     UINT16              prcFlags;               ///< PRC specific node flags
     UINT32              relPropagationDelayNs;  ///< Propagation delay in nanoseconds
     UINT32              pResTimeFirstNs;        ///< PRes time
+    BOOL                fPrcSupportIsMissing;   ///< A node configured to be used for PRC is not supporting it
+    UINT32              nodeCfgBackup;          ///< Backup of nodeCfg member is used if fPrcSupportIsMissing is TRUE
 } tNmtMnuNodeInfo;
 
 /**
@@ -408,6 +410,8 @@ static ULONG      computeCeilDiv(ULONG numerator_p,
                                  ULONG denominator_p);
 
 static tNmtState  correctNmtState(UINT8 nmtState_p);
+
+static void handleMissingPrcSupport(UINT nodeId_p, UINT32 featureFlags_p);
 
 /* internal node event handler functions */
 static INT processNodeEventNoIdentResponse(UINT nodeId_p,
@@ -1655,6 +1659,8 @@ static tOplkError cbIdentResponse(UINT nodeId_p,
     {   // node answered IdentRequest
         errorCode = E_NO_ERROR;
         nmtState = correctNmtState(ami_getUint8Le(&pIdentResponse_p->nmtStatus));
+
+        handleMissingPrcSupport(nodeId_p, pIdentResponse_p->featureFlagsLe);
 
         // check IdentResponse $$$ move to ProcessIntern, because this function may be called also if CN
 
@@ -5415,6 +5421,46 @@ static tNmtState correctNmtState(UINT8 nmtState_p)
     }
 
     return correctedNmtState;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Handle missing PRC support
+
+The function handles a node which is configured to be used with PRC but misses
+to support PRC. The node configuration is changed to asynchronous only what
+avoids that the NMTMNU continuously resets the node. This enables the application
+to e.g. update the node with a firmware revision that supports PRC.
+
+\param[in]      nodeId_p            Node ID of an identified node
+\param[in]      featureFlags_p      The node's feature flags
+*/
+//------------------------------------------------------------------------------
+static void handleMissingPrcSupport(UINT nodeId_p, UINT32 featureFlags_p)
+{
+    tNmtMnuNodeInfo* pNodeInfo = NMTMNU_GET_NODEINFO(nodeId_p);
+
+    if (pNodeInfo->fPrcSupportIsMissing)
+    {
+        if ((featureFlags_p & NMT_FEATUREFLAGS_PRC) != 0)
+        {
+            pNodeInfo->nodeCfg = pNodeInfo->nodeCfgBackup;
+            pNodeInfo->nodeCfgBackup = 0;
+            pNodeInfo->fPrcSupportIsMissing = FALSE;
+        }
+    }
+    else
+    {
+        if (((featureFlags_p & NMT_FEATUREFLAGS_PRC) == 0) &&
+            ((pNodeInfo->nodeCfg & NMT_NODEASSIGN_PRES_CHAINING) != 0))
+        {
+            pNodeInfo->fPrcSupportIsMissing = TRUE;
+            pNodeInfo->nodeCfgBackup = pNodeInfo->nodeCfg;
+
+            pNodeInfo->nodeCfg &= ~NMT_NODEASSIGN_PRES_CHAINING;
+            pNodeInfo->nodeCfg |= NMT_NODEASSIGN_ASYNCONLY_NODE;
+        }
+    }
 }
 
 /// \}
