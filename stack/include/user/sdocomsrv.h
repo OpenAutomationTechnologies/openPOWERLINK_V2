@@ -45,16 +45,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tOplkError serverInitCon(tSdoComCon* pSdoComCon_p,
-                         const tAsySdoCom* pRecvdCmdLayer_p);
-tOplkError serverProcessStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p,
-                                             tSdoComConEvent sdoComConEvent_p,
-                                             const tAsySdoCom* pRecvdCmdLayer_p);
+tOplkError sdocomsrv_initCon(tSdoComCon* pSdoComCon_p,
+                             const tAsySdoCom* pRecvdCmdLayer_p);
+tOplkError sdocomsrv_processStateServerSegmTrans(tSdoComConHdl sdoComConHdl_p,
+                                                 tSdoComConEvent sdoComConEvent_p,
+                                                 const tAsySdoCom* pRecvdCmdLayer_p);
 
 #endif /* _INC_user_sdocomsrv_H_ */

@@ -263,36 +263,36 @@ typedef struct
 //------------------------------------------------------------------------------
 // global variable declarations
 //------------------------------------------------------------------------------
-extern tSdoComInstance sdoComInstance_l;
+extern tSdoComInstance sdoComInstance_g;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                     const tAsySdoCom* pSdoCom_p,
-                     UINT dataSize_p);
-tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                            tAsySdoConState sdoConnectionState_p);
-tOplkError processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
-                                     tSdoComConEvent sdoComConEvent_p,
-                                     const tAsySdoCom* pSdoCom_p);
-tOplkError processState(tSdoComConHdl sdoComConHdl_p,
-                        tSdoComConEvent sdoComConEvent_p,
-                        const tAsySdoCom* pSdoCom_p);
-void       initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
-                               UINT plkFrameSize_p,
-                               const tSdoComCon* pSdoComCon_p,
-                               tAsySdoCom** pCommandFrame_p);
-void       setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p,
-                              UINT8 flag_p);
-void       overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p,
-                                     UINT8 flag_p);
-void       setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p,
-                                  UINT size_p);
-void       fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
-                                const UINT8* pSrcData_p,
-                                UINT size_p);
-void       updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
-                               UINT tranferredBytes_p,
-                               BOOL fTransferComplete);
+tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
+                               const tAsySdoCom* pSdoCom_p,
+                               UINT dataSize_p);
+tOplkError sdocomint_conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
+                                      tAsySdoConState sdoConnectionState_p);
+tOplkError sdocomint_processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
+                                               tSdoComConEvent sdoComConEvent_p,
+                                               const tAsySdoCom* pSdoCom_p);
+tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
+                                  tSdoComConEvent sdoComConEvent_p,
+                                  const tAsySdoCom* pSdoCom_p);
+void       sdocomint_initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
+                                         UINT plkFrameSize_p,
+                                         const tSdoComCon* pSdoComCon_p,
+                                         tAsySdoCom** pCommandFrame_p);
+void       sdocomint_setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p,
+                                        UINT8 flag_p);
+void       sdocomint_overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p,
+                                               UINT8 flag_p);
+void       sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p,
+                                            UINT size_p);
+void       sdocomint_fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
+                                          const UINT8* pSrcData_p,
+                                          UINT size_p);
+void       sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
+                                         UINT tranferredBytes_p,
+                                         BOOL fTransferComplete);
 #endif /* _INC_user_sdocomint_H_ */

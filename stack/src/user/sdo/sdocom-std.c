@@ -55,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-tSdoComInstance sdoComInstance_l;
+tSdoComInstance sdoComInstance_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -96,12 +96,12 @@ static tSdoComFunctions standardSdoFunctions =
    sdoInit,
    sdoExit,
 #if defined(CONFIG_INCLUDE_SDOC)
-   clientSdoDefineConnection,
-   clientSdoInitTransferByIndex,
-   clientSdoUndefineConnection,
-   clientSdoGetState,
-   clientSdoGetNodeId,
-   clientSdoAbortTransfer,
+   sdocomclt_defineConnection,
+   sdocomclt_initTransferByIndex,
+   sdocomclt_undefineConnection,
+   sdocomclt_getState,
+   sdocomclt_getNodeId,
+   sdocomclt_abortTransfer,
 #endif // defined(CONFIG_INCLUDE_SDOC)
 };
 
@@ -129,7 +129,7 @@ tSdoComFunctions* sdocomstandard_getInterface(void)
 /**
 \brief  Initialize SDO command layer of an empty POWERLINK frame
 
-The function zeros the POWERLINK frame and build a generic SDO command layer.
+The function zeros the POWERLINK frame and builds a generic SDO command layer.
 
 \param[out]     pPlkFrame_p         Pointer to empty POWERLINK frame
 \param[in]      plkFrameSize_p      Size of POWERLINK frame
@@ -137,7 +137,7 @@ The function zeros the POWERLINK frame and build a generic SDO command layer.
 \param[out]     pCommandFrame_p     Returns pointer to command layer start
 */
 //------------------------------------------------------------------------------
-void initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
+void sdocomint_initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
                          UINT plkFrameSize_p,
                          const tSdoComCon* pSdoComCon_p,
                          tAsySdoCom** pCommandFrame_p)
@@ -166,7 +166,7 @@ existing flags (logical or).
 \param[in]      flag_p              Flag(s) to be set
 */
 //-----------------------------------------------------------------------------
-void setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
+void sdocomint_setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
 {
     UINT8   flag;
 
@@ -186,7 +186,7 @@ are overwritten.
 \param[in]      flag_p              Flag(s) to be set
 */
 //------------------------------------------------------------------------------
-void overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
+void sdocomint_overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
 {
     ami_setUint8Le(&pCommandFrame_p->flags,  flag_p);
 }
@@ -201,7 +201,7 @@ The function sets the segment size header field of a command layer frame.
 \param[in]      size_p              Command layer segment size
 */
 //------------------------------------------------------------------------------
-void setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p, UINT size_p)
+void sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p, UINT size_p)
 {
     ami_setUint16Le(&pCommandFrame_p->segmentSizeLe, size_p);
 }
@@ -219,7 +219,7 @@ It can also be used for an expedited ReadByIndex response.
 \param[in]      size_p              Size of data to copy
 */
 //------------------------------------------------------------------------------
-void fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
+void sdocomint_fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
                           const UINT8* pSrcData_p,
                           UINT size_p)
 {
@@ -239,7 +239,7 @@ members.
                                     (TRUE: completed, FALSE: incomplete)
 */
 //------------------------------------------------------------------------------
-void updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
+void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
                          UINT tranferredBytes_p,
                          BOOL fTransferComplete)
 {
@@ -264,72 +264,6 @@ void updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Initialize SDO command layer module
-
-The function initializes the command layer module.
-
-\param[in]      pfnObdWrite_p       Callback function for OD write access
-\param[in]      pfnObdRead_p        Callback function for OD read access
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError sdoInit(tComdLayerObdCb pfnObdWrite_p,
-                          tComdLayerObdCb pfnObdRead_p)
-{
-    tOplkError ret = kErrorOk;
-
-    OPLK_MEMSET(&sdoComInstance_l, 0x00, sizeof(sdoComInstance_l));
-
-#if defined(CONFIG_INCLUDE_SDOS)
-    if ((pfnObdWrite_p != NULL) && (pfnObdRead_p != NULL))
-    {
-        sdoComInstance_l.pfnProcessObdWrite = pfnObdWrite_p;
-        sdoComInstance_l.pfnProcessObdRead = pfnObdRead_p;
-    }
-    else
-        return kErrorSdoComInvalidParam;
-#else
-    UNUSED_PARAMETER(pfnObdWrite_p);
-    UNUSED_PARAMETER(pfnObdRead_p);
-#endif // defined(CONFIG_INCLUDE_SDOS)
-
-    ret = sdoseq_init(receiveCb, conStateChangeCb);
-    if (ret != kErrorOk)
-        return ret;
-
-#if (defined(WIN32) || defined(_WIN32))
-    sdoComInstance_l.pCriticalSection = &sdoComInstance_l.criticalSection;
-    InitializeCriticalSection(sdoComInstance_l.pCriticalSection);
-#endif
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Shut down the SDO command layer
-
-The function shuts down the SDO command layer module.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError sdoExit(void)
-{
-    tOplkError  ret;
-
-#if (defined(WIN32) || defined(_WIN32))
-    DeleteCriticalSection(sdoComInstance_l.pCriticalSection);
-#endif
-
-    ret = sdoseq_exit();
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Receive callback function
 
 The function implements the receive callback function that is called by the
@@ -342,7 +276,7 @@ SOD sequence layer when new data is received.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
+tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
                      const tAsySdoCom* pSdoCom_p,
                      UINT dataSize_p)
 {
@@ -350,7 +284,7 @@ tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
 
     UNUSED_PARAMETER(dataSize_p);
 
-    ret = processCmdLayerConnection(sdoSeqConHdl_p, kSdoComConEventRec, pSdoCom_p);
+    ret = sdocomint_processCmdLayerConnection(sdoSeqConHdl_p, kSdoComConEventRec, pSdoCom_p);
     if (ret == kErrorReject)
     {   // error code modified here, since sequence layer doesn't know about OD
         ret = kErrorSdoComHandleBusy;
@@ -378,7 +312,7 @@ of the connection.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
+tOplkError sdocomint_conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
                             tAsySdoConState sdoConnectionState_p)
 {
     tOplkError      ret = kErrorOk;
@@ -436,7 +370,7 @@ tOplkError conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
             break;
     }
 
-    ret = processCmdLayerConnection(sdoSeqConHdl_p, sdoComConEvent, NULL);
+    ret = sdocomint_processCmdLayerConnection(sdoSeqConHdl_p, sdoComConEvent, NULL);
     if (ret == kErrorReject)
     {   // error code modified here, since sequence layer doesn't know about OD
         ret = kErrorSdoComHandleBusy;
@@ -460,7 +394,7 @@ found, a new one is created.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
+tOplkError sdocomint_processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
                                      tSdoComConEvent sdoComConEvent_p,
                                      const tAsySdoCom* pSdoCom_p)
 {
@@ -470,14 +404,14 @@ tOplkError processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
     tSdoComConHdl   hdlFree;
 
     // get pointer to first element of the array
-    pSdoComCon = &sdoComInstance_l.sdoComCon[0];
+    pSdoComCon = &sdoComInstance_g.sdoComCon[0];
     hdlCount = 0;
     hdlFree = 0xFFFF;
     while (hdlCount < CONFIG_SDO_MAX_CONNECTION_COM)
     {
         if (pSdoComCon->sdoSeqConHdl == sdoSeqConHdl_p)
         {   // matching command layer handle found
-            ret = processState(hdlCount, sdoComConEvent_p, pSdoCom_p);
+            ret = sdocomint_processState(hdlCount, sdoComConEvent_p, pSdoCom_p);
         }
         else if ((pSdoComCon->sdoSeqConHdl == 0) && (hdlFree == 0xFFFF))
             hdlFree = hdlCount;
@@ -498,9 +432,9 @@ tOplkError processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
         else
         {   // create new handle
             hdlCount = hdlFree;
-            pSdoComCon = &sdoComInstance_l.sdoComCon[hdlCount];
+            pSdoComCon = &sdoComInstance_g.sdoComCon[hdlCount];
             pSdoComCon->sdoSeqConHdl = sdoSeqConHdl_p;
-            ret = processState(hdlCount, sdoComConEvent_p, pSdoCom_p);
+            ret = sdocomint_processState(hdlCount, sdoComConEvent_p, pSdoCom_p);
         }
     }
 
@@ -521,7 +455,7 @@ on the state the command layer event is processed.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError processState(tSdoComConHdl sdoComConHdl_p,
+tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
                         tSdoComConEvent sdoComConEvent_p,
                         const tAsySdoCom* pRecvdCmdLayer_p)
 {
@@ -529,12 +463,12 @@ tOplkError processState(tSdoComConHdl sdoComConHdl_p,
     const tSdoComCon*   pSdoComCon;
 
 #if (defined(WIN32) || defined(_WIN32))
-    EnterCriticalSection(sdoComInstance_l.pCriticalSection);
+    EnterCriticalSection(sdoComInstance_g.pCriticalSection);
     DEBUG_LVL_SDO_TRACE("\n\tEnterCriticalSection processState\n\n");
 #endif
 
     // get pointer to control structure
-    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_g.sdoComCon[sdoComConHdl_p];
 
     // process state machine
     switch (pSdoComCon->sdoComState)
@@ -549,7 +483,7 @@ tOplkError processState(tSdoComConHdl sdoComConHdl_p,
         // SDO Server part
         // segmented transfer
         case kSdoComStateServerSegmTrans:
-            ret = serverProcessStateServerSegmTrans(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
+            ret = sdocomsrv_processStateServerSegmTrans(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
             break;
 #endif // defined(CONFIG_INCLUDE_SDOS)
 
@@ -558,23 +492,23 @@ tOplkError processState(tSdoComConHdl sdoComConHdl_p,
         // SDO Client part
         // wait for finish of establishing connection
         case kSdoComStateClientWaitInit:
-            ret = clientProcessStateWaitInit(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
+            ret = sdocomclt_processStateWaitInit(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
             break;
 
         case kSdoComStateClientConnected:
-            ret = clientProcessStateConnected(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
+            ret = sdocomclt_processStateConnected(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
             break;
 
         // process segmented transfer
         case kSdoComStateClientSegmTrans:
-            ret = clientProcessStateSegmTransfer(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
+            ret = sdocomclt_processStateSegmTransfer(sdoComConHdl_p, sdoComConEvent_p, pRecvdCmdLayer_p);
             break;
 #endif // #if defined(CONFIG_INCLUDE_SDOC)
     }
 
 #if (defined(WIN32) || defined(_WIN32))
     DEBUG_LVL_SDO_TRACE("\n\tLeaveCriticalSection processState\n\n");
-    LeaveCriticalSection(sdoComInstance_l.pCriticalSection);
+    LeaveCriticalSection(sdoComInstance_g.pCriticalSection);
 #endif
 
     return ret;
@@ -585,6 +519,73 @@ tOplkError processState(tSdoComConHdl sdoComConHdl_p,
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize SDO command layer module
+
+The function initializes the command layer module.
+
+\param[in]      pfnObdWrite_p       Callback function for OD write access
+\param[in]      pfnObdRead_p        Callback function for OD read access
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sdoInit(tComdLayerObdCb pfnObdWrite_p,
+                          tComdLayerObdCb pfnObdRead_p)
+{
+    tOplkError ret = kErrorOk;
+
+    OPLK_MEMSET(&sdoComInstance_g, 0x00, sizeof(sdoComInstance_g));
+
+#if defined(CONFIG_INCLUDE_SDOS)
+    if ((pfnObdWrite_p != NULL) && (pfnObdRead_p != NULL))
+    {
+        sdoComInstance_g.pfnProcessObdWrite = pfnObdWrite_p;
+        sdoComInstance_g.pfnProcessObdRead = pfnObdRead_p;
+    }
+    else
+        return kErrorSdoComInvalidParam;
+#else
+    UNUSED_PARAMETER(pfnObdWrite_p);
+    UNUSED_PARAMETER(pfnObdRead_p);
+#endif // defined(CONFIG_INCLUDE_SDOS)
+
+    ret = sdoseq_init(sdocomint_receiveCb, sdocomint_conStateChangeCb);
+    if (ret != kErrorOk)
+        return ret;
+
+#if (defined(WIN32) || defined(_WIN32))
+    sdoComInstance_g.pCriticalSection = &sdoComInstance_g.criticalSection;
+    InitializeCriticalSection(sdoComInstance_g.pCriticalSection);
+#endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Shut down the SDO command layer
+
+The function shuts down the SDO command layer module.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError sdoExit(void)
+{
+    tOplkError  ret;
+
+#if (defined(WIN32) || defined(_WIN32))
+    DeleteCriticalSection(sdoComInstance_g.pCriticalSection);
+#endif
+
+    ret = sdoseq_exit();
+
+    return ret;
+}
 
 //------------------------------------------------------------------------------
 /**
@@ -611,7 +612,7 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p,
     tOplkError  ret = kErrorOk;
     tSdoComCon* pSdoComCon;
 
-    pSdoComCon = &sdoComInstance_l.sdoComCon[sdoComConHdl_p];
+    pSdoComCon = &sdoComInstance_g.sdoComCon[sdoComConHdl_p];
 
     switch (sdoComConEvent_p)
     {
@@ -625,7 +626,7 @@ static tOplkError processStateIdle(tSdoComConHdl sdoComConHdl_p,
 
         case kSdoComConEventRec:
 #if defined(CONFIG_INCLUDE_SDOS)
-            ret = serverInitCon(pSdoComCon, pRecvdCmdLayer_p);
+            ret = sdocomsrv_initCon(pSdoComCon, pRecvdCmdLayer_p);
 #endif
             break;
 

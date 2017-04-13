@@ -45,31 +45,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
 
-tOplkError clientSdoDefineConnection(tSdoComConHdl* pSdoComConHdl_p,
-                                     UINT targetNodeId_p,
-                                     tSdoType protType_p);
-tOplkError clientSdoInitTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p);
-tOplkError clientSdoUndefineConnection(tSdoComConHdl sdoComConHdl_p);
-tOplkError clientSdoGetState(tSdoComConHdl sdoComConHdl_p,
-                             tSdoComFinished* pSdoComFinished_p);
-UINT       clientSdoGetNodeId(tSdoComConHdl sdoComConHdl_p);
-tOplkError clientSdoAbortTransfer(tSdoComConHdl sdoComConHdl_p,
-                                  UINT32 abortCode_p);
-tOplkError clientProcessStateWaitInit(tSdoComConHdl sdoComConHdl_p,
-                                      tSdoComConEvent sdoComConEvent_p,
-                                      const tAsySdoCom* pRecvdCmdLayer_p);
-tOplkError clientProcessStateConnected(tSdoComConHdl sdoComConHdl_p,
-                                       tSdoComConEvent sdoComConEvent_p,
-                                       const tAsySdoCom* pRecvdCmdLayer_p);
-tOplkError clientProcessStateSegmTransfer(tSdoComConHdl sdoComConHdl_p,
+tOplkError sdocomclt_defineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                      UINT targetNodeId_p,
+                                      tSdoType protType_p);
+tOplkError sdocomclt_initTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p);
+tOplkError sdocomclt_undefineConnection(tSdoComConHdl sdoComConHdl_p);
+tOplkError sdocomclt_getState(tSdoComConHdl sdoComConHdl_p,
+                              tSdoComFinished* pSdoComFinished_p);
+UINT       sdocomclt_getNodeId(tSdoComConHdl sdoComConHdl_p);
+tOplkError sdocomclt_abortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                   UINT32 abortCode_p);
+tOplkError sdocomclt_processStateWaitInit(tSdoComConHdl sdoComConHdl_p,
                                           tSdoComConEvent sdoComConEvent_p,
                                           const tAsySdoCom* pRecvdCmdLayer_p);
+tOplkError sdocomclt_processStateConnected(tSdoComConHdl sdoComConHdl_p,
+                                           tSdoComConEvent sdoComConEvent_p,
+                                           const tAsySdoCom* pRecvdCmdLayer_p);
+tOplkError sdocomclt_processStateSegmTransfer(tSdoComConHdl sdoComConHdl_p,
+                                              tSdoComConEvent sdoComConEvent_p,
+                                              const tAsySdoCom* pRecvdCmdLayer_p);
 
 #endif /* _INC_user_sdocomclt_H_ */
