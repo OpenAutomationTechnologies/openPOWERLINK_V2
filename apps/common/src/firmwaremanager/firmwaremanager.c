@@ -96,6 +96,7 @@ typedef struct
     BOOL                    fInitialized;
     tFirmwareStoreHandle    firmwareStore;
     tFirmwareInfoHandle     firmwareInfo;
+    BOOL                    fCheckModules;
 } tFirmwareManagerInstance;
 
 //------------------------------------------------------------------------------
@@ -261,9 +262,20 @@ tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
     switch (eventType_p)
     {
         case kOplkApiEventUserDef:
-            if (pEventArg_p->pUserArg == &instance_l)
+            if ((pEventArg_p->pUserArg == &instance_l) && instance_l.fCheckModules)
             {
-                //TODO: Implement user event
+
+
+                fwRet = firmwarecheck_checkModulesOfNextNode();
+
+                if (fwRet != kFwReturnOk)
+                {
+                    ret = kErrorGeneralError;
+                }
+                else
+                {
+                    ret = kErrorOk;
+                }
             }
             break;
 
@@ -293,21 +305,27 @@ tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
             break;
 
         case kOplkApiEventNode:
-            if ((eventType_p == kOplkApiEventNode) &&
-                (pEventArg_p->nodeEvent.nodeEvent == kNmtNodeEventUpdateSw))
+            if ((eventType_p == kOplkApiEventNode))
             {
-                fwRet = firmwarecheck_processNodeEvent(pEventArg_p->nodeEvent.nodeId);
-                if (fwRet == kFwReturnInterruptBoot)
+                if (pEventArg_p->nodeEvent.nodeEvent == kNmtNodeEventUpdateSw)
                 {
-                    ret = kErrorReject;
+                    fwRet = firmwarecheck_processNodeEvent(pEventArg_p->nodeEvent.nodeId);
+                    if (fwRet == kFwReturnInterruptBoot)
+                    {
+                        ret = kErrorReject;
+                    }
+                    else if (fwRet != kFwReturnOk)
+                    {
+                        ret = kErrorGeneralError;
+                    }
+                    else
+                    {
+                        ret = kErrorOk;
+                    }
                 }
-                else if (fwRet != kFwReturnOk)
+                else if (pEventArg_p->nodeEvent.nodeEvent == kNmtNodeEventConfDone)
                 {
-                    ret = kErrorGeneralError;
-                }
-                else
-                {
-                    ret = kErrorOk;
+                    instance_l.fCheckModules = TRUE;
                 }
             }
             break;
