@@ -77,6 +77,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FIRMWARE_UPDATE_SDO_TYPE        kSdoTypeAsnd        ///< SDO type used for firmware update
 #define FIRMWARE_UPDATE_INVALID_SDO     ((tSdoComConHdl)-1) ///< Invalid SDO handle
 
+#if !defined(FIRMWARE_UPDATE_MAX_PARALLEL_TRANSMISSIONS)
+#define FIRMWARE_UPDATE_MAX_PARALLEL_TRANSMISSIONS 5        ///< Number of parallel transmissions of firmware images
+#endif
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -101,6 +105,8 @@ typedef struct
     BOOL                            fInitialized;   ///< Instance initialized flag
     tFirmwareUpdateConfig           config;         ///< Instance configuration
     tFirmwareUpdateTransmissionInfo aTransmissions[FIRMWARE_UPDATE_MAX_NODE_ID]; ///< Node transmission array
+    size_t                          numberOfStartedTransmissions;   ///< Number of started transmissions
+    size_t                          numberOfFinishedTransmissions;  ///< Number of finished/aborted transmissions
 } tFirmwareUpdateInstance;
 
 //------------------------------------------------------------------------------
@@ -124,6 +130,9 @@ static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p);
 static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo_p);
 static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p);
 static void cleanupInstance(void);
+static BOOL isTransmissionAllowed(tFirmwareUpdateTransmissionInfo* pInfo_p);
+
+static tFirmwareUpdateTransmissionInfo* getNextPendingTransmission(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -265,16 +274,23 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
 
     if (pSdoComFinished_p->sdoComConState != kSdoComTransferFinished)
     {
-        FWM_ERROR("SDO write failed with state: 0x%x and abort code 0x%x\n",
-                  pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
+        FWM_ERROR("SDO write failed for node 0x%X with state: 0x%x and abort code 0x%x\n",
+                  pSdoComFinished_p->nodeId, pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
 
         fSucceeded = FALSE;
     }
 
     if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
-        FWM_ERROR("SDO written number of bytes does not match: %u - %zu\n",
-                  pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %u - %zu\n",
+                  pSdoComFinished_p->nodeId, pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+
+        fSucceeded = FALSE;
+    }
+
+    if (pSdoComFinished_p->abortCode != 0)
+    {
+        FWM_ERROR("SDO event with abort code: 0x%x for node 0x%X\n", pSdoComFinished_p->abortCode, pSdoComFinished_p->nodeId);
 
         fSucceeded = FALSE;
     }
@@ -443,6 +459,15 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
         goto EXIT;
     }
 
+    if (!isTransmissionAllowed(pInfo_p))
+    {
+        FWM_TRACE("Postpone update for node: %u index: 0x%x subindex: 0x%x\n",
+                   pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
+                   pInfo_p->pUpdateList->subindex);
+
+        goto EXIT;
+    }
+
     FWM_TRACE("Start update for node: %u index: 0x%x subindex: 0x%x\n",
               pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
               pInfo_p->pUpdateList->subindex);
@@ -481,6 +506,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
         goto EXIT;
     }
 
+    instance_l.numberOfStartedTransmissions++;
     pInfo_p->fTranmissionActive = TRUE;
 
 EXIT:
@@ -532,6 +558,9 @@ static tFirmwareRet startTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
 //------------------------------------------------------------------------------
 static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
+    pInfo_p->fTranmissionActive = FALSE;
+    instance_l.numberOfFinishedTransmissions++;
+
     if (pInfo_p->pUpdateList->fIsNode)
     {
         if (instance_l.config.pfnError != NULL)
@@ -555,7 +584,8 @@ static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
 //------------------------------------------------------------------------------
 static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet                        ret = kFwReturnOk;
+    tFirmwareUpdateTransmissionInfo*    pNextInfo;
 
     FWM_TRACE("Update finished for node: %u index: 0x%x subindex: 0x%x\n",
               pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
@@ -578,6 +608,20 @@ static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo
         {
             ret = instance_l.config.pfnModuleUpdateComplete(pInfo_p->pUpdateList->nodeId,
                                                             &pInfo_p->sdoComCon);
+        }
+    }
+
+    instance_l.numberOfFinishedTransmissions++;
+
+    if (pInfo_p->pUpdateList->pNext == NULL)
+    {
+        pNextInfo = getNextPendingTransmission();
+
+        if (pNextInfo != NULL)
+        {
+            FWM_TRACE("Start next pending transmission for node 0x%X\n",
+                      pNextInfo->pUpdateList->nodeId);
+            startTransmission(pNextInfo);
         }
     }
 
@@ -608,6 +652,11 @@ static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
     (void)firmwarestore_flushData(pFwStore);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Clean up firmware update instance
+*/
+//------------------------------------------------------------------------------
 static void cleanupInstance(void)
 {
     tFirmwareUpdateEntry*   pRem;
@@ -623,6 +672,44 @@ static void cleanupInstance(void)
             pRem = instance_l.aTransmissions[iter].pUpdateList;
         }
     }
+}
+
+static tFirmwareUpdateTransmissionInfo* getNextPendingTransmission(void)
+{
+    tFirmwareUpdateTransmissionInfo*    pInfo = NULL;
+    size_t                              i;
+
+    for (i = 0U; i < FIRMWARE_UPDATE_MAX_NODE_ID; i++)
+    {
+
+        if (!instance_l.aTransmissions[i].fTranmissionActive &&
+                (instance_l.aTransmissions[i].pUpdateList != NULL))
+        {
+            pInfo = &instance_l.aTransmissions[i];
+            break;
+        }
+    }
+
+    return pInfo;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Check if the start of the given transmission is allowed
+
+\return This functions returns a boolean value, which is true if the
+        transmission is allowed.
+*/
+//------------------------------------------------------------------------------
+static BOOL isTransmissionAllowed(tFirmwareUpdateTransmissionInfo* pInfo_p)
+{
+    size_t numberOfActiveTransmissions = instance_l.numberOfStartedTransmissions -
+                                         instance_l.numberOfFinishedTransmissions;
+
+    UNUSED_PARAMETER(pInfo_p);
+
+    return (numberOfActiveTransmissions < FIRMWARE_UPDATE_MAX_PARALLEL_TRANSMISSIONS);
+
 }
 
 /// \}
