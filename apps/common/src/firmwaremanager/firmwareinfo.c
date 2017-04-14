@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "firmwareinfo.h"
+#include <firmwaremanager/firmwareinfo.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -70,10 +70,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Firmware info instance
+*/
 typedef struct tFirmwareInfoInstance
 {
-    tFirmwareInfoConfig config;
-    tFirmwareInfoList pInfoList;
+    tFirmwareInfoConfig config;     ///< Firmware info configuration
+    tFirmwareInfoList   pInfoList;  ///< Firmware info list
 } tFirmwareInfoInstance;
 
 //------------------------------------------------------------------------------
@@ -111,8 +114,8 @@ This function creates an instance of the firmware info module.
 tFirmwareRet firmwareinfo_create(const tFirmwareInfoConfig* pConfig_p,
                                  tFirmwareInfoHandle* ppHandle_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareInfoInstance* instance = NULL;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareInfoInstance*  instance = NULL;
 
     if ((pConfig_p == NULL) || (ppHandle_p == NULL))
     {
@@ -198,8 +201,8 @@ tFirmwareRet firmwareinfo_getInfoForNode(tFirmwareInfoHandle pHandle_p,
                                          const tFirmwareModuleInfo * pModuleInfo_p,
                                          tFirmwareInfo** ppFwInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareInfo* pInfo = NULL;
+    tFirmwareRet    ret = kFwReturnOk;
+    tFirmwareInfo*  pInfo = NULL;
 
     if (pHandle_p == NULL)
     {
@@ -234,6 +237,15 @@ EXIT:
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize firmware info list
+
+\param pHandle_p [in]       Handle of the firmware info instance
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet initInfoList(tFirmwareInfoInstance* pHandle_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -244,10 +256,22 @@ static tFirmwareRet initInfoList(tFirmwareInfoInstance* pHandle_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Find module in firmware info list
+
+\param pHandle_p [in]       Handle of the firmware info instance
+\param pModuleInfo_p [in]   Pointer to module info
+
+\return This functions returns a pointer to the firmware info list.
+\retval NULL    No firmware info is found
+\retval !NULL   Pointer to the found firmware info
+*/
+//------------------------------------------------------------------------------
 static tFirmwareInfo* findModuleInInfoList(tFirmwareInfoInstance* pHandle_p,
                                            const tFirmwareModuleInfo * pModuleInfo_p)
 {
-    tFirmwareInfo* pInfo = NULL;
+    tFirmwareInfo*      pInfo = NULL;
     tFirmwareInfoEntry* pIter = pHandle_p->pInfoList;
 
     while (pIter != NULL)

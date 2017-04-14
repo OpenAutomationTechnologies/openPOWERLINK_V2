@@ -39,11 +39,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <firmwaremanager/firmwaretrace.h>
 #include <firmwaremanager/firmwarecheck.h>
 #include <firmwaremanager/firmwareupdate.h>
 #include <firmwaremanager/firmwareinfo.h>
+
+#include <oplk/oplk.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -69,22 +70,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define FIRMWARE_CHECK_NODE_FIRWMARE_INDEX 0x1F50
-#define FIMRWARE_CHECK_NODE_FIRMWARE_SUBINDEX 0x01
+#define FIRMWARE_CHECK_NODE_FIRWMARE_INDEX          0x1F50          ///< Index of head firmware update object
+#define FIMRWARE_CHECK_NODE_FIRMWARE_SUBINDEX       0x01            ///< Subindex of head firmware update object
 
-#define FIRMWARE_CHECK_INDEX_IDENT_INDICIES 0x1027
-#define FIRMWARE_CHECK_INDEX_FW_DOWN_INDICES 0x1F55
+#define FIRMWARE_CHECK_INDEX_IDENT_INDICIES         0x1027          ///< Index of child ident list object
+#define FIRMWARE_CHECK_INDEX_FW_DOWN_INDICES        0x1F55          ///< Index of child download list object
 
-#define FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES 0x00
+#define FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES   0x00            ///< Subindex for number of entries
 
-#define FIRMWARE_CHECK_READ_SDO_TYPE kSdoTypeAsnd
+#define FIRMWARE_CHECK_READ_SDO_TYPE                kSdoTypeAsnd    ///< SDO type used to check the firmware
 
-#define FIRMWARE_CHECK_START_MODULE_CHECK_RETRIES 5u
+#define FIRMWARE_CHECK_START_MODULE_CHECK_RETRIES   5u              ///< Number of modular firmware check retries
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Modular firmware update state
+*/
 typedef enum
 {
     kFwModuleUpdateStateInit,
@@ -97,6 +101,9 @@ typedef enum
     kFwModuleUpdateStateComplete,
 } tFirmwareModuleUpdateState;
 
+/**
+\brief Modular firmware check state
+*/
 typedef enum
 {
     kFwModuleCheckStateInit,
@@ -108,6 +115,9 @@ typedef enum
     kFwModuleCheckStateComplete,
 } tFirmwareModuleCheckState;
 
+/**
+\brief Modular ident structure
+*/
 typedef struct
 {
     UINT32 vendorId;        ///< Vendor ID
@@ -118,25 +128,35 @@ typedef struct
     UINT32 softwareTime;    ///< Software time
 } tFirmwareCheckModuleIdent;
 
+/**
+\brief Firmware check firmware info
+*/
 typedef struct
 {
-    tFirmwareCheckModuleIdent ident; ///< Ident information of a module/node
-    UINT index;             ///< SDO transfer OD index of remote
-    UINT subindex;          ///< SDO transfer OD subindex of remotes
-    tFirmwareStoreHandle pFwStoreHandle;
+    tFirmwareCheckModuleIdent   ident;          ///< Ident information of a module/node
+    UINT                        index;          ///< SDO transfer OD index of remote
+    UINT                        subindex;       ///< SDO transfer OD subindex of remotes
+    tFirmwareStoreHandle        pFwStoreHandle; ///< Firmware store handle
 } tFirmwareCheckFwInfo;
 
+/**
+\brief Firmware check module entry
+*/
 typedef struct tFirmwareCheckModuleEntry
 {
-    tFirmwareModuleUpdateState          state;  ///< Module firmware check state
-    tFirmwareModuleUpdateState          nextCheckState;  ///< Module firmware check state
-    tFirmwareCheckFwInfo                fwInfo; ///< Firmware info from the module
-    struct tFirmwareCheckModuleEntry*   pNext;  ///< Pointer to next module entry
-    size_t moduleIndex;
+    tFirmwareCheckFwInfo                fwInfo;         ///< Firmware info from the module
+    struct tFirmwareCheckModuleEntry*   pNext;          ///< Pointer to next module entry
+    size_t                              moduleIndex;    ///< Module index
 } tFirmwareCheckModuleEntry;
 
+/**
+\brief Firmware check module list
+*/
 typedef tFirmwareCheckModuleEntry* tFirmwareCheckModuleList;
 
+/**
+\brief Firmware check node SDO structure
+*/
 typedef struct
 {
     tSdoComConHdl   handle;     ///< SDO command handle
@@ -146,46 +166,58 @@ typedef struct
     void*           pData;      ///< Pointer for result data storage
 } tFirmwareCheckNodeSdo;
 
+/**
+\brief Firmware check index array
+*/
 typedef struct
 {
-    UINT8 indexIdx;
-    UINT8 numberOfIndices;
-    UINT16* pIndices;
+    UINT8   indexIdx;           ///< Used to iterate through available indices
+    UINT8   numberOfIndices;    ///< Number of available indices
+    UINT16* pIndices;           ///< Pointer to object index field
 } tFirmwareCheckIndexArray;
 
+/**
+\brief Firmware check ident info
+*/
 typedef struct
 {
-    UINT8 identIdx;
-    UINT8 numberOfIdents;
+    UINT8 identIdx;         ///< Used to iterate through available indices
+    UINT8 numberOfIdents;   ///< Number of available indices
 } tFirmwareCheckIdentInfo;
 
+/**
+\brief Firmware check node info
+*/
 typedef struct
 {
-    UINT                                nodeId;                     ///< Node ID
-    UINT32                              featureFlags;               ///< Node feature flags
-    tFirmwareModuleCheckState           checkState;                 ///< Module firmware check state
-    tFirmwareModuleCheckState           nextCheckState;             ///< Next module firmware check state
-    tFirmwareModuleUpdateState          updateState;                ///< Module firmware update state
-    tFirmwareModuleUpdateState          nextUpdateState;            ///< Next module firmware update state
-    tFirmwareCheckFwInfo                nodeFwInfo;                 ///< Node firmware info
-    UINT                                moduleIdx;                  ///< Index of module within modular node
-    tFirmwareCheckModuleList            moduleList;                 ///< Module list
-    tFirmwareCheckIndexArray            identIndices;               ///< Index array for modules idents
-    tFirmwareCheckIdentInfo*            pIdentArrays;               ///< Field of ident infos for each ident object
-    tFirmwareCheckIndexArray            fwDownloadIndices;          ///< Index array for fw download objects
-    UINT16*                             pNumbersOfFwDownloads;      ///< Field of Number of entries for each fw download object
-    tFirmwareCheckNodeSdo               sdo;                        ///< Information about the current sdo tranmission
-    BOOL                                fModuleListContainsHead;    ///< Flag for indicating if the head station was added to the module list
-    UINT                                startCounter;               ///< Counter for requested module check starts
+    UINT                        nodeId;                     ///< Node ID
+    UINT32                      featureFlags;               ///< Node feature flags
+    tFirmwareModuleCheckState   checkState;                 ///< Module firmware check state
+    tFirmwareModuleCheckState   nextCheckState;             ///< Next module firmware check state
+    tFirmwareModuleUpdateState  updateState;                ///< Module firmware update state
+    tFirmwareModuleUpdateState  nextUpdateState;            ///< Next module firmware update state
+    tFirmwareCheckFwInfo        nodeFwInfo;                 ///< Node firmware info
+    UINT                        moduleIdx;                  ///< Index of module within modular node
+    tFirmwareCheckModuleList    moduleList;                 ///< Module list
+    tFirmwareCheckIndexArray    identIndices;               ///< Index array for modules idents
+    tFirmwareCheckIdentInfo*    pIdentArrays;               ///< Field of ident infos for each ident object
+    tFirmwareCheckIndexArray    fwDownloadIndices;          ///< Index array for fw download objects
+    UINT16*                     pNumbersOfFwDownloads;      ///< Field of Number of entries for each fw download object
+    tFirmwareCheckNodeSdo       sdo;                        ///< Information about the current sdo tranmission
+    BOOL                        fModuleListContainsHead;    ///< Flag for indicating if the head station was added to the module list
+    UINT                        startCounter;               ///< Counter for requested module check starts
 } tFirmwareCheckNodeInfo;
 
+/**
+\brief Firmware check instance
+*/
 typedef struct
 {
-    BOOL                    fInitialized;
-    tFirmwareCheckNodeInfo  aNodeInfo[FIRMWARECHECK_MAX_NODEID]; // TODO: replace by list
-    tFirmwareCheckNodeInfo* pNextNodeToCheck;
-    tFirmwareInfoHandle     pFwInfo;
-    tFirmwareCheckConfig    config;
+    BOOL                    fInitialized;                           ///< Instance initialized flag
+    tFirmwareCheckNodeInfo  aNodeInfo[FIRMWARECHECK_MAX_NODEID];    ///< Array of node info
+    tFirmwareCheckNodeInfo* pNextNodeToCheck;                       ///< Pointer to next node to be checked
+    tFirmwareInfoHandle     pFwInfo;                                ///< Firmware info handle
+    tFirmwareCheckConfig    config;                                 ///< Firmware check configuration
 } tFirmwareCheckInstance;
 
 //------------------------------------------------------------------------------
@@ -347,9 +379,9 @@ EXIT:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process a SDO event
+\brief  Process an SDO event
 
-This function processes a SOD event with the given resulting structure. This
+This function processes an SOD event with the given resulting structure. This
 functions manages the progress of gathering informations about the modules and
 the transmission of required firmware updates.
 
@@ -362,7 +394,7 @@ the transmission of required firmware updates.
 //------------------------------------------------------------------------------
 tFirmwareRet firmwarecheck_processSdoEvent(const tSdoComFinished* pSdoComFinished_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet            ret = kFwReturnOk;
     tFirmwareCheckNodeInfo* pNodeInfo;
 
     ret = checkPointer(pSdoComFinished_p);
@@ -406,7 +438,7 @@ each call.
 //------------------------------------------------------------------------------
 tFirmwareRet firmwarecheck_checkModulesOfNextNode(void)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet            ret = kFwReturnOk;
     tFirmwareCheckNodeInfo* pNodeInfo;
 
     pNodeInfo = getNextNodeToCheck();
@@ -436,6 +468,15 @@ EXIT:
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check pointer
+
+\param pCheck_p [in]    Pointer checked for validity
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet checkPointer(const void* pCheck_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -448,6 +489,15 @@ static tFirmwareRet checkPointer(const void* pCheck_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check node ID
+
+\param nodeId_p [in]    Node ID checked for validity
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet checkNodeId(UINT nodeId_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -460,6 +510,15 @@ static tFirmwareRet checkNodeId(UINT nodeId_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get node check info
+
+\param nodeId_p [in]    Node ID
+
+\return This functions returns a pointer to the node's check info.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareCheckNodeInfo* getNodeCheckInfo(UINT nodeId_p)
 {
     tFirmwareCheckNodeInfo* pNodeInfo;
@@ -478,13 +537,22 @@ static tFirmwareCheckNodeInfo* getNodeCheckInfo(UINT nodeId_p)
     return pNodeInfo;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check node info
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet checkNodeInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet    ret = kFwReturnOk;
-    tOplkError      oplkRet;
-    const tIdentResponse* pIdent;
-    tFirmwareCheckModuleEntry* pEntry;
-    BOOL fHeadUpdated = FALSE;
+    tFirmwareRet                ret = kFwReturnOk;
+    tOplkError                  oplkRet;
+    const tIdentResponse*       pIdent;
+    tFirmwareCheckModuleEntry*  pEntry;
+    BOOL                        fHeadUpdated = FALSE;
 
     oplkRet = oplk_getIdentResponse(pNodeInfo_p->nodeId, &pIdent);
     if (oplkRet != kErrorOk)
@@ -542,14 +610,23 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Finish node check
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckModuleEntry* pIter;
-    tFirmwareUpdateEntry* pList = NULL;
-    tFirmwareUpdateEntry* pNew;
-    tFirmwareUpdateEntry** ppIter = &pList;
-    tFirmwareUpdateEntry* pUpdateRem;
+    tFirmwareRet                ret = kFwReturnOk;
+    tFirmwareCheckModuleEntry*  pIter;
+    tFirmwareUpdateEntry*       pList = NULL;
+    tFirmwareUpdateEntry*       pNew;
+    tFirmwareUpdateEntry**      ppIter = &pList;
+    tFirmwareUpdateEntry*       pUpdateRem;
 
     pIter = pNodeInfo_p->moduleList;
 
@@ -612,11 +689,31 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check node for modular support
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a BOOL
+\retval TRUE    Node supports modular
+\retval FALSE   Node does not support modular
+*/
+//------------------------------------------------------------------------------
 static BOOL isModularSupported(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     return ((pNodeInfo_p->featureFlags & NMT_FEATUREFLAGS_MODULAR_DEVICE) != 0);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start gathering module info
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet startGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -636,6 +733,18 @@ static tFirmwareRet startGatheringModuleInfo(tFirmwareCheckNodeInfo* pNodeInfo_p
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check SDO finished event
+
+\param pNodeInfo_p [in]         Node check info
+\param pSdoComFinished_p [in]   Pointer to SDO finished event
+
+\return This functions returns a BOOL.
+\retval TRUE    SDO finished event is expected
+\retval FALSE   SDO finished event is not expected
+*/
+//------------------------------------------------------------------------------
 static BOOL isExpectedSdoCompleteEvent(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                        const tSdoComFinished* pSdoComFinished_p)
 {
@@ -645,10 +754,19 @@ static BOOL isExpectedSdoCompleteEvent(tFirmwareCheckNodeInfo* pNodeInfo_p,
             (pSdoComFinished_p->nodeId == pNodeInfo_p->nodeId));
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Issue SDO read
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet issueSdoRead(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tOplkError result;
+    tFirmwareRet    ret = kFwReturnOk;
+    tOplkError      result;
 
     result = oplk_readObject(&pNodeInfo_p->sdo.handle,
                              pNodeInfo_p->nodeId,
@@ -670,10 +788,19 @@ static tFirmwareRet issueSdoRead(tFirmwareCheckNodeInfo* pNodeInfo_p)
 }
 
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get number of module ident indices
+
+\param pNodeInfo_p [in] Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getNumberOfModuleIdentIndices(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = FIRMWARE_CHECK_INDEX_IDENT_INDICIES;
     pSdo->subindex = FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES;
@@ -685,11 +812,21 @@ static tFirmwareRet getNumberOfModuleIdentIndices(tFirmwareCheckNodeInfo* pNodeI
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get index of module ident
+
+\param pNodeInfo_p [in] Node check info
+\param index_p [in]     Index in ident array
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getIndexOfModuleIdent(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                           size_t index_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = FIRMWARE_CHECK_INDEX_IDENT_INDICIES;
     pSdo->subindex = (UINT)(index_p + 1u);
@@ -701,11 +838,21 @@ static tFirmwareRet getIndexOfModuleIdent(tFirmwareCheckNodeInfo* pNodeInfo_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get number of entries in ident object
+
+\param pNodeInfo_p [in]     Node check info
+\param identArray_p [in]    Index in ident array
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getNumberOfEntriesInIdentObject(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                                     size_t identArray_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = pNodeInfo_p->identIndices.pIndices[identArray_p];
     pSdo->subindex = FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES;
@@ -717,12 +864,23 @@ static tFirmwareRet getNumberOfEntriesInIdentObject(tFirmwareCheckNodeInfo* pNod
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get module ident
+
+\param pNodeInfo_p [in]     Node check info
+\param identArray_p [in]    Index in ident array
+\param ident_p [in]         Ident subindex
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getModuleIdent(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                    size_t identArray_p, size_t ident_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
-    tFirmwareCheckModuleEntry* pEntry;
+    tFirmwareRet                ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*      pSdo = &pNodeInfo_p->sdo;
+    tFirmwareCheckModuleEntry*  pEntry;
     tFirmwareCheckModuleEntry** ppInsertIter = NULL;
 
     pEntry = malloc(sizeof(tFirmwareCheckModuleEntry));
@@ -762,10 +920,19 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get number of module download indices
+
+\param pNodeInfo_p [in]     Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getNumberOfModuleFwDownloadIndices(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = FIRMWARE_CHECK_INDEX_FW_DOWN_INDICES;
     pSdo->subindex = FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES;
@@ -777,11 +944,21 @@ static tFirmwareRet getNumberOfModuleFwDownloadIndices(tFirmwareCheckNodeInfo* p
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get index of module download
+
+\param pNodeInfo_p [in]     Node check info
+\param index_p [in]         Download subindex
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                           size_t index_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = FIRMWARE_CHECK_INDEX_FW_DOWN_INDICES;
     pSdo->subindex = (UINT)(index_p + 1u);
@@ -797,11 +974,21 @@ static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get number of module firmware downloads
+
+\param pNodeInfo_p [in] Node check info
+\param fwArray_p [in]   Index in number of firmware download array
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet getNumberOfModuleFwDownload(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                                 size_t fwArray_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckNodeSdo* pSdo = &pNodeInfo_p->sdo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
 
     pSdo->index = pNodeInfo_p->fwDownloadIndices.pIndices[fwArray_p];
     pSdo->subindex = FIMRWARE_CHECK_SUBINDEX_NUMBER_OF_ENTRIES;
@@ -817,20 +1004,30 @@ static tFirmwareRet getNumberOfModuleFwDownload(tFirmwareCheckNodeInfo* pNodeInf
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process SDO event for module
+
+\param pNodeInfo_p [in]         Node check info
+\param pSdoComFinished_p [in]   Pointer to SDO finished event
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                              const tSdoComFinished* pSdoComFinished_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    BOOL fFailed = FALSE;
+    tFirmwareRet    ret = kFwReturnOk;
+    BOOL            fFailed = FALSE;
 
     if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
     {
         FWM_ERROR("Unexpected transferred bytes %u instead of %u for node %u index 0x%X subindex 0x%X\n",
-                pSdoComFinished_p->transferredBytes,
-                pNodeInfo_p->sdo.size,
-                pNodeInfo_p->nodeId,
-                pNodeInfo_p->sdo.index,
-                pNodeInfo_p->sdo.subindex);
+                  pSdoComFinished_p->transferredBytes,
+                  pNodeInfo_p->sdo.size,
+                  pNodeInfo_p->nodeId,
+                  pNodeInfo_p->sdo.index,
+                  pNodeInfo_p->sdo.subindex);
 
         fFailed = TRUE;
     }
@@ -863,11 +1060,20 @@ static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process check state machine
+
+\param pNodeInfo_p [in]         Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet processCheckStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareCheckIdentInfo* pIdentArray;
-    BOOL repeat;
+    tFirmwareRet                ret = kFwReturnOk;
+    tFirmwareCheckIdentInfo*    pIdentArray;
+    BOOL                        repeat;
 
     do
     {
@@ -980,13 +1186,22 @@ static tFirmwareRet processCheckStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process update state machine
+
+\param pNodeInfo_p [in]         Node check info
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet                ret = kFwReturnOk;
     tFirmwareCheckModuleEntry** ppIter = &pNodeInfo_p->moduleList;
-    tFirmwareCheckModuleEntry* pRem = NULL;
-    size_t modIdx = 1u;
-    BOOL repeat;
+    tFirmwareCheckModuleEntry*  pRem = NULL;
+    size_t                      modIdx = 1u;
+    BOOL                        repeat;
 
     do
     {
@@ -1126,13 +1341,25 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check if update is required
+
+\param pNodeInfo_p [in] Node check info
+\param pFwInfo_p [in]   Pointer to firmware info
+
+\return This functions returns a BOOL.
+\retval TRUE    Update is required
+\retval FALSE   Update is not required
+*/
+//------------------------------------------------------------------------------
 static BOOL isFirmwareUpdateRequired(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                      tFirmwareCheckFwInfo* pFwInfo_p)
 {
-    BOOL ret = FALSE;
+    BOOL                ret = FALSE;
     tFirmwareModuleInfo moduleInfo;
-    tFirmwareInfo* pFirmwareInfo;
-    tFirmwareRet fwReturn;
+    tFirmwareInfo*      pFirmwareInfo;
+    tFirmwareRet        fwReturn;
 
     memset(&moduleInfo, 0, sizeof(tFirmwareModuleInfo));
 
@@ -1164,13 +1391,23 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Calculate object index and subindex for module
+
+\param pNodeInfo_p [in]     Node check info
+\param moduleIndex_p [in]   Module index
+\param pIndex_p [out]       Pointer to return the index
+\param pSubIndex_p [out]    Pointer to return the subindex
+*/
+//------------------------------------------------------------------------------
 static void calcFwObjectForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
                                   size_t moduleIndex_p,
                                   UINT* pIndex_p,
                                   UINT* pSubIndex_p)
 {
-    size_t indexIter;
-    UINT modIndex = 0u;
+    size_t  indexIter;
+    UINT    modIndex = 0u;
 
     for (indexIter = 0u; indexIter < pNodeInfo_p->fwDownloadIndices.numberOfIndices; indexIter++)
     {
@@ -1187,15 +1424,29 @@ static void calcFwObjectForModule(tFirmwareCheckNodeInfo* pNodeInfo_p,
     }
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Module check failed
+
+\param pNodeInfo_p [in]     Node check info
+*/
+//------------------------------------------------------------------------------
 static void moduleCheckFailed(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     cleanupNode(pNodeInfo_p);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Clean up node check info
+
+\param pNodeInfo_p [in]     Node check info
+*/
+//------------------------------------------------------------------------------
 static void cleanupNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
-    tFirmwareCheckModuleEntry* pIter;
-    tFirmwareCheckModuleEntry* pRem;
+    tFirmwareCheckModuleEntry*  pIter;
+    tFirmwareCheckModuleEntry*  pRem;
 
     free(pNodeInfo_p->identIndices.pIndices);
     pNodeInfo_p->identIndices.pIndices = NULL;
@@ -1227,6 +1478,13 @@ static void cleanupNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
     pNodeInfo_p->sdo.handle = FIRMWARECHECK_INVALID_SDO;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Finish check for node
+
+\param pNodeInfo_p [in]     Node check info
+*/
+//------------------------------------------------------------------------------
 static void finishCheckForNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
 {
     FWM_TRACE("Firmware check finished for node %u\n", pNodeInfo_p->nodeId);
@@ -1234,9 +1492,18 @@ static void finishCheckForNode(tFirmwareCheckNodeInfo* pNodeInfo_p)
     cleanupNode(pNodeInfo_p);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get next node check info to be checked
+
+\return This functions returns a pointer to the next node check info.
+\retval NULL    No next node check info available
+\retval !NULL   Pointer to next node info to be checked
+*/
+//------------------------------------------------------------------------------
 static tFirmwareCheckNodeInfo* getNextNodeToCheck(void)
 {
-    size_t i;
+    size_t                  i;
     tFirmwareCheckNodeInfo* pNode = instance_l.pNextNodeToCheck;
 
     // TODO: replace by iterating through list

@@ -4,7 +4,7 @@
 
 \brief  Source file of the firmware manager
 
- This module implements the firmware maneger.
+ This module implements the firmware manager.
 
 \ingroup module_app_firmwaremanager
 *******************************************************************************/
@@ -41,10 +41,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <firmwaremanager/firmwaremanager.h>
 #include <firmwaremanager/firmwaretrace.h>
-#include "firmwarestore.h"
-#include "firmwareinfo.h"
-#include "firmwarecheck.h"
-#include "firmwareupdate.h"
+#include <firmwaremanager/firmwarestore.h>
+#include <firmwaremanager/firmwareinfo.h>
+#include <firmwaremanager/firmwarecheck.h>
+#include <firmwaremanager/firmwareupdate.h>
 
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
@@ -79,24 +79,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define tabentries(aVar_p)      (sizeof(aVar_p) / sizeof(*(aVar_p)))
 #endif
 
+#define FIRMWARE_MANAGER_MAX_NODE_ID        C_ADR_BROADCAST
 
-#define FIRMWARE_MANAGER_MAX_NODE_ID C_ADR_BROADCAST
-
-#define FIRMWARE_MANAGER_PRINT_LINE_LENGTH 80
-#define FIRMWARE_MANAGER_PRINT_NODE_LENGTH 6
+#define FIRMWARE_MANAGER_PRINT_LINE_LENGTH  80
+#define FIRMWARE_MANAGER_PRINT_NODE_LENGTH  6
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process SDO finished event
+
+This function is called to process an SDO finish event triggered by openPOWERLINK.
+
+\param pSdoComFinished_p [in]   Pointer to SDO finished
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 typedef tFirmwareRet (*tFirmwareProcessSdoEvent)(const tSdoComFinished* pSdoComFinished_p);
 
+/**
+\brief Firmware manager instance
+*/
 typedef struct
 {
-    BOOL                    fInitialized;
-    tFirmwareStoreHandle    firmwareStore;
-    tFirmwareInfoHandle     firmwareInfo;
-    BOOL                    fCheckModules;
+    BOOL                    fInitialized;   ///< Instance initialized flag
+    tFirmwareStoreHandle    firmwareStore;  ///< Firmware store handle
+    tFirmwareInfoHandle     firmwareInfo;   ///< Firmware info handle
+    BOOL                    fCheckModules;  ///< Check modular devices (triggered by periodic thread)
 } tFirmwareManagerInstance;
 
 //------------------------------------------------------------------------------
@@ -130,6 +143,19 @@ static void cleanupSdo(tSdoComConHdl* pSdoConnection_p);
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize the firmware manager
+
+This function initializes the firmware manager.
+
+\param fwInfoFileName_p [in]    Firmware info file created by openCONFIGURATOR
+
+\return This functions returns a value of \ref tFirmwareRet.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
 tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p)
 {
     tFirmwareRet            ret = kFwReturnOk;
@@ -160,7 +186,7 @@ tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p)
 
     infoConfig.pFwStore = instance_l.firmwareStore;
 
-    ret = firmwareinfo_create(&infoConfig, &instance_l.firmwareInfo);
+    (void)firmwareinfo_create(&infoConfig, &instance_l.firmwareInfo);
 
     memset(&checkConfig, 0, sizeof(tFirmwareCheckConfig));
 
@@ -192,11 +218,22 @@ EXIT:
     {
         firmwareupdate_exit();
         firmwarecheck_exit();
+        firmwareinfo_destroy(instance_l.firmwareInfo);
+        firmwarestore_destroy(instance_l.firmwareStore);
     }
 
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Deinitialize the firmware manager
+
+This function deinitializes the firmware manager.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
 void firmwaremanager_exit(void)
 {
     firmwareupdate_exit();
@@ -207,15 +244,29 @@ void firmwaremanager_exit(void)
     instance_l.fInitialized = FALSE;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Firmware manager thread
+
+This function implements the firmware manager thread. It shall be called regularly
+(e.g. every 5 seconds) to trigger checking the firmware of modular devices.
+The function also polls the firmware update transmission status to trace the
+firmware manager activity.
+
+\return This functions returns a value of \ref tFirmwareRet.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
 tOplkError firmwaremanager_thread(void)
 {
-    tOplkError ret = kErrorOk;
-    UINT nodeId;
-    tFirmwareRet fwReturn;
-    tFirmwareUpdateTransmissionStatus status;
-    char line[FIRMWARE_MANAGER_PRINT_LINE_LENGTH];
-    char node[FIRMWARE_MANAGER_PRINT_NODE_LENGTH];
-    BOOL fFinalPrint = FALSE;
+    tOplkError                          ret = kErrorOk;
+    UINT                                nodeId;
+    tFirmwareRet                        fwReturn;
+    tFirmwareUpdateTransmissionStatus   status;
+    char                                line[FIRMWARE_MANAGER_PRINT_LINE_LENGTH];
+    char                                node[FIRMWARE_MANAGER_PRINT_NODE_LENGTH];
+    BOOL                                fFinalPrint = FALSE;
 
     ret = oplk_postUserEvent((void*)&instance_l);
 
@@ -249,6 +300,21 @@ tOplkError firmwaremanager_thread(void)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Process openPOWERLINK events
+
+This function processes openPOWERLINK events.
+
+\param eventType_p [in] Event type
+\param pEventArg_p [in] Pointer to event argument
+\param pUserArg_p [in]  User argument
+
+\return This functions returns a value of \ref tOplkError.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
 tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
                                         const tOplkApiEventArg* pEventArg_p,
                                         void* pUserArg_p)
@@ -264,8 +330,6 @@ tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
         case kOplkApiEventUserDef:
             if ((pEventArg_p->pUserArg == &instance_l) && instance_l.fCheckModules)
             {
-
-
                 fwRet = firmwarecheck_checkModulesOfNextNode();
 
                 if (fwRet != kFwReturnOk)
@@ -343,27 +407,55 @@ tOplkError firmwaremanager_processEvent(tOplkApiEventType eventType_p,
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Firmware update not required callback
+
+This function is called if a firmware update is not required for the given
+node.
+
+\param  nodeId_p [in]           Node ID
+\param pSdoConnection_p [in]    Pointer to SDO connection handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet firmwareUpdateNotRequired(UINT nodeId_p,
                                               tSdoComConHdl* pSdoConnection_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tOplkError result;
+    tFirmwareRet    ret = kFwReturnOk;
+    tOplkError      result;
 
     cleanupSdo(pSdoConnection_p);
 
-    FWM_TRACE("No firmware update required for node %d, continuing boot/operation\n", nodeId_p);
+    FWM_TRACE("No firmware update required for node %d, continuing boot/operation\n",
+              nodeId_p);
 
     result = oplk_triggerMnStateChange(nodeId_p, kNmtNodeCommandSwOk);
     if (result != kErrorOk)
     {
-        FWM_ERROR("(%s) - Triggering mn state change failed with %d\n", __func__, result);
+        FWM_ERROR("(%s) - Triggering mn state change failed with %d\n",
+                  __func__, result);
     }
 
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Modular firmware update completed
+
+This function is called if a modular firmware update is completed for the given
+node.
+
+\param  nodeId_p [in]           Node ID
+\param pSdoConnection_p [in]    Pointer to SDO connection handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet moduleUpdateCompleteCb(UINT nodeId_p,
-                                     tSdoComConHdl* pSdoConnection_p)
+                                           tSdoComConHdl* pSdoConnection_p)
 {
     tFirmwareRet ret = kFwReturnOk;
 
@@ -374,8 +466,20 @@ static tFirmwareRet moduleUpdateCompleteCb(UINT nodeId_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Node firmware update completed
+
+This function is called if a firmware update is completed for the given node.
+
+\param  nodeId_p [in]           Node ID
+\param pSdoConnection_p [in]    Pointer to SDO connection handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet nodeUpdateCompleteCb(UINT nodeId_p,
-                                     tSdoComConHdl* pSdoConnection_p)
+                                         tSdoComConHdl* pSdoConnection_p)
 {
     tFirmwareRet ret = kFwReturnOk;
     tOplkError result;
@@ -394,11 +498,24 @@ static tFirmwareRet nodeUpdateCompleteCb(UINT nodeId_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Firmware update error
+
+This function is called if an error happend during a firmware update for the
+given node.
+
+\param  nodeId_p [in]           Node ID
+\param pSdoConnection_p [in]    Pointer to SDO connection handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet errorDuringUpdate(UINT nodeId_p,
                                       tSdoComConHdl* pSdoConnection_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tOplkError result;
+    tFirmwareRet    ret = kFwReturnOk;
+    tOplkError      result;
 
     cleanupSdo(pSdoConnection_p);
 

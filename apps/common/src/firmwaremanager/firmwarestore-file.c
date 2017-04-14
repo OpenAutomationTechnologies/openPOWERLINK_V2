@@ -40,7 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "firmwarestore.h"
+#include <firmwaremanager/firmwarestore.h>
+
 #include <stdio.h>
 
 //============================================================================//
@@ -67,20 +68,23 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define FWSTORE_READ_MODE "r"
-#define FWSTORE_FILEPATH_LENGTH 128u
+#define FWSTORE_READ_MODE       "r"
+#define FWSTORE_FILEPATH_LENGTH 256u
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Firmware store instance
+*/
 typedef struct tFirmwareStoreInstance
 {
-    char aFilename[FWSTORE_FILEPATH_LENGTH];
-    char aPathToFile[FWSTORE_FILEPATH_LENGTH];
-    FILE* pStorageFd;
-    void* pData;
-    size_t dataSize;
+    char    aFilename[FWSTORE_FILEPATH_LENGTH];     ///< File name
+    char    aPathToFile[FWSTORE_FILEPATH_LENGTH];   ///< Path to file
+    FILE*   pStorageFd;                             ///< File descriptor
+    void*   pData;                                  ///< File data pointer
+    size_t  dataSize;                               ///< File data size
 } tFirmwareStoreInstance;
 
 //------------------------------------------------------------------------------
@@ -119,7 +123,7 @@ This function creates an instance of the firmware store module.
 tFirmwareRet firmwarestore_create(const tFirmwareStoreConfig* pConfig_p,
                                   tFirmwareStoreHandle* ppHandle_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet            ret = kFwReturnOk;
     tFirmwareStoreInstance* instance;
 
     if ((pConfig_p == NULL) || (ppHandle_p == NULL))
@@ -301,7 +305,7 @@ EXIT:
 This function provides the base information of the storage, i.e. the base
 address of a memory storage or the containing directory of a file.
 
-\param pHandle_p [in] Handle of the firware store module
+\param pHandle_p [in] Handle of the firmware store module
 \param ppData_p [out] Pointer which will be filled with the base information
 
 \return This functions returns a value of \ref tFirmwareRet.
@@ -338,15 +342,26 @@ EXIT:
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate buffer and read data from file
+
+\param pFile_p [in]     File handle to be read
+\param ppBuffer_p [out] Pointer to buffer allocated and filled with the read data
+\param pDataSize [out]  Pointer filled with the allocated buffer size
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet allocAndReadData(FILE* pFile_p,
                                      void** ppBuffer_p, size_t* pDataSize_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    UINT8* pBuffer = NULL;
-    size_t fileSize;
-    size_t readBytes;
-    int result;
-    long tellResult;
+    tFirmwareRet    ret = kFwReturnOk;
+    UINT8*          pBuffer = NULL;
+    size_t          fileSize;
+    size_t          readBytes;
+    int             result;
+    long            tellResult;
 
     result = fseek(pFile_p, 0, SEEK_END);
     if (result < 0)
@@ -389,10 +404,19 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Flush firmware store data
+
+\param pHandle_p [in] Store handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet flushData(tFirmwareStoreHandle pHandle_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    int result;
+    tFirmwareRet    ret = kFwReturnOk;
+    int             result;
 
     if (pHandle_p->pStorageFd != NULL)
     {
@@ -414,21 +438,29 @@ static tFirmwareRet flushData(tFirmwareStoreHandle pHandle_p)
     return ret;
 }
 
-static void getPathToFile(const char* pFilename_p, char* aPath_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Get path to file
+
+\param pFilename_p [in] File name
+\param pPath_p [out]    Pointer which will be filled with the path
+*/
+//------------------------------------------------------------------------------
+static void getPathToFile(const char* pFilename_p, char* pPath_p)
 {
     char* pPos;
 
     pPos = strrchr(pFilename_p, FIRMWARESTORE_PATH_DIR_SEP);
 
-    memset(aPath_p, 0, FWSTORE_FILEPATH_LENGTH);
+    memset(pPath_p, 0, FWSTORE_FILEPATH_LENGTH);
 
     if (pPos != NULL)
     {
-        memcpy(aPath_p, pFilename_p, (pPos - pFilename_p));
+        memcpy(pPath_p, pFilename_p, (pPos - pFilename_p));
     }
     else
     {
-        aPath_p[0] = '.';
+        pPath_p[0] = '.';
     }
 }
 

@@ -40,7 +40,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include "firmwareinfodecode.h"
+#include <firmwaremanager/firmwareinfodecode.h>
 #include <firmwaremanager/firmwarestore.h>
 
 #include <string.h>
@@ -69,10 +69,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define FIRMWAREINFO_ASCII_LINE_SEPERATOR "\n"
-#define FIRMWAREINFO_LINE_FORMAT "%x\t%x\t%x\t%x\t%x\t%x\t%x\t%63s"
-#define FIRMWAREINFO_FW_IMAGE_PATH_LENGTH 256u
-#define FIRMWAREINFO_NUMBER_OF_VALUES_PER_LINE 8
+#define FIRMWAREINFO_ASCII_LINE_SEPERATOR       "\n"
+#define FIRMWAREINFO_LINE_FORMAT                "%x\t%x\t%x\t%x\t%x\t%x\t%x\t%255s"
+#define FIRMWAREINFO_FW_IMAGE_PATH_LENGTH       256u
+#define FIRMWAREINFO_NUMBER_OF_VALUES_PER_LINE  8
 
 //------------------------------------------------------------------------------
 // local types
@@ -86,8 +86,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local function prototypes
 //------------------------------------------------------------------------------
 
-tFirmwareRet parseLine(tFirmwareStoreHandle pFwStore_p, char* pLine_p,
-                       tFirmwareInfo* pInfo_p);
+static tFirmwareRet parseLine(tFirmwareStoreHandle pFwStore_p, char* pLine_p,
+                              tFirmwareInfo* pInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -115,15 +115,14 @@ by calling \ref firmwareinfodecode_freeInfo.
 tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
                                            tFirmwareInfoList* ppInfoList_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    size_t dataSize;
-    void* pData;
-    char* pFileString;
-    char* pLine;
-    tFirmwareInfoList pList = NULL;
-    tFirmwareInfoEntry** ppInsertIter = &pList;
-    tFirmwareInfoEntry* pEntry = NULL;
-
+    tFirmwareRet            ret = kFwReturnOk;
+    size_t                  dataSize;
+    void*                   pData;
+    char*                   pFileString;
+    char*                   pLine;
+    tFirmwareInfoList       pList = NULL;
+    tFirmwareInfoEntry**    ppInsertIter = &pList;
+    tFirmwareInfoEntry*     pEntry = NULL;
 
     if (ppInfoList_p == NULL)
     {
@@ -177,7 +176,6 @@ tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
     *ppInfoList_p = pList;
 
 EXIT:
-
     (void)firmwarestore_flushData(pStore_p);
 
     if (ret != kFwReturnOk)
@@ -209,9 +207,9 @@ allocated resources.
 //------------------------------------------------------------------------------
 tFirmwareRet firmwareinfodecode_freeInfo(tFirmwareInfoList pInfoList_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
+    tFirmwareRet        ret = kFwReturnOk;
     tFirmwareInfoEntry* rem;
-    tFirmwareInfoList pInfoList = pInfoList_p;
+    tFirmwareInfoList   pInfoList = pInfoList_p;
 
     if (pInfoList_p != NULL)
     {
@@ -236,16 +234,31 @@ tFirmwareRet firmwareinfodecode_freeInfo(tFirmwareInfoList pInfoList_p)
 /// \name Private Functions
 /// \{
 
-tFirmwareRet parseLine(tFirmwareStoreHandle pFwStore_p, char* pLine_p,
-                       tFirmwareInfo* pInfo_p)
+//------------------------------------------------------------------------------
+/**
+\brief  Parse line of firmware info file
+
+This function parses the given line of a firmware info file and returns the
+firmware information.
+
+\param pStore_p [in]        Handle of the firmware store module accessing the
+                            information storage.
+\param pLine_p [in]         Line to be parsed
+\param pInfo_p [out]        Pointer used to return the firmware information
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
+static tFirmwareRet parseLine(tFirmwareStoreHandle pFwStore_p, char* pLine_p,
+                              tFirmwareInfo* pInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareInfo info;
-    int result;
-    tFirmwareStoreConfig storeConfig;
-    char imagePath[FIRMWAREINFO_FW_IMAGE_PATH_LENGTH];
-    char completePath[FIRMWAREINFO_FW_IMAGE_PATH_LENGTH];
-    void* baseInfo;
+    tFirmwareRet            ret = kFwReturnOk;
+    tFirmwareInfo           info;
+    int                     result;
+    tFirmwareStoreConfig    storeConfig;
+    char                    imagePath[FIRMWAREINFO_FW_IMAGE_PATH_LENGTH];
+    char                    completePath[FIRMWAREINFO_FW_IMAGE_PATH_LENGTH];
+    void*                   baseInfo;
 
     memset(imagePath, 0, FIRMWAREINFO_FW_IMAGE_PATH_LENGTH);
 

@@ -39,9 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <firmwaremanager/firmwaremanager.h>
 #include <firmwaremanager/firmwareinfodecode.h>
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -51,22 +52,44 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+/**
+\brief  Firmware update node callback
+
+This function is called by the firmware update module to inform about a node's
+update completion.
+
+\param nodeId_p [in]            Node ID
+\param pSdoConnection_p [in]    Pointer to SDO connection used for this node
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 typedef tFirmwareRet (*tFirmwareUpdateNodeCb)(UINT nodeId_p,
                                               tSdoComConHdl* pSdoConnection_p);
 
+/**
+\brief Firmware update transmission status
+*/
 typedef struct
 {
-    UINT numberOfPendingTransmissions;
-    BOOL fTransmissionActive;
+    UINT numberOfPendingTransmissions;  ///< Number of pending transmissions
+    BOOL fTransmissionActive;           ///< Active transmission flag
 } tFirmwareUpdateTransmissionStatus;
 
+/**
+\brief Firmware update configuration
+*/
 typedef struct
 {
-    tFirmwareUpdateNodeCb pfnNodeUpdateComplete;
-    tFirmwareUpdateNodeCb pfnModuleUpdateComplete;
-    tFirmwareUpdateNodeCb pfnError;
+    tFirmwareUpdateNodeCb pfnNodeUpdateComplete;    ///< Node update complete callback
+    tFirmwareUpdateNodeCb pfnModuleUpdateComplete;  ///< Modules of a node update complete callback
+    tFirmwareUpdateNodeCb pfnError;                 ///< Node update error callback
 } tFirmwareUpdateConfig;
 
+/**
+\brief Firmware update entry
+*/
 typedef struct tFirmwareUpdateEntry
 {
     UINT                            nodeId;         ///< Node ID
@@ -77,6 +100,9 @@ typedef struct tFirmwareUpdateEntry
     struct tFirmwareUpdateEntry*    pNext;          ///< Pointer to next update entry
 } tFirmwareUpdateEntry;
 
+/**
+\brief Firmware update list
+*/
 typedef tFirmwareUpdateEntry* tFirmwareUpdateList;
 
 //------------------------------------------------------------------------------

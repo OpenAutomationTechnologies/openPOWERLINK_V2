@@ -39,9 +39,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <firmwaremanager/firmwaremanager.h>
 #include <firmwaremanager/firmwarestore.h>
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -56,10 +57,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct
 {
-    UINT8 nodeId;       ///< ID of the node
-    UINT32 vendorId;    ///< Vendor ID of the module
-    UINT32 productId;   ///< Product ID of the module
-    UINT32 hwVariant;   ///< Hardware variant of the module
+    UINT8   nodeId;     ///< ID of the node
+    UINT32  vendorId;   ///< Vendor ID of the module
+    UINT32  productId;  ///< Product ID of the module
+    UINT32  hwVariant;  ///< Hardware variant of the module
 } tFirmwareModuleInfo;
 
 /**
@@ -67,14 +68,14 @@ typedef struct
  */
 typedef struct
 {
-    tFirmwareModuleInfo moduleInfo; ///< Info of the associated module
-    UINT32 appSwDate;               ///< Software date of the configured firmware
-    UINT32 appSwTime;               ///< Software time of the configured firmware
-    BOOL fFirmwareLocked;           ///< Flag for representation if the firmware
-                                    ///< should be locked, this functionality is
-                                    ///< currently not supported.
-    tFirmwareStoreHandle pFwImage;  ///< Handle of the firmware store instance for
-                                    ///< accessing the firmware
+    tFirmwareModuleInfo     moduleInfo;         ///< Info of the associated module
+    UINT32                  appSwDate;          ///< Software date of the configured firmware
+    UINT32                  appSwTime;          ///< Software time of the configured firmware
+    BOOL                    fFirmwareLocked;    ///< Flag for representation if the firmware
+                                                ///< should be locked, this functionality is
+                                                ///< currently not supported.
+    tFirmwareStoreHandle    pFwImage;           ///< Handle of the firmware store instance for
+                                                ///< accessing the firmware
 } tFirmwareInfo;
 
 /**
@@ -82,8 +83,8 @@ typedef struct
  */
 typedef struct tFirmwareInfoEntry
 {
-    tFirmwareInfo fwInfo;               ///< Firmware info structure
-    struct tFirmwareInfoEntry* pNext;   ///< Pointer to the next entry within list
+    tFirmwareInfo               fwInfo; ///< Firmware info structure
+    struct tFirmwareInfoEntry*  pNext;  ///< Pointer to the next entry within list
 } tFirmwareInfoEntry;
 
 /**

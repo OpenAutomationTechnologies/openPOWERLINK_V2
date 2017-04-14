@@ -47,7 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-
 #define FIRMWARECHECK_INVALID_NODEID    C_ADR_INVALID
 #define FIRMWARECHECK_MAX_NODEID        C_ADR_BROADCAST
 #define FIRMWARECHECK_INVALID_SDO       ((UINT)-1)
@@ -56,19 +55,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define tabentries(aVar_p)      (sizeof(aVar_p) / sizeof(*(aVar_p)))
 #endif
 
-
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 
+//------------------------------------------------------------------------------
+/**
+\brief  No firmware update required
+
+This function is called if a firmware update is not required for a certain node.
+
+\param nodeId_p [in]            ID of the already up-to-date node
+\param pSdoConnection_p [in]    Pointer to SDO connection handle
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 typedef tFirmwareRet (*tNoFirmwareCheckNodeCb)(UINT nodeId_p,
                                                tSdoComConHdl* pSdoConnection_p);
 
+/**
+\brief Firmware check configuration
+*/
 typedef struct
 {
-    tFirmwareInfoHandle pFwInfo;    ///< Handle of the firmware store instance
-                                    ///< for accessing the firmware configuration
-    tNoFirmwareCheckNodeCb pfnNoUpdateRequired;
+    tFirmwareInfoHandle     pFwInfo;                ///< Handle of the firmware store instance
+                                                    ///< for accessing the firmware configuration
+    tNoFirmwareCheckNodeCb  pfnNoUpdateRequired;    ///< No update required callback
 } tFirmwareCheckConfig;
 
 //------------------------------------------------------------------------------
@@ -85,8 +98,6 @@ void            firmwarecheck_exit(void);
 tFirmwareRet    firmwarecheck_processNodeEvent(UINT nodeId_p);
 tFirmwareRet    firmwarecheck_processSdoEvent(const tSdoComFinished* pSdoComFinished_p);
 tFirmwareRet    firmwarecheck_checkModulesOfNextNode(void);
-
-//FIXME: Free update list forwarded to update module here or in update module after completion?
 
 #ifdef __cplusplus
 }

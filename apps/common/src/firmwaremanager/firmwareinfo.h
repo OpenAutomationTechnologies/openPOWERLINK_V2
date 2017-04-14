@@ -39,10 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <firmwaremanager/firmwaremanager.h>
 #include <firmwaremanager/firmwareinfodecode.h>
 #include <firmwaremanager/firmwarestore.h>
+
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines

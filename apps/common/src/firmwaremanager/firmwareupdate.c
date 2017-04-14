@@ -39,10 +39,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <firmwaremanager/firmwaretrace.h>
 #include <firmwaremanager/firmwareupdate.h>
 #include <firmwaremanager/firmwarestore.h>
+
+#include <oplk/oplk.h>
 
 #include <stdio.h>
 #include <errno.h>
@@ -71,29 +72,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define FIRMWARE_UPDATE_MAX_NODE_ID C_ADR_BROADCAST
+#define FIRMWARE_UPDATE_MAX_NODE_ID     C_ADR_BROADCAST     ///< Maximum value of a node ID
 
-#define FIRMWARE_UPDATE_SDO_TYPE kSdoTypeAsnd
-#define FIRMWARE_UPDATE_INVALID_SDO ((tSdoComConHdl)-1)
+#define FIRMWARE_UPDATE_SDO_TYPE        kSdoTypeAsnd        ///< SDO type used for firmware update
+#define FIRMWARE_UPDATE_INVALID_SDO     ((tSdoComConHdl)-1) ///< Invalid SDO handle
 
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Firmware update transmission information
+*/
 typedef struct
 {
-    BOOL                    fTranmissionActive;
-    tFirmwareUpdateList     pUpdateList;
-    void*                   pFirmwareImage;
-    size_t                  firmwareSize;
-    tSdoComConHdl           sdoComCon;
+    BOOL                fTranmissionActive; ///< Active transmission
+    tFirmwareUpdateList pUpdateList;        ///< Firmware update list
+    void*               pFirmwareImage;     ///< Firmware image in progress
+    size_t              firmwareSize;       ///< Size of firmware image in progress
+    tSdoComConHdl       sdoComCon;          ///< SDO handle
 } tFirmwareUpdateTransmissionInfo;
 
+/**
+\brief Firmware update instance
+*/
 typedef struct
 {
-    BOOL                            fInitialized;
-    tFirmwareUpdateConfig           config;
-    tFirmwareUpdateTransmissionInfo aTranmsissions[FIRMWARE_UPDATE_MAX_NODE_ID]; // TODO: replace by list
+    BOOL                            fInitialized;   ///< Instance initialized flag
+    tFirmwareUpdateConfig           config;         ///< Instance configuration
+    tFirmwareUpdateTransmissionInfo aTransmissions[FIRMWARE_UPDATE_MAX_NODE_ID]; ///< Node transmission array
 } tFirmwareUpdateInstance;
 
 //------------------------------------------------------------------------------
@@ -187,9 +194,9 @@ This function processes the required firmware updates defined by the given list.
 //------------------------------------------------------------------------------
 tFirmwareRet firmwareupdate_processUpdateList(tFirmwareUpdateList* ppList_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareUpdateEntry** ppInsertIter;
-    tFirmwareUpdateTransmissionInfo* pInfo;
+    tFirmwareRet                        ret = kFwReturnOk;
+    tFirmwareUpdateEntry**              ppInsertIter;
+    tFirmwareUpdateTransmissionInfo*    pInfo;
 
     ret = checkPointerAndInstance(ppList_p);
     if (ret != kFwReturnOk)
@@ -197,7 +204,7 @@ tFirmwareRet firmwareupdate_processUpdateList(tFirmwareUpdateList* ppList_p)
         goto EXIT;
     }
 
-    pInfo = &instance_l.aTranmsissions[(*ppList_p)->nodeId];
+    pInfo = &instance_l.aTransmissions[(*ppList_p)->nodeId];
 
     ppInsertIter = &pInfo->pUpdateList;
 
@@ -223,10 +230,10 @@ EXIT:
 
 //------------------------------------------------------------------------------
 /**
-\brief  Process a SDO event
+\brief  Process an SDO event
 
 This function processes SDO events given by the passed \ref tSdoComFinished
-structure. By processing the accoridng events this module checks the result of
+structure. By processing the according events this module checks the result of
 firmware transmissions and proceeds for further required updates.
 
 \param pSdoComFinished_p [in]   Structure of the SDO event
@@ -238,9 +245,9 @@ firmware transmissions and proceeds for further required updates.
 //------------------------------------------------------------------------------
 tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinished_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareUpdateTransmissionInfo* pInfo = NULL;
-    BOOL fSucceeded = TRUE;
+    tFirmwareRet                        ret = kFwReturnOk;
+    tFirmwareUpdateTransmissionInfo*    pInfo = NULL;
+    BOOL                                fSucceeded = TRUE;
 
     ret = checkPointerAndInstance(pSdoComFinished_p);
     if (ret != kFwReturnOk)
@@ -248,7 +255,7 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
         goto EXIT;
     }
 
-    pInfo = &instance_l.aTranmsissions[pSdoComFinished_p->nodeId];
+    pInfo = &instance_l.aTransmissions[pSdoComFinished_p->nodeId];
 
     if (!isExpectedSdoCompleteEvent(pInfo, pSdoComFinished_p))
     {
@@ -259,7 +266,7 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
     if (pSdoComFinished_p->sdoComConState != kSdoComTransferFinished)
     {
         FWM_ERROR("SDO write failed with state: 0x%x and abort code 0x%x\n",
-                pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
+                  pSdoComFinished_p->sdoComConState, pSdoComFinished_p->abortCode);
 
         fSucceeded = FALSE;
     }
@@ -267,7 +274,7 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
     if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
         FWM_ERROR("SDO written number of bytes does not match: %u - %zu\n",
-                pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+                  pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
 
         fSucceeded = FALSE;
     }
@@ -292,13 +299,29 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get update transmission status
+
+This function returns the node's update transmission status.
+
+\param pConfig_p [in]       Pointer to the configuration structure for the
+                            firmware update module.
+\param nodeId_p [in]        Node ID
+\param pStatus_p [in]       Pointer used to return the transmission status
+
+\return This functions returns a value of \ref tFirmwareRet.
+
+\ingroup module_app_firmwaremanager
+*/
+//------------------------------------------------------------------------------
 tFirmwareRet firmwareupdate_getTransmissionStatus(UINT nodeId_p,
                                                   tFirmwareUpdateTransmissionStatus* pStatus_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tFirmwareUpdateTransmissionInfo* pInfo;
-    tFirmwareUpdateEntry* pIter;
-    UINT count = 0u;
+    tFirmwareRet                        ret = kFwReturnOk;
+    tFirmwareUpdateTransmissionInfo*    pInfo;
+    tFirmwareUpdateEntry*               pIter;
+    UINT                                count = 0u;
 
     ret = checkPointerAndInstance(pStatus_p);
     if (ret != kFwReturnOk)
@@ -334,6 +357,15 @@ EXIT:
 /// \name Private Functions
 /// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check pointer and instance
+
+\param pCheck_p [in]        Pointer checked
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet checkPointerAndInstance(const void* pCheck_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -350,18 +382,37 @@ static tFirmwareRet checkPointerAndInstance(const void* pCheck_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Get transmission information
+
+\param nodeId_p [in]        Node ID
+
+\return This functions returns a pointer to the transmission information.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareUpdateTransmissionInfo* getInfo(UINT nodeId_p)
 {
     tFirmwareUpdateTransmissionInfo* pInfo = NULL;
 
     if (nodeId_p <= FIRMWARE_UPDATE_MAX_NODE_ID)
     {
-        pInfo = &instance_l.aTranmsissions[nodeId_p];
+        pInfo = &instance_l.aTransmissions[nodeId_p];
     }
 
     return pInfo;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Check SDO complete event's validity
+
+\param pInfo_p [in]             Pointer to transmission information
+\param pSdoComFinished_p [in]   Pointer to SDO finish
+
+\return This functions returns a \ref BOOL.
+*/
+//------------------------------------------------------------------------------
 static BOOL isExpectedSdoCompleteEvent(tFirmwareUpdateTransmissionInfo* pInfo_p,
                                        const tSdoComFinished* pSdoComFinished_p)
 {
@@ -373,10 +424,19 @@ static BOOL isExpectedSdoCompleteEvent(tFirmwareUpdateTransmissionInfo* pInfo_p,
             (pSdoComFinished_p->sdoComConHdl == pInfo_p->sdoComCon));
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Transmit firmware update image
+
+\param pInfo_p [in]             Pointer to transmission information
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
-    tFirmwareRet ret = kFwReturnOk;
-    tOplkError oplkRet;
+    tFirmwareRet    ret = kFwReturnOk;
+    tOplkError      oplkRet;
 
     if (pInfo_p->fTranmissionActive)
     {
@@ -384,8 +444,8 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
     }
 
     FWM_TRACE("Start update for node: %u index: 0x%x subindex: 0x%x\n",
-           pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
-           pInfo_p->pUpdateList->subindex);
+              pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
+              pInfo_p->pUpdateList->subindex);
 
     ret = firmwarestore_loadData(pInfo_p->pUpdateList->pStoreHandle);
     if (ret != kFwReturnOk)
@@ -416,7 +476,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
 
     if ((oplkRet != kErrorApiTaskDeferred) && (pInfo_p->sdoComCon != FIRMWARE_UPDATE_INVALID_SDO))
     {
-        FWM_ERROR("Writing the firmware object failed with %d\n", oplkRet);
+        FWM_ERROR("Writing the firmware object failed with 0x%X\n", oplkRet);
         ret = kFwReturnSdoWriteFailed;
         goto EXIT;
     }
@@ -431,6 +491,15 @@ EXIT:
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Start firmware update image transmission
+
+\param pInfo_p [in]             Pointer to transmission information
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet startTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
@@ -452,6 +521,15 @@ static tFirmwareRet startTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Handle firmware update transmission failed
+
+\param pInfo_p [in]             Pointer to transmission information
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
     if (pInfo_p->pUpdateList->fIsNode)
@@ -466,13 +544,22 @@ static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
     cleanupTransmission(pInfo_p);
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Handle firmware update transmission succeeded
+
+\param pInfo_p [in]             Pointer to transmission information
+
+\return This functions returns a value of \ref tFirmwareRet.
+*/
+//------------------------------------------------------------------------------
 static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
     tFirmwareRet ret = kFwReturnOk;
 
     FWM_TRACE("Update finished for node: %u index: 0x%x subindex: 0x%x\n",
-           pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
-           pInfo_p->pUpdateList->subindex);
+              pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
+              pInfo_p->pUpdateList->subindex);
 
 
     if (pInfo_p->pUpdateList->fIsNode)
@@ -484,7 +571,7 @@ static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo
                                                           &pInfo_p->sdoComCon);
         }
     }
-    else if (pInfo_p->pUpdateList == NULL)
+    else if (pInfo_p->pUpdateList->pNext == NULL)
     {
         // Module callback
         if (instance_l.config.pfnModuleUpdateComplete != NULL)
@@ -499,11 +586,17 @@ static tFirmwareRet transmissionSucceeded(tFirmwareUpdateTransmissionInfo* pInfo
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Clean up firmware update transmission
 
+\param pInfo_p [in]             Pointer to transmission information
+*/
+//------------------------------------------------------------------------------
 static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
 {
-    tFirmwareUpdateEntry* pRem;
-    tFirmwareStoreHandle pFwStore;
+    tFirmwareUpdateEntry*   pRem;
+    tFirmwareStoreHandle    pFwStore;
 
     pInfo_p->fTranmissionActive = FALSE;
     pFwStore = pInfo_p->pUpdateList->pStoreHandle;
@@ -517,17 +610,17 @@ static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
 
 static void cleanupInstance(void)
 {
-    tFirmwareUpdateEntry* pRem;
-    size_t iter;
+    tFirmwareUpdateEntry*   pRem;
+    size_t                  iter;
 
     for (iter = 0u; iter < FIRMWARE_UPDATE_MAX_NODE_ID; iter++)
     {
-        pRem = instance_l.aTranmsissions[iter].pUpdateList;
+        pRem = instance_l.aTransmissions[iter].pUpdateList;
         while (pRem != NULL)
         {
-            instance_l.aTranmsissions[iter].pUpdateList = pRem->pNext;
+            instance_l.aTransmissions[iter].pUpdateList = pRem->pNext;
             free(pRem);
-            pRem = instance_l.aTranmsissions[iter].pUpdateList;
+            pRem = instance_l.aTransmissions[iter].pUpdateList;
         }
     }
 }
