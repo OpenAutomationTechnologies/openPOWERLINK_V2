@@ -16,7 +16,7 @@ provide direct access to user application for specific shared memory regions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // TODO:Get the following value from configuration header files
 #define DUALPROCSHM_BUFF_ID_ERRHDLR     12
 #define DUALPROCSHM_BUFF_ID_PDO         13
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#define DUALPROCSHM_BUFF_ID_TIMESYNC    14
+#endif
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -112,6 +115,9 @@ typedef struct
     tCircBufInstance*       apEventQueueInst[kEventQueueNum];   ///< Event queue instances.
     tCircBufInstance*       apDllQueueInst[DRV_DLLCALTXQUEUE_INSTCNT]; ///< DLL queue instances.
     tErrHndObjects*         pErrorObjects;                      ///< Pointer to error objects.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pTimesyncShm;                       ///< Pointer to timesync shared memory
+#endif
     BOOL                    fDriverActive;                      ///< Flag to identify status of driver interface.
 #if defined(CONFIG_INCLUDE_VETH)
     BOOL                    fVEthActive;                        ///< Flag to indicate whether the VEth interface is intialized.
@@ -913,6 +919,11 @@ Maps the kernel layer memory specified by the caller into user layer.
 \param[in]      size_p              Size of the memory to be mapped.
 
 \return Returns tOplkError error code.
+\retval kErrorOk                   Kernel layer memory to user layer memeory
+                                   mapping is successful
+\retval kErrorNoResource           Kernel to User memory mapping is not successful
+\retval kErrorInvalidInstanceParam PCP buffer pointer lies outside the shared
+                                   memory region
 
 \ingroup module_driver_linux_kernel_zynq
 */
@@ -969,12 +980,8 @@ tOplkError drvintf_mapKernelMem(const void* pKernelMem_p,
         drvIntfInstance_l.shmSize = remoteProcSharedMemInst.span;
     }
 
-    if ((ULONG)pKernelMem_p <= drvIntfInstance_l.shmMemRemote)
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() Error: PCP buffer pointer lies outside the shared memory region\n");
-        return kErrorInvalidInstanceParam;
-    }
-    else
+    if (((ULONG)pKernelMem_p <= (drvIntfInstance_l.shmMemRemote + drvIntfInstance_l.shmSize)) &&
+        (ULONG)pKernelMem_p >= drvIntfInstance_l.shmMemRemote)
     {
         *ppUserMem_p = (void*)((ULONG)pKernelMem_p -
                                (ULONG)drvIntfInstance_l.shmMemRemote +
@@ -984,6 +991,25 @@ tOplkError drvintf_mapKernelMem(const void* pKernelMem_p,
                                 drvIntfInstance_l.shmMemRemote,
                                 (ULONG)pKernelMem_p,
                                 (ULONG)(*ppUserMem_p));
+    }
+    else
+    {
+        // Checks whether the passed memory is a local memory
+        if (((ULONG)pKernelMem_p <= (drvIntfInstance_l.shmMemLocal + drvIntfInstance_l.shmSize)) &&
+            (ULONG)pKernelMem_p >= drvIntfInstance_l.shmMemLocal)
+        {
+            *ppUserMem_p = (void*)((ULONG)pKernelMem_p);
+             DEBUG_LVL_DRVINTF_TRACE("LA: 0x%lX, RA: 0x%lX, KA: 0x%lX, UA: 0x%lX\n",
+                                     drvIntfInstance_l.shmMemLocal,
+                                     drvIntfInstance_l.shmMemRemote,
+                                     (ULONG)pKernelMem_p,
+                                     (ULONG)(*ppUserMem_p));
+        }
+        else
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() Error: PCP buffer pointer lies outside the shared memory region\n");
+            return kErrorInvalidInstanceParam;
+        }
     }
 
     return kErrorOk;
@@ -1079,6 +1105,116 @@ ULONG drvintf_getFileBufferSize(void)
 {
     return CONFIG_CTRL_FILE_CHUNK_SIZE;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize timesync shared memory
+
+This function retrieves the shared memory for the timesync module. This memory
+is accessible to user space through ioctl calls.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk               Successful timesync shared memory initialization
+\retval kErrorNoResource       Driver is not active or dualprocessor get memory
+                               failed or timesync shared memory buffer is small
+\retval kErrorInvalidOperation Pointer to timesync shared memory is not NULL
+
+\ingroup module_driver_linux_kernel_zynq
+*/
+//------------------------------------------------------------------------------
+tOplkError drvintf_initTimesyncShm(void)
+{
+    tDualprocReturn dualRet;
+    void*           pBase;
+    size_t          span;
+
+    if (!drvIntfInstance_l.fDriverActive)
+        return kErrorNoResource;
+
+    if (drvIntfInstance_l.pTimesyncShm != NULL)
+        return kErrorInvalidOperation;
+
+    dualRet = dualprocshm_getMemory(drvIntfInstance_l.dualProcDrvInst, // Driver instance
+                                    DUALPROCSHM_BUFF_ID_TIMESYNC,      // ID of timesync memory buffer
+                                    &pBase,                            // Base address of the requested memory
+                                    &span,                             // Size of the memory to be allocated
+                                    FALSE);                            // Retrieves address from address mapping table
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Couldn't get timesync shared memory buffer (0x%X)\n",
+                              __func__,
+                              dualRet);
+        return kErrorNoResource;
+    }
+
+    if (span < sizeof(tTimesyncSharedMemory))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Timesync shared memory buffer too small\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+
+    drvIntfInstance_l.pTimesyncShm = (tTimesyncSharedMemory*)pBase;
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Free timesync shared memory
+
+Frees the timesync shared memory.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk    Exit drvintf timesync shared memory successful
+
+\ingroup module_driver_linux_kernel_zynq
+*/
+//------------------------------------------------------------------------------
+tOplkError drvintf_exitTimesyncShm(void)
+{
+    tOplkError ret;
+
+    if (drvIntfInstance_l.pTimesyncShm != NULL)
+    {
+        ret = dualprocshm_freeMemory(drvIntfInstance_l.dualProcDrvInst, // Driver instance
+                                     DUALPROCSHM_BUFF_ID_TIMESYNC,      // ID of timesync memory buffer
+                                     FALSE);                            // Clear address from address mapping table
+        if (ret != kDualprocSuccessful)
+            DEBUG_LVL_ERROR_TRACE("%s(): The dynamic memory buffer is not freed successfully\n"
+                                  __func__);
+
+        drvIntfInstance_l.pTimesyncShm = NULL;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+This routine fetches the address of timesync shared memory to be passed to user
+layer.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_driver_linux_kernel_zynq
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* drvintf_getTimesyncShm(void)
+{
+    if (!drvIntfInstance_l.fDriverActive)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Driver is not active and timesync shared memory is not available\n",
+                              __func__);
+        return NULL;
+    }
+
+    return drvIntfInstance_l.pTimesyncShm;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
