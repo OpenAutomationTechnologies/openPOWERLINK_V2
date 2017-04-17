@@ -68,6 +68,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_CMD_PDO_MAP_OFFSET                  _IOR (PLK_IOC_MAGIC, 11, ULONG)
 #define PLK_CMD_CTRL_WRITE_FILE_BUFFER          _IOW (PLK_IOC_MAGIC, 12, tIoctlFileChunk)
 #define PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE       _IOR (PLK_IOC_MAGIC, 13, ULONG)
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#define PLK_CMD_TIMESYNC_MAP_OFFSET             _IOWR(PLK_IOC_MAGIC, 14, ULONG)
+#endif
 
 //------------------------------------------------------------------------------
 // typedef

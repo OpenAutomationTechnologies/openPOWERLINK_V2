@@ -281,7 +281,7 @@ SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
     )
 
 SET(PDO_UCAL_LINUXDPSHM_SOURCES
-    ${USER_SOURCE_DIR}/timesync/timesyncucal-ioctl.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-linuxdpshm.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxdpshm.c
     )
 
@@ -441,7 +441,7 @@ SET(PDO_KCAL_POSIXMEM_SOURCES
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxdpshm.c
     )
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
