@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,7 @@ SET(MODULE_SOURCE_FILES
     ${COMMON_SOURCE_DIR}/debugstr.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
-    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxdpshm.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxpcie.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )

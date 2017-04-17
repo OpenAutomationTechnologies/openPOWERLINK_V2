@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -281,7 +281,7 @@ SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
     )
 
 SET(PDO_UCAL_LINUXPCIE_SOURCES
-    ${USER_SOURCE_DIR}/timesync/timesyncucal-ioctl.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-linuxdpshm.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxpcie.c
     )
 
@@ -441,7 +441,7 @@ SET(PDO_KCAL_POSIXMEM_SOURCES
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxdpshm.c
     )
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
