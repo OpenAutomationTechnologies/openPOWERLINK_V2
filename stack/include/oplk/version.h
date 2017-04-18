@@ -8,7 +8,7 @@ The file contains definitions describing the openPOWERLINK version.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -54,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //                 build        = current build (will be set to 0 if minor version will be incremented)
 //                       rc     = release candidate (will be set to 0 if final version created)
 //
-#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 5, 2, 0)
-#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 5, 2, 0)
-#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION      (2, 5, 2, 0)
+#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 6, 0, 1)
+#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 6, 0, 1)
+#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION_RC   (2, 6, 0, 1)
 
 #endif /* _INC_oplk_version_H_ */
