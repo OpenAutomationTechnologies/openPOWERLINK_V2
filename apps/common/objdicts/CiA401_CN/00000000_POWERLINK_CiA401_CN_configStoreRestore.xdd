@@ -234,14 +234,14 @@
              <SubObject subIndex="01" name="AllParam_U32" objectType="7" dataType="0007" accessType="rw"/>
              <SubObject subIndex="02" name="CommunicationParam_U32" objectType="7" dataType="0007" accessType="rw"/>
              <SubObject subIndex="03" name="ApplicationParam_U32" objectType="7" dataType="0007" accessType="rw"/>
-             <SubObject subIndex="04" name="ManufacturerParam_U32" objectType="7" dataType="0007" accessType="rw"/>
+             <SubObject subIndex="04" name="ManufacturerParam_04h_U32" objectType="7" dataType="0007" accessType="rw"/>
           </Object>
           <Object index="1011" name="NMT_RestoreDefParam_REC" objectType="9">
              <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" defaultValue="4"/>
              <SubObject subIndex="01" name="AllParam_U32" objectType="7" dataType="0007" accessType="rw"/>
              <SubObject subIndex="02" name="CommunicationParam_U32" objectType="7" dataType="0007" accessType="rw"/>
              <SubObject subIndex="03" name="ApplicationParam_U32" objectType="7" dataType="0007" accessType="rw"/>
-             <SubObject subIndex="04" name="ManufacturerParam_U32" objectType="7" dataType="0007" accessType="rw"/>
+             <SubObject subIndex="04" name="ManufacturerParam_04h_U32" objectType="7" dataType="0007" accessType="rw"/>
           </Object>
           <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>

@@ -122,7 +122,7 @@ OBD_BEGIN()
         // Object 1030h: NMT_InterfaceGroup_Xh_REC
         OBD_BEGIN_INDEX_RAM(0x1030, 0x0A, FALSE)
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x09)
-            OBD_SUBINDEX_RAM_VAR_RG(0x1030, 0x01, kObdTypeUInt16, kObdAccR, tObdUnsigned16, InterfaceIndex_U16, 0x01, 0x00, 0x0A)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1030, 0x01, kObdTypeUInt16, kObdAccR, tObdUnsigned16, InterfaceIndex_U16, 0x01, 0x01, 0x0A)
             OBD_SUBINDEX_RAM_VSTRING(0x1030, 0x02, kObdAccR, InterfaceDescription_VSTR, 0x20, "Interface 1")
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x03, kObdTypeUInt8, kObdAccR, tObdUnsigned8, InterfaceType_U8, 0x06)
             OBD_SUBINDEX_RAM_VAR(0x1030, 0x04, kObdTypeUInt16, kObdAccR, tObdUnsigned16, InterfaceMtu_U16, 1518)
