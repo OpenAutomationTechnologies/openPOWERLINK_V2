@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -48,6 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 
+#include <system/system.h>
 #include <obdcreate/obdcreate.h>
 #include <gpio/gpio.h>
 #include <lcd/lcd.h>
@@ -131,6 +132,12 @@ int main(void)
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
 
+    if (system_init() != 0)
+    {
+        PRINTF("system_init() failed!\n");
+        return -1;
+    }
+
     // Initialize helper modules
     gpio_init();
     lcd_init();
@@ -187,6 +194,8 @@ Exit:
     // Shutdown helper modules
     lcd_exit();
     gpio_exit();
+
+    system_exit();
 
     return 0;
 }

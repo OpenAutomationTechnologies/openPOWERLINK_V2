@@ -2,7 +2,7 @@
 #
 # CMake file of CiA 401 CN embedded demo application (Target is Microblaze)
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -70,6 +70,7 @@ SET(DEMO_ARCH_SOURCES
     ${DEMO_ARCHSOURCES}
     ${COMMON_SOURCE_DIR}/gpio/gpio-microblaze.c
     ${COMMON_SOURCE_DIR}/lcd/lcdl-null.c
+    ${COMMON_SOURCE_DIR}/system/system-microblaze.c
    )
 
 INCLUDE_DIRECTORIES(
