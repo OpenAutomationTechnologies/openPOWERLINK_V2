@@ -603,11 +603,11 @@ static int getOptions(int argc_p,
 #if defined(CONFIG_USE_PCAP)
                 printf("Usage: %s [-c CDC-FILE] [-f FWINFO-FILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
                 printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
+                printf("              If option is skipped the program prompts for the interface.\n");
 #else
                 printf("Usage: %s [-c CDC-FILE] [-f FWINFO-FILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
 #endif
                 printf(" -p: Use parsable log format\n");
-                printf("              If option is skipped the program prompts for the interface.\n");
                 printf(" -v LOGLEVEL: A bit mask with log levels to be printed in the event logger\n");
                 printf(" -t LOGCATEGORY: A bit mask with log categories to be printed in the event logger\n");
                 return -1;

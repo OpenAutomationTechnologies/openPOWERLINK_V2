@@ -545,6 +545,7 @@ static int getOptions(int argc_p,
 #if defined(CONFIG_USE_PCAP)
                 printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
                 printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
+                printf("              If option is skipped the program prompts for the interface.\n");
 #else
                 printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
 #endif
