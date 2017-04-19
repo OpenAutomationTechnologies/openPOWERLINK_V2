@@ -991,11 +991,21 @@ tOplkError oplk_readLocalObject(UINT index_p,
                                 UINT* pSize_p)
 {
     tOplkError  ret = kErrorOk;
+    tObdSize    obdSize;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    ret = readLocalObject(index_p, subindex_p, pDstData_p, pSize_p);
+    if ((index_p == 0) ||
+        (subindex_p > 255) ||
+        (pDstData_p == NULL) ||
+        (pSize_p == NULL) ||
+        (*pSize_p == 0))
+        return kErrorApiInvalidParam;
+
+    obdSize = (tObdSize)*pSize_p;
+    ret = obdu_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
+    *pSize_p = (UINT)obdSize;
 
     return ret;
 }
@@ -1024,14 +1034,16 @@ tOplkError oplk_writeLocalObject(UINT index_p,
                                  const void* pSrcData_p,
                                  UINT size_p)
 {
-    tOplkError ret = kErrorOk;
-
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    ret = writeLocalObject(index_p, subindex_p, pSrcData_p, size_p);
+    if ((index_p == 0) ||
+        (subindex_p > 255) ||
+        (pSrcData_p == NULL) ||
+        (size_p == 0))
+        return kErrorApiInvalidParam;
 
-    return ret;
+    return obdu_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -1913,7 +1925,7 @@ static tOplkError readLocalObject(UINT index_p,
     }
 
     obdSize = (tObdSize)*pSize_p;
-    ret = obdu_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
+    ret = obdu_readEntryToLe(index_p, subindex_p, pDstData_p, &obdSize);
     *pSize_p = (UINT)obdSize;
 
 Exit:
@@ -1946,7 +1958,7 @@ static tOplkError writeLocalObject(UINT index_p,
         (size_p == 0))
         return kErrorApiInvalidParam;
 
-    return obdu_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
+    return obdu_writeEntryFromLe(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
 //------------------------------------------------------------------------------
