@@ -1357,6 +1357,8 @@ static tOplkError initNonNumWrite(UINT index_p,
     // function, re-read this values.
     obdSize = getObjectSize(pSubEntry);
     pDstData = getObjectDataPtr(pSubEntry);
+    cbParam.index = index_p;
+    cbParam.subIndex = subIndex_p;
 
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)
     if (segmOffset_p == 0)
@@ -1376,8 +1378,6 @@ static tOplkError initNonNumWrite(UINT index_p,
     if (pDstData == NULL)
        return kErrorObdAccessViolation;
 
-    cbParam.index = index_p;
-    cbParam.subIndex = subIndex_p;
     cbParam.pArg = &obdSize;
     cbParam.obdEvent = kObdEvInitWrite;
     ret = callObjectCallback(pObdEntry, &cbParam);
