@@ -55,10 +55,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 typedef enum
 {
-    kFwReturnOk = 0,                ///< Function call was successfull
+    kFwReturnOk = 0,                ///< Function call was successful
     kFwReturnInvalidParameter,      ///< An invalid parameter was passed
     kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoRessource,           ///< The allocation of required ressources failed
+    kFwReturnNoResource,           ///< The allocation of required resources failed
     kFwReturnFileOperationFailed,   ///< A File operation failed
     kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
     kFwReturnModuleNotFound,        ///< The requested module was not found

@@ -126,7 +126,7 @@ tFirmwareRet firmwareinfo_create(const tFirmwareInfoConfig* pConfig_p,
     instance = malloc(sizeof(tFirmwareInfoInstance));
     if (instance == NULL)
     {
-        ret = kFwReturnNoRessource;
+        ret = kFwReturnNoResource;
         goto EXIT;
     }
 
