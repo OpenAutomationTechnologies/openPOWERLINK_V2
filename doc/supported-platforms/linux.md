@@ -21,9 +21,11 @@ This file contains documentation for the openPOWERLINK stack on Linux.
 One of the following network controllers is required to run openPOWERLINK on
 Linux.
 
+- Network controller card with Realtek 8111 (or compatible) 1GBit Ethernet chip
 - Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip
 - Network controller card with Realtek RTL8139 Rev C or D chip
 - Network controller card with Intel 8255x 100MBit Ethernet chip
+- Network controller card with Intel I210 1GBit Ethernet chip
 - Standard Linux network controller through libpcap library (for user-space stack version)
 
 ## Linux Kernel {#sect_linux_kernel}
@@ -51,6 +53,7 @@ extensively tested with this openPOWERLINK version.
 
 - 2.6.33.7.2-rt30
 - 3.12.24-rt38
+- 4.4.39-rt50
 
 **Thread Priorities**
 If using a real-time kernel, the real-time priorities of the necessary
@@ -88,6 +91,20 @@ behavior on a _multicore_ processor:
 * Disable IRQ balancing by disable irqbalance. This depends on your
   Linux distribution. For example in Ubuntu edit `/etc/default/irqbalance`
 
+**Power Modes (C-states)**
+
+In recent kernel versions (>4.x) it sometimes can be observed that context
+switches take an unusual amount of time. This added latency interferes with the
+realtime behavior of openPOWERLINK leading to cycle errors.
+
+* To achieve the lowest context switch latency possible, add the following kernel
+  boot parameters in `/etc/default/grub` to disable all power saving features:
+
+      GRUB_CMDLINE_LINUX="intel_idle.max_cstate=0 processor.max_cstate=0 idle=poll"
+
+* Afterwards, run the following command to activate the changes
+
+      > update-grub
 
 ## Libraries and Tools {#sect_linux_libs}
 
@@ -104,9 +121,9 @@ For a detailed description of CMake look at the
 In order to use the user space POWERLINK stack the libpcap library is needed
 to access the Ethernet interface.
 
-### QT5 Development Tools
+### Qt5 Development Tools
 
-If you want to build the QT demo application the QT5 development tools must
+If you want to build the QT demo application the Qt5 development tools must
 be installed on the system (<http://www.qt.io/>).
 
 ### openCONFIGURATOR
