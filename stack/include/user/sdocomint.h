@@ -219,7 +219,7 @@ typedef struct
     tSdoTransType       sdoTransferType;     ///< Transfer Type: Auto, Expedited, Segmented
     tSdoServiceType     sdoServiceType;      ///< Service Type: WriteByIndex, ReadByIndex, WriteMultParam, ReadMultParam
     tSdoType            sdoProtocolType;     ///< Protocol Type: Auto, Udp, ASnd
-    UINT8*              pData;               ///< Pointer to data
+    void*               pData;               ///< Pointer to data
     UINT                transferSize;        ///< Number of bytes to transfer
     UINT                transferredBytes;    ///< Number of bytes already transferred
     UINT                reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request for server or max. buffer size for client
@@ -279,7 +279,7 @@ tOplkError sdocomint_processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
 tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
                                   tSdoComConEvent sdoComConEvent_p,
                                   const tAsySdoCom* pSdoCom_p);
-void       sdocomint_initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
+void       sdocomint_initCmdFrameGeneric(tPlkFrame* pPlkFrame_p,
                                          UINT plkFrameSize_p,
                                          const tSdoComCon* pSdoComCon_p,
                                          tAsySdoCom** pCommandFrame_p);
@@ -290,8 +290,8 @@ void       sdocomint_overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p,
 void       sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p,
                                             UINT size_p);
 void       sdocomint_fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
-                                          const UINT8* pSrcData_p,
-                                          UINT size_p);
+                                          const void* pSrcData_p,
+                                          size_t size_p);
 void       sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
                                          UINT tranferredBytes_p,
                                          BOOL fTransferComplete);
