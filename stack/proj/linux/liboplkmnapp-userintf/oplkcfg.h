@@ -11,7 +11,7 @@ application libary on Linux which is using the userspace interface.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_SDO_UDP
+#define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_IP
 #define CONFIG_INCLUDE_CFM

@@ -9,7 +9,7 @@ This header file configures the POWERLINK node.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -59,6 +59,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_CFM
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_IP

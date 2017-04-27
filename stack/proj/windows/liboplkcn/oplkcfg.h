@@ -11,7 +11,7 @@ on Linux.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,6 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_MASND
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE

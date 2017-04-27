@@ -10,6 +10,7 @@ application library without an OS which is using the dualprocshm interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited.
 All rights reserved.
 
@@ -59,6 +60,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_CFM
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_INCLUDE_IP

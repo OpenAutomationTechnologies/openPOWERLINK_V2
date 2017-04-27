@@ -78,8 +78,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2017-04-18"
-      fileModificationTime="13:00:00+01:00"
+      fileModificationDate="2017-04-27"
+      fileModificationTime="14:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -126,8 +126,8 @@
       fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2017-04-18"
-      fileModificationTime="13:00:00+01:00"
+      fileModificationDate="2017-04-27"
+      fileModificationTime="14:00:00+01:00"
       fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
       fileVersion="01.00"
       supportedLanguages="en">
@@ -933,7 +933,7 @@
             <SubObject subIndex="FD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="FE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
-          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00050265"/>
+          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00058265"/>
           <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="0x20"/>
           <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="optional" accessType="ro"/>
           <Object index="1F8D" name="NMT_PResPayloadLimitList_AU16" objectType="8" dataType="0006">
@@ -1545,7 +1545,8 @@
           SDOCmdReadAllByIndex="false"
           SDOCmdWriteByName="false"
           SDOCmdReadByName="false"
-          SDOCmdWriteMultParam="false"
+          SDOCmdWriteMultParam="true"
+          SDOCmdReadMultParam="true"
           NMTFlushArpEntry="false"
           NMTNetHostNameSet="false"
           PDORPDOChannels="3"
