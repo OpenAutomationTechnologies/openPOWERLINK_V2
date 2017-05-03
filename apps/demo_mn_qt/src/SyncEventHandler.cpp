@@ -288,9 +288,9 @@ void SyncEventHandler::processSyncEvent()
     if (ret != kErrorOk)
         return;
 
-    this->input[0] = this->pProcessImageOut->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
-    this->input[1] = this->pProcessImageOut->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
-    this->input[2] = this->pProcessImageOut->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
+    this->input[0] = this->pProcessImageOut->CN1_DigitalInput_00h_AU8_DigitalInput;
+    this->input[1] = this->pProcessImageOut->CN32_DigitalInput_00h_AU8_DigitalInput;
+    this->input[2] = this->pProcessImageOut->CN110_DigitalInput_00h_AU8_DigitalInput;
 
     this->cnt++;
 
@@ -344,9 +344,9 @@ void SyncEventHandler::processSyncEvent()
     if (this->fOperational)
     {
         // Write the outputs
-        this->pProcessImageIn->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = this->leds[0];
-        this->pProcessImageIn->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = this->leds[1];
-        this->pProcessImageIn->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = this->leds[2];
+        this->pProcessImageIn->CN1_DigitalOutput_00h_AU8_DigitalOutput = this->leds[0];
+        this->pProcessImageIn->CN32_DigitalOutput_00h_AU8_DigitalOutput = this->leds[1];
+        this->pProcessImageIn->CN110_DigitalOutput_00h_AU8_DigitalOutput = this->leds[2];
 
         ret = oplk_exchangeProcessImageIn();
         if (ret != kErrorOk)

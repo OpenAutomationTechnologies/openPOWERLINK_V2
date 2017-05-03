@@ -12,7 +12,7 @@ the running light is controlled by the read digital inputs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -180,9 +180,9 @@ tOplkError processSync(void)
 
     cnt_l++;
 
-    aNodeVar_l[0].input = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
-    aNodeVar_l[1].input = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
-    aNodeVar_l[2].input = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[0].input = pProcessImageOut_l->CN1_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[1].input = pProcessImageOut_l->CN32_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[2].input = pProcessImageOut_l->CN110_DigitalInput_00h_AU8_DigitalInput;
 
     for (i = 0; (i < MAX_NODES) && (aUsedNodeIds_l[i] != 0); i++)
     {
@@ -220,9 +220,9 @@ tOplkError processSync(void)
             aNodeVar_l[i].ledsOld = aNodeVar_l[i].leds;
     }
 
-    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[0].leds;
-    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[1].leds;
-    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[2].leds;
+    pProcessImageIn_l->CN1_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[0].leds;
+    pProcessImageIn_l->CN32_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[1].leds;
+    pProcessImageIn_l->CN110_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[2].leds;
 
     ret = oplk_exchangeProcessImageIn();
 
