@@ -2011,9 +2011,11 @@ static tOplkError performSdo(tSdoComConHdl* pSdoComConHdl_p,
            (sdoAccessType_p == kSdoAccessTypeMultiWrite) ||
            (sdoAccessType_p == kSdoAccessTypeMultiRead));
 
-    ASSERT(((sdoAccessType_p == kSdoAccessTypeWrite) ||
-            (sdoAccessType_p == kSdoAccessTypeRead)) &&
-           (subAccCnt_p == 1));
+    if ((sdoAccessType_p == kSdoAccessTypeWrite) ||
+        (sdoAccessType_p == kSdoAccessTypeRead))
+    {
+        ASSERT(subAccCnt_p == 1);
+    }
 
     ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
     if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
