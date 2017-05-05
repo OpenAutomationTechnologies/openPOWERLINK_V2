@@ -220,8 +220,10 @@ typedef struct
     tSdoServiceType     sdoServiceType;      ///< Service Type: WriteByIndex, ReadByIndex, WriteMultParam, ReadMultParam
     tSdoType            sdoProtocolType;     ///< Protocol Type: Auto, Udp, ASnd
     void*               pData;               ///< Pointer to data
+    UINT8*              pDataStart;          ///< Pointer start of data for segmented transfer
     UINT                transferSize;        ///< Number of bytes to transfer
     UINT                transferredBytes;    ///< Number of bytes already transferred
+    UINT                pendingTxBytes;      ///< Due bytes waiting for transmission
     UINT                reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request for server or max. buffer size for client
     UINT                respSegmSize;        ///< Segment size of WriteMultParam or ReadMultParam response
     tSdoMultiAccEntry*  paMultiAcc;          ///< Pointer to multi access array provided by user

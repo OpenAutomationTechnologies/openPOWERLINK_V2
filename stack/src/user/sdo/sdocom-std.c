@@ -243,11 +243,15 @@ void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
                                    UINT tranferredBytes_p,
                                    BOOL fTransferComplete)
 {
+    pSdoComCon_p->transferredBytes += tranferredBytes_p;
+
     if (fTransferComplete)
     {
         pSdoComCon_p->transferSize = 0;
         pSdoComCon_p->reqSegmSize = 0;
         pSdoComCon_p->respSegmSize = 0;
+        pSdoComCon_p->pendingTxBytes = 0;
+        pSdoComCon_p->pDataStart = NULL;
     }
     else
     {
@@ -255,11 +259,16 @@ void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
         pSdoComCon_p->transferSize -= tranferredBytes_p;
 
 #if defined(CONFIG_INCLUDE_SDOC)
-        pSdoComCon_p->pData = (UINT8*)pSdoComCon_p->pData + tranferredBytes_p;
+        if ((pSdoComCon_p->sdoTransferType == kSdoTransSegmented) &&
+            ((pSdoComCon_p->sdoComState == kSdoComStateClientConnected) ||
+             (pSdoComCon_p->sdoComState == kSdoComStateClientSegmTrans)))
+        {
+            ASSERT(pSdoComCon_p->pDataStart != NULL);
+            pSdoComCon_p->pData = (UINT8*)pSdoComCon_p->pDataStart + pSdoComCon_p->transferredBytes;
+        }
 #endif // defined(CONFIG_INCLUDE_SDOC)
     }
 
-    pSdoComCon_p->transferredBytes += tranferredBytes_p;
 }
 
 //------------------------------------------------------------------------------
