@@ -68,8 +68,10 @@ ${CONTRIB_SOURCE_DIR} \
 
 CFG_LIB_CFLAGS="\
 -DCONFIG_HOSTIF_PCP=FALSE \
--DCONFIG_INCLUDE_STORE_RESTORE \
 "
+# Add the following line to CFG_LIB_CFLAGS if the host cpu BSP and
+# hardware supports configuration storage (on the cfi-flash memory):
+# -DCONFIG_INCLUDE_STORE_RESTORE \
 
 CFG_LIB_ARGS="\
 --set LIB_CFLAGS_DEFINED_SYMBOLS=-G4 \

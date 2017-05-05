@@ -527,6 +527,17 @@ Steps in the previous sections \ref sect_altera-cn_build-hardware and \ref sect_
    flash memory. After the next power cycle the complete design will load
    automatically from flash.
 
+## How to enable configuration store/restore {#sect_altera-cn_cfg_storage}
+
+To enable the configuration storage feature, set both:
+- `-DCONFIG_APP_STORE_RESTORE`
+  in apps/demo_cn_embedded/build/altera-nios2/app.settings
+- `-DCONFIG_INCLUDE_STORE_RESTORE`
+  in stack/build/altera-nios2/liboplkcnapp-hostif/lib.settings
+
+\note This configuration store/restore feature is only implemented on the platform
+      `hardware/boards/terasic-de2-115/cn-single-hostif-gpio` and uses the CFI-flash memory.
+
 ## Troubleshooting {#sect_altera-cn_trouble}
 
 1. It is advised to clean all generated files after switching from one demo to
