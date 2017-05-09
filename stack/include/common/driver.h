@@ -10,7 +10,7 @@ kernel driver modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2016, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -138,7 +138,7 @@ extern "C"
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
 #if defined (__LINUX_PCIE__) || defined(__LINUX_ZYNQ__)
-#include <common/driver-linuxpcie.h>
+#include <common/driver-linuxdpshm.h>
 #else /* __LINUX_PCIE__ */
 #include <common/driver-linux.h>
 #endif /* __LINUX_PCIE__ */
