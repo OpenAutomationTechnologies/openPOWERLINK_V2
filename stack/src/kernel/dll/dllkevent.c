@@ -10,6 +10,7 @@ This file contains the event handling functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
@@ -96,6 +97,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static BOOL   fNewData = FALSE;  // TRUE if the net time data is new.
+static UINT32 netTimeUsec = 0;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -1037,7 +1042,34 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     ret = timesynck_setSocTime(&dllkInstance_g.socTime);
     if (ret != kErrorOk)
         return ret;
+
+    ret = timesynck_getNetTime(&dllkInstance_g.socTime.netTime, &fNewData);
+    if (ret != kErrorOk)
+        return ret;
 #endif
+
+    // Add cycle length to compensate the delay introduced by the buffers
+    if (fNewData == TRUE)
+        netTimeUsec = dllkInstance_g.dllConfigParam.cycleLen;
+
+    // Increment net time if fNewData is false
+    if ((fNewData == FALSE) &&
+        ((dllkInstance_g.socTime.netTime.nsec || dllkInstance_g.socTime.netTime.sec) != 0))
+    {
+        // Convert nsec value to usec value
+        netTimeUsec += ((dllkInstance_g.socTime.netTime.nsec / 1000) +
+                        dllkInstance_g.dllConfigParam.cycleLen);
+        dllkInstance_g.socTime.netTime.nsec = (dllkInstance_g.socTime.netTime.nsec % 1000);
+
+        //Increment net time value
+        dllkInstance_g.socTime.netTime.sec += (netTimeUsec / 1000000);
+        dllkInstance_g.socTime.netTime.nsec += ((netTimeUsec % 1000000) * 1000);
+        netTimeUsec = 0;
+    }
+
+    // Set SoC net time
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.nsec, dllkInstance_g.socTime.netTime.nsec);
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.sec, dllkInstance_g.socTime.netTime.sec);
 
     // Set SoC relative time
     ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.socTime.relTime);

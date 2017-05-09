@@ -8,6 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -87,7 +88,8 @@ transfer time information from the kernel to the user layer.
 */
 typedef struct
 {
-    tTimesyncSocTimeTripleBuf   socTime;    ///< Buffer to transfer SoC time
+    tTimesyncSocTimeTripleBuf   kernelToUserSocTime;    ///< Buffer to transfer SoC time from kernel to user
+    tTimesyncSocTimeTripleBuf   userToKernelSocTime;    ///< Buffer to transfer net time from user to kernel
 } tTimesyncSharedMemory;
 
 #endif /* _INC_common_timesync_H_ */
