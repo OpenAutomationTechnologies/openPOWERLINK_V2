@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdoucalmem-linuxpcie.c
+\file   pdoucalmem-linuxdpshm.c
 
 \brief  PDO user CAL shared-memory module for openPOWERLINK Linux PCIe driver
 
@@ -13,7 +13,7 @@ operations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

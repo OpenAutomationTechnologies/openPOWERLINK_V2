@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventucal-linuxpcie.c
+\file   eventucal-linuxdpshm.c
 
 \brief  User event CAL module for openPOWERLINK PCIe driver on Linux
 
@@ -12,7 +12,7 @@ calls on Linux to communicate with the openPOWERLINK PCIe driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

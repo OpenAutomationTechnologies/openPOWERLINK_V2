@@ -3,7 +3,7 @@
 # CMake file of openPOWERLINK application MN library with kernelspace pcp interface
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,17 +45,17 @@ SET (LIB_SOURCES
      ${USER_SOURCES}
      ${SDO_LINUX_SOURCES}
      ${USER_MN_SOURCES}
-     ${CTRL_UCAL_LINUXPCIE_SOURCES}
+     ${CTRL_UCAL_LINUXDPSHM_SOURCES}
      ${DLL_UCAL_LINUXIOCTL_SOURCES}
      ${ERRHND_UCAL_LINUXIOCTL_SOURCES}
-     ${EVENT_UCAL_LINUXPCIE_SOURCES}
-     ${PDO_UCAL_LINUXPCIE_SOURCES}
+     ${EVENT_UCAL_LINUXDPSHM_SOURCES}
+     ${PDO_UCAL_LINUXDPSHM_SOURCES}
      ${USER_TIMER_LINUXUSER_SOURCES}
      ${COMMON_SOURCES}
      ${COMMON_LINUXUSER_SOURCES}
      ${TARGET_LINUX_SOURCES}
      ${CIRCBUF_POSIX_SOURCES}
-     ${MEMMAP_LINUXPCIE_SOURCES}
+     ${MEMMAP_LINUXDPSHM_SOURCES}
      )
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")
