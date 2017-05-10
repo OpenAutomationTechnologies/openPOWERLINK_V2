@@ -5,6 +5,44 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.6.0 {#sect_revision_v2_6_0}
+
+This is the first release of the V2.6 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.5 series (\ref sect_revision_v2_5_2)
+
+Following is a summary of changes in V2.6.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add store/restore support to Nios II target
+- Add Multiple Read / Write By Index for SDO server and client
+- Add firmware manager to MN console demo
+
+### Fixes:
+- Correct PDO frame count statement in Altera CN documentation
+- Fix loss of frames on SDO client segmented WriteByIndex
+- Fix missing index of event kObdEvWrStringDomain
+- Shutdown pcap thread using pthread_cancel()
+- Reduce unconstraint pins FPGA warnings
+- Delete store/restore XDD default values
+- Fix alignment for reading store/restore capabilities
+- Handle missing PRC support of a node
+- Avoid flood of error traces in pdou_cbNmtStateChange()
+
+### Changes:
+- Update OD and XDD for compliance with EPSG DS 301 V1.3.0
+- Update Linux platform documentation
+- Refactor Qt demo
+- Update openCONFIGURATOR sample projects
+- Add CFI flash interface to cn-single-hostif-gpio FPGA demo
+- Refactor SDO client and server sources
+- Add NMT commands and events for firmware update support
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.5.2 {#sect_revision_v2_5_2}
 
 This is the latest release of the V2.5 release series. This release is a stable
