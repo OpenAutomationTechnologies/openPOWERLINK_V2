@@ -10,6 +10,7 @@ application library on Windows which is using the PCIe interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -61,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
+#define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_CFM
 #define CONFIG_INCLUDE_VETH
 

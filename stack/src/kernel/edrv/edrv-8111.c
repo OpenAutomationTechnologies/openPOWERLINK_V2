@@ -12,7 +12,7 @@ Realtek 8111/8168.
 
 /* ------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -460,13 +460,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define RW_REGW_PHY_GBSR                                0x000A
 
 #ifdef _DBG_TRACE_POINTS_
-void PUBLIC TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
-void PUBLIC TgtDbgPostTraceValue(DWORD dwTraceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)       TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)         TgtDbgPostTraceValue(v)
+void target_signalTracePoint(UINT8 tracePointNumber_p);
+#define TGT_DBG_SIGNAL_TRACE_POINT(p)   target_signalTracePoint(p)
 #else
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 
 #define EDRV_COUNT_SEND                                 TGT_DBG_SIGNAL_TRACE_POINT(2)
@@ -484,12 +481,6 @@ void PUBLIC TgtDbgPostTraceValue(DWORD dwTraceValue_p);
 #define EDRV_COUNT_RX_FOVW_EMPTY                        TGT_DBG_SIGNAL_TRACE_POINT(17)
 #define EDRV_COUNT_RX_FOVW                              TGT_DBG_SIGNAL_TRACE_POINT(18)
 #define EDRV_COUNT_RX_FAE                               TGT_DBG_SIGNAL_TRACE_POINT(19)
-
-#define EDRV_TRACE_CAPR(x)      TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x06000000)
-#define EDRV_TRACE_RX_CRC(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0E000000)
-#define EDRV_TRACE_RX_ERR(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x0F000000)
-#define EDRV_TRACE_RX_PUN(x)    TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF) | 0x11000000)
-#define EDRV_TRACE(x)           TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
 
 //------------------------------------------------------------------------------
 // local types

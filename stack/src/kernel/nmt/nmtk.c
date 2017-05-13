@@ -11,7 +11,7 @@ This file contains the implementation of the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -58,21 +58,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-// TracePoint support for realtime-debugging
-#ifdef _DBG_TRACE_POINTS_
-void TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
-void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
-#else
-#define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
-#endif
-
-#define OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent_p, oldNmtState_p, newNmtState_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkNmtk << 28) | ((nmtEvent_p) << 16) | \
-                             (((oldNmtState_p) & 0xFF) << 8) | \
-                             ((newNmtState_p) & 0xFF))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -299,8 +284,6 @@ tOplkError nmtk_process(const tEvent* pEvent_p)
     // inform higher layer about State-Change if needed
     if (oldState != nmtkInstance_l.stateIndex)
     {
-        OPLK_NMTK_DBG_POST_TRACE_VALUE(nmtEvent, nmtkStates_l[oldState].nmtState,
-                                       nmtkStates_l[nmtkInstance_l.stateIndex].nmtState);
         DEBUG_LVL_NMTK_TRACE("%s(): (NMT-event = 0x%04X): New NMT-State = 0x%03X\n",
                              __func__,
                              nmtEvent,

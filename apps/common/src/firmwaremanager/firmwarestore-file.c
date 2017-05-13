@@ -134,7 +134,7 @@ tFirmwareRet firmwarestore_create(const tFirmwareStoreConfig* pConfig_p,
     instance = malloc(sizeof(tFirmwareStoreInstance));
     if (instance == NULL)
     {
-        ret = kFwReturnNoRessource;
+        ret = kFwReturnNoResource;
         goto EXIT;
     }
 
@@ -382,7 +382,7 @@ static tFirmwareRet allocAndReadData(FILE* pFile_p,
     pBuffer = malloc(fileSize);
     if (pBuffer == NULL)
     {
-        ret = kFwReturnNoRessource;
+        ret = kFwReturnNoResource;
         goto EXIT;
     }
 

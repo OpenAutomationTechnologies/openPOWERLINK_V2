@@ -1216,11 +1216,20 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
                 pSdoSeqCon_p->recvSeqNum += 4;
                 ret = sendFrame(pSdoSeqCon_p, dataSize_p, pData_p, TRUE);
                 if (ret == kErrorSdoSeqRequestAckNeeded)
-                {   // request ack, change state to wait ack
+                {
+                    // successful, but Tx history buffer is reaching its limits
+                    // request ack, change state to wait ack
                     pSdoSeqCon_p->sdoSeqState = kSdoSeqStateWaitAck;
-                    // set ret to kErrorOk, because no error
-                    // for higher layer
-                    ret = kErrorOk;
+
+                    ret = sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateFrameSent);
+                    if (ret == kErrorSdoComHandleBusy)
+                    {
+                        ret = kErrorOk;
+                        forceRetransmissionRequest(pSdoSeqCon_p, TRUE);
+                    }
+                    else
+                        forceRetransmissionRequest(pSdoSeqCon_p, FALSE);
+
                 }
                 else if (ret != kErrorOk)
                     return ret;

@@ -635,7 +635,7 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
         pNew = malloc(sizeof(tFirmwareUpdateEntry));
         if (pNew == NULL)
         {
-            ret = kFwReturnNoRessource;
+            ret = kFwReturnNoResource;
             goto EXIT;
         }
 
@@ -886,7 +886,7 @@ static tFirmwareRet getModuleIdent(tFirmwareCheckNodeInfo* pNodeInfo_p,
     pEntry = malloc(sizeof(tFirmwareCheckModuleEntry));
     if (pEntry == NULL)
     {
-        ret = kFwReturnNoRessource;
+        ret = kFwReturnNoResource;
         goto EXIT;
     }
 

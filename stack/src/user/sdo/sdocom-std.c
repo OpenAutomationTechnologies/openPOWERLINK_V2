@@ -137,14 +137,14 @@ The function zeros the POWERLINK frame and builds a generic SDO command layer.
 \param[out]     pCommandFrame_p     Returns pointer to command layer start
 */
 //------------------------------------------------------------------------------
-void sdocomint_initCmdFrameGeneric(const tPlkFrame* pPlkFrame_p,
-                         UINT plkFrameSize_p,
-                         const tSdoComCon* pSdoComCon_p,
-                         tAsySdoCom** pCommandFrame_p)
+void sdocomint_initCmdFrameGeneric(tPlkFrame* pPlkFrame_p,
+                                   UINT plkFrameSize_p,
+                                   const tSdoComCon* pSdoComCon_p,
+                                   tAsySdoCom** pCommandFrame_p)
 {
     tAsySdoCom* pCmdFrame;
 
-    OPLK_MEMSET((tPlkFrame*)pPlkFrame_p, 0x00, plkFrameSize_p);
+    OPLK_MEMSET(pPlkFrame_p, 0x00, plkFrameSize_p);
 
     // build generic part of command frame
     pCmdFrame = (tAsySdoCom*)&pPlkFrame_p->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
@@ -220,8 +220,8 @@ It can also be used for an expedited ReadByIndex response.
 */
 //------------------------------------------------------------------------------
 void sdocomint_fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
-                          const UINT8* pSrcData_p,
-                          UINT size_p)
+                                    const void* pSrcData_p,
+                                    size_t size_p)
 {
     OPLK_MEMCPY(&pCommandFrame_p->aCommandData[0], pSrcData_p, size_p);
 }
@@ -240,14 +240,18 @@ members.
 */
 //------------------------------------------------------------------------------
 void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
-                         UINT tranferredBytes_p,
-                         BOOL fTransferComplete)
+                                   UINT tranferredBytes_p,
+                                   BOOL fTransferComplete)
 {
+    pSdoComCon_p->transferredBytes += tranferredBytes_p;
+
     if (fTransferComplete)
     {
         pSdoComCon_p->transferSize = 0;
         pSdoComCon_p->reqSegmSize = 0;
         pSdoComCon_p->respSegmSize = 0;
+        pSdoComCon_p->pendingTxBytes = 0;
+        pSdoComCon_p->pDataStart = NULL;
     }
     else
     {
@@ -255,11 +259,16 @@ void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
         pSdoComCon_p->transferSize -= tranferredBytes_p;
 
 #if defined(CONFIG_INCLUDE_SDOC)
-        pSdoComCon_p->pData += tranferredBytes_p;
+        if ((pSdoComCon_p->sdoTransferType == kSdoTransSegmented) &&
+            ((pSdoComCon_p->sdoComState == kSdoComStateClientConnected) ||
+             (pSdoComCon_p->sdoComState == kSdoComStateClientSegmTrans)))
+        {
+            ASSERT(pSdoComCon_p->pDataStart != NULL);
+            pSdoComCon_p->pData = (UINT8*)pSdoComCon_p->pDataStart + pSdoComCon_p->transferredBytes;
+        }
 #endif // defined(CONFIG_INCLUDE_SDOC)
     }
 
-    pSdoComCon_p->transferredBytes += tranferredBytes_p;
 }
 
 //------------------------------------------------------------------------------
@@ -277,8 +286,8 @@ SOD sequence layer when new data is received.
 */
 //------------------------------------------------------------------------------
 tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                     const tAsySdoCom* pSdoCom_p,
-                     UINT dataSize_p)
+                               const tAsySdoCom* pSdoCom_p,
+                               UINT dataSize_p)
 {
     tOplkError  ret;
 
@@ -290,7 +299,8 @@ tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
         ret = kErrorSdoComHandleBusy;
     }
 
-    DEBUG_LVL_SDO_TRACE("receiveCb SdoSeqConHdl: 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
+    DEBUG_LVL_SDO_TRACE("%s(): 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
+                        __func__,
                         sdoSeqConHdl_p,
                         (UINT16)pSdoCom_p->aCommandData[0],
                         dataSize_p);
@@ -313,9 +323,9 @@ of the connection.
 */
 //------------------------------------------------------------------------------
 tOplkError sdocomint_conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                            tAsySdoConState sdoConnectionState_p)
+                                      tAsySdoConState sdoConnectionState_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError      ret;
     tSdoComConEvent sdoComConEvent = kSdoComConEventSendFirst;
 
     switch (sdoConnectionState_p)
@@ -395,8 +405,8 @@ found, a new one is created.
 */
 //------------------------------------------------------------------------------
 tOplkError sdocomint_processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
-                                     tSdoComConEvent sdoComConEvent_p,
-                                     const tAsySdoCom* pSdoCom_p)
+                                               tSdoComConEvent sdoComConEvent_p,
+                                               const tAsySdoCom* pSdoCom_p)
 {
     tOplkError      ret = kErrorSdoComNotResponsible;
     tSdoComCon*     pSdoComCon;
@@ -456,15 +466,15 @@ on the state the command layer event is processed.
 */
 //------------------------------------------------------------------------------
 tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
-                        tSdoComConEvent sdoComConEvent_p,
-                        const tAsySdoCom* pRecvdCmdLayer_p)
+                                  tSdoComConEvent sdoComConEvent_p,
+                                  const tAsySdoCom* pRecvdCmdLayer_p)
 {
     tOplkError          ret = kErrorOk;
     const tSdoComCon*   pSdoComCon;
 
 #if (defined(WIN32) || defined(_WIN32))
     EnterCriticalSection(sdoComInstance_g.pCriticalSection);
-    DEBUG_LVL_SDO_TRACE("\n\tEnterCriticalSection processState\n\n");
+    DEBUG_LVL_SDO_TRACE("\n\tEnterCriticalSection: %s()\n\n", __func__);
 #endif
 
     // get pointer to control structure
@@ -507,7 +517,7 @@ tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
     }
 
 #if (defined(WIN32) || defined(_WIN32))
-    DEBUG_LVL_SDO_TRACE("\n\tLeaveCriticalSection processState\n\n");
+    DEBUG_LVL_SDO_TRACE("\n\tLeaveCriticalSection: %s()\n\n", __func__);
     LeaveCriticalSection(sdoComInstance_g.pCriticalSection);
 #endif
 
@@ -519,7 +529,6 @@ tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 //------------------------------------------------------------------------------
 /**

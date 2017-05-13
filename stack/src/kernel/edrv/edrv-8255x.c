@@ -18,7 +18,7 @@ Developer Manual.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -124,13 +124,10 @@ DAMAGE.
 //------------------------------------------------------------------------------
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-    void TgtDbgSignalTracePoint (UINT8 tracePointNumber_p);
-    void TgtDbgPostTraceValue (UINT32 traceValue_p);
-#define TGT_DBG_SIGNAL_TRACE_POINT(p) TgtDbgSignalTracePoint(p)
-#define TGT_DBG_POST_TRACE_VALUE(v) TgtDbgPostTraceValue(v)
+void target_signalTracePoint(UINT8 tracePointNumber_p);
+#define TGT_DBG_SIGNAL_TRACE_POINT(p)   target_signalTracePoint(p)
 #else
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)
-#define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 
 //============================================================================//
@@ -297,12 +294,6 @@ DAMAGE.
 #define EDRV_COUNT_RX_ERR_SEQ       TGT_DBG_SIGNAL_TRACE_POINT(16)
 #define EDRV_COUNT_RX_ERR_OTHER     TGT_DBG_SIGNAL_TRACE_POINT(17)
 #define EDRV_COUNT_RX_ORUN          TGT_DBG_SIGNAL_TRACE_POINT(18)
-
-#define EDRV_TRACE_CAPR(x)          TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x06000000)
-#define EDRV_TRACE_RX_CRC(x)        TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x0E000000)
-#define EDRV_TRACE_RX_ERR(x)        TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x0F000000)
-#define EDRV_TRACE_RX_PUN(x)        TGT_DBG_POST_TRACE_VALUE(((x) & 0x0000FFFF) | 0x11000000)
-#define EDRV_TRACE(x)               TGT_DBG_POST_TRACE_VALUE(((x) & 0xFFFF0000) | 0x0000FEC0)
 
 //------------------------------------------------------------------------------
 // local types
