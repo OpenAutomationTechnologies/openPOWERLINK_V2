@@ -12,7 +12,7 @@ threads or processes.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
@@ -62,7 +63,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -94,19 +94,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function creates a mutex.
 
-\param  mutexName_p             The name of the mutex to create.
-\param  pMutex_p                Pointer to store the created mutex.
+\param[in]      mutexName_p         The name of the mutex to create.
+\param[out]     pMutex_p            Pointer to store the created mutex.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully created.
-\retval kErrorNoFreeInstance    An error occured while creating the mutex.
+\retval kErrorOk                    Mutex was successfully created.
+\retval kErrorNoFreeInstance        An error occurred while creating the mutex.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
+tOplkError target_createMutex(const char* mutexName_p,
+                              OPLK_MUTEX_T* pMutex_p)
 {
-    OPLK_MUTEX_T      lockSem;
+    sem_t*  lockSem;
 
     // unlink any existing semaphore,
     // so it will be created with the correct init state
@@ -114,7 +115,8 @@ tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
     //          call, even if the very same name is specified.
     sem_unlink(mutexName_p);
 
-    if ((lockSem = sem_open(mutexName_p, O_CREAT | O_RDWR, S_IRWXG, 1)) == SEM_FAILED)
+    lockSem = sem_open(mutexName_p, O_CREAT | O_RDWR, S_IRWXG, 1);
+    if (lockSem == SEM_FAILED)
         return kErrorNoFreeInstance;
 
     *pMutex_p = lockSem;
@@ -122,21 +124,20 @@ tOplkError target_createMutex(char* mutexName_p, OPLK_MUTEX_T* pMutex_p)
     return kErrorOk;
 }
 
-
 //------------------------------------------------------------------------------
 /**
 \brief  Destroy Mutex
 
 The function destroys a mutex.
 
-\param  mutexId_p               The ID of the mutex to destroy.
+\param[in]      mutexId_p           The ID of the mutex to destroy.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
 void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
 {
-    sem_close((sem_t*)mutexId_p);
+    sem_close(mutexId_p);
 }
 
 //------------------------------------------------------------------------------
@@ -145,11 +146,11 @@ void target_destroyMutex(OPLK_MUTEX_T mutexId_p)
 
 The function locks a mutex.
 
-\param  mutexId_p               The ID of the mutex to lock.
+\param[in]      mutexId_p           The ID of the mutex to lock.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Mutex was successfully locked.
-\retval kErrorNoFreeInstance    An error occured while locking the mutex.
+\retval kErrorOk                    Mutex was successfully locked.
+\retval kErrorNoFreeInstance        An error occurred while locking the mutex.
 
 \ingroup module_target
 */
@@ -158,6 +159,7 @@ tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
 {
     if (sem_wait(mutexId_p) < 0)
         return kErrorIllegalInstance;
+
     return kErrorOk;
 }
 
@@ -167,7 +169,7 @@ tOplkError target_lockMutex(OPLK_MUTEX_T mutexId_p)
 
 The function unlocks a mutex.
 
-\param  mutexId_p               The ID of the mutex to unlock.
+\param[in]      mutexId_p           The ID of the mutex to unlock.
 
 \ingroup module_target
 */
@@ -183,4 +185,4 @@ void target_unlockMutex(OPLK_MUTEX_T mutexId_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

@@ -11,7 +11,7 @@ This file contains the implementation of the status module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -75,18 +75,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tStatusuCbResponse      apfnCbResponse[254];
+    tStatusuCbResponse  apfnCbResponse[254];
 } tStatusuInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tStatusuInstance   instance_g;
+static tStatusuInstance instance_g;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p);
+static tOplkError cbStatusResponse(const tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -105,12 +105,13 @@ The function initializes an instance of the status module
 //------------------------------------------------------------------------------
 tOplkError statusu_init(void)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register StatusResponse callback function
-    ret = dllucal_regAsndService(kDllAsndStatusResponse, statusu_cbStatusResponse,
+    ret = dllucal_regAsndService(kDllAsndStatusResponse,
+                                 cbStatusResponse,
                                  kDllAsndFilterAny);
 
     return ret;
@@ -129,10 +130,11 @@ The function shuts down the status module instance
 //------------------------------------------------------------------------------
 tOplkError statusu_exit(void)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
-    // deregister StatusResponse callback function
+    // de-register StatusResponse callback function
     ret = dllucal_regAsndService(kDllAsndStatusResponse, NULL, kDllAsndFilterNone);
+
     return ret;
 }
 
@@ -161,18 +163,19 @@ tOplkError statusu_reset(void)
 
 The function requests the StatusResponse for a specified node.
 
-\param  nodeId_p            The Node ID to request the StatusResponse for.
-\param  pfnCbResponse_p     Function pointer to callback function which will
-                            be called if StatusResponse is received
+\param[in]      nodeId_p            The Node ID to request the StatusResponse for.
+\param[in]      pfnCbResponse_p     Function pointer to callback function which will
+                                    be called if StatusResponse is received
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p)
+tOplkError statusu_requestStatusResponse(UINT nodeId_p,
+                                         tStatusuCbResponse pfnCbResponse_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
     UNUSED_PARAMETER(pfnCbResponse_p);
@@ -225,15 +228,15 @@ tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCb
 The function implements the callback function which will be called when a
 StatusResponse is received.
 
-\param  pFrameInfo_p            Pointer to frame information structure describing
-                                the received StatusResponse frame.
+\param[in]      pFrameInfo_p        Pointer to frame information structure describing
+                                    the received StatusResponse frame.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_statusu
 */
 //------------------------------------------------------------------------------
-static tOplkError statusu_cbStatusResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError cbStatusResponse(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                nodeId;
@@ -268,4 +271,4 @@ Exit:
     return ret;
 }
 
-///\}
+/// \}

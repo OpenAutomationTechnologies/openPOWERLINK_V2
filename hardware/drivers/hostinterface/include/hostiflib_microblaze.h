@@ -7,8 +7,10 @@
 This header file provides specific macros for Xilinx Microblaze CPU.
 
 *******************************************************************************/
+
 /*------------------------------------------------------------------------------
 Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,14 +45,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <stdint.h>
 #include <xil_types.h>
-#include <xparameters.h>
+#include <xil_io.h>
+#include <xil_cache.h>
+#include <mb_interface.h>
 
-#include <cachemem/cachemem.h> // For data cache aware memory access
+#include <xparameters.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if CONFIG_HOSTIF_PCP != FALSE
+#if (CONFIG_HOSTIF_PCP != FALSE)
 
 #define HOSTIF_BASE             XPAR_AXI_HOSTINTERFACE_0_BASEADDR
 #define HOSTIF_IRQ_IC_ID        -1
@@ -69,7 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #else
 
-#error No Valid Interrupt Controller found for Host!
+#error "No Valid Interrupt Controller found for Host!"
 
 #endif // XPAR_HOST_INTC_DEVICE_ID
 
@@ -85,12 +89,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #else
 
-#error No Valid Interrupt Controller found for Host!
+#error "No Valid Interrupt Controller found for Host!"
 
 #endif  // XPAR_HOST_INTC_DEVICE_ID
 
 #endif  // defined(XPAR_AXI_HOSTINTERFACE_0_HOST_BASEADDR)
-#endif  // CONFIG_HOSTIF_PCP != FALSE
+#endif  // (CONFIG_HOSTIF_PCP != FALSE)
 
 #if (XPAR_MICROBLAZE_USE_DCACHE == 1)
 #define HOSTIF_SYNC_DCACHE      TRUE
@@ -104,13 +108,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_UNCACHED_FREE(ptr)           free(ptr)
 
 // hw access
-#define HOSTIF_RD32(base, offset)           cachemem_invAndRead32(base, offset)
-#define HOSTIF_RD16(base, offset)           cachemem_invAndRead16(base, offset)
-#define HOSTIF_RD8(base, offset)            cachemem_invAndRead8(base, offset)
+#define HOSTIF_RD32(base)                   Xil_In32(base)
+#define HOSTIF_RD16(base)                   Xil_In16(base)
+#define HOSTIF_RD8(base)                    Xil_In8(base)
 
-#define HOSTIF_WR32(base, offset, dword)    cachemem_writeAndFlush32(base, offset, dword)
-#define HOSTIF_WR16(base, offset, word)     cachemem_writeAndFlush16(base, offset, word)
-#define HOSTIF_WR8(base, offset, byte)      cachemem_writeAndFlush8(base, offset, byte)
+#define HOSTIF_WR32(base, dword)            Xil_Out32(base, dword)
+#define HOSTIF_WR16(base, word)             Xil_Out16(base, word)
+#define HOSTIF_WR8(base, byte)              Xil_Out8(base, byte)
+
+#define HOSTIF_DCACHE_FLUSH(base, len)      Xil_L1DCacheFlushRange((unsigned int)(base), len)
+#define HOSTIF_DCACHE_INVALIDATE(base, len) Xil_L1DCacheInvalidateRange((unsigned int)(base), len)
 
 //------------------------------------------------------------------------------
 // typedef

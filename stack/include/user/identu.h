@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   identu.h
+\file   user/identu.h
 
 \brief  Definitions for identu module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the identu modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_identu_H_
-#define _INC_identu_H_
+#ifndef _INC_user_identu_H_
+#define _INC_user_identu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -52,12 +51,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p, tIdentResponse* pIdentResponse_p);
+typedef tOplkError (*tIdentuCbResponse)(UINT nodeId_p,
+                                        const tIdentResponse* pIdentResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -66,12 +65,13 @@ extern "C"
 tOplkError identu_init(void);
 tOplkError identu_exit(void);
 tOplkError identu_reset(void);
-tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
-tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p);
-UINT32     identu_getRunningRequests(void);
+tOplkError identu_getIdentResponse(UINT nodeId_p,
+                                   const tIdentResponse** ppIdentResponse_p);
+tOplkError identu_requestIdentResponse(UINT nodeId_p,
+                                       tIdentuCbResponse pfnCbResponse_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_identu_H_ */
+#endif /* _INC_user_identu_H_ */

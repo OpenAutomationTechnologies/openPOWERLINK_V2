@@ -12,7 +12,7 @@ interface implementation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -104,23 +104,24 @@ static struct net_device* pVEthNetDevice_g = NULL;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int veth_open(struct net_device* pNetDevice_p);
-static int veth_close(struct net_device* pNetDevice_p);
-static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p);
-static struct net_device_stats* veth_getStats(struct net_device* pNetDevice_p);
-static void veth_timeout(struct net_device* pNetDevice_p);
-static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p);
+static int                      vethOpen(struct net_device* pNetDevice_p);
+static int                      vethStop(struct net_device* pNetDevice_p);
+static int                      vethStartXmit(struct sk_buff* pSkb_p,
+                                              struct net_device* pNetDevice_p);
+static struct net_device_stats* vethGetStats(struct net_device* pNetDevice_p);
+static void                     vethTxTimeout(struct net_device* pNetDevice_p);
+static tOplkError               receiveFrameCb(const tFrameInfo* pFrameInfo_p);
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 static const struct net_device_ops oplk_netdev_ops =
 {
-    .ndo_open               = veth_open,
-    .ndo_stop               = veth_close,
-    .ndo_get_stats          = veth_getStats,
-    .ndo_start_xmit         = veth_xmit,
-    .ndo_tx_timeout         = veth_timeout,
+    .ndo_open               = vethOpen,
+    .ndo_stop               = vethStop,
+    .ndo_get_stats          = vethGetStats,
+    .ndo_start_xmit         = vethStartXmit,
+    .ndo_tx_timeout         = vethTxTimeout,
     .ndo_change_mtu         = eth_change_mtu,
     .ndo_set_mac_address    = eth_mac_addr,
     .ndo_validate_addr      = eth_validate_addr,
@@ -136,7 +137,7 @@ static const struct net_device_ops oplk_netdev_ops =
 
 The function initializes the virtual Ethernet module.
 
-\param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
+\param[in]      aSrcMac_p           MAC address to set for virtual Ethernet interface.
 
 \return The function returns a tOplkError error code.
 
@@ -148,20 +149,22 @@ tOplkError veth_init(const UINT8 aSrcMac_p[6])
 
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 17, 0))
     // Allocate net device structure with priv pointing to stats structure
-    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
+    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats),
+                                    PLK_VETH_NAME,
                                     ether_setup);
 #else
     // Allocate net device structure with priv pointing to stats structure
-    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats), PLK_VETH_NAME,
+    pVEthNetDevice_g = alloc_netdev(sizeof(struct net_device_stats),
+                                    PLK_VETH_NAME,
                                     NET_NAME_UNKNOWN, ether_setup);
 #endif
 
     if (pVEthNetDevice_g == NULL)
         return kErrorNoResource;
 
-    pVEthNetDevice_g->netdev_ops        = &oplk_netdev_ops;
-    pVEthNetDevice_g->watchdog_timeo    = VETH_TX_TIMEOUT;
-    pVEthNetDevice_g->destructor        = free_netdev;
+    pVEthNetDevice_g->netdev_ops = &oplk_netdev_ops;
+    pVEthNetDevice_g->watchdog_timeo = VETH_TX_TIMEOUT;
+    pVEthNetDevice_g->destructor = free_netdev;
 
     // Copy own MAC address to net device structure
     OPLK_MEMCPY(pVEthNetDevice_g->dev_addr, aSrcMac_p, 6);
@@ -169,11 +172,11 @@ tOplkError veth_init(const UINT8 aSrcMac_p[6])
     // Register VEth to the network subsystem
     if (register_netdev(pVEthNetDevice_g))
     {
-        DEBUG_LVL_VETH_TRACE("veth_init: Could not register VEth...\n");
+        DEBUG_LVL_VETH_TRACE("%s(): Could not register VEth...\n", __func__);
     }
     else
     {
-        DEBUG_LVL_VETH_TRACE("veth_init: Register VEth successful...\n");
+        DEBUG_LVL_VETH_TRACE("%s(): Register VEth successful...\n", __func__);
     }
 
     return kErrorOk;
@@ -196,6 +199,7 @@ tOplkError veth_exit(void)
     {
         // Unregister VEth from the network subsystem
         unregister_netdev(pVEthNetDevice_g);
+
         // Destructor was set to free_netdev,
         // So we do not need to call free_netdev here
         pVEthNetDevice_g = NULL;
@@ -216,23 +220,23 @@ tOplkError veth_exit(void)
 
 The function contains the open routine of the virtual Ethernet driver.
 
-\param  pNetDevice_p        Pointer to net device structure.
+\param[in,out]  pNetDevice_p        Pointer to net device structure.
 
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_open(struct net_device* pNetDevice_p)
+static int vethOpen(struct net_device* pNetDevice_p)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
     // Open the device
     // Start the interface queue for the network subsystem
     netif_start_queue(pNetDevice_p);
 
     // Register callback function in interface driver
-    ret = drvintf_regVethHandler(veth_receiveFrame);
+    ret = drvintf_regVethHandler(receiveFrameCb);
+    DEBUG_LVL_VETH_TRACE("%s(): drvintf_regVethHandler returned 0x%04X\n", __func__, ret);
 
-    DEBUG_LVL_VETH_TRACE("veth_open: drvintf_regVethHandler returned 0x%02X\n", ret);
     return 0;
 }
 
@@ -242,17 +246,18 @@ static int veth_open(struct net_device* pNetDevice_p)
 
 The function contains the close routine of the virtual Ethernet driver.
 
-\param  pNetDevice_p        Pointer to net device structure.
+\param[in,out]  pNetDevice_p        Pointer to net device structure.
 
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_close(struct net_device* pNetDevice_p)
+static int vethStop(struct net_device* pNetDevice_p)
 {
-    DEBUG_LVL_VETH_TRACE("veth_close\n");
+    DEBUG_LVL_VETH_TRACE("%s()\n", __func__);
 
     drvintf_regVethHandler(NULL);
     netif_stop_queue(pNetDevice_p);     // Stop the interface queue for the network subsystem
+
     return 0;
 }
 
@@ -262,21 +267,21 @@ static int veth_close(struct net_device* pNetDevice_p)
 
 The function contains the transmit function for the virtual Ethernet driver.
 
-\param  pSkb_p          Pointer to packet which should be transmitted.
-\param  pNetDevice_p    Pointer to net device structure of interface.
+\param[in,out]  pSkb_p              Pointer to packet which should be transmitted.
+\param[in,out]  pNetDevice_p        Pointer to net device structure of interface.
 
 \return The function returns an error code.
 */
 //------------------------------------------------------------------------------
-static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
+static int vethStartXmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError      ret;
     tFrameInfo      frameInfo;
 
     // Transmit function
     struct net_device_stats* pStats = netdev_priv(pNetDevice_p);
 
-    // Save timestemp
+    // Save time stamp
     pNetDevice_p->trans_start = jiffies;
 
     frameInfo.frame.pBuffer = (tPlkFrame*)pSkb_p->data;
@@ -286,12 +291,12 @@ static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
     ret = drvintf_sendVethFrame(&frameInfo);
     if (ret != kErrorOk)
     {
-        DEBUG_LVL_VETH_TRACE("veth_xmit: drvintf_sendVethFrame returned 0x%02X\n", ret);
+        DEBUG_LVL_VETH_TRACE("%s(): drvintf_sendVethFrame returned 0x%04X\n", __func__, ret);
         netif_stop_queue(pNetDevice_p);
     }
     else
     {
-        DEBUG_LVL_VETH_TRACE("veth_xmit: frame passed to interface driver\n");
+        DEBUG_LVL_VETH_TRACE("%s(): frame passed to interface driver\n", __func__);
         dev_kfree_skb(pSkb_p);
 
         // Set stats for the device
@@ -308,14 +313,15 @@ static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
 
 The function gets the statistics of the interface.
 
-\param  pNetDevice_p        Pointer to net device structure of interface.
+\param[in,out]  pNetDevice_p        Pointer to net device structure of interface.
 
 \return The function returns a pointer to a net_device_stats structure.
 */
 //------------------------------------------------------------------------------
-static struct net_device_stats* veth_getStats(struct net_device* pNetDevice_p)
+static struct net_device_stats* vethGetStats(struct net_device* pNetDevice_p)
 {
-    DEBUG_LVL_VETH_TRACE("veth_getStats\n");
+    DEBUG_LVL_VETH_TRACE("%s()\n", __func__);
+
     return netdev_priv(pNetDevice_p);
 }
 
@@ -325,16 +331,15 @@ static struct net_device_stats* veth_getStats(struct net_device* pNetDevice_p)
 
 The function provides the TX timeout entry point of the driver.
 
-\param  pNetDevice_p        Pointer to net device structure of interface.
+\param[in,out]  pNetDevice_p        Pointer to net device structure of interface.
 */
 //------------------------------------------------------------------------------
-static void veth_timeout(struct net_device* pNetDevice_p)
+static void vethTxTimeout(struct net_device* pNetDevice_p)
 {
-    DEBUG_LVL_VETH_TRACE("veth_timeout(\n");
+    DEBUG_LVL_VETH_TRACE("%s()\n", __func__);
+
     if (netif_queue_stopped(pNetDevice_p))
-    {
         netif_wake_queue(pNetDevice_p);
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -343,19 +348,19 @@ static void veth_timeout(struct net_device* pNetDevice_p)
 
 The function receives a frame from the virtual Ethernet interface.
 
-\param  pFrameInfo_p        Pointer to frame information of received frame.
+\param[in]      pFrameInfo_p        Pointer to frame information of received frame.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
+static tOplkError receiveFrameCb(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError               ret = kErrorOk;
     struct net_device*       pNetDevice = pVEthNetDevice_g;
     struct net_device_stats* pStats = netdev_priv(pNetDevice);
     struct sk_buff*          pSkb;
 
-    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: FrameSize=%u\n", pFrameInfo_p->frameSize);
+    DEBUG_LVL_VETH_TRACE("%s(): FrameSize=%u\n", __func__, pFrameInfo_p->frameSize);
 
     if ((pSkb = dev_alloc_skb(pFrameInfo_p->frameSize + 2)) == NULL)
     {
@@ -374,7 +379,8 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p)
 
     netif_rx(pSkb);         // Call netif_rx with skb
 
-    DEBUG_LVL_VETH_TRACE("veth_receiveFrame: SrcMAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
+    DEBUG_LVL_VETH_TRACE("%s(): SrcMAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
+                         __func__,
                          pFrameInfo_p->frame.pBuffer->aSrcMac[0],
                          pFrameInfo_p->frame.pBuffer->aSrcMac[1],
                          pFrameInfo_p->frame.pBuffer->aSrcMac[2],
@@ -391,4 +397,5 @@ Exit:
 }
 
 /// \}
-#endif
+
+#endif // CONFIG_INCLUDE_VETH

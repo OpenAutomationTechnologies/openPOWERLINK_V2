@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventucalintf.h
+\file   user/eventucalintf.h
 
 \brief  Include file for user event CAL module interfaces
 
@@ -11,7 +11,7 @@ implementations.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventucalintf_H_
-#define _INC_eventucalintf_H_
+#ifndef _INC_user_eventucalintf_H_
+#define _INC_user_eventucalintf_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,7 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -66,7 +64,7 @@ extern "C"
 /* circular buffer event interface */
 tOplkError eventucal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_exitQueueCircbuf(tEventQueue eventQueue_p);
-tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p);
+tOplkError eventucal_postEventCircbuf(tEventQueue eventQueue_p, const tEvent* pEvent_p);
 tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p);
 UINT       eventucal_getEventCountCircbuf(tEventQueue eventQueue_p);
 tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
@@ -75,4 +73,4 @@ tOplkError eventucal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR p
 }
 #endif
 
-#endif /* _INC_eventucalintf_H_ */
+#endif /* _INC_user_eventucalintf_H_ */

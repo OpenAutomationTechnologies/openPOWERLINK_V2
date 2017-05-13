@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdokcal.h
+\file   kernel/pdokcal.h
 
 \brief  Include file for kernel PDO CAL module
 
@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_PDOKCAL_H_
-#define _INC_PDOKCAL_H_
+#ifndef _INC_kernel_pdokcal_H_
+#define _INC_kernel_pdokcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -62,27 +61,32 @@ extern "C"
 
 tOplkError pdokcal_init(void);
 tOplkError pdokcal_exit(void);
-tOplkError pdokcal_process(tEvent* pEvent_p) SECTION_PDOKCAL_PROCESS;
+tOplkError pdokcal_process(const tEvent* pEvent_p) SECTION_PDOKCAL_PROCESS;
 
 // PDO memory functions
 tOplkError pdokcal_openMem(void);
 tOplkError pdokcal_closeMem(void);
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p);
-tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p);
-void       pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p);
+tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** pPdoMem_p);
+tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p);
 
 // PDO buffer functions
-tOplkError pdokcal_initPdoMem(tPdoChannelSetup* pPdoChannels, size_t rxPdoMemSize_p,
+tOplkError pdokcal_initPdoMem(const tPdoChannelSetup* pPdoChannels,
+                              size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdokcal_cleanupPdoMem(void);
 tOplkError pdokcal_getPdoMemRegion(UINT8** ppPdoMemBase, size_t* pPdoMemSize_p);
-tOplkError pdokcal_writeRxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_WRITE_RPDO;
-tOplkError pdokcal_readTxPdo(UINT channelId_p, BYTE* pPayload_p, UINT16 pdoSize_p) SECTION_PDOKCAL_READ_TPDO;
+tOplkError pdokcal_writeRxPdo(UINT channelId_p,
+                              const UINT8* pPayload_p,
+                              UINT16 pdoSize_p)
+                              SECTION_PDOKCAL_WRITE_RPDO;
+tOplkError pdokcal_readTxPdo(UINT channelId_p,
+                             UINT8* pPayload_p,
+                             UINT16 pdoSize_p)
+                             SECTION_PDOKCAL_READ_TPDO;
 BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_PDOKCAL_H_
+#endif  /* _INC_kernel_pdokcal_H_ */

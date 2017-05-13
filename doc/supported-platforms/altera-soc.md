@@ -107,8 +107,8 @@ Follow the steps below to start the MN demo on the board:
 2. Prepare an SD card using the following commands after connecting it:\n
    - `cd <openPOWERLINK_directory>\bin\generic\alterac5arm\altera-c5soc\mn-soc-shmem-gpio`
    - `dd if=<Altera_installation_dir>/embedded/embeddedsw/socfpga/prebuilt_images/sd_card_linux_boot_image.img
-      of=/dev/<sd_card_drive>`
-   - `alt-boot-disk-util.exe -p preloader-mkpimage.bin -a write -d <sd_card_path> bs=1M`
+      of=/dev/<sd_card_drive> bs=1M`
+   - `alt-boot-disk-util.exe -p preloader-mkpimage.bin -a write -d <sd_card_path>`
 3. Copy the `BOOT.bin` and `fpga.rbf` from `<openPOWERLINK_directory>\bin\generic\alterac5arm\altera-c5soc\mn-soc-shmem-gpio`
    to the SD card.
 4. Boot the Altera Cylcone V SoC from the prepared SD card.

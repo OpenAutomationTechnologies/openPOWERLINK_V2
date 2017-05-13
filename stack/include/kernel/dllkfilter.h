@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllkfilter.h
+\file   kernel/dllkfilter.h
 
 \brief  Definitions of the filters for the dllk module
 
@@ -11,7 +11,7 @@ can only be used for MACs which have a frame filter.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,9 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_dllkfilter_H_
-#define _INC_dllkfilter_H_
+#ifndef _INC_kernel_dllkfilter_H_
+#define _INC_kernel_dllkfilter_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -53,12 +52,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_SOA_IDREQ           1
 #define DLLK_FILTER_SOA_STATREQ         2
 #define DLLK_FILTER_SOA_NMTREQ          3
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-  #define DLLK_FILTER_SOA_SYNCREQ       4
-  #define DLLK_FILTER_SOA_NONPLK        5
-#else
-  #define DLLK_FILTER_SOA_NONPLK        4
-#endif
+
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
+#define DLLK_FILTER_SOA_SYNCREQ         4
+#define DLLK_FILTER_SOA_NONPLK          5
+#else /* (CONFIG_DLL_PRES_CHAINING_CN != FALSE) */
+#define DLLK_FILTER_SOA_NONPLK          4
+#endif /* (CONFIG_DLL_PRES_CHAINING_CN != FALSE) */
 
 #define DLLK_FILTER_SOA                 (DLLK_FILTER_SOA_NONPLK + 1)
 #define DLLK_FILTER_SOC                 (DLLK_FILTER_SOA + 1)
@@ -68,15 +68,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DLLK_FILTER_VETH_UNICAST        (DLLK_FILTER_ASND + 1)
 #define DLLK_FILTER_VETH_BROADCAST      (DLLK_FILTER_VETH_UNICAST + 1)
 #define DLLK_FILTER_PRES                (DLLK_FILTER_VETH_BROADCAST + 1)
-#else
+#else /* defined(CONFIG_INCLUDE_VETH) */
 #define DLLK_FILTER_PRES                (DLLK_FILTER_ASND + 1)
-#endif
+#endif /* defined(CONFIG_INCLUDE_VETH) */
 
-#if CONFIG_DLL_PRES_FILTER_COUNT < 0
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + 1)
-#else
-  #define DLLK_FILTER_COUNT             (DLLK_FILTER_PRES + CONFIG_DLL_PRES_FILTER_COUNT)
-#endif
+#if (CONFIG_DLL_PRES_FILTER_COUNT < 0)
+#define DLLK_FILTER_COUNT               (DLLK_FILTER_PRES + 1)
+#else /* (CONFIG_DLL_PRES_FILTER_COUNT < 0) */
+#define DLLK_FILTER_COUNT               (DLLK_FILTER_PRES + CONFIG_DLL_PRES_FILTER_COUNT)
+#endif /* (CONFIG_DLL_PRES_FILTER_COUNT < 0) */
 
 //------------------------------------------------------------------------------
 // typedef
@@ -94,10 +94,10 @@ void dllkfilter_setupFilters(void);
 void dllkfilter_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
                                 tEdrvTxBuffer* pBuffer_p,
-                                UINT8* pMacAdrs_p);
+                                const UINT8* pMacAdrs_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_dllkfilter_H_
+#endif  /* _INC_kernel_dllkfilter_H_ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ledk.h
+\file   kernel/ledk.h
 
 \brief  Definitions for kernel LED module
 
@@ -9,6 +9,7 @@ This file contains definitions and declarations of the kernel LED module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ledk_H_
-#define _INC_ledk_H_
+#ifndef _INC_kernel_ledk_H_
+#define _INC_kernel_ledk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -60,15 +60,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 //ledk functions
 tOplkError ledk_init(void);
 tOplkError ledk_exit(void);
-tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p);
+tOplkError ledk_handleNmtStateChange(const tEventNmtStateChange* pNmtStateChange_p);
 tOplkError ledk_process(void);
 
 //ledktimer functions
@@ -81,4 +81,4 @@ tOplkError ledk_setLedMode(tLedType ledType_p, tLedMode newMode_p);
 }
 #endif
 
-#endif /* _INC_ledk_H_ */
+#endif /* _INC_kernel_ledk_H_ */

@@ -5,7 +5,7 @@
 \brief  Dual Processor CAL kernel timesync module
 
 This file contains an implementation for the kernel CAL timesync module which
-uses the dualprocshm interrupt feature for synchronisation.
+uses the dualprocshm interrupt feature for synchronization.
 
 The sync module is responsible to synchronize the user layer.
 
@@ -14,6 +14,7 @@ The sync module is responsible to synchronize the user layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -116,10 +117,10 @@ The function initializes the kernel CAL timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_init(void)
 {
-    tDualprocReturn         dualRet;
+    tDualprocReturn dualRet;
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    UINT8*                  pBuffer;
-    size_t                  memSize = sizeof(tTimesyncSharedMemory);
+    void*           pBuffer;
+    size_t          memSize = sizeof(tTimesyncSharedMemory);
 #endif
 
     instance_l.pDrvInstance = dualprocshm_getLocalProcDrvInst();
@@ -131,19 +132,20 @@ tOplkError timesynckcal_init(void)
     }
 
     dualRet = dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
-
     if (dualRet != kDualprocSuccessful)
-    {
         return kErrorNoResource;
-    }
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    dualRet = dualprocshm_getMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC,
-                                    &pBuffer, &memSize, TRUE);
+    dualRet = dualprocshm_getMemory(instance_l.pDrvInstance,
+                                    DUALPROCSHM_BUFF_ID_TIMESYNC,
+                                    &pBuffer,
+                                    &memSize,
+                                    TRUE);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't allocate timesync buffer (%d)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         return kErrorNoResource;
     }
 
@@ -168,14 +170,11 @@ void timesynckcal_exit(void)
     instance_l.pSharedMemory = NULL;
 #endif
 
-    if (instance_l.pDrvInstance == NULL)
+    if (instance_l.pDrvInstance != NULL)
     {
-        // Simply skip here because the next calls won't work anyway...
-        return;
+        dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
+        dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, TRUE);
     }
-
-    dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, FALSE);
-    dualprocshm_freeMemory(instance_l.pDrvInstance, DUALPROCSHM_BUFF_ID_TIMESYNC, TRUE);
 }
 
 //------------------------------------------------------------------------------
@@ -201,11 +200,8 @@ tOplkError timesynckcal_sendSyncEvent(void)
     }
 
     dualRet = dualprocshm_setIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, TRUE);
-
     if (dualRet != kDualprocSuccessful)
-    {
         return kErrorNoResource;
-    }
 
     return kErrorOk;
 }
@@ -216,7 +212,7 @@ tOplkError timesynckcal_sendSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               Enable/disable sync event
+\param[in]      fEnable_p           Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
@@ -225,7 +221,7 @@ The function enables sync events.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    tDualprocReturn         dualRet;
+    tDualprocReturn dualRet;
 
     if (instance_l.pDrvInstance == NULL)
     {
@@ -235,11 +231,8 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
     }
 
     dualRet = dualprocshm_enableIrq(instance_l.pDrvInstance, TARGET_SYNC_INTERRUPT_ID, fEnable_p);
-
     if (dualRet != kDualprocSuccessful)
-    {
         return kErrorNoResource;
-    }
 
     return kErrorOk;
 }
@@ -268,4 +261,4 @@ tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

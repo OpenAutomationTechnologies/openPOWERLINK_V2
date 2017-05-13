@@ -8,7 +8,7 @@ This header file contains definitions describing POWERLINK frames.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_frame_H_
 #define _INC_oplk_frame_H_
 
@@ -48,10 +47,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Defines for tFrameData.flag1 and tFrameData.flag2
 #define PLK_FRAME_FLAG1_RD          0x01    // ready                                    (PReq, PRes)
-#define PLK_FRAME_FLAG1_ER          0x02    // exception reset (error signalling)       (SoA)
-#define PLK_FRAME_FLAG1_EA          0x04    // exception acknowledge (error signalling) (PReq, SoA)
-#define PLK_FRAME_FLAG1_EC          0x08    // exception clear (error signalling)       (StatusRes)
-#define PLK_FRAME_FLAG1_EN          0x10    // exception new (error signalling)         (PRes, StatusRes)
+#define PLK_FRAME_FLAG1_ER          0x02    // exception reset (error signaling)        (SoA)
+#define PLK_FRAME_FLAG1_EA          0x04    // exception acknowledge (error signaling)  (PReq, SoA)
+#define PLK_FRAME_FLAG1_EC          0x08    // exception clear (error signaling)        (StatusRes)
+#define PLK_FRAME_FLAG1_EN          0x10    // exception new (error signaling)          (PRes, StatusRes)
 #define PLK_FRAME_FLAG1_MS          0x20    // multiplexed slot                         (PReq)
 #define PLK_FRAME_FLAG1_PS          0x40    // prescaled slot                           (SoC)
 #define PLK_FRAME_FLAG1_MC          0x80    // multiplexed cycle completed              (SoC)
@@ -152,9 +151,9 @@ typedef UINT8 tMsgType;
 #define PACK_STRUCT
 #elif defined(__GNUC__)
 #define PACK_STRUCT    __attribute__((packed))
-#else
+#else /* defined(__GNUC__) */
 #error You must Byte-align these structures with the appropriate compiler directives
-#endif
+#endif /* defined(__GNUC__) */
 
 /**
 * \brief Start of cycle Frame (SoC)
@@ -478,6 +477,6 @@ typedef struct
 // reset byte-align of structures
 #ifdef _MSC_VER
 #pragma pack(pop, packing)
-#endif
+#endif /* _MSC_VER */
 
 #endif /* _INC_oplk_frame_H_ */

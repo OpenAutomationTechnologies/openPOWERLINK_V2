@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK kernel stack (Linux kernel module)
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -37,6 +37,11 @@ PROJECT(oplkdrv_daemon C)
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
 
+# Set CMake Policy to suppress the warning in CMake version 3.3.x
+IF (POLICY CMP0043)
+    CMAKE_POLICY(SET CMP0043 OLD)
+ENDIF()
+
 INCLUDE(../../cmake/findoplkdrvlib.cmake)
 MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
 MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
@@ -57,7 +62,7 @@ ENDIF (NOT CMAKE_BUILD_TYPE)
 
 OPTION(CFG_OPLK_MN "Compile openPOWERLINK MN driver (Otherwise CN)" ON)
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 SET(CFG_BUILD_KERNEL_STACK "host-interface"
     CACHE STRING "Configure how to build the kernel stack")
@@ -115,7 +120,9 @@ INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}
                    )
 
-IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    INCLUDE(microblazeise.cmake)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
     INCLUDE(microblaze.cmake)
 ELSE ()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} with processor ${CMAKE_SYSTEM_PROCESSOR} is not supported!")
@@ -146,7 +153,9 @@ TARGET_LINK_LIBRARIES(${EXECUTABLE_NAME} ${ARCH_LIBRARIES})
 
 ################################################################################
 # Post Build targets
-IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+IF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
+    INCLUDE(microblazeapppostactionsise)
+ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
     INCLUDE(microblazeapppostactions)
 ENDIF ()
 

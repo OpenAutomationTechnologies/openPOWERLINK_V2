@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -53,10 +53,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  Print debug trace message
 
-The function prints a debug trace message using standard printf
+The function prints a debug trace message using standard printk
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 */
 //------------------------------------------------------------------------------
 void trace(const char* fmt, ...)
@@ -67,4 +67,3 @@ void trace(const char* fmt, ...)
     vprintk(fmt, argptr);
     va_end(argptr);
 }
-

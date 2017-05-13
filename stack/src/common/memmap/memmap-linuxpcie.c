@@ -12,6 +12,7 @@ for Linux systems using openPOWERLINK PCIe driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -120,6 +121,7 @@ tMemMapReturn memmap_init(void)
 {
     fd_l = ctrlucal_getFd();
     OPLK_MEMSET(&memmapInstance_l, 0, sizeof(memmapInstance_l));
+
     return kMemMapOk;
 }
 
@@ -137,6 +139,7 @@ The function shuts down the memory mapping service.
 tMemMapReturn memmap_shutdown(void)
 {
     fd_l = (OPLK_FILE_HANDLE)0;
+
     return kMemMapOk;
 }
 
@@ -147,17 +150,20 @@ tMemMapReturn memmap_shutdown(void)
 The function maps a kernel layer buffer address into user application
 virtual address space which is of the size specified by \p bufferSize_p.
 
-\param  pKernelBuffer_p     The pointer to the kernel buffer.
-\param  bufferSize_p        The size of the kernel buffer.
+\param[in]      pKernelBuffer_p     The pointer to the kernel buffer.
+\param[in]      bufferSize_p        The size of the kernel buffer.
 
 \return The functions returns the pointer to the mapped kernel buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
 {
     void* pMappedBuffer = NULL;
+
+    // Check parameter validity
+    ASSERT(pKernelBuffer_p != NULL);
 
     memmapInstance_l.memSize = bufferSize_p;
 
@@ -182,7 +188,7 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
     else
     {
         // Add the byte offset of the buffer back to the mapped page
-        pMappedBuffer = (UINT8*)((ULONG)memmapInstance_l.pUserBuf +
+        pMappedBuffer = (void*)((ULONG)memmapInstance_l.pUserBuf +
                                  memmapInstance_l.offset);
     }
 
@@ -195,13 +201,16 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 
 The function disconnects from a memory mapping.
 
-\param  pBuffer_p       The pointer to the previously mapped buffer.
+\param[in]      pBuffer_p           The pointer to the previously mapped buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void memmap_unmapKernelBuffer(void* pBuffer_p)
+void memmap_unmapKernelBuffer(const void* pBuffer_p)
 {
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     if ((ULONG)memmapInstance_l.pUserBuf +
         memmapInstance_l.offset != (ULONG)pBuffer_p)
     {
@@ -217,7 +226,6 @@ void memmap_unmapKernelBuffer(void* pBuffer_p)
                               __func__, strerror(errno));
     }
 
-    pBuffer_p = NULL;
     OPLK_MEMSET(&memmapInstance_l, 0, sizeof(memmapInstance_l));
 }
 

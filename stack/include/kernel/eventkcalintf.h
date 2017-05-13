@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventkcalintf.h
+\file   kernel/eventkcalintf.h
 
 \brief  Include file for kernel event CAL module interfaces
 
@@ -10,7 +10,7 @@ CAL builds the interface between the event and the event queue implementations.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventkcalintf_H_
-#define _INC_eventkcalintf_H_
+#ifndef _INC_kernel_eventkcalintf_H_
+#define _INC_kernel_eventkcalintf_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -56,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -65,9 +63,9 @@ extern "C"
 /* circular buffer event interface */
 tOplkError eventkcal_initQueueCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_exitQueueCircbuf(tEventQueue eventQueue_p);
-tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, tEvent* pEvent_p) SECTION_EVENTKCAL_CIRCBUF_POST;
+tOplkError eventkcal_postEventCircbuf(tEventQueue eventQueue_p, const tEvent* pEvent_p) SECTION_EVENTKCAL_CIRCBUF_POST;
 tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p);
-tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, BYTE* pDataBuffer_p, size_t* pReadSize_p);
+tOplkError eventkcal_getEventCircbuf(tEventQueue eventQueue_p, UINT8* pDataBuffer_p, size_t* pReadSize_p);
 UINT       eventkcal_getEventCountCircbuf(tEventQueue eventQueue_p);
 tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR pfnSignalCb_p);
 
@@ -75,4 +73,4 @@ tOplkError eventkcal_setSignalingCircbuf(tEventQueue eventQueue_p, VOIDFUNCPTR p
 }
 #endif
 
-#endif /* _INC_eventkcalintf_H_ */
+#endif /* _INC_kernel_eventkcalintf_H_ */

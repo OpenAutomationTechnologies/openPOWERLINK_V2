@@ -59,7 +59,7 @@ Carry out the following steps to adjust the boards hardware setup:
 
 ### Xilinx ISE
 The following tool is necessary to evaluate a Xilinx FPGA-based openPOWERLINK
-slave:
+node:
 * `Xilinx ISE - Embedded Edition` which is called `ISE Design Suite - 14.7 Full
   Product Installation` or `ISE Design Suite - 14.7 Embedded Edition` and can be
   downloaded from: http://www.xilinx.com/support/download/index.htm. The license
@@ -96,11 +96,17 @@ Microblaze the following configurations are possible:
   _Libraries:_
   - `stack/proj/generic/liboplkcn` (liboplkcn.a)
 
+- __Host interface__
+
+  The kernel and the user part are separated executable. The user part and the application
+  run on the host processor, and the kernel part runs on the PCP.
+
 ## Demo Applications  {#sect_xilinx_components_apps}
 
 The following demo application are provided for the target Microblaze:
 
 * [demo_cn_embedded](\ref sect_components_demo_cn_embedded)
+* [demo_mn_embedded](\ref sect_components_demo_mn_embedded)
 
 # Building {#sect_xilinx_build}
 
@@ -110,6 +116,7 @@ steps from this section. On the platform Xilinx Microblaze the following build
 steps can be carried out:
 * [Build the hardware platform](\ref page_build_hardware)
 * [Build the openPOWERLINK stack libraries](\ref page_build_stack)
+* [Build the driver](\ref page_build_drivers)
 * [Build your application (or a delivered demo application)](\ref page_build_demos)
 
 # Running openPOWERLINK {#sect_xilinx_running}
@@ -164,7 +171,7 @@ completed and the binary is installed into the __bin__ directory.
   commands:\n
 
       > cd <openPOWERLINK_dir>/contrib/bootloader/xilinx-microblaze/simpleboot/build
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../
       > cmake -DCFG_BIN_DIR=../../../../../bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio -DCFG_HW_LIB_DIR=../../../../../hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio ../
       > make all
       > make prog-flash

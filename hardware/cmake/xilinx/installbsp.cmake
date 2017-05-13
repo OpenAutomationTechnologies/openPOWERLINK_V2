@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake macro for installing the bsp for Microblaze
+# CMake macro for installing the bsp for Vivado Microblaze
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,30 +33,13 @@ MACRO(INSTALL_BSP BSP_SOURCE_DIR BSP_TARGET_DIR BSP_CPU_NAME)
     SET(BSP_CPU_NAME ${BSP_CPU_NAME})
     SET(CFG_CPU_NAME ${BSP_CPU_NAME})
 
-    # Copy hardware platform eclipse project file
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspcproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspproject.in ${BSP_SOURCE_DIR} COPY_ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bspsdkproject.in ${BSP_SOURCE_DIR} @ONLY)
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/bsplibgen.options.in ${BSP_SOURCE_DIR} @ONLY)
-
     INSTALL(DIRECTORY ${BSP_SOURCE_DIR}
             DESTINATION ${BSP_TARGET_DIR}
             PATTERN "*.in" EXCLUDE
            )
 
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspcproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .cproject
+    INSTALL(FILES ${BSP_SOURCE_DIR}/../lscript.ld
+            DESTINATION ${BSP_TARGET_DIR}/bsp${BSP_CPU_NAME}
            )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .project
-           )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bspsdkproject.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME .sdkproject
-           )
-    INSTALL(FILES ${BSP_SOURCE_DIR}/bsplibgen.options.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME libgen.options
-           )
-    INSTALL(FILES ${ARCH_TOOLS_DIR}/eclipse/bspmakefile.in
-            DESTINATION ${BSP_TARGET_DIR}/${BSP_TARGET_NAME} RENAME Makefile
-           )
+
 ENDMACRO()

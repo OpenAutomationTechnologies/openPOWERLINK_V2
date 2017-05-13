@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdoklut.h
+\file   kernel/pdoklut.h
 
 \brief  Include file for kernel PDO lookup table module
 
@@ -8,7 +8,7 @@ This file contains the definitions needed by the PDO lookup table module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_PDOKLUT_H_
-#define _INC_PDOKLUT_H_
+#ifndef _INC_kernel_pdoklut_H_
+#define _INC_kernel_pdoklut_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -48,7 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // We can have up to 254 mapping entries per channel. If we map only bytes we
-// could need 1490 / 254 --> 6 PDO channels per frame.
+// require up to 1490 / 254 --> 6 PDO channels per frame.
 #define PDOKLUT_MAX_CHANNELS_PER_NODE       6
 #define PDOKLUT_INVALID_CHANNEL             0xff
 
@@ -76,11 +75,16 @@ extern "C"
 #endif
 
 void       pdoklut_clear(tPdoklutEntry* pLut_p, UINT32 numEntries_p);
-tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p, tPdoChannel* pPdoChannel_p, UINT channelId_p);
-UINT       pdoklut_getChannel(tPdoklutEntry* pLut_p, UINT8 searchIndex_p, UINT8 nodeId_p) SECTION_PDOKLUT_GETCHANNEL;
+tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p,
+                              const tPdoChannel* pPdoChannel_p,
+                              UINT channelId_p);
+UINT       pdoklut_getChannel(const tPdoklutEntry* pLut_p,
+                              UINT8 searchIndex_p,
+                              UINT8 nodeId_p)
+                              SECTION_PDOKLUT_GETCHANNEL;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_PDOKLUT_H_
+#endif  /* _INC_kernel_pdoklut_H_ */

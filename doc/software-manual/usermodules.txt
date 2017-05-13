@@ -318,6 +318,28 @@ objects.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_obdal obdal
+
+\brief Object dictionary abstraction layer module
+
+The object dictionary abstraction layer module implements an abstraction layer
+for accessing different POWERLINK Object Dictionaries (OD).
+For detailed information about the POWERLINK OD refer to \ref sect_powerlink_od
+
+As first priority, the default object dictionary will be accessed from this
+module. If an object does not exist in the default object dictionary, the call
+will be forwarded to a user defined implementation of the object dictionary as
+a user event.
+
+\see module_obd
+\see module_eventu
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup module_timeru timeru
 
 \brief User timer module

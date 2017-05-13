@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                               (0xC00000000L)
+#define DEF_DEBUG_LVL                               0xC0000000L
 #endif
 
 #undef FTRACE_DEBUG
@@ -62,6 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDOC
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_CFM
+#define CONFIG_INCLUDE_VETH
 
 #define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
 
@@ -81,9 +82,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // callback function (called event kObdEvWrStringDomain)
 #define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM         TRUE
 
-#define CONFIG_OBD_USE_LOAD_CONCISEDCF              TRUE
+#if defined(CONFIG_INCLUDE_CFM)
 #define CONFIG_OBD_DEF_CONCISEDCF_FILENAME          "mnobd.cdc"
 #define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH           TRUE
+#endif
 
 // Configure if the range from 0xA000 is used for mapping client objects.
 // openCONFIGURATOR uses this range for mapping objects.

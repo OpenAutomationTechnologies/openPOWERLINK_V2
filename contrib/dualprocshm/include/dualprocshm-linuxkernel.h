@@ -11,6 +11,7 @@ interface in Linux kernel.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,14 +36,12 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_linuxkernel_H_
 #define _INC_dualprocshm_linuxkernel_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <linux/types.h>
 #include <linux/delay.h>
 #include <linux/kernel.h>
@@ -54,19 +53,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef TRACE
-#ifndef NDEBUG
-#define TRACE(...)                              printk(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
-#endif
-
 /// memory
 #define DPSHM_MAKE_NONCACHEABLE(ptr)            (void*)(((unsigned long)ptr))
 #define DUALPROCSHM_MALLOC(size)                kmalloc(size, GFP_KERNEL)
 #define DUALPROCSHM_FREE(ptr)                   kfree(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)      memcpy(dest, src, siz)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)      memcpy((dest), (src), (siz))
 
 /// IO operations
 #define DPSHM_READ8(base)                       readb((UINT8*)base)
@@ -100,5 +91,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _INC_dualprocshm_linuxkernel_H_ */

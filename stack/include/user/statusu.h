@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   statusu.h
+\file   user/statusu.h
 
 \brief  Include file for statusu module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the statusu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_statusu_H_
-#define _INC_statusu_H_
+#ifndef _INC_user_statusu_H_
+#define _INC_user_statusu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -51,12 +50,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p, tStatusResponse* pStatusResponse_p);
+typedef tOplkError (*tStatusuCbResponse)(UINT nodeId_p,
+                                         const tStatusResponse* pStatusResponse_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -65,10 +64,11 @@ extern "C"
 tOplkError statusu_init(void);
 tOplkError statusu_exit(void);
 tOplkError statusu_reset(void);
-tOplkError statusu_requestStatusResponse(UINT nodeId_p, tStatusuCbResponse pfnCbResponse_p);
+tOplkError statusu_requestStatusResponse(UINT nodeId_p,
+                                         tStatusuCbResponse pfnCbResponse_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_statusu_H_ */
+#endif /* _INC_user_statusu_H_ */

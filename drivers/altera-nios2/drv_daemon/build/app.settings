@@ -39,7 +39,7 @@ ${OPLK_BASE_DIR}/drivers/altera-nios2/drv_daemon/daemon.c \
 
 APP_INCLUDES="\
 ${OPLK_BASE_DIR}/stack/include \
-${OPLK_BASE_DIR}/stack/include/kernel \
+${OPLK_BASE_DIR}/contrib \
 "
 
 APP_CFLAGS="\

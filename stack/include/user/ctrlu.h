@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlu.h
+\file   user/ctrlu.h
 
 \brief  Definitions for user control module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the user control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlu_H_
-#define _INC_ctrlu_H_
+#ifndef _INC_user_ctrlu_H_
+#define _INC_user_ctrlu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,30 +56,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError ctrlu_init(void);
-void       ctrlu_exit(void);
-tOplkError ctrlu_checkKernelStackInfo(void);
-tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
-tOplkError ctrlu_shutdownStack(void);
-tOplkError ctrlu_processStack(void);
-BOOL       ctrlu_checkKernelStack(void);
-tOplkError ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
-tOplkError ctrlu_callUserEventCallback(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p);
-tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
-UINT8*     ctrlu_getEthMacAddr(void);
-BOOL       ctrlu_stackIsInitialized(void);
-UINT32     ctrlu_getFeatureFlags(void);
-tOplkError ctrlu_writeFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p);
-size_t     ctrlu_getMaxFileChunkSize(void);
+tOplkError   ctrlu_init(void);
+void         ctrlu_exit(void);
+tOplkError   ctrlu_checkKernelStackInfo(void);
+tOplkError   ctrlu_initStack(const tOplkApiInitParam* pInitParam_p);
+tOplkError   ctrlu_shutdownStack(void);
+tOplkError   ctrlu_processStack(void);
+BOOL         ctrlu_checkKernelStack(void);
+tOplkError   ctrlu_getKernelInfo(tCtrlKernelInfo* pKernelInfo_p);
+tOplkError   ctrlu_callUserEventCallback(tOplkApiEventType eventType_p,
+                                         const tOplkApiEventArg* pEventArg_p);
+const UINT8* ctrlu_getEthMacAddr(void);
+BOOL         ctrlu_stackIsInitialized(void);
+UINT32       ctrlu_getFeatureFlags(void);
+tOplkError   ctrlu_writeFileChunk(const tOplkApiFileChunkDesc* pDesc_p,
+                                  const void* pBuffer_p);
+size_t       ctrlu_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ctrlu_H_ */
+#endif /* _INC_user_ctrlu_H_ */

@@ -11,6 +11,7 @@ This file contains the implementation of the kernel LED module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -125,19 +126,19 @@ tOplkError ledk_exit(void)
 The function handles the NMT state changes and updates the target
 LED mode.
 
-\param  nmtStateChange_p    NMT state change event.
+\param[in]      pNmtStateChange_p   NMT state change event.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ledk
 */
 //------------------------------------------------------------------------------
-tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p)
+tOplkError ledk_handleNmtStateChange(const tEventNmtStateChange* pNmtStateChange_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     // activate status LED according to NMT state
-    switch (nmtStateChange_p.newNmtState)
+    switch (pNmtStateChange_p->newNmtState)
     {
         // status LED off
         case kNmtGsOff:
@@ -191,7 +192,7 @@ tOplkError ledk_handleNmtStateChange(tEventNmtStateChange nmtStateChange_p)
     }
 
     // activate error LED according to NMT event
-    switch (nmtStateChange_p.nmtEvent)
+    switch (pNmtStateChange_p->nmtEvent)
     {
         // error LED off
         case kNmtEventSwReset:               // NMT_GT2
@@ -229,7 +230,9 @@ The function is called in loop from the ctrlk module to process led state change
 tOplkError ledk_process(void)
 {
     tOplkError      ret;
+
     ret = ledk_updateLedState();
+
     return ret;
 }
 

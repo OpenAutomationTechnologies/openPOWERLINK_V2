@@ -2,8 +2,9 @@
 #
 # File lists for openPOWERLINK stack sources
 #
-# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,6 +59,10 @@ SET(COMMON_CAL_DIRECT_SOURCES
     ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c
     )
 
+SET(COMMON_SIM_SOURCES
+    ${CONTRIB_SOURCE_DIR}/trace/trace-sim.c
+    )
+
 ################################################################################
 # Application library (User) sources
 ################################################################################
@@ -67,7 +72,6 @@ SET(COMMON_CAL_DIRECT_SOURCES
 
 SET(USER_MN_SOURCES
     ${USER_SOURCE_DIR}/obd/obdcdc.c
-    ${USER_SOURCE_DIR}/api/processimage-cia302.c
     ${USER_SOURCE_DIR}/cfmu.c
     )
 
@@ -79,8 +83,8 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/processimage.c
     ${USER_SOURCE_DIR}/api/sdotest.c
     ${USER_SOURCE_DIR}/api/service.c
-    ${USER_SOURCE_DIR}/obd/obd.c
-    ${USER_SOURCE_DIR}/obd/obdcreate.c
+    ${USER_SOURCE_DIR}/obd/obdu.c
+    ${USER_SOURCE_DIR}/obd/obdal.c
     ${USER_SOURCE_DIR}/dll/dllucal.c
     ${USER_SOURCE_DIR}/event/eventu.c
     ${USER_SOURCE_DIR}/nmt/nmtu.c
@@ -137,6 +141,10 @@ SET(SDO_SOCKETWRAPPER_SOURCES
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-ioctl.c
+    )
+
+SET(CTRL_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-pcie.c
     )
 
 SET(CTRL_UCAL_POSIXMEM_SOURCES
@@ -248,6 +256,11 @@ SET(EVENT_UCAL_WINDOWSIOCTL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-winioctl.c
     )
 
+SET(EVENT_UCAL_SIM_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-nooscircbuf.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
@@ -308,6 +321,7 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
+    ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
     ${KERNEL_SOURCE_DIR}/led/ledk.c
     ${KERNEL_SOURCE_DIR}/led/ledktimer.c
@@ -405,6 +419,11 @@ SET(EVENT_KCAL_DUALPROCSHM_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c
     )
 
+SET(EVENT_KCAL_SIM_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-direct.c
+    )
+
 ################################################################################
 # Kernel PDO CAL sources
 
@@ -485,6 +504,14 @@ SET(HARDWARE_DRIVER_OPENMAC_MN_SOURCES
     ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
     ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
     )
+
+SET(HARDWARE_DRIVER_SIM_SOURCES
+    ${KERNEL_SOURCE_DIR}/veth/veth-generic.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-sim.c
+    ${EDRV_SOURCE_DIR}/edrvcyclic.c
+    ${EDRV_SOURCE_DIR}/edrv-sim.c
+    )
+
 ################################################################################
 # User timer sources
 
@@ -499,6 +526,10 @@ SET(USER_TIMER_WINDOWS_SOURCES
 
 SET(USER_TIMER_GENERIC_SOURCES
     ${USER_SOURCE_DIR}/timer/timer-generic.c
+    )
+
+SET(USER_TIMER_SIM_SOURCES
+    ${USER_SOURCE_DIR}/timer/timer-sim.c
     )
 
 ################################################################################
@@ -538,6 +569,11 @@ SET(CIRCBUF_NOOSHOSTIF_SOURCES
 SET(CIRCBUF_DUALPROCSHM_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c
+    )
+
+SET(CIRCBUF_SIM_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
     )
 
 ################################################################################
@@ -605,15 +641,6 @@ SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-microblaze/openmac-microblaze.c
     )
 
-SET(TARGET_XILINX_ARM_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-zynqarm.c
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/target-mutex.c
-    )
-
-SET(TARGET_XILINX_ARM_DUAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx-zynqarm/lock-dualprocnoos.c
-    )
-
 SET(TARGET_ALTERA_ARM_SOURCES
     ${ARCH_SOURCE_DIR}/altera-c5socarm/target-c5socarm.c
     ${ARCH_SOURCE_DIR}/altera-c5socarm/target-mutex.c
@@ -622,6 +649,11 @@ SET(TARGET_ALTERA_ARM_SOURCES
 
 SET(TARGET_ALTERA_ARM_DUAL_SOURCES
     ${ARCH_SOURCE_DIR}/altera-c5socarm/lock-dualprocnoos.c
+    )
+
+SET(TARGET_SIM_SOURCES
+        ${ARCH_SOURCE_DIR}/sim/target-sim.c
+        ${ARCH_SOURCE_DIR}/sim/target-mutex.c
     )
 ################################################################################
 # Architecture specific sources
@@ -636,13 +668,26 @@ SET(ARCH_LE_SOURCES
     )
 
 ################################################################################
+# Simulation interface sources
+################################################################################
+SET(SIM_IF_SOURCES
+    ${SIM_SOURCE_DIR}/sim-target.c
+    ${SIM_SOURCE_DIR}/sim-trace.c
+    ${SIM_SOURCE_DIR}/sim-edrv.c
+    ${SIM_SOURCE_DIR}/sim-hrestimer.c
+    ${SIM_SOURCE_DIR}/sim-api.c
+    ${SIM_SOURCE_DIR}/sim-apievent.c
+    ${SIM_SOURCE_DIR}/sim-processsync.c
+    ${SIM_SOURCE_DIR}/sim-timer.c
+    )
+
+################################################################################
 # Header Files
 ################################################################################
 
 SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/benchmark.h
     ${STACK_INCLUDE_DIR}/oplk/cfm.h
-    ${STACK_INCLUDE_DIR}/oplk/debug.h
     ${STACK_INCLUDE_DIR}/oplk/debugstr.h
     ${STACK_INCLUDE_DIR}/oplk/dll.h
     ${STACK_INCLUDE_DIR}/oplk/oplk.h
@@ -657,7 +702,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
     ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
-    ${STACK_INCLUDE_DIR}/oplk/obdmacro.h
     ${STACK_INCLUDE_DIR}/oplk/powerlink-module.h
     ${STACK_INCLUDE_DIR}/oplk/sdo.h
     ${STACK_INCLUDE_DIR}/oplk/sdoabortcodes.h
@@ -679,6 +723,7 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/ctrlcal.h
     ${STACK_INCLUDE_DIR}/common/ctrlcal-mem.h
     ${STACK_INCLUDE_DIR}/common/defaultcfg.h
+    ${STACK_INCLUDE_DIR}/common/debug.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
     ${STACK_INCLUDE_DIR}/common/led.h
@@ -705,6 +750,7 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/nmtmnu.h
     ${STACK_INCLUDE_DIR}/user/nmtu.h
     ${STACK_INCLUDE_DIR}/user/obdconf.h
+    ${STACK_INCLUDE_DIR}/user/obdu.h
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h
@@ -743,9 +789,4 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h
     ${STACK_INCLUDE_DIR}/kernel/timesynck.h
     ${STACK_INCLUDE_DIR}/kernel/timesynckcal.h
-    )
-
-SET(OBJDICT_HEADERS
-    ${OBJDICT_DIR}/generic/objdict_1000-13ff.h
-    ${OBJDICT_DIR}/generic/objdict_1b00-1fff.h
     )

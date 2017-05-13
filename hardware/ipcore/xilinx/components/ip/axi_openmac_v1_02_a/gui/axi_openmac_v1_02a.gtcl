@@ -1,0 +1,57 @@
+###############################################################################
+# @file axi_openmac_v_1_02a.gtcl
+#
+# @details Generated tcl file from openMAC vivado project
+#
+###############################################################################
+
+# This file is automatically written.  Do not modify.
+proc gen_USERPARAMETER_gui_rxBurstSize_ENABLEMENT {gui_rxBufLoc } {expr ($gui_rxBufLoc == 2)}
+proc gen_USERPARAMETER_COL1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_USERPARAMETER_GTXCLK0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_gSmiPortCount_VALUE {gui_phyCount gui_extraSmi } {expr [get_gSmiPortCount $gui_phyCount $gui_extraSmi]}
+proc gen_USERPARAMETER_gDmaBurstCountWidth_VALUE {gui_txBufLoc gui_txBurstSize gui_rxBufLoc gui_rxBurstSize } {expr [::openmac::getBurstCountWidth $gui_txBufLoc $gui_txBurstSize $gui_rxBufLoc $gui_rxBurstSize]}
+proc gen_HDLPARAMETER_RST_POLARITY_VALUE {RST_POLARITY } {expr { ( $RST_POLARITY eq "ACTIVE_HIGH" ) ? 1 : 0}}
+proc gen_USERPARAMETER_TXCLK0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_gTimerCount_VALUE {gui_tmrCount } {expr $gui_tmrCount}
+proc gen_USERPARAMETER_GTXCLK1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_USERPARAMETER_gPacketBufferLocTx_VALUE {gui_txBufLoc } {expr $gui_txBufLoc}
+proc gen_HDLPARAMETER_RESET_POLARITY_VALUE {RESET_POLARITY } {expr { ( $RESET_POLARITY eq "ACTIVE_HIGH" ) ? 1 : 0}}
+proc gen_USERPARAMETER_C_S_AXI_MAC_PKT_BASEADDR_ENABLEMENT {gui_txBufLoc gui_rxBufLoc } {expr ($gui_txBufLoc == 1 || $gui_rxBufLoc == 1)}
+proc gen_USERPARAMETER_gPacketBufferLog2Size_VALUE {gui_txBufLoc gui_txBufSize gui_rxBufLoc gui_rxBufSize } {expr [get_PacketBufferLog2Size $gui_txBufLoc $gui_txBufSize $gui_rxBufLoc $gui_rxBufSize]}
+proc gen_USERPARAMETER_gTimerPulseRegWidth_VALUE {gui_tmrPulseWdt } {expr $gui_tmrPulseWdt}
+proc gen_USERPARAMETER_gPhyPortType_VALUE {gui_phyType } {expr $gui_phyType }
+proc gen_USERPARAMETER_gPacketBufferLocRx_VALUE {gui_rxBufLoc } {expr $gui_rxBufLoc}
+proc gen_USERPARAMETER_gui_txBurstSize_ENABLEMENT {gui_txBufLoc } {expr ($gui_txBufLoc == 2)}
+proc gen_USERPARAMETER_TXCLK1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_HDLPARAMETER_TOTAL_PERIOD_VALUE {PULSE_PERIOD RST_PERIOD } {expr {  ( $PULSE_PERIOD > 0 ) ? [expr $PULSE_PERIOD - $RST_PERIOD] : 0 }}
+proc gen_USERPARAMETER_CRS0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_gEndianness_VALUE {} {expr "little"}
+proc gen_USERPARAMETER_C_S_AXI_MAC_REG_MIN_SIZE_VALUE {C_S_AXI_MAC_REG_RNG0_BASEADDR C_S_AXI_MAC_REG_RNG1_BASEADDR C_S_AXI_MAC_REG_RNG0_HIGHADDR C_S_AXI_MAC_REG_RNG1_HIGHADDR } {format "0x%08X" [get_C_S_AXI_MAC_REG_MIN_SIZE $C_S_AXI_MAC_REG_RNG0_BASEADDR $C_S_AXI_MAC_REG_RNG1_BASEADDR $C_S_AXI_MAC_REG_RNG0_HIGHADDR $C_S_AXI_MAC_REG_RNG1_HIGHADDR]}
+proc gen_USERPARAMETER_RXCLK0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_C_M_AXI_MAC_DMA_MAX_BURST_LEN_VALUE {gui_txBufLoc gui_txBurstSize gui_rxBufLoc gui_rxBurstSize } {expr [get_C_M_AXI_MAC_DMA_MAX_BURST_LEN $gui_txBufLoc $gui_txBurstSize $gui_rxBufLoc $gui_rxBurstSize]}
+proc gen_USERPARAMETER_gPhyPortCount_VALUE {gui_phyCount } {expr $gui_phyCount}
+proc gen_USERPARAMETER_gDmaReadFifoLength_VALUE {gui_txBurstSize } {expr [::openmac::getFifoLength $gui_txBurstSize]}
+proc gen_USERPARAMETER_gui_txBufSize_ENABLEMENT {gui_txBufLoc } {expr ($gui_txBufLoc == 1)}
+proc gen_USERPARAMETER_gTimerEnablePulse_VALUE {gui_tmrPulse } {expr ($gui_tmrPulse != 0)}
+proc gen_USERPARAMETER_RESET_POLARITY_ENABLEMENT {CLOCK_TYPE } {expr { $CLOCK_TYPE eq "Single_Ended"} }
+proc gen_USERPARAMETER_C_S_AXI_MAC_PKT_HIGHADDR_ENABLEMENT {gui_txBufLoc gui_rxBufLoc } {expr ($gui_txBufLoc == 1 || $gui_rxBufLoc == 1)}
+proc gen_USERPARAMETER_CRS1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_USERPARAMETER_RXCLK1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_USERPARAMETER_gDmaWriteBurstLength_VALUE {gui_rxBurstSize } {expr $gui_rxBurstSize}
+proc gen_HDLPARAMETER_CLOCK_PERIOD_VALUE {FREQ_HZ } {expr { 1000000000.0 / $FREQ_HZ }}
+proc gen_USERPARAMETER_gui_tmrPulseEn_ENABLEMENT {gui_tmrPulse } {expr ($gui_tmrPulse != 0)}
+proc gen_USERPARAMETER_gEnableActivity_VALUE {gui_actEn } {expr $gui_actEn}
+proc gen_USERPARAMETER_TXER0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_gDmaAddrWidth_VALUE {} {expr 32}
+proc gen_USERPARAMETER_INITIAL_RESET_CLOCK_CYCLES_ENABLEMENT {CLOCK_TYPE } {expr { $CLOCK_TYPE eq "Single_Ended"} }
+proc gen_USERPARAMETER_C_S_AXI_MAC_PKT_MIN_SIZE_VALUE {C_S_AXI_MAC_PKT_BASEADDR C_S_AXI_MAC_PKT_HIGHADDR } {format "0x%08X" [get_C_S_AXI_MAC_PKT_MIN_SIZE $C_S_AXI_MAC_PKT_BASEADDR $C_S_AXI_MAC_PKT_HIGHADDR]}
+proc gen_USERPARAMETER_gEnableDmaObserver_VALUE {gui_txBufLoc gui_rxBufLoc } {expr [get_gEnableDmaObserver $gui_txBufLoc $gui_rxBufLoc]}
+proc gen_USERPARAMETER_COL0_EN_ENABLEMENT {GMII0_EN } {expr $GMII0_EN == true}
+proc gen_USERPARAMETER_gDmaWriteFifoLength_VALUE {gui_rxBurstSize } {expr [::openmac::getFifoLength $gui_rxBurstSize]}
+proc gen_USERPARAMETER_gui_rxBufSize_ENABLEMENT {gui_rxBufLoc } {expr ($gui_rxBufLoc == 1)}
+proc gen_USERPARAMETER_gDmaReadBurstLength_VALUE {gui_txBurstSize } {expr $gui_txBurstSize}
+proc gen_USERPARAMETER_TXER1_EN_ENABLEMENT {GMII1_EN } {expr $GMII1_EN == true}
+proc gen_USERPARAMETER_gTimerEnablePulseWidth_VALUE {gui_tmrPulseEn } {expr $gui_tmrPulseEn}
+proc gen_USERPARAMETER_gui_tmrPulseWdt_ENABLEMENT {gui_tmrPulse gui_tmrPulseEn } {expr ($gui_tmrPulse != 0 && $gui_tmrPulseEn != 0)}
+proc gen_USERPARAMETER_gDmaDataWidth_VALUE {} {expr 32}

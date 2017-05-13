@@ -10,6 +10,7 @@ openPOWERLINK PCIe driver for Linux kernel - Header file
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_pciedrv_H_
 #define _INC_pciedrv_H_
 
@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -59,6 +60,7 @@ typedef tOplkError (*tIrqCallback)(void);   ///< Function signature of PCIe ISR 
 extern "C"
 {
 #endif
+
 tOplkError  pciedrv_init(void);
 tOplkError  pciedrv_shutdown(void);
 ULONG       pciedrv_getBarLength(ULONG barCount_p);
@@ -66,6 +68,7 @@ ULONG       pciedrv_getBarAddr(UINT8 barCount_p);
 ULONG       pciedrv_getBarPhyAddr(UINT8 barCount_p);
 tOplkError  pciedrv_regSyncHandler(tIrqCallback cbSync_p);
 tOplkError  pciedrv_enableSync(BOOL fEnable_p);
+
 #ifdef __cplusplus
 }
 #endif

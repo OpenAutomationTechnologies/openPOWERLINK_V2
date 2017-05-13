@@ -10,7 +10,7 @@ This file contains the implementation of the SDO over UDP protocol.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -129,7 +129,7 @@ static tSdoUdpInstance      sdoUdpInstance_l;
 
 The function initializes the SDO over UDP module.
 
-\param  pfnReceiveCb_p          Pointer to SDO sequence layer receive callback function.
+\param[in]      pfnReceiveCb_p      Pointer to SDO sequence layer receive callback function.
 
 \return The function returns a tOplkError error code.
 
@@ -138,18 +138,14 @@ The function initializes the SDO over UDP module.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&sdoUdpInstance_l, 0x00, sizeof(sdoUdpInstance_l));
 
     if (pfnReceiveCb_p != NULL)
-    {
         sdoUdpInstance_l.pfnSdoAsySeqCb = pfnReceiveCb_p;
-    }
     else
-    {
         return kErrorSdoUdpMissCb;
-    }
 
     ret = sdoudp_initSocket();
     if (ret != kErrorOk)
@@ -189,29 +185,26 @@ tOplkError sdoudp_exit(void)
 The function reconfigures a socket with a new IP address. It is needed for
 NMT_ResetConfiguration.
 
-\param  ipAddr_p            IP address to configure.
-\param  port_p              Port to configure
+\param[in]      ipAddr_p            IP address to configure.
+\param[in]      port_p              Port to configure
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
+tOplkError sdoudp_config(UINT32 ipAddr_p, UINT port_p)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
     tSdoUdpCon  udpConnection;
 
     if (port_p == 0)
-    {
-        port_p = C_SDO_EPL_PORT;  // set UDP port to default port number
-    }
+        port_p = C_SDO_EPL_PORT;            // set UDP port to default port number
     else if (port_p > 65535)
-    {
         return kErrorSdoUdpSocketError;
-    }
 
-    if ((ret = sdoudp_closeSocket()) != kErrorOk)
+    ret = sdoudp_closeSocket();
+    if (ret != kErrorOk)
         return ret;
 
     udpConnection.ipAddr = ipAddr_p;
@@ -227,8 +220,8 @@ tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p)
 
 The function initializes a new connection.
 
-\param  pSdoConHandle_p           Pointer for the new connection handle.
-\param  targetNodeId_p            Node ID of the target.
+\param[out]     pSdoConHandle_p     Pointer for the new connection handle.
+\param[in]      targetNodeId_p      Node ID of the target.
 
 \return The function returns a tOplkError error code.
 
@@ -237,10 +230,13 @@ The function initializes a new connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 {
-    tOplkError          ret = kErrorOk;
-    UINT                count;
-    UINT                freeCon;
-    tSdoUdpCon*         pSdoUdpCon;
+    tOplkError  ret = kErrorOk;
+    UINT        count;
+    UINT        freeCon;
+    tSdoUdpCon* pSdoUdpCon;
+
+    // Check parameter validity
+    ASSERT(pSdoConHandle_p != NULL);
 
     // get free entry in control structure
     count = 0;
@@ -255,28 +251,35 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
             return ret;
         }
         else if ((pSdoUdpCon->ipAddr == 0) && (pSdoUdpCon->port == 0))
-        {
             freeCon = count;
-        }
 
         count++;
         pSdoUdpCon++;
     }
 
     if (freeCon == CONFIG_SDO_MAX_CONNECTION_UDP)
-    {
         ret = kErrorSdoUdpNoFreeHandle;
-    }
     else
     {
         pSdoUdpCon = &sdoUdpInstance_l.aSdoUdpConnection[freeCon];
         // save infos for connection
         pSdoUdpCon->port = htons(C_SDO_EPL_PORT);
-        pSdoUdpCon->ipAddr = htonl(0xC0A86400 | targetNodeId_p);   // 192.168.100.uiTargetNodeId_p
+        pSdoUdpCon->ipAddr = htonl(0xC0A86400 | targetNodeId_p);    // 192.168.100.targetNodeId_p
+
+        ret = sdoudp_arpQuery(pSdoUdpCon->ipAddr);
+        if (ret != kErrorOk)
+        {
+            // Reset connection handle
+            pSdoUdpCon->port = 0;
+            pSdoUdpCon->ipAddr = 0;
+
+            return ret;
+        }
 
         // set handle
         *pSdoConHandle_p = (freeCon | SDO_UDP_HANDLE);
     }
+
     return ret;
 }
 
@@ -286,18 +289,20 @@ tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
 
 The function sends data on an existing connection.
 
-\param  sdoConHandle_p          Connection handle to use for data transfer.
-\param  pSrcData_p              Pointer to data which should be sent.
-\param  dataSize_p              Size of data to send
+\param[in]      sdoConHandle_p      Connection handle to use for data transfer.
+\param[in,out]  pSrcData_p          Pointer to data which should be sent.
+\param[in]      dataSize_p          Size of data to send
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p)
+tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p,
+                           tPlkFrame* pSrcData_p,
+                           UINT32 dataSize_p)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
     INT         sdoUdpConSel;
     tSdoUdpCon  sdoUdpCon;
 
@@ -305,10 +310,10 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
     if (sdoUdpConSel >= CONFIG_SDO_MAX_CONNECTION_UDP)
         return kErrorSdoUdpInvalidHdl;
 
-    ami_setUint8Le(&pSrcData_p->messageType, 0x06);   // set message type SDO
-    ami_setUint8Le(&pSrcData_p->dstNodeId, 0x00);     // target node id (for Udp = 0)
-    ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);     // set source-nodeid (for Udp = 0)
-    dataSize_p += ASND_HEADER_SIZE;                   // calc size
+    ami_setUint8Le(&pSrcData_p->messageType, 0x06);     // set message type SDO
+    ami_setUint8Le(&pSrcData_p->dstNodeId, 0x00);       // target node id (for Udp = 0)
+    ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);       // set source-nodeid (for Udp = 0)
+    dataSize_p += ASND_HEADER_SIZE;                     // calc size
 
     sdoudp_criticalSection(TRUE);
     sdoUdpCon.port = sdoUdpInstance_l.aSdoUdpConnection[sdoUdpConSel].port;
@@ -326,14 +331,16 @@ tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UIN
 
 The function receives data from the UDP socket.
 
-\param  pSdoUdpCon_p        Pointer to remote SDO over UDP connection.
-\param  pSdoSeqData_p       Pointer to SDO sequence data.
-\param  dataSize_p          Size of SDO sequence data.
+\param[in]      pSdoUdpCon_p        Pointer to remote SDO over UDP connection.
+\param[in,out]  pSdoSeqData_p       Pointer to SDO sequence data.
+\param[in]      dataSize_p          Size of SDO sequence data.
 
 \ingroup module_sdo_udp
 */
 //------------------------------------------------------------------------------
-void sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p)
+void sdoudp_receiveData(const tSdoUdpCon* pSdoUdpCon_p,
+                        const tAsySdoSeq* pSdoSeqData_p,
+                        UINT dataSize_p)
 {
     tOplkError  ret;
     INT         count;
@@ -361,6 +368,7 @@ void sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UIN
         {
             freeEntry = count;
         }
+
         count++;
     }
 
@@ -383,14 +391,16 @@ void sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UIN
             ret = sdoUdpInstance_l.pfnSdoAsySeqCb(sdoConHdl, pSdoSeqData_p, dataSize_p);
             if (ret != kErrorOk)
             {
-                DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
-                      (ULONG)ntohl(sdoUdpInstance_l.aSdoUdpConnection[freeEntry].ipAddr),
-                      ntohs((USHORT)sdoUdpInstance_l.aSdoUdpConnection[freeEntry].port), ret);
+                DEBUG_LVL_ERROR_TRACE("%s new con: ip=%lX, port=%u, ret=0x%X\n",
+                                      __func__,
+                                      (UINT32)ntohl(sdoUdpInstance_l.aSdoUdpConnection[freeEntry].ipAddr),
+                                      ntohs((USHORT)sdoUdpInstance_l.aSdoUdpConnection[freeEntry].port),
+                                      ret);
             }
         }
         else
         {
-            DEBUG_LVL_ERROR_TRACE("Error in sdoudp: sdoudp_receiveData(): no free handle\n");
+            DEBUG_LVL_ERROR_TRACE("Error in sdoudp: %s(): no free handle\n", __func__);
             sdoudp_criticalSection(FALSE);
         }
     }
@@ -406,9 +416,11 @@ void sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UIN
         ret = sdoUdpInstance_l.pfnSdoAsySeqCb(sdoConHdl, pSdoSeqData_p, dataSize_p);
         if (ret != kErrorOk)
         {
-            DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, Ret=0x%X\n", __func__,
-                  (ULONG)ntohl(sdoUdpInstance_l.aSdoUdpConnection[count].ipAddr),
-                  ntohs((USHORT)sdoUdpInstance_l.aSdoUdpConnection[count].port), ret);
+            DEBUG_LVL_ERROR_TRACE("%s known con: ip=%lX, port=%u, ret=0x%X\n",
+                                  __func__,
+                                  (UINT32)ntohl(sdoUdpInstance_l.aSdoUdpConnection[count].ipAddr),
+                                  ntohs((USHORT)sdoUdpInstance_l.aSdoUdpConnection[count].port),
+                                  ret);
         }
     }
 }
@@ -419,7 +431,7 @@ void sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UIN
 
 The function deletes an existing connection.
 
-\param  sdoConHandle_p          Connection handle to use for data transfer.
+\param[in]      sdoConHandle_p      Connection handle to use for data transfer.
 
 \return The function returns a tOplkError error code.
 
@@ -428,14 +440,13 @@ The function deletes an existing connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p)
 {
-    tOplkError      ret = kErrorOk;
-    UINT            array;
+    tOplkError  ret = kErrorOk;
+    UINT        array;
 
     array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if (array >= CONFIG_SDO_MAX_CONNECTION_UDP)
-    {
         return kErrorSdoUdpInvalidHdl;
-    }
+
     // delete connection
     sdoUdpInstance_l.aSdoUdpConnection[array].ipAddr = 0;
     sdoUdpInstance_l.aSdoUdpConnection[array].port = 0;

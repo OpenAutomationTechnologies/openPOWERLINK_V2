@@ -12,7 +12,7 @@ timer module for Windows.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -51,20 +51,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TIMER_COUNT             2           ///< number of high-resolution timers
 
-#define TIMER_COUNT           2            ///< number of high-resolution timers
-
-#define HRTIMER_HDL_EVENT     0
-#define HRTIMER_HDL_TIMER0    1
-#define HRTIMER_HDL_TIMER1    2
-#define HRTIMER_HDL_COUNT     3
+#define HRTIMER_HDL_EVENT       0
+#define HRTIMER_HDL_TIMER0      1
+#define HRTIMER_HDL_TIMER1      2
+#define HRTIMER_HDL_COUNT       3
 
 /* macros for timer handles */
-#define TIMERHDL_MASK         0x0FFFFFFF
-#define TIMERHDL_SHIFT        28
-#define HDL_TO_IDX(Hdl)       ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) | (Hdl & ~TIMERHDL_MASK))
+#define TIMERHDL_MASK           0x0FFFFFFF
+#define TIMERHDL_SHIFT          28
+#define HDL_TO_IDX(hdl)         ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)           ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)            (((hdl + 1) & TIMERHDL_MASK) | (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -95,7 +94,7 @@ typedef struct
 {
     tTimerEventArg      eventArg;           ///< Event argument
     tTimerkCallback     pfnCallback;        ///< Pointer to timer callback function
-    LARGE_INTEGER       dueTime;            ///< Duetime for continuous timers, otherwise 0
+    LARGE_INTEGER       dueTime;            ///< Due time for continuous timers, otherwise 0
 } tHresTimerInfo;
 
 /**
@@ -161,7 +160,7 @@ tOplkError hrestimer_init(void)
     if (ret != kErrorOk)
         return ret;
 
-    // Clear the module instance strucutre
+    // Clear the module instance structure
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
     // Create two unnamed waitable timers
@@ -179,7 +178,7 @@ tOplkError hrestimer_init(void)
         return kErrorNoResource;
     }
 
-    // Create event for signalling shutdown
+    // Create event for signaling shutdown
     hresTimerInstance_l.aHandle[HRTIMER_HDL_EVENT] = CreateEvent(NULL, FALSE, FALSE, NULL);
 
     // Create the thread to begin execution on its own
@@ -238,30 +237,32 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument.
-\param  fContinue_p     If TRUE, the callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError                  ret = kErrorOk;
-    BOOL                        fRet;
-    UINT                        index;
-    tHresTimerInfo*             pTimerInfo;
-    HANDLE                      hTimer;
-    LARGE_INTEGER               dueTime;
+    tOplkError          ret = kErrorOk;
+    BOOL                fRet;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
+    HANDLE              hTimer;
+    LARGE_INTEGER       dueTime;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
@@ -340,10 +341,10 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 /**
 \brief    Delete a high-resolution timer
 
-The function deletes an created high-resolution timer. The timer is specified
+The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -352,10 +353,10 @@ by its timer handle. After deleting, the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError                  ret = kErrorOk;
-    UINT                        index;
-    tHresTimerInfo*             pTimerInfo;
-    HANDLE                      hTimer;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
+    HANDLE              hTimer;
 
     DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer: %lx\n", __func__, *pTimerHdl_p);
 
@@ -396,7 +397,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -414,7 +415,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -496,7 +497,7 @@ static void restoreTimerResolution(void)
 
     // Reset timer resolution to old value
     winRet = NtSetTimerResolution(0, FALSE, &current);
-    DEBUG_LVL_TIMERH_TRACE("NtSetTimerResolution returnd %ld, current resolution = %lu\n", winRet, current);
+    DEBUG_LVL_TIMERH_TRACE("NtSetTimerResolution returned %ld, current resolution = %lu\n", winRet, current);
 
     // Free library NTDLL.DLL
     FreeLibrary(hInstLibNtDll_l);
@@ -510,7 +511,7 @@ static void restoreTimerResolution(void)
 The function implements the timer callback function. It is called when a timer
 expires.
 
-\param  index_p     Index of timer (0 or 1)
+\param[in]      index_p             Index of timer (0 or 1)
 */
 //------------------------------------------------------------------------------
 static void callTimerCb(UINT index_p)
@@ -550,7 +551,7 @@ static void callTimerCb(UINT index_p)
 This function implements the hrestimer worker thread. It is responsible to handle
 timer events.
 
-\param  pArgument_p    Thread argument (unused!)
+\param[in,out]  pArgument_p         Thread argument (unused!)
 
 \return The function returns a thread return code
 */
@@ -572,7 +573,7 @@ static DWORD WINAPI timerThread(LPVOID pArgument_p)
         switch (waitRet)
         {
             case WAIT_OBJECT_0 + HRTIMER_HDL_EVENT:
-                // Shutdown was signalled
+                // Shutdown was signaled
                 return 0;
 
             case WAIT_OBJECT_0 + HRTIMER_HDL_TIMER0:
@@ -585,8 +586,8 @@ static DWORD WINAPI timerThread(LPVOID pArgument_p)
                 callTimerCb(1);
                 break;
 
-            default:
             case WAIT_FAILED:
+            default:
                 DEBUG_LVL_ERROR_TRACE("WaitForMultipleObjects failed (%d)\n", GetLastError());
                 break;
         }

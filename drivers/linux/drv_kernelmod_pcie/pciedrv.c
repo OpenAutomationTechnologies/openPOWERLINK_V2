@@ -16,6 +16,7 @@ openPOWERLINK driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,6 +45,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include "pciedrv.h"
+
+#include <common/driver.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -60,13 +64,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/sched.h>
 #include <linux/delay.h>
 #include <linux/gfp.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26)
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 26))
 #include <linux/semaphore.h>
 #endif
 
-#include <common/driver.h>
-#include <kernel/pdokcal.h>
-#include "pciedrv.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -75,11 +76,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 
-#define OPLK_MAX_BAR_COUNT      6   // Maximum BARs polled in the PCIe
+#define OPLK_MAX_BAR_COUNT      6                   // Maximum BARs polled in the PCIe
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -109,9 +110,9 @@ The structure holds the information of the PCIe BAR mapped by this driver.
 */
 typedef struct
 {
-    ULONG       busAddr;            ///< Physical address of the BAR.
-    ULONG       virtualAddr;        ///< Virtual address of the BAR in kernel memory.
-    ULONG       length;             ///< Length of the BAR.
+    ULONG           busAddr;                        ///< Physical address of the BAR.
+    ULONG           virtualAddr;                    ///< Virtual address of the BAR in kernel memory.
+    ULONG           length;                         ///< Length of the BAR.
 } tBarInfo;
 
 /**
@@ -123,25 +124,26 @@ The structure holds the information of this PCIe driver instance.
 */
 typedef struct
 {
-    struct pci_dev*     pPciDev;                        ///< Pointer to PCI device structure.
-    tBarInfo            aBarInfo[OPLK_MAX_BAR_COUNT];   ///< Bar instances of the PCIe interface.
-    tIrqCallback        pfnCbSync;                      ///< Sync irq callback function of the upper user layer.
-    BOOL                fSyncEnabled;                   ///< Flag to check if sync irq for user has been enabled.
+    struct pci_dev* pPciDev;                        ///< Pointer to PCI device structure.
+    tBarInfo        aBarInfo[OPLK_MAX_BAR_COUNT];   ///< Bar instances of the PCIe interface.
+    tIrqCallback    pfnCbSync;                      ///< Sync IRQ callback function of the upper user layer.
+    BOOL            fSyncEnabled;                   ///< Flag to check if sync IRQ for user has been enabled.
 } tPcieDrvInstance;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static INT          initOnePciDev(struct pci_dev* pPciDev_p,
+static int          initOnePciDev(struct pci_dev* pPciDev_p,
                                   const struct pci_device_id* pId_p);
 static void         removeOnePciDev(struct pci_dev* pPciDev_p);
-static irqreturn_t  pcieDrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
+static irqreturn_t  pcieDrvIrqHandler(int irqNum_p,
+                                      void* ppDevInstData_p);
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 
-static struct pci_device_id     aDriverPciTbl_l[] =
+static struct pci_device_id aDriverPciTbl_l[] =
 {
     {0x1677, 0xe53f, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // APC2100
     {0x1677, 0xe809, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // APC2100
@@ -151,9 +153,8 @@ static struct pci_device_id     aDriverPciTbl_l[] =
 
 MODULE_DEVICE_TABLE(pci, aDriverPciTbl_l);
 
-static struct pci_driver        oplkPcieDriver_l;
-
-static tPcieDrvInstance         pcieDrvInstance_l;
+static struct pci_driver    oplkPcieDriver_l;
+static tPcieDrvInstance     pcieDrvInstance_l;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -172,32 +173,33 @@ This function initializes the openPOWERLINK PCIe driver.
 //------------------------------------------------------------------------------
 tOplkError pciedrv_init(void)
 {
-    tOplkError      ret = kErrorOk;
-    INT             result;
+    tOplkError  ret = kErrorOk;
+    INT         result;
 
     // Clear instance structure
     OPLK_MEMSET(&pcieDrvInstance_l, 0, sizeof(pcieDrvInstance_l));
 
     // Clear driver structure
     OPLK_MEMSET(&oplkPcieDriver_l, 0, sizeof(oplkPcieDriver_l));
-    oplkPcieDriver_l.name         = PLK_DRV_NAME;
-    oplkPcieDriver_l.id_table     = aDriverPciTbl_l;
-    oplkPcieDriver_l.probe        = initOnePciDev;
-    oplkPcieDriver_l.remove       = removeOnePciDev;
+    oplkPcieDriver_l.name = PLK_DRV_NAME;
+    oplkPcieDriver_l.id_table = aDriverPciTbl_l;
+    oplkPcieDriver_l.probe = initOnePciDev;
+    oplkPcieDriver_l.remove = removeOnePciDev;
 
     // Register PCI driver
     result = pci_register_driver(&oplkPcieDriver_l);
     if (result != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s pci_register_driver failed with %d\n",
-                              __FUNCTION__, result);
+                              __func__,
+                              result);
         ret = kErrorNoResource;
         goto Exit;
     }
 
     if (pcieDrvInstance_l.pPciDev == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s pPciDev=NULL\n", __FUNCTION__);
+        DEBUG_LVL_ERROR_TRACE("%s pPciDev=NULL\n", __func__);
         ret = pciedrv_shutdown();
         ret = kErrorNoResource;
         goto Exit;
@@ -221,7 +223,7 @@ This function shuts down the openPOWERLINK PCIe driver.
 tOplkError pciedrv_shutdown(void)
 {
     // Unregister PCI driver
-    DEBUG_LVL_DRVINTF_TRACE("%s calling pci_unregister_driver()\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s calling pci_unregister_driver()\n", __func__);
     pci_unregister_driver(&oplkPcieDriver_l);
 
     return kErrorOk;
@@ -233,7 +235,7 @@ tOplkError pciedrv_shutdown(void)
 
 This routine fetches the BAR address of the requested BAR.
 
-\param  barCount_p     ID of the requested BAR.
+\param[in]      barCount_p          ID of the requested BAR.
 
 \return Returns the address of requested PCIe BAR.
 
@@ -243,9 +245,7 @@ This routine fetches the BAR address of the requested BAR.
 ULONG pciedrv_getBarAddr(UINT8 barCount_p)
 {
     if (barCount_p >= OPLK_MAX_BAR_COUNT)
-    {
         return 0;
-    }
 
     return pcieDrvInstance_l.aBarInfo[barCount_p].virtualAddr;
 }
@@ -256,7 +256,7 @@ ULONG pciedrv_getBarAddr(UINT8 barCount_p)
 
 This routine fetches the physical BAR address of the requested BAR.
 
-\param  barCount_p     ID of the requested BAR.
+\param[in]      barCount_p          ID of the requested BAR.
 
 \return Returns the physical address of requested PCIe BAR.
 
@@ -266,9 +266,7 @@ This routine fetches the physical BAR address of the requested BAR.
 ULONG pciedrv_getBarPhyAddr(UINT8 barCount_p)
 {
     if (barCount_p >= OPLK_MAX_BAR_COUNT)
-    {
         return 0;
-    }
 
     return pcieDrvInstance_l.aBarInfo[barCount_p].busAddr;
 }
@@ -277,7 +275,7 @@ ULONG pciedrv_getBarPhyAddr(UINT8 barCount_p)
 /**
 \brief  Get BAR Length
 
-\param  barCount_p     ID of the requested BAR.
+\param[in]      barCount_p          ID of the requested BAR.
 
 \return Returns the length of requested PCIe BAR.
 
@@ -287,9 +285,7 @@ ULONG pciedrv_getBarPhyAddr(UINT8 barCount_p)
 ULONG pciedrv_getBarLength(ULONG barCount_p)
 {
     if (barCount_p >= OPLK_MAX_BAR_COUNT)
-    {
         return 0;
-    }
 
     return pcieDrvInstance_l.aBarInfo[barCount_p].length;
 }
@@ -301,7 +297,7 @@ ULONG pciedrv_getBarLength(ULONG barCount_p)
 This function stores the user sync event callback function tobe called from
 the PCIe sync ISR.
 
-\param cbSync_p     Pinter to the user sync callback function.
+\param[in]      cbSync_p            Pinter to the user sync callback function.
 
 \return The function returns a tOplkError error code.
 
@@ -311,6 +307,7 @@ the PCIe sync ISR.
 tOplkError pciedrv_regSyncHandler(tIrqCallback cbSync_p)
 {
     pcieDrvInstance_l.pfnCbSync = cbSync_p;
+
     return kErrorOk;
 }
 
@@ -320,8 +317,8 @@ tOplkError pciedrv_regSyncHandler(tIrqCallback cbSync_p)
 
 Enables or disable the forwarding of sync interrupt to user.
 
-\param fEnable_p    Boolean value indicating whether or not to forward sync irq
-                    to user.
+\param[in]      fEnable_p           Boolean value indicating whether or not to
+                                    forward sync IRQ to user.
 
 \return The function returns a tOplkError error code.
 
@@ -331,6 +328,7 @@ Enables or disable the forwarding of sync interrupt to user.
 tOplkError pciedrv_enableSync(BOOL fEnable_p)
 {
     pcieDrvInstance_l.fSyncEnabled = fEnable_p;
+
     return kErrorOk;
 }
 
@@ -346,15 +344,16 @@ tOplkError pciedrv_enableSync(BOOL fEnable_p)
 
 This function is the interrupt service routine for the openPOWERLINK PCIe driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in]      ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t pcieDrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t pcieDrvIrqHandler(int irqNum_p,
+                                     void* ppDevInstData_p)
 {
-    INT         ret = IRQ_HANDLED;
+    irqreturn_t ret = IRQ_HANDLED;
 
     UNUSED_PARAMETER(irqNum_p);
     UNUSED_PARAMETER(ppDevInstData_p);
@@ -377,18 +376,18 @@ static irqreturn_t pcieDrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
 
 This function initializes one PCI device.
 
-\param  pPciDev_p   Pointer to corresponding PCI device structure
-\param  pId_p       PCI device ID
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
+\param[in]      pId_p               PCI device ID
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePciDev(struct pci_dev* pPciDev_p,
+static int initOnePciDev(struct pci_dev* pPciDev_p,
                          const struct pci_device_id* pId_p)
 {
-    INT         result = 0;
+    int         result = 0;
     UINT8       barCount = 0;
     tBarInfo*   pBarInfo = NULL;
 
@@ -398,7 +397,8 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     {
         // This driver is already connected to a PCIe device
         DEBUG_LVL_DRVINTF_TRACE("%s device %s discarded\n",
-                                __FUNCTION__, pci_name(pPciDev_p));
+                                __func__,
+                                pci_name(pPciDev_p));
         result = -ENODEV;
         goto Exit;
     }
@@ -406,19 +406,15 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     pcieDrvInstance_l.pPciDev = pPciDev_p;
 
     // Enable the PCIe device
-    DEBUG_LVL_DRVINTF_TRACE("%s enable device\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s enable device\n", __func__);
     result = pci_enable_device(pPciDev_p);
     if (result != 0)
-    {
         goto Exit;
-    }
 
-    DEBUG_LVL_DRVINTF_TRACE("%s request PCIe regions\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s request PCIe regions\n", __func__);
     result = pci_request_regions(pPciDev_p, PLK_DRV_NAME);
     if (result != 0)
-    {
         goto ExitFail;
-    }
 
     // Ignoring whether or not any BAR is accessible
     for (barCount = 0; barCount < OPLK_MAX_BAR_COUNT; barCount++)
@@ -434,19 +430,16 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
 
         // Look for the MMIO BARs
         if ((pci_resource_flags(pPciDev_p, barCount) & IORESOURCE_MEM) == 0)
-        {
             continue;
-        }
 
         // get the size of this field
         pBarInfo->length = pci_resource_len(pPciDev_p, barCount);
 
         // $$: Add check for weird broken IO regions
 
-        pBarInfo->virtualAddr = (ULONG)ioremap_nocache(pci_resource_start(pPciDev_p,
-                                                       barCount),
+        pBarInfo->virtualAddr = (ULONG)ioremap_nocache(pci_resource_start(pPciDev_p, barCount),
                                                        pBarInfo->length);
-        if (pBarInfo->virtualAddr == (ULONG)NULL)
+        if (pBarInfo->virtualAddr == 0UL)
         {
             // Remap of controller's register space failed
             result = -EIO;
@@ -455,7 +448,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
 
         pBarInfo->busAddr = (ULONG)pci_resource_start(pPciDev_p, barCount);
 
-        DEBUG_LVL_DRVINTF_TRACE("%s() --> ioremap\n", __FUNCTION__);
+        DEBUG_LVL_DRVINTF_TRACE("%s() --> ioremap\n", __func__);
         DEBUG_LVL_DRVINTF_TRACE("\tbar#\t%u\n", barCount);
         DEBUG_LVL_DRVINTF_TRACE("\tbarLen\t%lu\n", pBarInfo->length);
         DEBUG_LVL_DRVINTF_TRACE("\tbarMap\t0x%lX\n", pBarInfo->virtualAddr);
@@ -463,7 +456,7 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     }
 
     // Enable PCI busmaster
-    DEBUG_LVL_DRVINTF_TRACE("%s enable busmaster\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s enable busmaster\n", __func__);
     pci_set_master(pPciDev_p);
 
     // Enable msi
@@ -471,20 +464,18 @@ static INT initOnePciDev(struct pci_dev* pPciDev_p,
     result = pci_enable_msi(pPciDev_p);
     if (result != 0)
     {
-        DEBUG_LVL_DRVINTF_TRACE("%s Could not enable MSI\n", __FUNCTION__);
+        DEBUG_LVL_DRVINTF_TRACE("%s Could not enable MSI\n", __func__);
     }
 
     // Install interrupt handler
-    DEBUG_LVL_DRVINTF_TRACE("%s install interrupt handler\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s install interrupt handler\n", __func__);
     result = request_irq(pPciDev_p->irq,
                          pcieDrvIrqHandler,
                          IRQF_SHARED,
                          PLK_DRV_NAME, /* pPciDev_p->dev.name */
                          pPciDev_p);
     if (result != 0)
-    {
         goto ExitFail;
-    }
 
     goto Exit;
 
@@ -492,7 +483,7 @@ ExitFail:
     removeOnePciDev(pPciDev_p);
 
 Exit:
-    DEBUG_LVL_DRVINTF_TRACE("%s finished with %d\n", __FUNCTION__, result);
+    DEBUG_LVL_DRVINTF_TRACE("%s finished with %d\n", __func__, result);
     return result;
 }
 
@@ -502,7 +493,7 @@ Exit:
 
 This function removes one PCI device.
 
-\param  pPciDev_p     Pointer to corresponding PCI device structure
+\param[in,out]  pPciDev_p           Pointer to corresponding PCI device structure
 */
 //------------------------------------------------------------------------------
 static void removeOnePciDev(struct pci_dev* pPciDev_p)
@@ -522,7 +513,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
         free_irq(pPciDev_p->irq, pPciDev_p);
 
     // Disable Message Signaled Interrupt
-    DEBUG_LVL_DRVINTF_TRACE("%s Disable MSI\n", __FUNCTION__);
+    DEBUG_LVL_DRVINTF_TRACE("%s Disable MSI\n", __func__);
     pci_disable_msi(pPciDev_p);
 
     // unmap controller's register space

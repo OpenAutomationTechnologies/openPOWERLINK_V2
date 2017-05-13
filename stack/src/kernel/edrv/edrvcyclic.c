@@ -12,7 +12,7 @@ It implements time-triggered transmission of frames necessary for MN.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/edrv.h>
 #include <kernel/hrestimer.h>
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 #include <common/target.h>
 #endif
 
@@ -73,11 +73,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if CONFIG_TIMER_USE_HIGHRES == FALSE
+#if (CONFIG_TIMER_USE_HIGHRES == FALSE)
 #error "EdrvCyclic needs CONFIG_TIMER_USE_HIGHRES = TRUE"
 #endif
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 #ifndef EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US
 #define EDRV_CYCLIC_SAMPLE_TH_CYCLE_TIME_DIFF_US         50
 #endif
@@ -85,7 +85,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US
 #define EDRV_CYCLIC_SAMPLE_TH_SPARE_TIME_US             150
 #endif
-#endif
+#endif /* (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE) */
 
 #if (EDRV_USE_TTTX == TRUE)
 #define EDRV_SHIFT                                      150000ULL
@@ -114,7 +114,7 @@ typedef struct
     ULONGLONG               nextCycleTime;                  ///< Timestamp of the start of the next cycle
     BOOL                    fNextCycleValid;                ///< Flag indicating whether the value in nextCycleTime is valid
 #endif
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     UINT                    sampleCount;                    ///< Sample counter
     ULONGLONG               startCycleTimeStamp;            ///< Timestamp of the cycle start
     ULONGLONG               lastSlotTimeStamp;              ///< Timestamp of the last slot
@@ -130,9 +130,9 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p);
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p);
 #if (EDRV_USE_TTTX != TRUE)
-static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p);
+static tOplkError timerHdlSlotCb(const tTimerEventArg* pEventArg_p);
 #endif
 static tOplkError processTxBufferList(BOOL fCallSyncCb_p);
 
@@ -156,7 +156,7 @@ tOplkError edrvcyclic_init(void)
     // clear instance structure
     OPLK_MEMSET(&edrvcyclicInstance_l, 0, sizeof(edrvcyclicInstance_l));
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     edrvcyclicInstance_l.diagnostics.cycleTimeMin        = 0xFFFFFFFF;
     edrvcyclicInstance_l.diagnostics.usedCycleTimeMin    = 0xFFFFFFFF;
     edrvcyclicInstance_l.diagnostics.spareCycleTimeMin   = 0xFFFFFFFF;
@@ -192,9 +192,9 @@ tOplkError edrvcyclic_exit(void)
 /**
 \brief  Set maximum size of Tx buffer list
 
-This function determines the maxmimum size of the cyclic Tx buffer list.
+This function determines the maximum size of the cyclic Tx buffer list.
 
-\param  maxListSize_p   Maximum Tx buffer list size
+\param[in]      maxListSize_p       Maximum Tx buffer list size
 
 \return The function returns a tOplkError error code.
 
@@ -215,14 +215,14 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
         }
 
         edrvcyclicInstance_l.ppTxBufferList = (tEdrvTxBuffer**)OPLK_MALLOC(sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
-        if (edrvcyclicInstance_l.ppTxBufferList == NULL)
+        if (edrvcyclicInstance_l.ppTxBufferList != NULL)
         {
-            ret = kErrorEdrvNoFreeBufEntry;
+            edrvcyclicInstance_l.curTxBufferList = 0;
+
+            OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
         }
-
-        edrvcyclicInstance_l.curTxBufferList = 0;
-
-        OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0, sizeof(*edrvcyclicInstance_l.ppTxBufferList) * maxListSize_p * 2);
+        else
+            ret = kErrorEdrvNoFreeBufEntry;
     }
 
     return ret;
@@ -234,18 +234,22 @@ tOplkError edrvcyclic_setMaxTxBufferListSize(UINT maxListSize_p)
 
 This function forwards the next cycle Tx buffer list to the cyclic Edrv.
 
-\param  ppTxBuffer_p        Pointer to next cycle Tx buffer list
-\param  txBufferCount_p     Tx buffer list count
+\param[in]      ppTxBuffer_p        Pointer to next cycle Tx buffer list
+\param[in]      txBufferCount_p     Tx buffer list count
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer** ppTxBuffer_p, UINT txBufferCount_p)
+tOplkError edrvcyclic_setNextTxBufferList(tEdrvTxBuffer* const* ppTxBuffer_p,
+                                          UINT txBufferCount_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        nextTxBufferList;
+
+    // Check parameter validity
+    ASSERT(ppTxBuffer_p != NULL);
 
     nextTxBufferList = edrvcyclicInstance_l.curTxBufferList ^ edrvcyclicInstance_l.maxTxBufferCount;
 
@@ -282,8 +286,8 @@ Exit:
 
 This function sets the cycle time controlled by the cyclic Edrv.
 
-\param  cycleTimeUs_p   Cycle time [us]
-\param  minSyncTime_p   Minimum period for sending sync events to the api [us]
+\param[in]      cycleTimeUs_p       Cycle time [us]
+\param[in]      minSyncTime_p       Minimum period for sending sync events to the api [us]
 
 \return The function returns a tOplkError error code.
 
@@ -307,12 +311,15 @@ tOplkError edrvcyclic_setCycleTime(UINT32 cycleTimeUs_p, UINT32 minSyncTime_p)
 
 This function starts the cycles.
 
+\param  fContinuousMode_p   If TRUE, the timer will be called continuously
+                            Otherwise, it is a one-shot timer
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_startCycle(void)
+tOplkError edrvcyclic_startCycle(BOOL fContinuousMode_p)
 {
     tOplkError ret = kErrorOk;
 
@@ -330,13 +337,13 @@ tOplkError edrvcyclic_startCycle(void)
 
     ret = hrestimer_modifyTimer(&edrvcyclicInstance_l.timerHdlCycle,
                                 edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
-                                timerHdlCycleCb, 0L, TRUE);
+                                timerHdlCycleCb, 0L, fContinuousMode_p);
 
 #if (EDRV_USE_TTTX == TRUE)
     edrvcyclicInstance_l.fNextCycleValid = FALSE;
 #endif
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     edrvcyclicInstance_l.lastSlotTimeStamp = 0;
 #endif
 
@@ -350,8 +357,8 @@ Exit:
 
 This function stops the cycles.
 
-\param  fKeepCycle_p    If TRUE, just stop transmission (i.e. slot timer),
-                        but keep cycle timer running.
+\param[in]      fKeepCycle_p        If TRUE, just stop transmission (i.e. slot timer),
+                                    but keep cycle timer running.
 
 \return The function returns a tOplkError error code.
 
@@ -365,16 +372,26 @@ tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
     if (!fKeepCycle_p)
     {
         ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlCycle);
+        if (ret != kErrorOk)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s delete cycle timer failed with 0x%X\n",
+                                  __func__, ret);
+        }
     }
 #if (EDRV_USE_TTTX == FALSE)
     ret = hrestimer_deleteTimer(&edrvcyclicInstance_l.timerHdlSlot);
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s delete cycle timer failed with 0x%X\n",
+                              __func__, ret);
+    }
 #endif
 
     // clear current and next Tx buffer list
     OPLK_MEMSET(edrvcyclicInstance_l.ppTxBufferList, 0,
                 sizeof(*edrvcyclicInstance_l.ppTxBufferList) * edrvcyclicInstance_l.maxTxBufferCount * 2);
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     edrvcyclicInstance_l.startCycleTimeStamp = 0;
 #endif
 
@@ -387,7 +404,8 @@ tOplkError edrvcyclic_stopCycle(BOOL fKeepCycle_p)
 
 This function registers the synchronization callback.
 
-\param  pfnCbSync_p     Function pointer called at the configured synchronisation point
+\param[in]      pfnCbSync_p         Function pointer called at the configured
+                                    synchronization point
 
 \return The function returns a tOplkError error code.
 
@@ -407,7 +425,7 @@ tOplkError edrvcyclic_regSyncHandler(tEdrvCyclicCbSync pfnCbSync_p)
 
 This function registers the error callback.
 
-\param  pfnCbError_p    Function pointer called in case of a cycle processing error
+\param[in]      pfnCbError_p        Function pointer called in case of a cycle processing error
 
 \return The function returns a tOplkError error code.
 
@@ -422,27 +440,31 @@ tOplkError edrvcyclic_regErrorHandler(tEdrvCyclicCbError pfnCbError_p)
 }
 
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Obtain diagnostic information
 
-This function returns diagnostic information provided by the cyclic Edrv.
+This function returns diagnostic information provided by the cyclic edrv.
 
-\param  ppDiagnostics_p     Pointer to store the pointer to the diagnostic information
+\param[out]     ppDiagnostics_p     Pointer to store the pointer to the diagnostic
+                                    information
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
+tOplkError edrvcyclic_getDiagnostics(const tEdrvCyclicDiagnostics** ppDiagnostics_p)
 {
+    // Check parameter validity
+    ASSERT(ppDiagnostics_p != NULL);
+
     *ppDiagnostics_p = &edrvcyclicInstance_l.diagnostics;
 
     return kErrorOk;
 }
-#endif
+#endif /* (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE) */
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -456,15 +478,15 @@ tOplkError edrvcyclic_getDiagnostics(tEdrvCyclicDiagnostics** ppDiagnostics_p)
 
 This function is called by the timer module. It starts the next cycle.
 
-\param  pEventArg_p     Timer event argument
+\param[in]      pEventArg_p         Timer event argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
+static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     UINT32          cycleTime;
     UINT32          usedCycleTime;
     UINT32          spareCycleTime;
@@ -477,7 +499,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     startNewCycleTimeStamp = target_getCurrentTimestamp();
 #endif
 
@@ -505,7 +527,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     if (edrvcyclicInstance_l.startCycleTimeStamp != 0)
     {
         // calculate time diffs of previous cycle
@@ -580,7 +602,7 @@ static tOplkError timerHdlCycleCb(tTimerEventArg* pEventArg_p)
 
     edrvcyclicInstance_l.startCycleTimeStamp = startNewCycleTimeStamp;
     edrvcyclicInstance_l.lastSlotTimeStamp = 0;
-#endif
+#endif /* (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE) */
 
 Exit:
     if (ret != kErrorOk)
@@ -606,12 +628,12 @@ Exit:
 This function is called by the timer module. It triggers the transmission of the
 next frame.
 
-\param  pEventArg_p     Timer event argument
+\param[in]      pEventArg_p         Timer event argument
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
+static tOplkError timerHdlSlotCb(const tTimerEventArg* pEventArg_p)
 {
     tOplkError      ret = kErrorOk;
     tEdrvTxBuffer*  pTxBuffer = NULL;
@@ -622,7 +644,7 @@ static tOplkError timerHdlSlotCb(tTimerEventArg* pEventArg_p)
         goto Exit;
     }
 
-#if CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE)
     edrvcyclicInstance_l.lastSlotTimeStamp = target_getCurrentTimestamp();
 #endif
 
@@ -655,7 +677,7 @@ Exit:
 
 This function processes the cycle Tx buffer list provided by dllk.
 
-\param  fCallSyncCb_p   Call Sync callback function if TRUE
+\param[in]      fCallSyncCb_p       Call Sync callback function if TRUE
 
 \return The function returns a tOplkError error code.
 */
@@ -703,16 +725,18 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
 
         if (fFirstPacket)
         {
-            pTxBuffer->launchTime = launchTime;
+            pTxBuffer->launchTime.nanoseconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
             fFirstPacket = FALSE;
         }
         else
         {
             launchTime = launchTime + (UINT64)pTxBuffer->timeOffsetNs;
-            pTxBuffer->launchTime = launchTime;
+            pTxBuffer->launchTime.nanoseconds = launchTime;
+            pTxBuffer->fLaunchTimeValid = TRUE;
         }
 
-        if ((pTxBuffer->launchTime - cycleMin) > (cycleMax - cycleMin))
+        if ((pTxBuffer->launchTime.nanoseconds - cycleMin) > (cycleMax - cycleMin))
         {
             ret = kErrorEdrvTxListNotFinishedYet;
             goto Exit;
@@ -722,7 +746,9 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
         if (ret != kErrorOk)
             goto Exit;
 
-        pTxBuffer->launchTime = 0;
+        pTxBuffer->launchTime.nanoseconds = 0;
+        pTxBuffer->fLaunchTimeValid = FALSE;
+
         edrvcyclicInstance_l.curTxBufferEntry++;
 
         if (fCallSyncCb_p)
@@ -735,7 +761,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
         }
     }
 
-#else
+#else /* (EDRV_USE_TTTX == TRUE) */
 
     while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
     {
@@ -769,7 +795,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
             fCallSyncCb_p = FALSE;
         }
     }
-#endif
+#endif /* (EDRV_USE_TTTX == TRUE) */
 
 Exit:
     if (ret != kErrorOk)
@@ -782,4 +808,4 @@ Exit:
     return ret;
 }
 
-///\}
+/// \}

@@ -13,7 +13,7 @@ implementation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -58,19 +58,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define TIMER_COUNT             2           ///< number of high-resolution timers
+#define TIMER_MIN_VAL_SINGLE    20000       ///< minimum timer interval for single timeouts
+#define TIMER_MIN_VAL_CYCLE     100000      ///< minimum timer interval for continuous timeouts
 
-#define TIMER_COUNT           2            ///< number of high-resolution timers
-#define TIMER_MIN_VAL_SINGLE  20000        ///< minimum timer intervall for single timeouts
-#define TIMER_MIN_VAL_CYCLE   100000       ///< minimum timer intervall for continuous timeouts
-
-#define SIGHIGHRES           SIGRTMIN + 1
+#define SIGHIGHRES              SIGRTMIN + 1
 
 /* macros for timer handles */
-#define TIMERHDL_MASK         0x0FFFFFFF
-#define TIMERHDL_SHIFT        28
-#define HDL_TO_IDX(Hdl)       ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) | (Hdl & ~TIMERHDL_MASK))
+#define TIMERHDL_MASK           0x0FFFFFFF
+#define TIMERHDL_SHIFT          28
+#define HDL_TO_IDX(hdl)         ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)           ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)            (((hdl + 1) & TIMERHDL_MASK) | (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -142,11 +141,11 @@ The function initializes the high-resolution timer module
 //------------------------------------------------------------------------------
 tOplkError hrestimer_init(void)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
-    struct sched_param      schedParam;
-    tHresTimerInfo*         pTimerInfo;
-    struct sigevent         sev;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    struct sched_param  schedParam;
+    tHresTimerInfo*     pTimerInfo;
+    struct sigevent     sev;
 
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
@@ -179,7 +178,7 @@ tOplkError hrestimer_init(void)
         return kErrorNoResource;
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(hresTimerInstance_l.threadId, "oplk-hrtimer");
 #endif
 
@@ -199,9 +198,9 @@ The function shuts down the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_exit(void)
 {
-    tHresTimerInfo*         pTimerInfo;
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
+    tHresTimerInfo*     pTimerInfo;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
 
     for (index = 0; index < TIMER_COUNT; index++)
     {
@@ -234,28 +233,30 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, the callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
-    tHresTimerInfo*         pTimerInfo;
-    struct itimerspec       RelTime;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
+    struct itimerspec   relTime;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
@@ -316,31 +317,31 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     if (time_p >= 1000000000L)
     {
-        RelTime.it_value.tv_sec = (time_p / 1000000000L);
-        RelTime.it_value.tv_nsec = (time_p % 1000000000);
+        relTime.it_value.tv_sec = (time_p / 1000000000L);
+        relTime.it_value.tv_nsec = (time_p % 1000000000);
     }
     else
     {
-        RelTime.it_value.tv_sec = 0;
-        RelTime.it_value.tv_nsec = time_p;
+        relTime.it_value.tv_sec = 0;
+        relTime.it_value.tv_nsec = time_p;
     }
 
     if (fContinue_p)
     {
-        RelTime.it_interval.tv_nsec = RelTime.it_value.tv_nsec;
-        RelTime.it_interval.tv_sec = RelTime.it_value.tv_sec;
+        relTime.it_interval.tv_nsec = relTime.it_value.tv_nsec;
+        relTime.it_interval.tv_sec = relTime.it_value.tv_sec;
     }
     else
     {
-        RelTime.it_interval.tv_nsec = 0;
-        RelTime.it_interval.tv_sec = 0;
+        relTime.it_interval.tv_nsec = 0;
+        relTime.it_interval.tv_sec = 0;
     }
 
     DEBUG_LVL_TIMERH_TRACE("%s() timer:%lx timeout=%ld:%ld\n", __func__,
                             pTimerInfo->eventArg.timerHdl.handle,
-                            RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec);
+                            relTime.it_value.tv_sec, relTime.it_value.tv_nsec);
 
-    timer_settime(pTimerInfo->timer, 0, &RelTime, NULL);
+    timer_settime(pTimerInfo->timer, 0, &relTime, NULL);
 
     return ret;
 }
@@ -349,10 +350,10 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 /**
 \brief    Delete a high-resolution timer
 
-The function deletes an created high-resolution timer. The timer is specified
+The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -361,10 +362,10 @@ by its timer handle. After deleting, the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError                  ret = kErrorOk;
-    UINT                        index;
-    tHresTimerInfo*             pTimerInfo;
-    struct itimerspec           relTime;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
+    struct itimerspec   relTime;
 
     DEBUG_LVL_TIMERH_TRACE("%s() Deleting timer:%lx\n", __func__, *pTimerHdl_p);
 
@@ -408,7 +409,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -426,7 +427,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -448,17 +449,17 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 
 The function provides the main function of the timer thread.
 
-\param  pParm_p     Thread parameter (unused!)
+\param[in,out]  pParm_p             Thread parameter (unused!)
 
 \return Returns a void* as specified by the pthread interface but it is not used!
 */
 //------------------------------------------------------------------------------
 static void* timerThread(void* pParm_p)
 {
-    INT                                 iRet;
-    tHresTimerInfo*                     pTimerInfo;
-    sigset_t                            awaitedSignal;
-    siginfo_t                           signalInfo;
+    int                 iRet;
+    tHresTimerInfo*     pTimerInfo;
+    sigset_t            awaitedSignal;
+    siginfo_t           signalInfo;
 
     UNUSED_PARAMETER(pParm_p);
 

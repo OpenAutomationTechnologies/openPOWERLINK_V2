@@ -7,7 +7,7 @@
 This file implements the header file of the Data Input/Output class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_DataInOutThread_H_
-#define _INC_DataInOutThread_H_
+#ifndef _INC_demo_DataInOutThread_H_
+#define _INC_demo_DataInOutThread_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -43,7 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <QThread>
 
 #include <oplk/oplk.h>
-#include "xap.h"
 
 //------------------------------------------------------------------------------
 // const defines
@@ -53,8 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QWidget;
-class QString;
+
 
 //------------------------------------------------------------------------------
 /**
@@ -76,32 +73,32 @@ public:
     void inChanged(int input_p, int usedNodeId_p);
     void outChanged(int led_p, int usedNodeId_p);
     tOplkError setupProcessImage();
-    tSyncCb getSyncCbFunc();
+    tSyncCb getSyncCbFunc() const;
     tOplkError processSync(void);
-    static tOplkError AppCbSync(void);
     void stop();
+
+    static tOplkError appCbSync(void);
 
 public slots:
     void setMnActiveFlag(bool fMnActive_p);
 
 signals:
-    void processImageInChanged(int data_p, int nodeId_p);
-    void processImageOutChanged(int data_p, int nodeId_p);
+    void processImageInChanged(int data_p,
+                               int nodeId_p);
+    void processImageOutChanged(int data_p,
+                                int nodeId_p);
     void disableOutputs(int nodeId_p);
 
 private:
-    //    volatile UINT   ackCount;
-
-    UINT            cnt;
-    UINT            leds[MAX_NODES];
-    UINT            ledsOld[MAX_NODES];
-    UINT            input[MAX_NODES];
-    UINT            inputOld[MAX_NODES];
-    UINT            period[MAX_NODES];
-    int             toggle[MAX_NODES];
-    bool            fStop;
-    bool            fMnActive;
+    UINT    cnt;
+    UINT    aLeds[MAX_NODES];
+    UINT    aLedsOld[MAX_NODES];
+    UINT    aInput[MAX_NODES];
+    UINT    aInputOld[MAX_NODES];
+    UINT    aPeriod[MAX_NODES];
+    int     aToggle[MAX_NODES];
+    bool    fStop;
+    bool    fMnActive;
 };
 
-#endif //_INC_DataInOutThread_H_
-
+#endif //_INC_demo_DataInOutThread_H_

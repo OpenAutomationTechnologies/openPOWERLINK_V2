@@ -3,7 +3,8 @@
 # CMake file for openPOWERLINK MN user library on
 # no OS platforms with host interface
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -33,8 +34,6 @@ PROJECT(oplkmnapp-hostif C)
 MESSAGE(STATUS "Configuring ${PROJECT_NAME}")
 
 ################################################################################
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
 
 # set sources of POWERLINK library
 SET(LIB_KERNEL_SOURCES
@@ -76,7 +75,6 @@ SET(LIB_SOURCES
 # set includes of POWERLINK library
 INCLUDE_DIRECTORIES(
                     ${PROJECT_SOURCE_DIR}
-                    ${OBJDICT_DIR}/${OBJDICT}
                    )
 
 # set flags of the openPOWERLINK library
@@ -85,8 +83,8 @@ ADD_DEFINITIONS(-DCONFIG_HOSTIF_PCP=FALSE -DCONFIG_PCP=FALSE)
 
 ################################################################################
 # Handle target specific functions
-IF (${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblaze")
-    INCLUDE(configure-microblaze.cmake)
+IF (${CMAKE_SYSTEM_NAME} STREQUAL "Generic" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "Microblazeise")
+    INCLUDE(configure-microblazeise.cmake)
 ELSE ()
     MESSAGE(FATAL_ERROR "Unknown platform selected!")
 ENDIF ()

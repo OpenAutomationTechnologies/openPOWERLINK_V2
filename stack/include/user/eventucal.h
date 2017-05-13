@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventucal.h
+\file   user/eventucal.h
 
 \brief  Include file for user event CAL module
 
@@ -12,7 +12,7 @@ implementations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventucal_H_
-#define _INC_eventucal_H_
+#ifndef _INC_user_eventucal_H_
+#define _INC_user_eventucal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -58,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -66,12 +64,12 @@ extern "C"
 
 tOplkError eventucal_init(void);
 tOplkError eventucal_exit(void);
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p);
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p);
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p);
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p);
 void       eventucal_process(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_eventucal_H_ */
+#endif /* _INC_user_eventucal_H_ */

@@ -8,7 +8,7 @@ The file contains definitions describing the openPOWERLINK version.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_version_H_
 #define _INC_oplk_version_H_
 
@@ -55,17 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //                 build        = current build (will be set to 0 if minor version will be incremented)
 //                       rc     = release candidate (will be set to 0 if final version created)
 //
-#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 3, 2, 0)
-#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 3, 2, 0)
-#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION      (2, 3, 2, 0)
-
-// -----------------------------------------------------------------------------
-#define PLK_PRODUCT_NAME            "OPLK"
-#define PLK_PRODUCT_VERSION         PLK_DEFINED_STRING_VERSION
-#define PLK_PRODUCT_MANUFACTURER    "SYS TEC electronic GmbH"
-
-#define PLK_PRODUCT_KEY             "SO-1083"
-#define PLK_PRODUCT_DESCRIPTION     "openPOWERLINK Protocol Stack Source"
+#define PLK_DEFINED_STACK_VERSION   PLK_STACK_VERSION       (2, 5, 2, 0)
+#define PLK_DEFINED_OBJ1018_VERSION PLK_OBJ1018_VERSION     (2, 5, 2, 0)
+#define PLK_DEFINED_STRING_VERSION  PLK_STRING_VERSION      (2, 5, 2, 0)
 
 #endif /* _INC_oplk_version_H_ */
-

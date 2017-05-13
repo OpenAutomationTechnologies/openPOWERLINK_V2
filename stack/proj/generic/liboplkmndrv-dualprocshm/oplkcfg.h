@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Include memory file to override default queue sizes
 #include <dualprocshm-mem.h>
+#include <oplkcfg-board.h> // Board specific configuration
 
 //------------------------------------------------------------------------------
 // const defines
@@ -76,7 +77,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
     ///< enable benchmark for specific stack modules
 #endif
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                       0x4C000001L
+#define DEF_DEBUG_LVL                       0xC0000000L
     ///< determine debug level for specific stack modules
 #endif
 /**@}*/
@@ -91,14 +92,13 @@ Note: The settings are specific for MN with openMAC!
     ///< fast TX support by Edrv
 #define CONFIG_EDRV_EARLY_RX_INT            FALSE
     ///< support TX handler call when DMA transfer finished
-#define CONFIG_EDRV_AUTO_RESPONSE           FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE           TRUE
     ///< support auto-response (e.g. openMAC)
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY     TRUE
 #define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
 #define CONFIG_EDRV_MAX_TX2_BUFFERS         64
     ///< set number for second Tx buffer queue to support larger networks
-#define CONFIG_EDRVCYC_NEG_SHIFT_US         100U
-    ///< us (timer irq before next cycle)
 /**@}*/
 
 /**
@@ -113,7 +113,11 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 #define CONFIG_DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
+
+#if !defined(CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
+#endif
+
 #define CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS        8
     ///< disable deferred RX frames if Edrv does not support it
 #define CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS        5
@@ -127,8 +131,6 @@ The timer defines determine the high resolution timer module.
 #define CONFIG_TIMER_USE_HIGHRES               TRUE
     ///< use high resolution timer
 /**@}*/
-
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   16384
 
 //------------------------------------------------------------------------------
 // typedef

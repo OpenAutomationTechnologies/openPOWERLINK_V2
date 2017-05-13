@@ -7,7 +7,7 @@
 This file contains the implementation of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -38,17 +38,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <QtGui>
+#include <MainWindow.h>
 
-#include "MainWindow.h"
-#include "State.h"
-#include "Api.h"
-#include "Input.h"
-#include "Output.h"
-#include "NmtCommandDialog.h"
+#include <QHBoxLayout>
+#include <QPixmap>
+#include <QLabel>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QFrame>
+#include <QTextEdit>
+#include <QMessageBox>
 
-#ifdef CONFIG_USE_PCAP
-#include "InterfaceSelectDialog.h"
+
+#include <State.h>
+#include <Output.h>
+#include <Input.h>
+#include <CnState.h>
+#include <Api.h>
+#include <SdoDialog.h>
+#include <NmtCommandDialog.h>
+
+#if defined(CONFIG_USE_PCAP)
+#include <InterfaceSelectDialog.h>
 #endif
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -60,15 +73,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructor of main window class.
 
-\param  parent      Pointer to the parent window
+\param[in,out]  parent              Pointer to the parent window
 */
 //------------------------------------------------------------------------------
 MainWindow::MainWindow(QWidget* parent)
     : QWidget(parent)
 {
-    pApi = NULL;
-    pSdoDialog = NULL;
-    nmtEvent = kNmtEventResetNode;
+    this->pApi = NULL;
+    this->pSdoDialog = NULL;
+    this->nmtEvent = kNmtEventResetNode;
 
     resize(1000, 600);
 
@@ -79,27 +92,27 @@ MainWindow::MainWindow(QWidget* parent)
     // ---------------------------------------------------------------------
     // Head Region
     // ---------------------------------------------------------------------
-    pHeadRegion = new QHBoxLayout();
-    pHeadRegion->setObjectName("HeadRegion");
+    this->pHeadRegion = new QHBoxLayout();
+    this->pHeadRegion->setObjectName("HeadRegion");
 
-    pLogo  = new QPixmap(":/img/powerlink_open_source.png");
-    pLabel = new QLabel();
-    pLabel->setPixmap(*pLogo);
-    pHeadRegion->addWidget(pLabel, 1, Qt::AlignLeft);
+    this->pLogo = new QPixmap(":/img/powerlink_open_source.png");
+    this->pLabel = new QLabel();
+    this->pLabel->setPixmap(*pLogo);
+    this->pHeadRegion->addWidget(this->pLabel, 1, Qt::AlignLeft);
 
-    version = oplk_getVersion();
-    QLabel* pVersion = new QLabel("openPOWERLINK MN QT Demo\nVersion "
-                                  + QString::number(PLK_STACK_VER(version))+ "."
-                                  + QString::number(PLK_STACK_REF(version)) + "."
-                                  + QString::number(PLK_STACK_REL(version)));
-    pHeadRegion->addWidget(pVersion, Qt::AlignCenter,Qt::AlignLeft);
+    this->version = oplk_getVersion();
+    QLabel* pVersion = new QLabel("openPOWERLINK MN QT Demo\nVersion " +
+                                   QString::number(PLK_STACK_VER(this->version)) + "." +
+                                   QString::number(PLK_STACK_REF(this->version)) + "." +
+                                   QString::number(PLK_STACK_REL(this->version)));
+    this->pHeadRegion->addWidget(pVersion, Qt::AlignCenter,Qt::AlignLeft);
 
-    pWindowLayout->addLayout(pHeadRegion);
+    pWindowLayout->addLayout(this->pHeadRegion);
     pWindowLayout->addSpacing(10);
 
-    pFrameSepHeadMiddle = new QFrame();
-    pFrameSepHeadMiddle->setFrameStyle(QFrame::HLine);
-    pWindowLayout->addWidget(pFrameSepHeadMiddle);
+    this->pFrameSepHeadMiddle = new QFrame();
+    this->pFrameSepHeadMiddle->setFrameStyle(QFrame::HLine);
+    pWindowLayout->addWidget(this->pFrameSepHeadMiddle);
 
     // ---------------------------------------------------------------------
     // Middle Region
@@ -109,30 +122,30 @@ MainWindow::MainWindow(QWidget* parent)
     QHBoxLayout* pMiddleRegion = new QHBoxLayout();
     pMiddleRegion->setObjectName("MiddleRegion");
 
-    pCnState = new CnState;
-    pMiddleRegion->addWidget(pCnState);
+    this->pCnState = new CnState;
+    pMiddleRegion->addWidget(this->pCnState);
 
     pFrameSepMiddle = new QFrame();
     pFrameSepMiddle->setFrameStyle(QFrame::VLine);
     pMiddleRegion->addWidget(pFrameSepMiddle);
 
-    pInput = new Input;
-    pMiddleRegion->addWidget(pInput);
+    this->pInput = new Input;
+    pMiddleRegion->addWidget(this->pInput);
 
-    pFrameSepMiddle2 = new QFrame();
-    pFrameSepMiddle2->setFrameStyle(QFrame::VLine);
-    pMiddleRegion->addWidget(pFrameSepMiddle2);
+    this->pFrameSepMiddle2 = new QFrame();
+    this->pFrameSepMiddle2->setFrameStyle(QFrame::VLine);
+    pMiddleRegion->addWidget(this->pFrameSepMiddle2);
 
 
-    pOutput = new Output;
-    pMiddleRegion->addWidget(pOutput);
+    this->pOutput = new Output;
+    pMiddleRegion->addWidget(this->pOutput);
 
     pWindowLayout->addLayout(pMiddleRegion, 8);
     pWindowLayout->addStretch(10);
 
-    pFrameSepMiddleStatus = new QFrame();
-    pFrameSepMiddleStatus->setFrameStyle(QFrame::HLine);
-    pWindowLayout->addWidget(pFrameSepMiddleStatus);
+    this->pFrameSepMiddleStatus = new QFrame();
+    this->pFrameSepMiddleStatus->setFrameStyle(QFrame::HLine);
+    pWindowLayout->addWidget(this->pFrameSepMiddleStatus);
 
     // ---------------------------------------------------------------------
     // Status Region
@@ -141,14 +154,14 @@ MainWindow::MainWindow(QWidget* parent)
     pStatusRegion->setObjectName("StatusRegion");
 
     // POWERLINK network state
-    pState = new State;
-    pStatusRegion->addWidget(pState);
+    this->pState = new State;
+    pStatusRegion->addWidget(this->pState);
 
     pWindowLayout->addLayout(pStatusRegion, 0);
 
-    pFrameSepStatusFoot = new QFrame();
-    pFrameSepStatusFoot->setFrameStyle(QFrame::HLine);
-    pWindowLayout->addWidget(pFrameSepStatusFoot);
+    this->pFrameSepStatusFoot = new QFrame();
+    this->pFrameSepStatusFoot->setFrameStyle(QFrame::HLine);
+    pWindowLayout->addWidget(this->pFrameSepStatusFoot);
 
     // ---------------------------------------------------------------------
     // Foot Region
@@ -163,35 +176,49 @@ MainWindow::MainWindow(QWidget* parent)
     sNodeId.setNum(Api::defaultNodeId());
 
     QValidator* pValidator = new QIntValidator(1, 254, this);
-    pNodeIdEdit = new QLineEdit(sNodeId);
-    pNodeIdEdit->setValidator(pValidator);
-    pFootRegion->addWidget(pNodeIdEdit);
+    this->pNodeIdEdit = new QLineEdit(sNodeId);
+    this->pNodeIdEdit->setValidator(pValidator);
+    pFootRegion->addWidget(this->pNodeIdEdit);
 
     pFootRegion->addSpacing(20);
 
-    pStartStopOplk = new QPushButton(tr("Start POWERLINK"));
-    pFootRegion->addWidget(pStartStopOplk);
-    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
+    this->pStartStopOplk = new QPushButton(tr("Start POWERLINK"));
+    pFootRegion->addWidget(this->pStartStopOplk);
+    connect(this->pStartStopOplk,
+            SIGNAL(clicked()),
+            this,
+            SLOT(startPowerlink()));
 
-    pShowSdoDialog = new QPushButton(tr("SDO..."));
-    pFootRegion->addWidget(pShowSdoDialog);
-    connect(pShowSdoDialog, SIGNAL(clicked()), this, SLOT(showSdoDialog()));
+    this->pShowSdoDialog = new QPushButton(tr("SDO..."));
+    pFootRegion->addWidget(this->pShowSdoDialog);
+    connect(this->pShowSdoDialog,
+            SIGNAL(clicked()),
+            this,
+            SLOT(showSdoDialog()));
 
-    pNmtCmd = new QPushButton(tr("Exec NMT command"));
-    pNmtCmd->setEnabled(false);
-    pFootRegion->addWidget(pNmtCmd);
-    connect(pNmtCmd, SIGNAL(clicked()), this, SLOT(execNmtCmd()));
+    this->pNmtCmd = new QPushButton(tr("Exec NMT command"));
+    this->pNmtCmd->setEnabled(false);
+    pFootRegion->addWidget(this->pNmtCmd);
+    connect(this->pNmtCmd,
+            SIGNAL(clicked()),
+            this,
+            SLOT(execNmtCmd()));
 
     pFootRegion->addStretch();
 
-    pToggleMax = new QPushButton(tr("Full Screen"));
-    pFootRegion->addWidget(pToggleMax);
-    connect(pToggleMax, SIGNAL(clicked()),
-            this, SLOT(toggleWindowState()));
+    this->pToggleMax = new QPushButton(tr("Full Screen"));
+    pFootRegion->addWidget(this->pToggleMax);
+    connect(this->pToggleMax,
+            SIGNAL(clicked()),
+            this,
+            SLOT(toggleWindowState()));
 
     QPushButton* pQuit = new QPushButton(tr("Quit"));
     pFootRegion->addWidget(pQuit);
-    connect(pQuit, SIGNAL(clicked()), qApp, SLOT(quit()));
+    connect(pQuit,
+            SIGNAL(clicked()),
+            qApp,
+            SLOT(quit()));
 
     pWindowLayout->addLayout(pFootRegion, 0);
 
@@ -201,9 +228,9 @@ MainWindow::MainWindow(QWidget* parent)
     QHBoxLayout* pTextRegion = new QHBoxLayout();
     pTextRegion->setObjectName("TextRegion");
 
-    pTextEdit = new QTextEdit();
-    pTextRegion->addWidget(pTextEdit);
-    pTextEdit->setReadOnly(true);
+    this->pTextEdit = new QTextEdit();
+    pTextRegion->addWidget(this->pTextEdit);
+    this->pTextEdit->setReadOnly(true);
 
     pWindowLayout->addLayout(pTextRegion, 0);
 }
@@ -219,13 +246,9 @@ void MainWindow::toggleWindowState()
 {
     setWindowState(windowState() ^ Qt::WindowFullScreen);
     if (windowState() & Qt::WindowFullScreen)
-    {
-        pToggleMax->setText(tr("Window"));
-    }
+        this->pToggleMax->setText(tr("Window"));
     else
-    {
-        pToggleMax->setText(tr("Full Screen"));
-    }
+        this->pToggleMax->setText(tr("Full Screen"));
 }
 
 //------------------------------------------------------------------------------
@@ -237,15 +260,16 @@ Starts the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::startPowerlink()
 {
-    bool fConvOk;
-    unsigned int nodeId;
+    bool            fConvOk;
+    unsigned int    nodeId;
 
 #if defined(CONFIG_USE_PCAP)
     // start the selection dialog
     InterfaceSelectDialog* pInterfaceDialog = new InterfaceSelectDialog();
-    if (pInterfaceDialog->fillList(devName) < 0)
+    if (pInterfaceDialog->fillList(this->devName) < 0)
     {
-        QMessageBox::warning(this, "PCAP not working!",
+        QMessageBox::warning(this,
+                             "PCAP not working!",
                              "No PCAP interfaces found!\n"
                              "Make sure LibPcap is installed and you have root permissions!",
                              QMessageBox::Close);
@@ -253,39 +277,42 @@ void MainWindow::startPowerlink()
     }
 
     if (pInterfaceDialog->exec() == QDialog::Rejected)
-    {
         return;
-    }
 
-    devName = pInterfaceDialog->getDevName();
+    this->devName = pInterfaceDialog->getDevName();
     delete pInterfaceDialog;
 #else
-    devName = "plk";
+    this->devName = "plk";
 #endif
 
-    pNodeIdEdit->setEnabled(false);
-    nodeId = pNodeIdEdit->text().toUInt(&fConvOk);
+    this->pNodeIdEdit->setEnabled(false);
+    nodeId = this->pNodeIdEdit->text().toUInt(&fConvOk);
     if (fConvOk == false)
-    {
         nodeId = Api::defaultNodeId();
-    }
 
-    pNmtCmd->setEnabled(true);
+    this->pNmtCmd->setEnabled(true);
 
     // change the button to stop
-    pStartStopOplk->setText(tr("Stop POWERLINK"));
-    pStartStopOplk->disconnect(this, SLOT(startPowerlink()));
-    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(stopPowerlink()));
+    this->pStartStopOplk->setText(tr("Stop POWERLINK"));
+    this->pStartStopOplk->disconnect(this, SLOT(startPowerlink()));
+    connect(this->pStartStopOplk,
+            SIGNAL(clicked()),
+            this,
+            SLOT(stopPowerlink()));
 
-    pApi = new Api(this, nodeId, devName);
+    this->pApi = new Api(this, nodeId, devName);
 
     if (pSdoDialog)
     {
-        QObject::connect(pApi, SIGNAL(userDefEvent(void*)),
-                         pSdoDialog, SLOT(userDefEvent(void*)),
+        QObject::connect(this->pApi,
+                         SIGNAL(userDefEvent(void*)),
+                         pSdoDialog,
+                         SLOT(userDefEvent(void*)),
                          Qt::DirectConnection);
-        QObject::connect(pApi, SIGNAL(sdoFinished(tSdoComFinished)),
-                         pSdoDialog, SLOT(sdoFinished(tSdoComFinished)));
+        QObject::connect(this->pApi,
+                         SIGNAL(sdoFinished(tSdoComFinished)),
+                         pSdoDialog,
+                         SLOT(sdoFinished(tSdoComFinished)));
     }
 }
 
@@ -298,13 +325,17 @@ Stops the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::stopPowerlink()
 {
-    delete pApi;
-    pStartStopOplk->setText(tr("Start POWERLINK"));
-    pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
-    connect(pStartStopOplk, SIGNAL(clicked()), this, SLOT(startPowerlink()));
-    pNodeIdEdit->setEnabled(true);
-    pNmtCmd->setEnabled(false);
+    delete this->pApi;
 
+    this->pStartStopOplk->setText(tr("Start POWERLINK"));
+    this->pStartStopOplk->disconnect(this, SLOT(stopPowerlink()));
+    connect(this->pStartStopOplk,
+            SIGNAL(clicked()),
+            this,
+            SLOT(startPowerlink()));
+
+    this->pNodeIdEdit->setEnabled(true);
+    this->pNmtCmd->setEnabled(false);
 }
 
 //------------------------------------------------------------------------------
@@ -316,7 +347,7 @@ Execute NMT command/event entered in dialog.
 //------------------------------------------------------------------------------
 void MainWindow::execNmtCmd()
 {
-    NmtCommandDialog* pDialog = new NmtCommandDialog(nmtEvent);
+    NmtCommandDialog* pDialog = new NmtCommandDialog(this->nmtEvent);
 
     if (pDialog->exec() == QDialog::Rejected)
     {
@@ -324,15 +355,13 @@ void MainWindow::execNmtCmd()
         return;
     }
 
-    nmtEvent = pDialog->getNmtEvent();
+    this->nmtEvent = pDialog->getNmtEvent();
     delete pDialog;
 
-    if (nmtEvent == kNmtEventNoEvent)
-    {
+    if (this->nmtEvent == kNmtEventNoEvent)
         return;
-    }
 
-    oplk_execNmtCommand(nmtEvent);
+    oplk_execNmtCommand(this->nmtEvent);
 }
 
 //------------------------------------------------------------------------------
@@ -344,28 +373,30 @@ Show dialog to perform SDO transfers.
 //------------------------------------------------------------------------------
 void MainWindow::showSdoDialog()
 {
-    if (!pSdoDialog)
+    if (!this->pSdoDialog)
     {
-        pSdoDialog = new SdoDialog();
-        if (pApi)
+        this->pSdoDialog = new SdoDialog();
+        if (this->pApi)
         {
-            QObject::connect(pApi, SIGNAL(userDefEvent(void*)),
-                             pSdoDialog, SLOT(userDefEvent(void*)),
+            QObject::connect(this->pApi,
+                             SIGNAL(userDefEvent(void*)),
+                             this->pSdoDialog,
+                             SLOT(userDefEvent(void*)),
                              Qt::DirectConnection);
-            QObject::connect(pApi, SIGNAL(sdoFinished(tSdoComFinished)),
-                             pSdoDialog, SLOT(sdoFinished(tSdoComFinished)));
+            QObject::connect(this->pApi,
+                             SIGNAL(sdoFinished(tSdoComFinished)),
+                             this->pSdoDialog,
+                             SLOT(sdoFinished(tSdoComFinished)));
         }
     }
-    if (pSdoDialog->isVisible())
+    if (this->pSdoDialog->isVisible())
     {
-        pSdoDialog->showNormal();
-        pSdoDialog->activateWindow();
-        pSdoDialog->raise();
+        this->pSdoDialog->showNormal();
+        this->pSdoDialog->activateWindow();
+        this->pSdoDialog->raise();
     }
     else
-    {
-        pSdoDialog->show();
-    }
+        this->pSdoDialog->show();
 }
 
 //------------------------------------------------------------------------------
@@ -374,11 +405,10 @@ void MainWindow::showSdoDialog()
 
 The function prints a log entry.
 
-\param  str     String to print.
+\param[in]      str                 String to print.
 */
 //------------------------------------------------------------------------------
-void MainWindow::printlog(QString str)
+void MainWindow::printlog(const QString& str)
 {
-    pTextEdit->append(str);
+    this->pTextEdit->append(str);
 }
-

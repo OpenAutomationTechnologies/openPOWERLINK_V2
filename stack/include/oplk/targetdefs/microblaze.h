@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/microblaze.h
+\file   oplk/targetdefs/microblaze.h
 
 \brief  Target specific definitions for microblaze systems
 
@@ -8,7 +8,7 @@ This file contains target specific definitions for microblaze systems.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_microblaze_H_
-#define _INC_targetdefs_microblaze_H_
+#ifndef _INC_oplk_targetdefs_microblaze_H_
+#define _INC_oplk_targetdefs_microblaze_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -48,25 +47,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <xil_io.h>
 #include <xil_cache.h>
 #include <mb_interface.h>
+
 #ifdef __ZYNQ__
 // Required to include UART redirection for Zynq Microblaze
 #include <mb_uart.h>
-#endif
+#endif /* __ZYNQ__ */
 #include <oplk/basictypes.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-#define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                // usage: CONST BYTE ROM foo = 0x00;
-
-#define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-#ifndef CONST
-#define CONST const             // variables mapped to ROM (i.e. flash)
-#endif
-
 #define OPLKDLLEXPORT
 
 #define INLINE                  inline
@@ -76,10 +66,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define UNUSED_PARAMETER(par)   (void)par
 
 #ifndef NDEBUG
-#define PRINTF(...)                 printf(__VA_ARGS__)
-#else
+#define PRINTF(...)             printf(__VA_ARGS__)
+#else /* NDEBUG */
 #define PRINTF(...)
-#endif
+#endif /* NDEBUG */
 
 // Target IO functions
 // - Write
@@ -92,11 +82,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_IO_RD32(addr)          Xil_In32(addr)
 
 // Target data cache functions
-#define OPLK_DCACHE_FLUSH(addr, len)        Xil_DCacheFlushRange((unsigned int) addr, len)
-#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_DCacheInvalidateRange((unsigned int) addr, len)
+#define OPLK_DCACHE_FLUSH(addr, len)        Xil_L1DCacheFlushRange((unsigned int)(addr), len)
+#define OPLK_DCACHE_INVALIDATE(addr, len)   Xil_L1DCacheInvalidateRange((unsigned int)(addr), len)
 
 // Target memory barrier function
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C.
+#define OPLK_MEMBAR()               __extension__ mbar(1)
+#else /* __GNUC__ */
 #define OPLK_MEMBAR()               mbar(1)
+#endif /* __GNUC__ */
 
 // Target lock
 #define OPLK_LOCK_T                 UINT8
@@ -110,11 +105,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                             return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
                         target_lock(); \
-                        oldval = Xil_In8(address); \
-                        Xil_Out8(address, newval); \
+                        oldval = Xil_In8((u32)(address)); \
+                        Xil_Out8((u32)(address), newval); \
                         target_unlock()
 
 #define OPLK_MUTEX_T    u8
 
-#endif /* _INC_targetdefs_microblaze_H_ */
-
+#endif /* _INC_oplk_targetdefs_microblaze_H_ */

@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC Ethernet driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,20 +73,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE)
-    #undef EDRV_MAX_AUTO_RESPONSES
-    #define EDRV_MAX_AUTO_RESPONSES 0 //no auto-response used
+#ifndef CONFIG_EDRV_RX_BUFFERS
+#define CONFIG_EDRV_RX_BUFFERS      16
+#endif
+
+#if (CONFIG_EDRV_RX_BUFFERS > EDRV_MAX_RX_BUFFERS)
+#error "The number of Rx buffers exceeds the limit!"
 #endif
 
 #ifndef CONFIG_EDRV_TIME_TRIG_TX
 #define CONFIG_EDRV_TIME_TRIG_TX FALSE
-#endif
-
-#if (CONFIG_EDRV_AUTO_RESPONSE == FALSE && CONFIG_EDRV_TIME_TRIG_TX == FALSE)
-    #error "Please enable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for CN!"
-#endif
-#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE && CONFIG_EDRV_TIME_TRIG_TX != FALSE)
-#error "Please disable CONFIG_EDRV_AUTO_RESPONSE in oplkcfg.h to use openMAC for MN!"
 #endif
 
 #ifndef CONFIG_EDRV_MAX_TX2_BUFFERS
@@ -96,7 +92,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
 /**
 \brief Structure describing the second TX queue.
 
@@ -125,35 +121,35 @@ typedef struct
     UINT8               phyInstCount;                           ///< Number of PYHs instantiated
     UINT32              txPacketFreed;                          ///< Counter of freed packet buffers
     UINT32              txPacketSent;                           ///< Counter of of sent packets
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
     // auto-response Tx buffers
     tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_AUTO_RESPONSES];    ///< Array of auto-response TX buffers
 #endif
-#if OPENMAC_DMAOBSERV != 0
+#if (OPENMAC_DMAOBSERV != 0)
     BOOL                fDmaError;                              ///< Flag indicating a DMA error
 #endif
-#if OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     void*               pTxBufferBase;                          ///< Pointer to the TX buffer base address
     void*               pNextBufferBase;                        ///< Pointer to the next buffer base address
     UINT8               txBufferCount;                          ///< TX buffer counter
     UINT                usedMemorySpace;                        ///< Used memory for the driver
 #endif
-#if OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL
+#if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL)
     void*               pRxBufferBase;                          ///< Pointer to the RX buffer base address
 #endif
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     //additional tx queue
     tEdrv2ndTxQueue     txQueue[CONFIG_EDRV_MAX_TX2_BUFFERS];   ///< Array of buffers for the second TX queue
     INT                 txQueueWriteIndex;                      ///< Current index in the queue for writes
     INT                 txQueueReadIndex;                       ///< Current index in the queue for reads
 #endif
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     OMETH_HOOK_H        pRxAsndHookInst;                        ///< Pointer to the ASnd receive hook
 #endif
 #if defined(CONFIG_INCLUDE_VETH)
     OMETH_HOOK_H        pRxVethHookInst;                        ///< Pointer to virtual Ethernet receive hook
 #endif
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     UINT                asyncFrameLostCount;                    ///< Number of ASync frame not released to openMAC
     UINT                vethFrameLostCount;                     ///< Number of VEth frame not released to openMAC
     UINT                asyncBufFreedCount;                     ///< Number of ASync buffers released to openMAC
@@ -179,12 +175,12 @@ static tEdrvInstance edrvInstance_l;
 static ometh_config_typ getMacConfig(UINT adapter_p);
 static tOplkError initRxFilters(void);
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
-static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
-static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p);
+static ometh_packet_typ* allocTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p);
+static void freeTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p);
 #endif
 
 // Diagnostic functions
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p);
 static void diagnoseReleasedAsndFrame(void* pAsndFrame_p);
 #endif
@@ -204,20 +200,24 @@ static void irqHandler(void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError  ret = kErrorOk;
     INT         i;
 
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
+
     DEBUG_LVL_EDRV_TRACE("*** %s ***\n", __func__);
     DEBUG_LVL_EDRV_TRACE(" PHY_NUM = %d\n", OPENMAC_PHYCNT);
+    DEBUG_LVL_EDRV_TRACE(" RX_BUFFERS = %d\n", CONFIG_EDRV_RX_BUFFERS);
     DEBUG_LVL_EDRV_TRACE(" MAX_RX_BUFFERS = %d\n", EDRV_MAX_RX_BUFFERS);
     DEBUG_LVL_EDRV_TRACE(" PKTLOCTX = %d\n", OPENMAC_PKTLOCTX);
     DEBUG_LVL_EDRV_TRACE(" PKTLOCRX = %d\n", OPENMAC_PKTLOCRX);
@@ -273,7 +273,7 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     // initialize Rx hook for Asnd frames with pending allowed
     edrvInstance_l.pRxAsndHookInst = omethHookCreate(edrvInstance_l.pMacInst, rxHook, CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS);
     if (edrvInstance_l.pRxAsndHookInst == NULL)
@@ -300,11 +300,11 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
 
     //moved following lines here, since omethHookCreate may change tx buffer base!
-#if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL && OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+#if ((OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL) && (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL))
     //get rx/tx buffer base
     edrvInstance_l.pRxBufferBase = omethGetRxBufBase(edrvInstance_l.pMacInst);
     edrvInstance_l.pTxBufferBase = omethGetTxBufBase(edrvInstance_l.pMacInst);
-#elif OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL
+#elif (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     //get tx buffer base
     edrvInstance_l.pTxBufferBase = OPENMAC_MEMUNCACHED((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 #endif
@@ -370,7 +370,7 @@ tOplkError edrv_exit(void)
         DEBUG_LVL_EDRV_TRACE("\n");
     }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     DEBUG_LVL_EDRV_TRACE(" ---    edrvDiagnostics    ---\n");
     DEBUG_LVL_EDRV_TRACE(" ----  ASnd Late Release  ----\n");
     DEBUG_LVL_EDRV_TRACE("  Acquired ASync buffers = %u\n", edrvInstance_l.asyncBufAcquiredCount);
@@ -383,7 +383,7 @@ tOplkError edrv_exit(void)
     DEBUG_LVL_EDRV_TRACE("\n");
 #endif
 
-#if OPENMAC_DMAOBSERV != 0
+#if (OPENMAC_DMAOBSERV != 0)
     if (edrvInstance_l.fDmaError == TRUE)
     {
         //if you see this openMAC DMA is connected to slow memory!
@@ -413,7 +413,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -424,7 +424,7 @@ UINT8* edrv_getMacAddr(void)
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -435,6 +435,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_BUFFER_SIZE)
     {
@@ -452,7 +455,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     pPacket = allocTxMsgBufferIntern(pBuffer_p);
 #else
     DEBUG_LVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
-    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc(pBuffer_p->maxBufferSize + sizeof(pPacket->length));
+    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc((size_t)pBuffer_p->maxBufferSize + sizeof(pPacket->length));
 #endif
 
     if (pPacket == NULL)
@@ -478,7 +481,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -492,7 +495,10 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     ometh_packet_typ*   pPacket = NULL;
 #endif
 
-#if EDRV_MAX_AUTO_RESPONSES > 0
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
     if (pBuffer_p->txBufferNumber.value < EDRV_MAX_AUTO_RESPONSES)
     {
         // disable auto-response
@@ -510,7 +516,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
     freeTxMsgBufferIntern(pBuffer_p);
 #else
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
-    openmac_uncachedFree((UINT8*)pPacket);
+    openmac_uncachedFree(pPacket);
 #endif
 
     // mark buffer as free
@@ -520,13 +526,14 @@ Exit:
     return ret;
 }
 
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Update Tx buffer
 
 This function updates the Tx buffer for use with auto-response filter.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -536,8 +543,11 @@ This function updates the Tx buffer for use with auto-response filter.
 tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError          ret = kErrorOk;
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
     ometh_packet_typ*   pPacket = NULL;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->txBufferNumber.value >= EDRV_MAX_AUTO_RESPONSES)
     {
@@ -552,7 +562,7 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
     // Flush data cache before handing over the packet buffer to openMAC.
     OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
-    // Update autoresponse buffer
+    // Update auto-response buffer
     edrvInstance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
 
     pPacket = omethResponseSet(edrvInstance_l.apRxFilterInst[pBuffer_p->txBufferNumber.value], pPacket);
@@ -565,11 +575,12 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 Exit:
 #else
     UNUSED_PARAMETER(pBuffer_p);
-    //invalid call, since auto-resp is deactivated for MN support
+    //invalid call, since auto-response is deactivated for MN support
     ret = kErrorEdrvInvalidParam;
 #endif
     return ret;
 }
+#endif /* (CONFIG_EDRV_AUTO_RESPONSE != FALSE) */
 
 //------------------------------------------------------------------------------
 /**
@@ -577,7 +588,7 @@ Exit:
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -590,22 +601,25 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     ometh_packet_typ*   pPacket = NULL;
     ULONG               txLength;
 
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     // Flush data cache before sending the frame to the network
     OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
     pPacket->length = pBuffer_p->txFrameSize;
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
-    if ((pBuffer_p->timeOffsetAbs & 1) == 1)
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
+    if (pBuffer_p->fLaunchTimeValid)
     {
         //free tx descriptors available
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
-                        txAckCb, pBuffer_p, pBuffer_p->timeOffsetAbs);
+                        txAckCb, pBuffer_p, pBuffer_p->launchTime.ticks);
 
         if (txLength == 0)
         {
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
             //time triggered sent failed => move to 2nd tx queue
             if ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) >= CONFIG_EDRV_MAX_TX2_BUFFERS)
             {
@@ -617,7 +631,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
             {
                 tEdrv2ndTxQueue* pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueWriteIndex & (CONFIG_EDRV_MAX_TX2_BUFFERS-1)];
                 pTxqueue->pBuffer = pBuffer_p;
-                pTxqueue->timeOffsetAbs = pBuffer_p->timeOffsetAbs;
+                pTxqueue->timeOffsetAbs = pBuffer_p->launchTime.ticks;
 
                 edrvInstance_l.txQueueWriteIndex++;
                 ret = kErrorOk;
@@ -635,7 +649,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 #endif
         txLength = omethTransmitArg(edrvInstance_l.pMacInst, pPacket,
                                     txAckCb, pBuffer_p);
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     }
 #endif
 
@@ -649,7 +663,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         ret = kErrorEdrvNoFreeBufEntry;
     }
 
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
 Exit:
 #endif
     if (ret != kErrorOk)
@@ -669,18 +683,20 @@ selects the Rx filter entry that shall be changed and \p changeFlags_p determine
 the property.
 If entryChanged_p is equal or larger \p count_p all Rx filters shall be changed.
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        index;
@@ -716,7 +732,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                                        index,
                                        pFilter_p[entry].aFilterMask[index]);
             }
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
             // set auto response
             if (pFilter_p[entry].pTxBuffer != NULL)
             {
@@ -728,7 +744,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 edrv_updateTxBuffer(pFilter_p[entry].pTxBuffer);
                 omethResponseEnable(edrvInstance_l.apRxFilterInst[entry]);
 
-#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if (CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE)
                 {
                     UINT32 delayNs;
 
@@ -767,7 +783,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
         if (((changeFlags_p & (EDRV_FILTER_CHANGE_VALUE |
                                EDRV_FILTER_CHANGE_MASK |
-#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if (CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE)
                                EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY |
 #endif
                                EDRV_FILTER_CHANGE_AUTO_RESPONSE)) != 0) ||
@@ -812,7 +828,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
                 }
             }
 
-#if CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE
+#if (CONFIG_EDRV_AUTO_RESPONSE_DELAY != FALSE)
             if ((changeFlags_p & EDRV_FILTER_CHANGE_AUTO_RESPONSE_DELAY) != 0)
             {   // filter auto-response delay has changed
                 UINT32 delayNs;
@@ -861,14 +877,16 @@ Exit:
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\note The multicast filters are not supported by this driver.
+
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
@@ -881,67 +899,30 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\note The multicast filters are not supported by this driver.
+
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
 
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
 //------------------------------------------------------------------------------
 /**
 \brief  Release Rx buffer
 
 This function releases a late release Rx buffer.
 
-\param  pRxBuffer_p     Rx buffer to be released
+\param[in,out]  pRxBuffer_p         Rx buffer to be released
 
 \return The function returns a tOplkError error code.
 
@@ -953,10 +934,13 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     tOplkError          ret = kErrorOk;
     ometh_packet_typ*   pPacket = NULL;
 
+    // Check parameter validity
+    ASSERT(pRxBuffer_p != NULL);
+
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
     pPacket->length = pRxBuffer_p->rxFrameSize;
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     diagnoseReleasedAsndFrame((void*)pPacket);
 #endif
 
@@ -974,6 +958,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 
     return ret;
 }
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -987,7 +972,7 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 
 This function returns the openMAC configuration depending on the adapter.
 
-\param  adapter_p   Adapter number
+\param[in]      adapter_p           Adapter number
 
 \return The function returns the adapters configuration.
 */
@@ -999,22 +984,22 @@ static ometh_config_typ getMacConfig(UINT adapter_p)
     OPLK_MEMSET(&config, 0, sizeof(config));
 
     config.adapter = adapter_p;
-    config.macType = OMETH_MAC_TYPE_01;
+    config.macType = OMETH_MAC_TYPE_02;
 
     config.mode = 0 |
-                  OMETH_MODE_HALFDUPLEX |         // Half-duplex
-                  OMETH_MODE_100MBIT |            // 100 Mbps
+                  OMETH_MODE_HALFDUPLEX |       // Half-duplex
+                  OMETH_MODE_100MBIT |          // 100 Mbps
                   OMETH_MODE_DIS_AUTO_NEG       // Disable Phy auto-negotiation
             ;
 
-    config.rxBuffers = EDRV_MAX_RX_BUFFERS;
+    config.rxBuffers = CONFIG_EDRV_RX_BUFFERS;
     config.rxMtu = EDRV_MAX_BUFFER_SIZE;
 
     config.pPhyBase = (void*)OPENMAC_PHY_BASE;
     config.pRamBase = (void*)OPENMAC_RAM_BASE;
     config.pRegBase = (void*)OPENMAC_REG_BASE;
 
-#if OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL
+#if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL)
     config.pBufBase = (void*)OPENMAC_PKT_BASE;
     config.pktLoc = OMETH_PKT_LOC_MACINT;
 #else
@@ -1052,7 +1037,7 @@ static tOplkError initRxFilters(void)
         // Assign filters to corresponding hooks
         switch (i)
         {
-#if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
             case DLLK_FILTER_ASND:
                 pHook = edrvInstance_l.pRxAsndHookInst;
                 break;
@@ -1078,7 +1063,7 @@ static tOplkError initRxFilters(void)
 
         omethFilterDisable(edrvInstance_l.apRxFilterInst[i]);
 
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
         if (i < EDRV_MAX_AUTO_RESPONSES)
         {
             // initialize the auto response for each filter ...
@@ -1105,12 +1090,12 @@ Exit:
 
 This function allocates local memory for the Tx buffer descriptor pBuffer_p.
 
-\param  pBuffer_p       Tx buffer descriptor
+\param[in]      pBuffer_p           Tx buffer descriptor
 
 \return The function returns the allocated packet buffer's descriptor.
 */
 //------------------------------------------------------------------------------
-static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
+static ometh_packet_typ* allocTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p)
 {
     ometh_packet_typ*   pPacket;
     UINT                bufferSize;
@@ -1168,12 +1153,12 @@ static ometh_packet_typ* allocTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 
 This function frees local memory for the Tx buffer descriptor pBuffer_p.
 
-\param  pBuffer_p   Packet buffer descriptor
+\param[in]      pBuffer_p           Packet buffer descriptor
 
 \return The function returns the allocated packet buffer's descriptor.
 */
 //------------------------------------------------------------------------------
-static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
+static void freeTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p)
 {
     INT bufferSize = pBuffer_p->maxBufferSize + sizeof(((ometh_packet_typ*)0)->length);
 
@@ -1190,7 +1175,7 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 }
 #endif /* OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL */
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Diagnose the acquired ASnd frame from openMAC
@@ -1198,8 +1183,8 @@ static void freeTxMsgBufferIntern(tEdrvTxBuffer* pBuffer_p)
 This function stores addresses of acquired ASnd frames from openMAC, in an array
 and updates the corresponding diagnostic information.
 
-\param  openMacFilterId_p   openMAC filter id as used by DLL.
-\param  pAsndFrame_p        Pointer to the acquired ASnd frame.
+\param[in]      openMacFilterId_p   openMAC filter id as used by DLL.
+\param[in,out]  pAsndFrame_p        Pointer to the acquired ASnd frame.
 */
 //------------------------------------------------------------------------------
 static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p)
@@ -1254,7 +1239,7 @@ This function searches the addresses of the ASnd frames to be released to openMA
 in the array which stores the buffer addresses during acquisition and updates
 corresponding diagnostic information.
 
-\param  pAsndFrame_p        Pointer to the acquired ASnd frame.
+\param[in,out]  pAsndFrame_p        Pointer to the acquired ASnd frame.
 */
 //------------------------------------------------------------------------------
 static void diagnoseReleasedAsndFrame(void* pAsndFrame_p)
@@ -1297,16 +1282,20 @@ static void diagnoseReleasedAsndFrame(void* pAsndFrame_p)
 
 This function is invoked by the Ethernet controller interrupt.
 
-\param  pArg_p  Interrupt service routine argument
+\param[in,out]  pArg_p              Interrupt service routine argument
 */
 //------------------------------------------------------------------------------
 static void irqHandler(void* pArg_p)
 {
+#if (OPENMAC_DMAOBSERV == 0)
+    UNUSED_PARAMETER(pArg_p);
+#endif
+
     BENCHMARK_MOD_01_SET(1);
 
     target_setInterruptContextFlag(TRUE);
 
-#if OPENMAC_DMAOBSERV != 0
+#if (OPENMAC_DMAOBSERV != 0)
     UINT16 dmaObservVal = OPENMAC_GETDMAOBSERVER();
 
     //read DMA observer feature
@@ -1322,7 +1311,7 @@ static void irqHandler(void* pArg_p)
 
     omethRxTxIrqHandlerMux();
 
-#if CONFIG_EDRV_TIME_TRIG_TX != FALSE
+#if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     //observe additional TX queue and send packet if necessary
     while ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
            (omethTransmitPending(edrvInstance_l.pMacInst) < 16U))
@@ -1364,9 +1353,9 @@ static void irqHandler(void* pArg_p)
 
 This function is called by omethlib in Tx interrupt context.
 
-\param  pPacket_p   Sent packet
-\param  pArg_p      User specific argument holding the Tx buffer descriptor
-\param  time_p      Tx time stamp
+\param[in,out]  pPacket_p           Sent packet
+\param[in,out]  pArg_p              User specific argument holding the Tx buffer descriptor
+\param[in]      time_p              Tx time stamp
 */
 //------------------------------------------------------------------------------
 static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p)
@@ -1378,7 +1367,7 @@ static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p)
 
     edrvInstance_l.txPacketFreed++;
 
-    if (pArg_p != NULL && pTxBuffer->pfnTxHandler != NULL)
+    if ((pArg_p != NULL) && (pTxBuffer->pfnTxHandler != NULL))
         pTxBuffer->pfnTxHandler(pTxBuffer);
 }
 
@@ -1388,9 +1377,9 @@ static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p)
 
 This function is called by omethlib in Rx interrupt context.
 
-\param  pArg_p      User specific argument holding the Tx response index
-\param  pPacket_p   Received packet
-\param  pfnFree_p   Function pointer to free function
+\param[in,out]  pArg_p              User specific argument holding the Tx response index
+\param[in,out]  pPacket_p           Received packet
+\param[in]      pfnFree_p           Function pointer to free function
 
 \return The function returns an Rx buffer release command.
 \retval 0           Packet buffer \p pPacket_p is deferred
@@ -1403,7 +1392,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     tEdrvRxBuffer           rxBuffer;
     tEdrvReleaseRxBuffer    releaseRxBuffer;
     tTimestamp              timeStamp;
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
     UINT                    txRespIndex = (UINT)pArg_p;
 #else
     UNUSED_PARAMETER(pArg_p);
@@ -1424,7 +1413,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
 
     if (releaseRxBuffer == kEdrvReleaseRxBufferLater)
     {
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
         diagnoseAcquiredAsndFrame((INT)pArg_p, (void*)pPacket_p);
 #endif
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
@@ -1432,7 +1421,7 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     else
         ret = -1; // Packet processing is done, returns to openMAC again
 
-#if EDRV_MAX_AUTO_RESPONSES > 0
+#if (EDRV_MAX_AUTO_RESPONSES > 0)
     if (edrvInstance_l.apTxBuffer[txRespIndex] != NULL)
     {   // filter with auto-response frame triggered
         BENCHMARK_MOD_01_SET(5);
@@ -1448,4 +1437,4 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     return ret;
 }
 
-///\}
+/// \}

@@ -11,7 +11,7 @@ the DLL kernel module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/errhndk.h>
 
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
 #include <kernel/hrestimer.h>
 #endif
 
@@ -86,7 +86,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
-typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tEventDllError*);
+typedef tOplkError (*tDllkStateFunc)(tNmtState nmtState_p,
+                                     tNmtEvent nmtEvent_p,
+                                     tEventDllError* pDllEvent_p);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -96,29 +98,38 @@ typedef tOplkError (*tDllkStateFunc)(tNmtState, tNmtEvent, tEventDllError*);
 // local function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_NMT_MN)
-static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsPreop1(tNmtState nmtState_p,
+                                     tNmtEvent nmtEvent_p,
                                      tEventDllError* pDllEvent_p);
-static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsFullCycle(tNmtState nmtState_p,
+                                        tNmtEvent nmtEvent_p,
                                         tEventDllError* pDllEvent_p);
 #endif
 
-static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p,
+                                                tNmtEvent nmtEvent_p,
                                                 tEventDllError* pDllEvent_p);
-static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
+                                               tNmtEvent nmtEvent_p,
                                                tEventDllError* pDllEvent_p);
-static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p,
+                                               tNmtEvent nmtEvent_p,
                                                tEventDllError* pDllEvent_p);
-static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p,
+                                              tNmtEvent nmtEvent_p,
                                               tEventDllError* pDllEvent_p);
 
-
-static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p,
+                                              tNmtEvent nmtEvent_p,
                                               tEventDllError* pDllEvent_p);
-static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p,
+                                             tNmtEvent nmtEvent_p,
                                              tEventDllError* pDllEvent_p);
-static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p,
+                                             tNmtEvent nmtEvent_p,
                                              tEventDllError* pDllEvent_p);
-static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p,
+                                            tNmtEvent nmtEvent_p,
                                             tEventDllError* pDllEvent_p);
 
 static BOOL triggerLossOfSocEvent(void);
@@ -127,7 +138,7 @@ static BOOL triggerLossOfSocEventOnFrameTimeout(void);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tDllkStateFunc  pfnProcessCsFullCycle_g[] =
+static tDllkStateFunc    pfnProcessCsFullCycle_l[] =
 {
     processCsFullCycleDllGsInit,
     processCsFullCycleDllWaitPreq,
@@ -135,7 +146,7 @@ tDllkStateFunc  pfnProcessCsFullCycle_g[] =
     processCsFullCycleDllWaitSoa,
 };
 
-tDllkStateFunc  pfnProcessCsStopped_g[] =
+static tDllkStateFunc    pfnProcessCsStopped_l[] =
 {
     processCsStoppedDllGsInit,
     processCsStoppedDllWaitPreq,
@@ -161,8 +172,8 @@ tDllkStateFunc  pfnProcessCsStopped_g[] =
 The function implements the main function of the DLL state machine. It
 changes the DLL state depending on the NMT state and the received event.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
 
 \return The function returns a tOplkError error code.
 */
@@ -170,8 +181,8 @@ changes the DLL state depending on the NMT state and the received event.
 tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
                                         tNmtState nmtState_p)
 {
-    tOplkError              ret = kErrorOk;
-    tEventDllError          dllEvent;
+    tOplkError      ret = kErrorOk;
+    tEventDllError  dllEvent;
 
     dllEvent.dllErrorEvents = 0;
     dllEvent.nodeId = 0;
@@ -184,7 +195,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
         case kNmtCsReadyToOperate:
         case kNmtCsOperational:
             if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
-                ret = pfnProcessCsFullCycle_g[dllkInstance_g.dllState](nmtState_p,
+                ret = pfnProcessCsFullCycle_l[dllkInstance_g.dllState](nmtState_p,
                                                                        nmtEvent_p,
                                                                        &dllEvent);
             break;
@@ -193,7 +204,8 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
         case kNmtMsPreOperational2:
         case kNmtMsReadyToOperate:
         case kNmtMsOperational:
-            if ((ret = processNmtMsFullCycle(nmtState_p, nmtEvent_p, &dllEvent)) != kErrorOk)
+            ret = processNmtMsFullCycle(nmtState_p, nmtEvent_p, &dllEvent);
+            if (ret != kErrorOk)
                 return ret;
             break;
 #endif
@@ -219,7 +231,7 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
 
         case kNmtCsStopped:
             if (dllkInstance_g.dllState < kDllMsNonCyclic)     // ensure that only CS states are handled
-                ret = pfnProcessCsStopped_g[dllkInstance_g.dllState](nmtState_p,
+                ret = pfnProcessCsStopped_l[dllkInstance_g.dllState](nmtState_p,
                                                                      nmtEvent_p,
                                                                      &dllEvent);
             break;
@@ -230,7 +242,8 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
             break;
 
         case kNmtMsPreOperational1:
-            if ((ret = processNmtMsPreop1(nmtState_p, nmtEvent_p, &dllEvent)) != kErrorOk)
+            ret = processNmtMsPreop1(nmtState_p, nmtEvent_p, &dllEvent);
+            if (ret != kErrorOk)
                 return ret;
             break;
 #endif
@@ -259,24 +272,24 @@ tOplkError dllkstatemachine_changeState(tNmtEvent nmtEvent_p,
 
 The function handles DLL state changes in NMT state MsPreoperational1
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsPreop1(tNmtState nmtState_p,
+                                     tNmtEvent nmtEvent_p,
                                      tEventDllError* pDllEvent_p)
 {
-    tOplkError      ret = kErrorOk;
-    tDllState       DummyDllState;
+    tOplkError  ret = kErrorOk;
+    tDllState   dummyDllState;
 
     UNUSED_PARAMETER(pDllEvent_p);
 
     if (dllkInstance_g.dllState != kDllMsNonCyclic)
     {   // stop cycle timer
-
         ret = edrvcyclic_stopCycle(FALSE);
         if (ret != kErrorOk)
             return ret;
@@ -291,7 +304,6 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
         case kNmtEventDllMeSocTrig:
         case kNmtEventDllCeAsnd:
             // because of reduced POWERLINK cycle SoA shall be triggered, not SoC
-
             ret = dllkframe_asyncFrameNotReceived(dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq],
                                                   dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]);
             if (ret != kErrorOk)
@@ -303,18 +315,24 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
             //          otherwise.
 
             // go ahead and send SoA
-            ret = dllkframe_mnSendSoa(nmtState_p, &DummyDllState,
+            ret = dllkframe_mnSendSoa(nmtState_p,
+                                      &dummyDllState,
                                       (dllkInstance_g.cycleCount >= C_DLL_PREOP1_START_CYCLES));
+            if (ret != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("%s() send SoA failed failed with 0x%X\n", __func__, ret);
+            }
 
             // increment cycle counter to detect if C_DLL_PREOP1_START_CYCLES empty cycles are elapsed
             dllkInstance_g.cycleCount++;
             ret = kErrorOk;
-            // reprogramming of timer will be done in CbFrameTransmitted()
+            // reprogramming of timer will be done in cbFrameTransmitted()
             break;
 
         default:
             break;
     }
+
     return ret;
 }
 
@@ -325,17 +343,18 @@ static tOplkError processNmtMsPreop1(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
 The function handles DLL state changes in the MN full cycle states
 MsPreOperational2, MsReadyToOperate and MsOperational.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processNmtMsFullCycle(tNmtState nmtState_p,
+                                        tNmtEvent nmtEvent_p,
                                         tEventDllError* pDllEvent_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     UNUSED_PARAMETER(nmtState_p);
 
@@ -345,7 +364,8 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
             // update cycle counter
             if (dllkInstance_g.dllConfigParam.multipleCycleCnt > 0)
             {   // multiplexed cycle active
-                dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) % dllkInstance_g.dllConfigParam.multipleCycleCnt;
+                dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) %
+                                                dllkInstance_g.dllConfigParam.multipleCycleCnt;
                 // $$$ check multiplexed cycle restart
                 //     -> toggle MC flag
                 //     -> change node linked list
@@ -360,7 +380,8 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
                     if (ret != kErrorOk)
                         return ret;
 
-                    if ((ret = edrvcyclic_startCycle()) != kErrorOk)
+                    ret = edrvcyclic_startCycle(TRUE);
+                    if (ret != kErrorOk)
                         return ret;
 
                     // initialize cycle counter
@@ -408,6 +429,7 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
         default:
             break;
     }
+
     return ret;
 }
 
@@ -420,14 +442,15 @@ static tOplkError processNmtMsFullCycle(tNmtState nmtState_p, tNmtEvent nmtEvent
 The function handles DLL state changes in full cycle NMT states and DLL
 state WaitPreq.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p,
+                                                tNmtEvent nmtEvent_p,
                                                 tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -463,7 +486,7 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
             case kNmtEventDllCeAInv:
                 // check if multiplexed and PReq should have been received in this cycle
                 // and if >= NMT_CS_READY_TO_OPERATE
-                if ((dllkInstance_g.cycleCount == 0)  &&
+                if ((dllkInstance_g.cycleCount == 0) &&
                     (nmtState_p >= kNmtCsReadyToOperate))
                 {
                     pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_PREQ | DLL_ERR_CN_LOSS_SOA;
@@ -507,14 +530,15 @@ static tOplkError processCsFullCycleDllWaitPreq(tNmtState nmtState_p, tNmtEvent 
 The function handles DLL state changes in full cycle NMT states and DLL
 state WaitSoC.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
+                                               tNmtEvent nmtEvent_p,
                                                tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -556,6 +580,7 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
             // remain in this state
             break;
     }
+
     return kErrorOk;
 }
 
@@ -566,14 +591,15 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p, tNmtEvent n
 The function handles DLL state changes in full cycle NMT states and DLL
 state WaitSoA.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p,
+                                               tNmtEvent nmtEvent_p,
                                                tEventDllError* pDllEvent_p)
 {
     switch (nmtEvent_p)
@@ -626,6 +652,7 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
             // remain in this state
             break;
     }
+
     return kErrorOk;
 }
 
@@ -636,14 +663,15 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p, tNmtEvent n
 The function handles DLL state changes in full cycle NMT states and DLL
 state GsInit.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p,
+                                              tNmtEvent nmtEvent_p,
                                               tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -663,14 +691,15 @@ static tOplkError processCsFullCycleDllGsInit(tNmtState nmtState_p, tNmtEvent nm
 The function handles DLL state changes in CS stopped NMT state and DLL
 state WaitPReq.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p,
+                                              tNmtEvent nmtEvent_p,
                                               tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -717,14 +746,15 @@ static tOplkError processCsStoppedDllWaitPreq(tNmtState nmtState_p, tNmtEvent nm
 The function handles DLL state changes in CS stopped NMT state and DLL
 state WaitSoC.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p,
+                                             tNmtEvent nmtEvent_p,
                                              tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -766,14 +796,15 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p, tNmtEvent nmt
 The function handles DLL state changes in CS stopped NMT state and DLL
 state WaitSoA.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p,
+                                             tNmtEvent nmtEvent_p,
                                              tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -819,6 +850,7 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
             // remain in this state
             break;
     }
+
     return kErrorOk;
 }
 
@@ -829,14 +861,15 @@ static tOplkError processCsStoppedDllWaitSoa(tNmtState nmtState_p, tNmtEvent nmt
 The function handles DLL state changes in CS stopped NMT state and DLL
 state GsInit.
 
-\param  nmtEvent_p              Event to handle.
-\param  nmtState_p              Current NMT state.
-\param  pDllEvent_p             DLL error event.
+\param[in]      nmtEvent_p          Event to handle.
+\param[in]      nmtState_p          Current NMT state.
+\param[in,out]  pDllEvent_p         DLL error event.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p, tNmtEvent nmtEvent_p,
+static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p,
+                                            tNmtEvent nmtEvent_p,
                                             tEventDllError* pDllEvent_p)
 {
     UNUSED_PARAMETER(nmtState_p);
@@ -869,7 +902,6 @@ static BOOL triggerLossOfSocEvent(void)
     if (!dllkInstance_g.lossSocStatus.fLossReported)
     {
         dllkInstance_g.lossSocStatus.fLossReported = TRUE;
-
         fTriggerEvent = TRUE;
     }
 

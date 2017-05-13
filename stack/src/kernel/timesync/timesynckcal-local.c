@@ -13,7 +13,7 @@ The sync module is responsible to synchronize the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -143,7 +143,7 @@ tOplkError timesynckcal_sendSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               Enable/disable sync event
+\param[in]      fEnable_p           Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
@@ -153,6 +153,7 @@ The function enables sync events.
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
+
     return kErrorOk;
 }
 
@@ -180,4 +181,4 @@ tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

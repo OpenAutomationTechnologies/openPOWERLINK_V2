@@ -11,7 +11,7 @@ register structures.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,7 +104,7 @@ typedef struct sScInfo
 /**
 \brief Status/Control - Control
 
-The control sub-registers provide basic Pcp-to-Host communication features.
+The control sub-registers provide basic PCP-to-Host communication features.
 */
 typedef struct sScCont
 {
@@ -182,6 +182,11 @@ typedef union sScDynB
 // local function prototypes
 //------------------------------------------------------------------------------
 
+static inline UINT32 hostifRead32(const UINT8* pAddr_p, UINT offset_p);
+static inline UINT16 hostifRead16(const UINT8* pAddr_p, UINT offset_p);
+static inline void hostifWrite32(UINT8* pAddr_p, UINT offset_p, UINT32 val_p);
+static inline void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p);
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -190,421 +195,421 @@ typedef union sScDynB
 /**
 \brief  Read magic word
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the magic word.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readMagic(UINT8* pHostifScBase_p)
+UINT32 hostif_readMagic(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                       offsetof(tScInfo, magic));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                        offsetof(tScInfo, magic));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read version
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the version field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readVersion(UINT8* pHostifScBase_p)
+UINT32 hostif_readVersion(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                       offsetof(tScInfo, version));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                        offsetof(tScInfo, version));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read boot base
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the boot base address.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readBootBase(UINT8* pHostifScBase_p)
+UINT32 hostif_readBootBase(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                       offsetof(tScInfo, bootBase));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                        offsetof(tScInfo, bootBase));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write boot base
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p              pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeBootBase(UINT8* pHostifScBase_p, UINT32 val_p)
 {
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                offsetof(tScInfo, bootBase), val_p);
+    hostifWrite32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                  offsetof(tScInfo, bootBase), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read init base
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the initialization base address.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readInitBase(UINT8* pHostifScBase_p)
+UINT32 hostif_readInitBase(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                       offsetof(tScInfo, initBase));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                        offsetof(tScInfo, initBase));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write init base
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeInitBase(UINT8* pHostifScBase_p, UINT32 val_p)
 {
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
-                offsetof(tScInfo, initBase), val_p);
+    hostifWrite32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+                  offsetof(tScInfo, initBase), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read bridge enable field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the bridge enable field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readBridgeEnable(UINT8* pHostifScBase_p)
+UINT16 hostif_readBridgeEnable(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, bridgeEnable));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                        offsetof(tScCont, bridgeEnable));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write bridge enabled field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeBridgeEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, bridgeEnable), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                  offsetof(tScCont, bridgeEnable), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read command field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the command field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readCommand(UINT8* pHostifScBase_p)
+UINT16 hostif_readCommand(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, command));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                        offsetof(tScCont, command));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write command field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeCommand(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, command), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                  offsetof(tScCont, command), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read state field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the state field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readState(UINT8* pHostifScBase_p)
+UINT16 hostif_readState(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, state));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                        offsetof(tScCont, state));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write state field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeState(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, state), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                  offsetof(tScCont, state), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read return field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the return field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readReturn(UINT8* pHostifScBase_p)
+UINT16 hostif_readReturn(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, ret));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                        offsetof(tScCont, ret));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write return field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeReturn(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, ret), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                  offsetof(tScCont, ret), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read heart beat field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the hear beat field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readHeartbeat(UINT8* pHostifScBase_p)
+UINT16 hostif_readHeartbeat(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                       offsetof(tScCont, heartbeat));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                        offsetof(tScCont, heartbeat));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write heart beat field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
-                offsetof(tScCont, heartbeat), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+                  offsetof(tScCont, heartbeat), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read irq enable field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the irq enable field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqEnable(UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqEnable(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                       offsetof(tScSync, irqEnable));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                        offsetof(tScSync, irqEnable));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write irq enable field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeIrqEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                offsetof(tScSync, irqEnable), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                  offsetof(tScSync, irqEnable), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read irq pending field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the irq pending field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqPending(UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqPending(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                       offsetof(tScSync, irqPending));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                        offsetof(tScSync, irqPending));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read irq master enable field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the irq master enable field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqMasterEnable(UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqMasterEnable(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                       offsetof(tScSync, irqMasterEnable));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                        offsetof(tScSync, irqMasterEnable));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write irq master enable field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeIrqMasterEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                offsetof(tScSync, irqMasterEnable), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                  offsetof(tScSync, irqMasterEnable), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write irq acknowledge field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_ackIrq(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                offsetof(tScSync, irq.ack), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                  offsetof(tScSync, irq.ack), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write irq set field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p              pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_setIrq(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                offsetof(tScSync, irq.set), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                  offsetof(tScSync, irq.set), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read synchronization configuration field
 
-\param  pHostifScBase_p     base address of Status/Control registers
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
 
 \return The function returns the irq synchronization configuration field.
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readSyncConfig(UINT8* pHostifScBase_p)
+UINT16 hostif_readSyncConfig(const UINT8* pHostifScBase_p)
 {
-    return HOSTIF_RD16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                       offsetof(tScSync, syncConfig));
+    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                        offsetof(tScSync, syncConfig));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write synchronization configuration field
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  val_p               pattern to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      val_p               Pattern to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeSyncConfig(UINT8* pHostifScBase_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
-                offsetof(tScSync, syncConfig), val_p);
+    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+                  offsetof(tScSync, syncConfig), val_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read dynamic buffer (Host only)
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  num_p               determines the addressed dynamic buffer
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      num_p               Determines the addressed dynamic buffer
 
 \return The function returns the dynamic buffer address. Note that the returned
 address is limited by the address width of the bridge master.
@@ -612,35 +617,35 @@ address is limited by the address width of the bridge master.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readDynBufHost(UINT8* pHostifScBase_p, UINT8 num_p)
+UINT32 hostif_readDynBufHost(const UINT8* pHostifScBase_p, UINT8 num_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-                       offsetof(tScDynB, Host.aDynBuf[num_p]));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+                        offsetof(tScDynB, Host.aDynBuf[num_p]));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write dynamic buffer (Host only)
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  num_p               determines the addressed dynamic buffer
-\param  addr_p              address to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      num_p               Determines the addressed dynamic buffer
+\param[in]      addr_p              Address to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeDynBufHost(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 {
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-                offsetof(tScDynB, Host.aDynBuf[num_p]), addr_p);
+    hostifWrite32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+                  offsetof(tScDynB, Host.aDynBuf[num_p]), addr_p);
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Read buffer (PCP only)
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  num_p               determines the addressed buffer
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      num_p               Determines the addressed buffer
 
 \return The function returns the dynamic buffer address. Note that the returned
 address is limited by the address width of the bridge master.
@@ -648,30 +653,111 @@ address is limited by the address width of the bridge master.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readBufPcp(UINT8* pHostifScBase_p, UINT8 num_p)
+UINT32 hostif_readBufPcp(const UINT8* pHostifScBase_p, UINT8 num_p)
 {
-    return HOSTIF_RD32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-                       offsetof(tScDynB, Pcp.aBuf[num_p]));
+    return hostifRead32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+                        offsetof(tScDynB, Pcp.aBuf[num_p]));
 }
 
 //------------------------------------------------------------------------------
 /**
 \brief  Write dynamic buffer (PCP only)
 
-\param  pHostifScBase_p     base address of Status/Control registers
-\param  num_p               determines the addressed buffer
-\param  addr_p              address to be written
+\param[in]      pHostifScBase_p     Base address of Status/Control registers
+\param[in]      num_p               Determines the addressed buffer
+\param[in]      addr_p              Address to be written
 
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
 void hostif_writeBufPcp(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 {
-    HOSTIF_WR32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
-                offsetof(tScDynB, Pcp.aBuf[num_p]), addr_p);
+    hostifWrite32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+                  offsetof(tScDynB, Pcp.aBuf[num_p]), addr_p);
 }
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read 32 bit value
+
+The function reads from the given base address plus the provided offset the
+32 bit value.
+
+\param[in]      pAddr_p             Base address
+\param[in]      offset_p            Offset from given base address
+
+\return The function returns the read value.
+*/
+//------------------------------------------------------------------------------
+static UINT32 hostifRead32(const UINT8* pAddr_p, UINT offset_p)
+{
+    HOSTIF_DCACHE_INVALIDATE(pAddr_p + offset_p, sizeof(UINT32));
+
+    return HOSTIF_RD32(pAddr_p + offset_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Read 16 bit value
+
+The function reads from the given base address plus the provided offset the
+16 bit value.
+
+\param[in]      pAddr_p             Base address
+\param[in]      offset_p            Offset from given base address
+
+\return The function returns the read value.
+*/
+//------------------------------------------------------------------------------
+static UINT16 hostifRead16(const UINT8* pAddr_p, UINT offset_p)
+{
+    HOSTIF_DCACHE_INVALIDATE(pAddr_p + offset_p, sizeof(UINT16));
+
+    return HOSTIF_RD16(pAddr_p + offset_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Write 32 bit value
+
+The function writes to the given base address plus the provided offset the given
+32 bit value.
+
+\param[in]      pAddr_p             Base address
+\param[in]      offset_p            Offset from given base address
+\param[in]      val_p               Value to be written to the given base plus offset
+*/
+//------------------------------------------------------------------------------
+static void hostifWrite32(UINT8* pAddr_p, UINT offset_p, UINT32 val_p)
+{
+    HOSTIF_WR32(pAddr_p + offset_p, val_p);
+
+    HOSTIF_DCACHE_FLUSH(pAddr_p + offset_p, sizeof(UINT32));
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Write 16 bit value
+
+The function writes to the given base address plus the provided offset the given
+16 bit value.
+
+\param[in]      pAddr_p             Base address
+\param[in]      offset_p            Offset from given base address
+\param[in]      val_p               Value to be written to the given base plus offset
+*/
+//------------------------------------------------------------------------------
+static void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p)
+{
+    HOSTIF_WR16(pAddr_p + offset_p, val_p);
+
+    HOSTIF_DCACHE_FLUSH(pAddr_p + offset_p, sizeof(UINT16));
+}
+
+/// \}

@@ -190,7 +190,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -203,7 +203,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -216,7 +216,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -229,7 +229,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -242,7 +242,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -255,7 +255,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_X86_=1;i386=1;STD_CALL;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <Optimization>MaxSpeed</Optimization>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -268,7 +268,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -286,7 +286,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60;CONFIG_PCP=FALSE</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -310,7 +310,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60;CONFIG_PCP=FALSE</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -328,7 +328,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -346,7 +346,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8 Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -364,7 +364,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Win8.1 Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\..\..\..\stack\src\kernel\errhnd;..\..\proj\mn;..\..\;..\..\..\..\..\stack\src\common\circbuf;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\..\stack\include;..\..\proj\mn;..\..\..\..\..\contrib\ndislib\ndispcie;..\..\..\..\..\contrib\dualprocshm\include;..\..\..\..\..\contrib</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_WIN64;_AMD64_;AMD64;%(PreprocessorDefinitions);NDIS60</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>

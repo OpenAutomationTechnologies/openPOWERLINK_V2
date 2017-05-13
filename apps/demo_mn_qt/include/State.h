@@ -7,7 +7,7 @@
 This file contains the definitions for the POWERLINK MN state widget.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,30 +33,32 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_State_H_
-#define _INC_State_H_
+#ifndef _INC_demo_State_H_
+#define _INC_demo_State_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 #include <QWidget>
+#include <QString>
+#include <QPalette>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LED_NUM        8
-#define NODE_ID_MAX    255
+#define LED_NUM         8
+#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
-class QPalette;
 class QHBoxLayout;
 class QLabel;
+class QToolButton;
 class Leds;
+class QPixmap;
 
 //------------------------------------------------------------------------------
 /**
@@ -77,31 +79,15 @@ public slots:
     void setNmtStateText(const QString& strState_p);
 
 private:
-    QPalette     PalGreenButton;
-    QPalette     PalYellowButton;
-    QPalette     PalRedButton;
+    QLabel*     pStatusLed;
+    QLabel*     pNmtStateLabel;
+    Leds*       pLeds;
 
-    QHBoxLayout* pNodesLayout;
+    QLabel*     pNmtSectionLabel;
 
-    QLabel*      pStatusLed;
-    QLabel*      pNmtStateLabel;
-    QHBoxLayout* pNmtStateLayout;
-
-    QToolButton* apNodes[NODE_ID_MAX + 1];
-
-    Leds*        pLeds;
-
-    QLabel*      pNmtSectionLabel;
-    QLabel*      pNodesSectionLabel;
-
-    int          iNodeWidth;
-    int          iNodeHeight;
-
-    QPixmap*     pRedLed;
-    QPixmap*     pYellowLed;
-    QPixmap*     pGreenLed;
-
+    QPixmap*    pRedLed;
+    QPixmap*    pYellowLed;
+    QPixmap*    pGreenLed;
 };
 
-#endif /* _INC_State_H_ */
-
+#endif /* _INC_demo_State_H_ */

@@ -18,6 +18,7 @@ user space by the kernel driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -130,14 +131,19 @@ tMemMapReturn memmap_init(void)
     if (memMapInstance_l.hFileHandle == NULL)
         return kMemMapNoResource;
 
-    if (!DeviceIoControl(memMapInstance_l.hFileHandle, PLK_CMD_MAP_MEM,
-        &inMemStruc, sizeof(tMemStruc), pOutMemStruc, sizeof(tMemStruc),
-        &bytesReturned, NULL))
+    if (!DeviceIoControl(memMapInstance_l.hFileHandle,
+                         PLK_CMD_MAP_MEM,
+                         &inMemStruc,
+                         sizeof(tMemStruc),
+                         pOutMemStruc,
+                         sizeof(tMemStruc),
+                         &bytesReturned,
+                         NULL))
     {
         return kMemMapNoResource;
     }
 
-    if (bytesReturned == 0 || pOutMemStruc->pUserAddr == NULL)
+    if ((bytesReturned == 0) || (pOutMemStruc->pUserAddr == NULL))
         return kMemMapNoResource;
 
     return kMemMapOk;
@@ -159,9 +165,14 @@ tMemMapReturn memmap_shutdown(void)
     tMemStruc*  pMemStruc = &memMapInstance_l.memStruc;
     ULONG       bytesReturned;
 
-    if (!DeviceIoControl(memMapInstance_l.hFileHandle, PLK_CMD_UNMAP_MEM,
-        pMemStruc, sizeof(tMemStruc), NULL, 0,
-        &bytesReturned, NULL))
+    if (!DeviceIoControl(memMapInstance_l.hFileHandle,
+                         PLK_CMD_UNMAP_MEM,
+                         pMemStruc,
+                         sizeof(tMemStruc),
+                         NULL,
+                         0,
+                         &bytesReturned,
+                         NULL))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Unable to free mem %d\n", __func__, GetLastError());
         return kErrorGeneralError;
@@ -181,33 +192,34 @@ tMemMapReturn memmap_shutdown(void)
 
 The function maps a kernel buffer address.
 
-\param  pKernelBuffer_p     The pointer to the kernel buffer.
-\param  bufferSize_p        The size of the kernel buffer.
+\param[in]      pKernelBuffer_p     The pointer to the kernel buffer.
+\param[in]      bufferSize_p        The size of the kernel buffer.
 
 \return The functions returns the pointer to the mapped kernel buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
 {
     INT32       offset;
     UINT8*      pUserAddr;
     tMemStruc*  pMemStruc = &memMapInstance_l.memStruc;
 
+    // Check parameter validity
+    ASSERT(pKernelBuffer_p != NULL);
     UNUSED_PARAMETER(bufferSize_p);
 
     // Negative offset not possible
-    if (pKernelBuffer_p < pMemStruc->pKernelAddr ||
-        ((UINT8*)pKernelBuffer_p + bufferSize_p) >
-        ((UINT8*)pMemStruc->pKernelAddr + pMemStruc->size))
+    if ((pKernelBuffer_p < pMemStruc->pKernelAddr) ||
+        (((const UINT8*)pKernelBuffer_p + bufferSize_p) >
+        ((const UINT8*)pMemStruc->pKernelAddr + pMemStruc->size)))
         return NULL;
 
-    offset = (UINT)((UINT8*)pKernelBuffer_p - (UINT8*)pMemStruc->pKernelAddr);
-
+    offset = (UINT)((const UINT8*)pKernelBuffer_p - (const UINT8*)pMemStruc->pKernelAddr);
     pUserAddr = (UINT8*)pMemStruc->pUserAddr + offset;
 
-    return pUserAddr;
+    return (void*)pUserAddr;
 }
 
 //------------------------------------------------------------------------------
@@ -216,12 +228,12 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 
 The function disconnects from a memory mapping.
 
-\param  pBuffer_p           The pointer to the previously mapped buffer.
+\param[in]      pBuffer_p           The pointer to the previously mapped buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void memmap_unmapKernelBuffer(void* pBuffer_p)
+void memmap_unmapKernelBuffer(const void* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 }

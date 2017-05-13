@@ -14,8 +14,8 @@ PollResponse Chaining mode of operation, dynamic and static PDO mapping, SDO
 via ASnd and SDO via UDP, as well as asynchronous communication via a Virtual
 Ethernet interface.
 
-Latest stable version: [2.3.2](\ref sect_revision_v2_3_2)
-Current version: [2.3.2](\ref sect_revision_v2_3_2)
+Latest stable version: [2.5.2](\ref sect_revision_v2_5_2)
+Current version: [2.5.2](\ref sect_revision_v2_5_2)
 
 ## License
 
@@ -33,7 +33,7 @@ The documentation of the openPOWERLINK protocol stack can be found in the
 subdirectory "doc". It is written in _markdown_ markup format.
 The openPOWERLINK software manual can be generated from the markdown
 documentation and the in-source documentation with the tool
-[Doxygen](http://www.doxygen.org). Doxygen version 1.8 or higher is required.
+[Doxygen](http://www.doxygen.org). Doxygen version 1.8.11 or higher is required.
 
 To generate the software manual:
 
@@ -58,7 +58,7 @@ Support on openPOWERLINK is available via the online discussion forums:
 
 openPOWERLINK can be downloaded from its SourceForge project site:
 
-* Sourcecode: [tar.gz](http://downloads.sourceforge.net/project/openpowerlink/openPOWERLINK/V2.3.2/openPOWERLINK_V2.3.2.tar.gz)
+* Sourcecode: [tar.gz](http://downloads.sourceforge.net/project/openpowerlink/openPOWERLINK/V2.5.2/openPOWERLINK_V2.5.2.tar.gz)
 
 
 ## Contributors
@@ -76,6 +76,15 @@ openPOWERLINK can be downloaded from its SourceForge project site:
 (c) Kalycito Infotech Private Limited,
     <http://www.kalycito.com>
 
+(c) Weidmueller Interface GmbH & Co. KG, 2016
+    <http://www.weidmueller.de>
+
+(c) Open Wide Ingenierie,
+    a Smile group company,
+    20 rue des Jardins,
+    92600 Asnières-sur-Seine,
+    <http://www.smile.fr/>
+    <http://ingenierie.openwide.fr>
 
 ## Links and References
 

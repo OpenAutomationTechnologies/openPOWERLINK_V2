@@ -9,7 +9,7 @@ for a Xilinx ZC702 board.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -52,24 +52,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define MAX_DYNAMIC_BUFF_SIZE       MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
 
 /* BASE ADDRESSES */
+/* Range of common memory and shared memory.
+zynq-7000.dtsi in the handoff provides this range */
 
-#if defined(__arm__)
+#define COMMON_MEM_OFFSET           0x0C000000
+#define SHARED_MEM_OFFSET           0x10000000
+
+#if defined(__MICROBLAZE__)
     // TODO : gks check if this can be retrieved from hardware configuration
-    #define COMMON_MEM_BASE             0x2C000000
 
-    #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
-        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR)
-        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR - SHARED_MEM_BASE + 1)
-    #else
-        #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
-    #endif
-#elif defined(__MICROBLAZE__)
-    // TODO : gks check if this can be retrieved from hardware configuration
-    #define COMMON_MEM_BASE             0x2C000000
-
-    #if defined(XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR) && defined (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR)
-        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_S_AXI_HP0_BASEADDR)
-        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_S_AXI_HP0_HIGHADDR - SHARED_MEM_BASE + 1)
+    #if defined(XPAR_PS7_DDR_0_HP0_AXI_BASENAME) && defined (XPAR_PS7_DDR_0_HP0_AXI_HIGHNAME)
+        #define COMMON_MEM_BASE         (XPAR_PS7_DDR_0_HP0_AXI_BASENAME + COMMON_MEM_OFFSET)
+        #define SHARED_MEM_BASE         (XPAR_PS7_DDR_0_HP0_AXI_BASENAME + SHARED_MEM_OFFSET)
+        #define SHARED_MEM_SPAN         (XPAR_PS7_DDR_0_HP0_AXI_HIGHNAME - SHARED_MEM_BASE + 1)
     #else
         #error "Shared memory base address(SHARED_MEM_BASE) could not be set!"
     #endif

@@ -15,6 +15,7 @@ for different causes such as events, data exchange, errors etc.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -86,7 +87,7 @@ control CAL module during runtime
 typedef struct
 {
     tDualprocDrvInstance    dualProcDrvInst;    ///< Dual processor driver instance
-}tCtrlkCalInstance;
+} tCtrlkCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
@@ -121,7 +122,8 @@ tOplkError ctrlkcal_init(void)
     tDualprocConfig     dualProcConfig;
     UINT16              magic;
 
-    OPLK_MEMSET(&instance_l, 0, sizeof(tCtrlkCalInstance));
+    // Reset the instance
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
     OPLK_MEMSET(&dualProcConfig, 0, sizeof(tDualprocConfig));
 
@@ -131,7 +133,8 @@ tOplkError ctrlkcal_init(void)
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE(" {%s} Could not create dual processor driver instance (0x%X)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         ret = kErrorNoResource;
 
         // Since dualprocshm_delete() is already called in dualprocshm_create()
@@ -158,12 +161,15 @@ tOplkError ctrlkcal_init(void)
     }
 
     magic = CTRL_MAGIC;
-    dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, magic),
-                                          sizeof(magic), (UINT8*)&magic);
+    dualRet = dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
+                                          offsetof(tCtrlBuf, magic),
+                                          sizeof(magic),
+                                          &magic);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE(" {%s} Could not create write magic (0x%X)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         ret = kErrorNoResource;
         goto Exit;
     }
@@ -197,6 +203,9 @@ void ctrlkcal_exit(void)
     {
         DEBUG_LVL_ERROR_TRACE("Could not delete dual processor driver (0x%X)\n", dualRet);
     }
+
+    // Reset the instance
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 }
 
 //------------------------------------------------------------------------------
@@ -223,7 +232,7 @@ tOplkError ctrlkcal_process(void)
 The function reads a control command stored by the user in the control memory
 block to execute a kernel control function.
 
-\param  pCmd_p            The command to be executed.
+\param[out]     pCmd_p              The command to be executed.
 
 \return The function returns a tOplkError error code.
 
@@ -232,10 +241,17 @@ block to execute a kernel control function.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
+    tDualprocReturn dualRet;
     tCtrlCmdType    cmd;
 
-    if (dualprocshm_readDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, ctrlCmd.cmd),
-                                   sizeof(cmd), (UINT8*)&cmd) != kDualprocSuccessful)
+    // Check parameter validity
+    ASSERT(pCmd_p != NULL);
+
+    dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
+                                         offsetof(tCtrlBuf, ctrlCmd.cmd),
+                                         sizeof(cmd),
+                                         &cmd);
+    if (dualRet != kDualprocSuccessful)
         return kErrorGeneralError;
 
     *pCmd_p = cmd;
@@ -250,7 +266,7 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 The function sends the return value of an executed command to the user stack
 by storing it in the control memory block.
 
-\param  retval_p            Return value to send.
+\param[in]      retval_p            Return value to send.
 
 \ingroup module_ctrlkcal
 */
@@ -262,8 +278,10 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
     ctrlCmd.cmd = 0;
     ctrlCmd.retVal = retval_p;
 
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, ctrlCmd),
-                                sizeof(tCtrlCmd), (UINT8*)&ctrlCmd);
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
+                                offsetof(tCtrlBuf, ctrlCmd),
+                                sizeof(tCtrlCmd),
+                                &ctrlCmd);
 }
 
 //------------------------------------------------------------------------------
@@ -272,15 +290,33 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
 
 The function stores the status of the kernel stack in the control memory block.
 
-\param  status_p                Status to set.
+\param[in]      status_p            Status to set.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
 void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 {
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, status),
-                                sizeof(status_p), (UINT8*)&status_p);
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
+                                offsetof(tCtrlBuf, status),
+                                sizeof(status_p),
+                                &status_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get the kernel stack status
+
+The function gets the status of the kernel stack.
+
+\return The function returns the status of the kernel stack.
+
+\ingroup module_ctrlkcal
+*/
+//------------------------------------------------------------------------------
+tCtrlKernelStatus ctrlkcal_getStatus(void)
+{
+    return kCtrlStatusUnavailable;
 }
 
 //------------------------------------------------------------------------------
@@ -290,15 +326,17 @@ void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 The function updates its heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
-\param  heartbeat_p         Heartbeat counter to store in the control memory
-                            block.
+\param[in]      heartbeat_p         Heartbeat counter to store in the control memory
+                                    block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
 void ctrlkcal_updateHeartbeat(UINT16 heartbeat_p)
 {
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, heartbeat),
-                                sizeof(heartbeat_p), (UINT8*)&heartbeat_p);
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
+                                offsetof(tCtrlBuf, heartbeat),
+                                sizeof(heartbeat_p),
+                                &heartbeat_p);
 }
 
 //------------------------------------------------------------------------------
@@ -309,16 +347,21 @@ The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the user stack. It is used to notify the user stack about
 parameters modified in the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlkcal
 
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
-    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, initParam),
-                                sizeof(tCtrlInitParam), (UINT8*)pInitParam_p);
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    dualprocshm_writeDataCommon(instance_l.dualProcDrvInst,
+                                offsetof(tCtrlBuf, initParam),
+                                sizeof(tCtrlInitParam),
+                                pInitParam_p);
 }
 
 //------------------------------------------------------------------------------
@@ -327,7 +370,7 @@ void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the user stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code.
 
@@ -338,8 +381,13 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     tDualprocReturn    dualRet;
 
-    dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst, offsetof(tCtrlBuf, initParam),
-                                         sizeof(tCtrlInitParam), (UINT8*)pInitParam_p);
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    dualRet = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
+                                         offsetof(tCtrlBuf, initParam),
+                                         sizeof(tCtrlInitParam),
+                                         pInitParam_p);
 
     if (dualRet != kDualprocSuccessful)
     {
@@ -357,9 +405,9 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 The function reads the file chunk descriptor and data from the file transfer
 buffer.
 
-\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
-\param  bufferSize_p    Size of buffer for storing the chunk data
-\param  pBuffer_p       Pointer to buffer for storing the chunk data
+\param[out]     pDesc_p             Pointer to buffer for storing the chunk descriptor
+\param[in]      bufferSize_p        Size of buffer for storing the chunk data
+\param[out]     pBuffer_p           Pointer to buffer for storing the chunk data
 
 \return The function returns a tOplkError code.
 
@@ -367,9 +415,14 @@ buffer.
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                  size_t bufferSize_p, UINT8* pBuffer_p)
+                                  size_t bufferSize_p,
+                                  UINT8* pBuffer_p)
 {
     tDualprocReturn dualret;
+
+    // Check parameter validity
+    ASSERT(pDesc_p != NULL);
+    ASSERT(pBuffer_p != NULL);
 
     // Check if caller provides sufficiently large buffer
     if (bufferSize_p < CONFIG_CTRL_FILE_CHUNK_SIZE)
@@ -378,7 +431,7 @@ tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
     dualret = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, fileChunkDesc),
                                          sizeof(tOplkApiFileChunkDesc),
-                                         (UINT8*)pDesc_p);
+                                         pDesc_p);
     if (dualret != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot read file chunk descriptor (0x%X)\n", dualret);
@@ -394,7 +447,8 @@ tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
 
     dualret = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
                                          offsetof(tCtrlBuf, aFileChunkBuffer),
-                                         bufferSize_p, pBuffer_p);
+                                         bufferSize_p,
+                                         pBuffer_p);
     if (dualret != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("Cannot read file chunk data (0x%X)\n", dualret);

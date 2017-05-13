@@ -2,7 +2,7 @@
 #
 # CMake settings file for mn-dual-shmem-gpio demo on xilinx-z702
 #
-# Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
+# Copyright (c) 2016, Kalycito Infotech Pvt. Ltd.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ SET(CFG_DEMO_BUS_SYSTEM "axi")
 
 # Enable FAT FS support library build
 # Useful when reading CDC file from SDCARD
-SET(CFG_FAT_SUPPORT TRUE)
+SET(CFG_FAT_SUPPORT FALSE)
 
 ################################################################################
 # P R O C E S S O R   F E A T U R E S   ( P C P )
@@ -57,10 +57,10 @@ SET(CFG_PCP_NAME pcp)
 SET(CFG_PCP_PROCESSOR Microblaze)
 
 # Version of the Microblaze instance
-SET(CFG_PCP_CPU_VERSION "v8.50.c")
+SET(CFG_PCP_CPU_VERSION "v9.6")
 
 # Pcp's tightly coupled instruction memory name
-SET(CFG_PCP_TCIMEM_NAME pcp_ilmb_cntlr)
+SET(CFG_PCP_TCIMEM_NAME pcp_bram_ilmb_bram_if_cntlr)
 
 # Bootloader not available for Microblaze
 SET(CFG_MB_BOOTLOADER_ENABLE "FALSE")
@@ -95,32 +95,3 @@ SET(CFG_PCP_DUALPROCSHM_ENABLE "TRUE")
 
 # Enable openMAC driver (omethlib)
 SET(CFG_PCP_OMETHLIB_ENABLE "TRUE")
-
-################################################################################
-# P R O C E S S O R   F E A T U R E S   ( H O S T )
-
-# Name of host processor
-SET(CFG_HOST_NAME ps7_cortexa9_0)
-
-# Processor type that matches CMAKE_SYSTEM_PROCESSOR in toolchain file
-SET(CFG_HOST_PROCESSOR zynqarm)
-
-# Version of the Microblaze instance
-SET(CFG_HOST_CPU_VERSION "cortex-a9")
-
-# Host's tightly coupled instruction memory name
-SET(CFG_HOST_TCIMEM_NAME dummy)
-
-# ARM core has enabled frame compliant with AAPCS
-OPTION(CFG_HOST_ARM_FRAME_AAPCS "ARM core has Stack frame compliant with AAPCS" ON)
-MARK_AS_ADVANCED(CFG_HOST_ARM_FRAME_AAPCS)
-
-# ARM core should use 4 byte enums
-OPTION(CFG_HOST_ARM_SHORT_ENUMS "ARM core uses 4-bytes enums" OFF)
-MARK_AS_ADVANCED(CFG_HOST_ARM_SHORT_ENUMS)
-
-################################################################################
-# E N A B L E   P R O C E S S O R   S O F T W A R E   ( H O S T )
-
-# Enable Dual Processor Shared Memory provided in contrib directory
-SET(CFG_HOST_DUALPROCSHM_ENABLE "TRUE")

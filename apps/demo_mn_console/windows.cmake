@@ -2,7 +2,7 @@
 #
 # Windows definitions for console demo application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ SET (DEMO_ARCH_SOURCES
      ${DEMO_ARCHSOURCES}
      ${COMMON_SOURCE_DIR}/system/system-windows.c
      ${CONTRIB_SOURCE_DIR}/console/console-windows.c
+     ${CONTRIB_SOURCE_DIR}/trace/trace-windows.c
      )
 
 INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)

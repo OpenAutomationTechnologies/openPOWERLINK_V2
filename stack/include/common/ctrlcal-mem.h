@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_ctrlcal_mem_H_
 #define _INC_common_ctrlcal_mem_H_
 
@@ -47,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_MAGIC                      0xA5A5
+#define CTRL_MAGIC          0xA5A5
 
 //------------------------------------------------------------------------------
 // typedef
@@ -60,8 +59,8 @@ The structure defines how a command looks like.
 */
 typedef struct sCtrlCmd
 {
-    tCtrlCmdType        cmd;        ///< The command to execute
-    UINT16              retVal;     ///< The return value of the command
+    tCtrlCmdType            cmd;            ///< The command to execute
+    UINT16                  retVal;         ///< The return value of the command
 } tCtrlCmd;
 
 /**
@@ -72,7 +71,7 @@ information between the kernel and the user layer.
 */
 typedef struct
 {
-    UINT16                  magic;          ///< Magic 0xA5A5 identifies valid struct
+    UINT16                  magic;          ///< Magic 0xA5A5 identifies valid structure
     tCtrlKernelStatus       status;         ///< Status of the kernel stack
     UINT16                  heartbeat;      ///< Heartbeat counter
     tCtrlCmd                ctrlCmd;        ///< The control command structure
@@ -85,7 +84,6 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

@@ -3,6 +3,7 @@
 # Main CMake file for openPOWERLINK stack libraries
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,6 +32,11 @@
 PROJECT (openPOWERLINK C)
 
 CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
+
+# Set CMake Policy to suppress the warning in CMake version 3.3.x
+IF (POLICY CMP0043)
+    CMAKE_POLICY(SET CMP0043 OLD)
+ENDIF()
 
 MESSAGE(STATUS "CMAKE_SYSTEM_NAME is ${CMAKE_SYSTEM_NAME}")
 MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
@@ -62,7 +68,7 @@ IF(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
     ENDIF()
 ENDIF()
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 STRING(TOUPPER "${CMAKE_BUILD_TYPE}" LIB_BUILD_TYPE)
 IF("${LIB_BUILD_TYPE}" STREQUAL "DEBUG")
@@ -95,10 +101,10 @@ IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     INCLUDE(cmake/options-linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     INCLUDE(cmake/options-windows.cmake)
+ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise"))
+    INCLUDE(cmake/options-microblazeise.cmake)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze"))
     INCLUDE(cmake/options-microblaze.cmake)
-ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "zynqarm"))
-    INCLUDE(cmake/options-zynqarm.cmake)
 ELSEIF((CMAKE_SYSTEM_NAME STREQUAL "Generic") AND (CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm"))
     INCLUDE(cmake/options-c5socarm.cmake)
 ELSE()

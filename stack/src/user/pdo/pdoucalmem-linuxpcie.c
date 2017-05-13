@@ -12,7 +12,7 @@ operations.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -47,12 +47,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/ctrlucal.h>
 #include <oplk/targetsystem.h>
 #include <common/driver.h>
+
 #include <sys/ioctl.h>
-#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
 #include <sys/mman.h>
+#include <stddef.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <errno.h>
 
 //============================================================================//
@@ -87,7 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static OPLK_FILE_HANDLE     fd_l;
-static ULONG                pdoMemOffset = 0;
+static ptrdiff_t            pdoMemOffset_l = 0;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -115,6 +117,7 @@ descriptor of the kernel PCIe interface driver.
 tOplkError pdoucal_openMem(void)
 {
     fd_l = ctrlucal_getFd();
+
     return kErrorOk;
 }
 
@@ -136,6 +139,7 @@ remapped to the user space.
 tOplkError pdoucal_closeMem(void)
 {
     fd_l = (OPLK_FILE_HANDLE)0;
+
     return kErrorOk;
 }
 
@@ -145,36 +149,43 @@ tOplkError pdoucal_closeMem(void)
 
 The function allocates shared memory for the user needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory.
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory.
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p,
+                               UINT8** ppPdoMem_p)
 {
-    INT     ret = 0;
+    int ret;
 
-    *ppPdoMem_p = mmap(NULL, memSize_p + ATOMIC_MEM_OFFSET + getpagesize(), PROT_READ | PROT_WRITE, MAP_SHARED,
-                       fd_l, 0);
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
+
+    *ppPdoMem_p = mmap(NULL,
+                       memSize_p + ATOMIC_MEM_OFFSET + getpagesize(),
+                       PROT_READ | PROT_WRITE, MAP_SHARED,
+                       fd_l,
+                       0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
+
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
 
-    if ((ret = ioctl(fd_l, PLK_CMD_PDO_MAP_OFFSET, &pdoMemOffset)) != 0)
+    ret = ioctl(fd_l, PLK_CMD_PDO_MAP_OFFSET, &pdoMemOffset_l);
+    if (ret != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() error %d\n", __func__, ret);
         return kErrorNoResource;
     }
     else
-    {
-        *ppPdoMem_p = (UINT8*)((size_t)(*ppPdoMem_p) + (size_t)pdoMemOffset);
-    }
+        *ppPdoMem_p += pdoMemOffset_l;
 
     return kErrorOk;
 }
@@ -186,20 +197,26 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 The function frees shared memory which was allocated in the user layer for
 transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
-    pMem_p = (UINT8*)((size_t)(pMem_p) - (size_t)pdoMemOffset);
+    // Check parameter validity
+    ASSERT(pMem_p != NULL);
+
+    pMem_p -= pdoMemOffset_l;
     if (munmap(pMem_p, memSize_p + getpagesize()) != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() munmap failed (%s)\n", __func__, strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() munmap failed (%s)\n",
+                              __func__,
+                              strerror(errno));
+
         return kErrorGeneralError;
     }
 
@@ -212,4 +229,4 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

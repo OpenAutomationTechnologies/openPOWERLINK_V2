@@ -8,7 +8,7 @@ This file contains basic type definitions for openPOWERLINK.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,15 +34,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_basictypes_H_
 #define _INC_oplk_basictypes_H_
 
 //---------------------------------------------------------------------------
 //  definitions of basic types
 
-#if !defined(_WINDEF_) && !defined(_NTDEF_)        // defined in WINDEF.H, included by <windows.h>
-                                                   // In kernel defined in NTDEF.h included by <ndis.h>
+#if (!defined(_WINDEF_) && !defined(_NTDEF_))   // defined in WINDEF.H, included by <windows.h>
+                                                // In kernel defined in NTDEF.h included by <ndis.h>
 
 // --- arithmetic types ---
 #ifndef SHORT
@@ -147,4 +146,3 @@ typedef void (*VOIDFUNCPTR)(void);
 typedef int (*INTFUNCPTR)(void);
 
 #endif /* _INC_oplk_basictypes_H_ */
-

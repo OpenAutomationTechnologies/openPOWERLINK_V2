@@ -11,7 +11,7 @@ openPOWERLINK demo applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <pthread.h>
 #include <signal.h>
 #include <sys/time.h>
-
+#include <trace/trace.h>
 #include "system.h"
 
 //============================================================================//
@@ -59,12 +59,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define SET_CPU_AFFINITY
-#define MAIN_THREAD_PRIORITY            20
+#define MAIN_THREAD_PRIORITY        20
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-static BOOL    fTermSignalReceived_g = FALSE;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -84,17 +83,19 @@ static BOOL    fTermSignalReceived_g = FALSE;
 #if defined(CONFIG_USE_SYNCTHREAD)
 typedef struct
 {
-    tSyncCb         pfnSyncCb;
-    BOOL            fTerminate;
+    tSyncCb                 pfnSyncCb;
+    BOOL                    fTerminate;
 } tSyncThreadInstance;
 #endif
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static BOOL                 fTermSignalReceived_l = FALSE;
+
 #if defined(CONFIG_USE_SYNCTHREAD)
-static pthread_t                syncThreadId_l;
-static tSyncThreadInstance      syncThreadInstance_l;
+static pthread_t            syncThreadId_l;
+static tSyncThreadInstance  syncThreadInstance_l;
 #endif
 
 //------------------------------------------------------------------------------
@@ -125,35 +126,37 @@ work correctly.
 //------------------------------------------------------------------------------
 int system_init(void)
 {
-    struct sched_param          schedParam;
+    struct sched_param  schedParam;
+    struct sigaction    new_action;
 
     /* adjust process priority */
     if (nice(-20) == -1)         // push nice level in case we have no RTPreempt
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set nice value! (%s)\n", __func__, strerror(errno));
+        TRACE("%s() couldn't set nice value! (%s)\n",
+              __func__,
+              strerror(errno));
     }
     schedParam.sched_priority = MAIN_THREAD_PRIORITY;
     if (pthread_setschedparam(pthread_self(), SCHED_RR, &schedParam) != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters! %d\n",
-                              __func__, schedParam.sched_priority);
+        TRACE("%s() couldn't set thread scheduling parameters! %d\n",
+              __func__,
+              schedParam.sched_priority);
     }
 
     // Register termination handler for signals with termination semantics
-    struct sigaction new_action;
-
     new_action.sa_handler = handleTermSignal;
-    (void)sigemptyset(&new_action.sa_mask);
+    sigemptyset(&new_action.sa_mask);
     new_action.sa_flags = 0;
 
-    (void)sigaction(SIGINT,  &new_action, NULL);    // Sent via CTRL-C
-    (void)sigaction(SIGTERM, &new_action, NULL);    // Generic signal used to cause program termination.
-    (void)sigaction(SIGQUIT, &new_action, NULL);    // Terminate because of abnormal condition
+    sigaction(SIGINT,  &new_action, NULL);      // Sent via CTRL-C
+    sigaction(SIGTERM, &new_action, NULL);      // Generic signal used to cause program termination.
+    sigaction(SIGQUIT, &new_action, NULL);      // Terminate because of abnormal condition
 
-#ifdef SET_CPU_AFFINITY
+#if defined(SET_CPU_AFFINITY)
     {
         /* binds all openPOWERLINK threads to the second CPU core */
-        cpu_set_t                   affinity;
+        cpu_set_t   affinity;
 
         CPU_ZERO(&affinity);
         CPU_SET(1, &affinity);
@@ -189,7 +192,7 @@ The function can be used by the application to react on termination request.
 //------------------------------------------------------------------------------
 BOOL system_getTermSignalState(void)
 {
-    return fTermSignalReceived_g;
+    return fTermSignalReceived_l;
 }
 
 
@@ -200,7 +203,7 @@ BOOL system_getTermSignalState(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds has elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_app_common
 */
@@ -247,7 +250,7 @@ void system_msleep(unsigned int milliSeconds_p)
 
 The function starts the thread used for synchronous data handling.
 
-\param  pfnSync_p           Pointer to sync callback function
+\param[in]      pfnSync_p           Pointer to sync callback function
 
 \ingroup module_app_common
 */
@@ -255,11 +258,14 @@ The function starts the thread used for synchronous data handling.
 void system_startSyncThread(tSyncCb pfnSync_p)
 {
     int ret;
+
     syncThreadInstance_l.pfnSyncCb = pfnSync_p;
     syncThreadInstance_l.fTerminate = FALSE;
 
     // create sync thread
-    ret = pthread_create(&syncThreadId_l, NULL, &powerlinkSyncThread,
+    ret = pthread_create(&syncThreadId_l,
+                         NULL,
+                         &powerlinkSyncThread,
                          &syncThreadInstance_l);
     if (ret != 0)
     {
@@ -267,7 +273,7 @@ void system_startSyncThread(tSyncCb pfnSync_p)
         return;
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(syncThreadId_l, "oplkdemo-sync");
 #endif
 }
@@ -300,6 +306,9 @@ void system_stopSyncThread(void)
 This functions can be used to react on signals with termination semantics,
 and remembers in a flag that the user or the system asked the program to shut down.
 The application can than check this flag.
+
+\param[in]      signum              Received signal.
+
 */
 //------------------------------------------------------------------------------
 static void handleTermSignal(int signum)
@@ -309,7 +318,7 @@ static void handleTermSignal(int signum)
         case SIGINT:    // Signals with termination semantics
         case SIGTERM:   // trigger a flag change
         case SIGQUIT:
-            fTermSignalReceived_g = TRUE;
+            fTermSignalReceived_l = TRUE;
             break;
 
         default:        // All other signals are ignored by this handler
@@ -324,12 +333,12 @@ static void handleTermSignal(int signum)
 
 This function implements the synchronous application thread.
 
-\param  arg             Needed for thread interface not used
+\param[in,out]  arg                 Needed for thread interface not used
 */
 //------------------------------------------------------------------------------
 static void* powerlinkSyncThread(void* arg)
 {
-    tSyncThreadInstance*     pSyncThreadInstance = (tSyncThreadInstance*)arg;
+    tSyncThreadInstance*    pSyncThreadInstance = (tSyncThreadInstance*)arg;
 
     printf("Synchronous data thread is starting...\n");
     while (!pSyncThreadInstance->fTerminate)

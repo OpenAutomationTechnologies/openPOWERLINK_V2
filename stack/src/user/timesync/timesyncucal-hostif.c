@@ -10,7 +10,7 @@ This file contains the hostif sync implementation for the user CAL timesync modu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,7 +93,7 @@ static void hostifIrqSyncCb(void* pArg_p);
 
 The function initializes the user CAL timesync module
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -102,7 +102,7 @@ The function initializes the user CAL timesync module
 //------------------------------------------------------------------------------
 tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
-    tHostifReturn hifRet;
+    tHostifReturn   hifRet;
     tHostifInstance pHifInstance = hostif_getInstance(0);
 
     if (pHifInstance == NULL)
@@ -134,7 +134,7 @@ The function cleans up the user CAL timesync module
 //------------------------------------------------------------------------------
 void timesyncucal_exit(void)
 {
-    tHostifReturn hifRet;
+    tHostifReturn   hifRet;
     tHostifInstance pHifInstance = hostif_getInstance(0);
 
     if (pHifInstance == NULL)
@@ -156,12 +156,12 @@ void timesyncucal_exit(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+\retval kErrorOk                    Successfully received sync event
+\retval kErrorGeneralError          Error while waiting on sync event
 
 \ingroup module_timesyncucal
 */
@@ -169,6 +169,7 @@ The function waits for a sync event.
 tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
     UNUSED_PARAMETER(timeout_p);
+
     return kErrorOk;
 }
 
@@ -182,7 +183,7 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 /**
 \brief  Synchronization callback called by Host Interface library
 
-\param  pArg_p                  Argument pointer provides hostif instance
+\param[in,out]  pArg_p              Argument pointer provides hostif instance
 */
 //------------------------------------------------------------------------------
 static void hostifIrqSyncCb(void* pArg_p)
@@ -190,9 +191,7 @@ static void hostifIrqSyncCb(void* pArg_p)
     UNUSED_PARAMETER(pArg_p);
 
     if (pfnSyncCb_l != NULL)
-    {
         pfnSyncCb_l();
-    }
 }
 
-///\}
+/// \}

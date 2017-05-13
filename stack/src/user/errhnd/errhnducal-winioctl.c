@@ -16,6 +16,7 @@ fetches the corresponding error object.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -111,7 +112,7 @@ static tErrHndObjects*      pLocalObjects_l;                ///< Pointer to user
 
 The function initializes the user layer CAL module of the error handler.
 
-\param  pLocalObjects_p         Pointer to local error objects.
+\param[in]      pLocalObjects_p     Pointer to local error objects.
 
 \return Always returns kErrorOk.
 
@@ -126,6 +127,7 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
     pLocalObjects_l = pLocalObjects_p;
     instance_l.hFileHandle = ctrlucal_getFd();
     fInitialized_l = TRUE;
+
     return kErrorOk;
 }
 
@@ -151,16 +153,18 @@ void errhnducal_exit(void)
 The function writes an error handler object to the shared memory region used
 by user and kernel layers of the stack.
 
-\param  index_p             Index of object in object dictionary.
-\param  subIndex_p          Sub-index of object.
-\param  pParam_p            Pointer to object in error handlers memory space.
+\param[in]      index_p             Index of object in object dictionary.
+\param[in]      subIndex_p          Sub-index of object.
+\param[in]      pParam_p            Pointer to object in error handlers memory space.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p,
+                                       UINT subIndex_p,
+                                       const UINT32* pParam_p)
 {
     tErrHndIoctl    errObj;
     ULONG           bytesReturned;
@@ -169,13 +173,21 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    errObj.offset = (UINT32)((UINT8*)pParam_p - (UINT8*)pLocalObjects_l);
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
+    errObj.offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
     errObj.errVal = *pParam_p;
 
-    fIoctlRet = DeviceIoControl(instance_l.hFileHandle, PLK_CMD_ERRHND_WRITE,
-                                &errObj, sizeof(tErrHndIoctl), 0, 0,
-                                &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(instance_l.hFileHandle,
+                                PLK_CMD_ERRHND_WRITE,
+                                &errObj,
+                                sizeof(tErrHndIoctl),
+                                0,
+                                0,
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
         return kErrorGeneralError;
 
     return kErrorOk;
@@ -188,16 +200,18 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
 The function reads an error handler object from the shared memory region used
 by user and kernel layers of the stack.
 
-\param  index_p             Index of object in object dictionary.
-\param  subIndex_p          Sub-index of object.
-\param  pParam_p            Pointer to object in error handlers memory space.
+\param[in]      index_p             Index of object in object dictionary.
+\param[in]      subIndex_p          Sub-index of object.
+\param[out]     pParam_p            Pointer to object in error handlers memory space.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p,
+                                      UINT subIndex_p,
+                                      UINT32* pParam_p)
 {
     tErrHndIoctl    errObj;
     tErrHndIoctl    errObjRes;
@@ -207,13 +221,20 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    errObj.offset = (UINT32)((UINT8*)pParam_p - (UINT8*)pLocalObjects_l);
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
 
-    fIoctlRet = DeviceIoControl(instance_l.hFileHandle, PLK_CMD_ERRHND_READ,
-                                &errObj, sizeof(tErrHndIoctl),
-                                &errObjRes, sizeof(tErrHndIoctl),
-                                &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    errObj.offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
+
+    fIoctlRet = DeviceIoControl(instance_l.hFileHandle,
+                                PLK_CMD_ERRHND_READ,
+                                &errObj,
+                                sizeof(tErrHndIoctl),
+                                &errObjRes,
+                                sizeof(tErrHndIoctl),
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
         return kErrorGeneralError;
 
     *pParam_p = errObjRes.errVal;

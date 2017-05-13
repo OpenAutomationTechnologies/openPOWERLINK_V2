@@ -12,7 +12,7 @@ stack. Additionally, it provides status information to the user part.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,7 +60,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ledk.h>
 #endif
 
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
 #include <kernel/hrestimer.h>
 #endif
 
@@ -138,7 +138,7 @@ static void setupKernelFeatures(void);
 
 The function initializes the kernel control module.
 
-\param  pfnExecuteCmdCb_p   Command execution callback
+\param[in]      pfnExecuteCmdCb_p   Command execution callback
 
 \return The function returns a tOplkError error code.
 
@@ -147,24 +147,25 @@ The function initializes the kernel control module.
 //------------------------------------------------------------------------------
 tOplkError ctrlk_init(tCtrlkExecuteCmdCb pfnExecuteCmdCb_p)
 {
-    tOplkError      ret = kErrorOk;
-    if ((ret = ctrlkcal_init()) != kErrorOk)
+    tOplkError  ret;
+
+    // Reset the instance
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
+
+    ret = ctrlkcal_init();
+    if (ret != kErrorOk)
     {
         DEBUG_LVL_ERROR_TRACE("ctrlkcal_init failed!\n");
-        goto ExitCleanup;
+        ctrlkcal_exit();
+        goto Exit;
     }
 
     // initialize heartbeat counter
     instance_l.heartbeat = 1;
-
     setupKernelFeatures();
-
     instance_l.pfnExecuteCmdCb = pfnExecuteCmdCb_p;
 
-    return kErrorOk;
-
-ExitCleanup:
-    ctrlkcal_exit();
+Exit:
     return ret;
 }
 
@@ -179,9 +180,10 @@ The function cleans up the kernel control module.
 //------------------------------------------------------------------------------
 void ctrlk_exit(void)
 {
-    instance_l.pfnExecuteCmdCb = NULL;
-
     ctrlkcal_exit();
+
+    // Reset the instance
+    OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 }
 
 //------------------------------------------------------------------------------
@@ -192,15 +194,15 @@ This function implements the main function of the control module. It processes
 commands from the user part of the stack and executes them.
 
 \return Returns the exit flag.
-\retval TRUE    Kernel stack should exit.
-\retval FALSE   Kernel stack should continue running.
+\retval TRUE                        Kernel stack should exit.
+\retval FALSE                       Kernel stack should continue running.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
 BOOL ctrlk_process(void)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError          ret;
     UINT16              fRet;
     tCtrlKernelStatus   status;
     tCtrlCmdType        cmd = kCtrlNone;
@@ -247,23 +249,28 @@ The function executes a control command from the user part of the stack.
 The return value of the executed function will be stored a \p pRet_p. If the
 pointer to the status and exit flag is not NULL the appropriate data is stored.
 
-\param  cmd_p               The command to be executed.
-\param  pRet_p              Pointer to store the return value.
-\param  pStatus_p           Pointer to store the kernel stack status. (if not NULL)
-\param  pfExit_p            Pointer to store the exit flag. (if not NULL)
+\param[in]      cmd_p               The command to be executed.
+\param[out]     pRet_p              Pointer to store the return value.
+\param[out]     pStatus_p           Pointer to store the kernel stack status. (if not NULL)
+\param[out]     pfExit_p            Pointer to store the exit flag. (if not NULL)
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p,
-                            tCtrlKernelStatus* pStatus_p, BOOL* pfExit_p)
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p,
+                            UINT16* pRet_p,
+                            tCtrlKernelStatus* pStatus_p,
+                            BOOL* pfExit_p)
 {
     tOplkError          ret = kErrorOk;
     tCtrlKernelStatus   status;
     BOOL                fExit;
     tOplkError          retVal;
+
+    // Check parameter validity
+    ASSERT(pRet_p != NULL);
 
     if (instance_l.pfnExecuteCmdCb != NULL)
     {
@@ -330,14 +337,10 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p,
     }
 
     if (pStatus_p != NULL)
-    {
         *pStatus_p = status;
-    }
 
     if (pfExit_p != NULL)
-    {
         *pfExit_p = fExit;
-    }
 
     return ret;
 }
@@ -355,7 +358,7 @@ to be called periodically, e.g. from a timer routine.
 //------------------------------------------------------------------------------
 void ctrlk_updateHeartbeat(void)
 {
-    UINT16      heartbeat;
+    UINT16  heartbeat;
 
     heartbeat = instance_l.heartbeat++;
     ctrlkcal_updateHeartbeat(heartbeat);
@@ -386,9 +389,9 @@ buffer. The caller must provide a sufficiently large buffer to store a data
 chunk. The maximum chunk size can be obtained by calling
 \ref ctrlk_getMaxFileChunkSize.
 
-\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
-\param  bufferSize_p    Size of buffer for storing the chunk data
-\param  pBuffer_p       Pointer to buffer for storing the chunk data
+\param[out]     pDesc_p             Pointer to buffer for storing the chunk descriptor
+\param[in]      bufferSize_p        Size of buffer for storing the chunk data
+\param[out]     pBuffer_p           Pointer to buffer for storing the chunk data
 
 \return The function returns a tOplkError code.
 
@@ -396,9 +399,10 @@ chunk. The maximum chunk size can be obtained by calling
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                               size_t bufferSize_p, UINT8* pBuffer_p)
+                               size_t bufferSize_p,
+                               UINT8* pBuffer_p)
 {
-    if (pDesc_p == NULL || bufferSize_p == 0 || pBuffer_p == NULL)
+    if ((pDesc_p == NULL) || (bufferSize_p == 0) || (pBuffer_p == NULL))
         return kErrorInvalidInstanceParam;
 
     return ctrlkcal_readFileChunk(pDesc_p, bufferSize_p, pBuffer_p);
@@ -437,25 +441,28 @@ The function initializes the kernel stack modules.
 //------------------------------------------------------------------------------
 static tOplkError initStack(void)
 {
-    tOplkError          ret;
-    tEdrvInitParam      edrvInitParam;
+    tOplkError      ret;
+    tEdrvInitParam  edrvInitParam;
 
     ctrlkcal_readInitParam(&instance_l.initParam);
 
-    if ((ret = eventk_init()) != kErrorOk)
+    ret = eventk_init();
+    if (ret != kErrorOk)
         return ret;
 
-    if ((ret = nmtk_init()) != kErrorOk)
+    ret = nmtk_init();
+    if (ret != kErrorOk)
         return ret;
 
-    //jba able to work without hresk?
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
-    if ((ret = hrestimer_init()) != kErrorOk)
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
+    ret = hrestimer_init();
+    if (ret != kErrorOk)
         return ret;
 #endif
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-    if ((ret = synctimer_init()) != kErrorOk)
+    ret = synctimer_init();
+    if (ret != kErrorOk)
         return ret;
 #endif
 
@@ -468,7 +475,8 @@ static tOplkError initStack(void)
     edrvInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
     edrvInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
     edrvInitParam.pfnRxHandler = dllkframe_processFrameReceived;
-    if ((ret = edrv_init(&edrvInitParam)) != kErrorOk)
+    ret = edrv_init(&edrvInitParam);
+    if (ret != kErrorOk)
         return ret;
 
     // copy local MAC address from Ethernet driver back to init parameters
@@ -478,34 +486,42 @@ static tOplkError initStack(void)
 
     // initialize Edrvcyclic
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((ret = edrvcyclic_init()) != kErrorOk)
+    ret = edrvcyclic_init();
+    if (ret != kErrorOk)
         return ret;
 
-    if ((ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError)) != kErrorOk)
+    ret = edrvcyclic_regErrorHandler(dllk_cbCyclicError);
+    if (ret != kErrorOk)
         return ret;
 #endif
 
-    if ((ret = timesynck_init()) != kErrorOk)
+    ret = timesynck_init();
+    if (ret != kErrorOk)
         return ret;
 
     dllk_regSyncHandler(timesynck_sendSyncEvent);
 
     // initialize dllkcal module
-    if ((ret = dllkcal_init()) != kErrorOk)
+    ret = dllkcal_init();
+    if (ret != kErrorOk)
         return ret;
 
 #if defined(CONFIG_INCLUDE_PDO)
-    if ((ret = pdok_init()) != kErrorOk)
+    ret = pdok_init();
+    if (ret != kErrorOk)
         return ret;
 #endif
 
 #if defined(CONFIG_INCLUDE_LEDK)
     ret = ledk_init();
+    if (ret != kErrorOk)
+        return ret;
 #endif
 
     // initialize Virtual Ethernet Driver
 #if defined(CONFIG_INCLUDE_VETH)
-    if ((ret = veth_init(instance_l.initParam.aMacAddress)) != kErrorOk)
+    ret = veth_init(instance_l.initParam.aMacAddress);
+    if (ret != kErrorOk)
         return ret;
 #endif
 
@@ -538,7 +554,7 @@ static tOplkError shutdownStack(void)
 
     dllk_exit();
 
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
     hrestimer_exit();
 #endif
 
@@ -552,7 +568,7 @@ static tOplkError shutdownStack(void)
 
     timesynck_exit();
 
-#if defined (CONFIG_INCLUDE_NMT_MN)
+#if defined(CONFIG_INCLUDE_NMT_MN)
     // DLL and events are shutdown, now it's save to shutdown edrvcyclic
     edrvcyclic_exit();
 #endif
@@ -575,7 +591,7 @@ static tOplkError shutdownStack(void)
 The function sets up the features which are supported by the kernel stack.
 */
 //------------------------------------------------------------------------------
-void setupKernelFeatures(void)
+static void setupKernelFeatures(void)
 {
     instance_l.features = 0;
 

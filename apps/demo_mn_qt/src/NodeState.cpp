@@ -7,7 +7,7 @@
 This file contains the implementation of the NodeState class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,14 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <NodeState.h>
 
-#include "NodeState.h"
+#include <QLabel>
+#include <QPixmap>
+#include <QHBoxLayout>
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -57,11 +55,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Constructs a NodeState widget. The NodeState widget is used to show the
 POWERLINK state of a node.
 
-\param  label_p     Label for the nodestate widget.
-\param  parent_p    Pointer to the parent widget.
+\param[in]      label_p             Label for the nodestate widget.
+\param[in]      parent_p            Pointer to the parent widget.
 */
 //------------------------------------------------------------------------------
-NodeState::NodeState(const QString& label_p, QWidget* parent_p)
+NodeState::NodeState(const QString& label_p,
+                     QWidget* parent_p)
     : QWidget(parent_p)
 {
     pRedLed  = new QPixmap(":/img/ledred.png");
@@ -84,9 +83,9 @@ NodeState::NodeState(const QString& label_p, QWidget* parent_p)
     pStateLayout->addStretch();
 
     // create array for pointers to LedButtons
-    pLedLabel = new QLabel();
-    pLedLabel->setPixmap(*pRedLed);
-    pStateLayout->addWidget(pLedLabel);
+    this->pLedLabel = new QLabel();
+    this->pLedLabel->setPixmap(*pRedLed);
+    pStateLayout->addWidget(this->pLedLabel);
 
     pStateLayout->update();
 }
@@ -97,7 +96,7 @@ NodeState::NodeState(const QString& label_p, QWidget* parent_p)
 
 Sets the state of a node. Depending on the state a different image is shown.
 
-\param  state_p               state to be set
+\param[in]      state_p             state to be set
 */
 //------------------------------------------------------------------------------
 void NodeState::setState(int state_p)
@@ -105,16 +104,15 @@ void NodeState::setState(int state_p)
     switch (state_p)
     {
         case 1:
-            pLedLabel->setPixmap(*pYellowLed);
+            this->pLedLabel->setPixmap(*this->pYellowLed);
             break;
 
         case 2:
-            pLedLabel->setPixmap(*pGreenLed);
+            this->pLedLabel->setPixmap(*this->pGreenLed);
             break;
 
         default:
-            pLedLabel->setPixmap(*pRedLed);
+            this->pLedLabel->setPixmap(*this->pRedLed);
             break;
     }
 }
-

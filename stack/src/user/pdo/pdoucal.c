@@ -11,7 +11,7 @@ This file contains the generic functions of the user PDO CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ The function initializes the PDO user CAL module.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_init(void)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
     ret = pdoucal_openMem();
 
@@ -118,37 +118,38 @@ The function cleans up the PDO user CAL module.
 tOplkError pdoucal_exit(void)
 {
     pdoucal_closeMem();
+
     return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  Allocate memory for PDO channels in Pdok
+\brief  Allocate memory for PDO channels in pdok
 
 This function allocates memory for PDOs according to the specified parameter
-in the Pdok module by sending the appropriate event to Pdok.
+in the pdok module by sending the appropriate event to pdok.
 
-\param  pAllocationParam_p      Allocation parameters containing info
-                                needed for memory allocation.
+\param[in]      pAllocationParam_p  Allocation parameters containing info
+                                    needed for memory allocation.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
+tOplkError pdoucal_postPdokChannelAlloc(const tPdoAllocationParam* pAllocationParam_p)
 {
-    tOplkError  Ret = kErrorOk;
-    tEvent      Event;
+    tOplkError  ret;
+    tEvent      event;
 
-    Event.eventSink = kEventSinkPdokCal;
-    Event.eventType = kEventTypePdokAlloc;
-    Event.eventArg.pEventArg = pAllocationParam_p;
-    Event.eventArgSize = sizeof(*pAllocationParam_p);
+    event.eventSink = kEventSinkPdokCal;
+    event.eventType = kEventTypePdokAlloc;
+    event.eventArg.pEventArg = (void*)pAllocationParam_p;
+    event.eventArgSize = sizeof(*pAllocationParam_p);
 
-    Ret = eventu_postEvent(&Event);
+    ret = eventu_postEvent(&event);
 
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -158,23 +159,24 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 The function configures the specified PDO channel in the kernel by sending a
 kEventTypePdokConfig to the kernel PDO module.
 
-\param  pChannelConf_p          PDO channel configuration.
+\param[in]      pChannelConf_p      PDO channel configuration.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
+tOplkError pdoucal_postConfigureChannel(const tPdoChannelConf* pChannelConf_p)
 {
-    tOplkError      ret = kErrorOk;
-    tEvent          Event;
+    tOplkError  ret = kErrorOk;
+    tEvent      event;
 
-    Event.eventSink = kEventSinkPdokCal;
-    Event.eventType = kEventTypePdokConfig;
-    Event.eventArg.pEventArg = pChannelConf_p;
-    Event.eventArgSize = sizeof(tPdoChannelConf);
-    ret = eventu_postEvent(&Event);
+    event.eventSink = kEventSinkPdokCal;
+    event.eventType = kEventTypePdokConfig;
+    event.eventArg.pEventArg = (void*)pChannelConf_p;
+    event.eventArgSize = sizeof(tPdoChannelConf);
+
+    ret = eventu_postEvent(&event);
 
     return ret;
 }
@@ -186,29 +188,31 @@ tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 The function sends the PDO buffer setup to the kernel PDO module by posting
 a kEventTypePdokSetupPdoBuf event.
 
-\param  rxPdoMemSize_p          Size of RX PDO buffers.
-\param  txPdoMemSize_p          Size of TX PDO buffers.
+\param[in]      rxPdoMemSize_p      Size of RX PDO buffers.
+\param[in]      txPdoMemSize_p      Size of TX PDO buffers.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
+tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p,
+                                       size_t txPdoMemSize_p)
 {
-    tOplkError      Ret = kErrorOk;
-    tEvent          Event;
-    tPdoMemSize     pdoMemSize;
+    tOplkError  ret;
+    tEvent      event;
+    tPdoMemSize pdoMemSize;
 
     pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
     pdoMemSize.txPdoMemSize = txPdoMemSize_p;
-    Event.eventSink = kEventSinkPdokCal;
-    Event.eventType = kEventTypePdokSetupPdoBuf;
-    Event.eventArg.pEventArg = &pdoMemSize;
-    Event.eventArgSize = sizeof(tPdoMemSize);
-    Ret = eventu_postEvent(&Event);
+    event.eventSink = kEventSinkPdokCal;
+    event.eventType = kEventTypePdokSetupPdoBuf;
+    event.eventArg.pEventArg = &pdoMemSize;
+    event.eventArgSize = sizeof(tPdoMemSize);
 
-    return Ret;
+    ret = eventu_postEvent(&event);
+
+    return ret;
 }
 
 //============================================================================//
@@ -217,4 +221,4 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSiz
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

@@ -15,6 +15,7 @@ are added to process events in background.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -92,7 +93,7 @@ typedef struct
     HANDLE    hRcvFileHandle;           ///< Handle to driver for receiving events
     HANDLE    hThreadHandle;            ///< Handle to the event thread
     BOOL      fStopThread;              ///< Flag to identify thread exit
-    UINT32    threadId;                 ///< Thread ID of the event thread
+    DWORD     threadId;                 ///< Thread ID of the event thread
 } tEventuCalInstance;
 
 //------------------------------------------------------------------------------
@@ -104,7 +105,7 @@ static tEventuCalInstance    instance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static DWORD WINAPI eventThread(void* pArg_p);
-static tOplkError postEvent(tEvent* pEvent_p);
+static tOplkError   postEvent(const tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -119,16 +120,14 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
 tOplkError eventucal_init(void)
 {
-    tOplkError    ret = kErrorOk;
-
     OPLK_MEMSET(&instance_l, 0, sizeof(tEventuCalInstance));
 
     instance_l.hSendFileHandle = ctrlucal_getFd();
@@ -145,14 +144,16 @@ tOplkError eventucal_init(void)
     if (instance_l.hThreadHandle == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Failed to create event thread with error: 0x%X\n",
-                              __func__, GetLastError());
+                              __func__,
+                              GetLastError());
         return kErrorNoResource;
     }
 
     if (!SetThreadPriority(instance_l.hThreadHandle, THREAD_PRIORITY_TIME_CRITICAL))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
-                              __func__, GetLastError());
+                              __func__,
+                              GetLastError());
         return kErrorNoResource;
     }
 
@@ -170,8 +171,8 @@ functions of the queue implementations for each used queue.
       the exit of file interface.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -186,7 +187,8 @@ tOplkError eventucal_exit(void)
         target_msleep(10);
         if (i++ > 1000)
         {
-            TRACE("Event Thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTU_TRACE("%s(): Event thread is not terminating, continue shutdown...!\n",
+                                   __func__);
             break;
         }
     }
@@ -202,17 +204,20 @@ This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     return postEvent(pEvent_p);
 }
 
@@ -224,17 +229,20 @@ This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     return postEvent(pEvent_p);
 }
 
@@ -266,25 +274,32 @@ This function posts an event to a queue. It is called from the generic user
 event post function in the event handler. Depending on the sink the appropriate
 queue post function is called.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent(tEvent* pEvent_p)
+static tOplkError postEvent(const tEvent* pEvent_p)
 {
     UINT8     eventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
     DWORD     eventBufSize = (DWORD)(sizeof(tEvent) + pEvent_p->eventArgSize);
     ULONG     bytesReturned;
 
     OPLK_MEMCPY(eventBuf, pEvent_p, sizeof(tEvent));
-    OPLK_MEMCPY((eventBuf + sizeof(tEvent)), pEvent_p->eventArg.pEventArg, pEvent_p->eventArgSize);
+    OPLK_MEMCPY(eventBuf + sizeof(tEvent),
+                pEvent_p->eventArg.pEventArg,
+                pEvent_p->eventArgSize);
 
-    if (!DeviceIoControl(instance_l.hSendFileHandle, PLK_CMD_POST_EVENT,
-        eventBuf, eventBufSize,
-        0, 0, &bytesReturned, NULL))
+    if (!DeviceIoControl(instance_l.hSendFileHandle,
+                         PLK_CMD_POST_EVENT,
+                         eventBuf,
+                         eventBufSize,
+                         0,
+                         0,
+                         &bytesReturned,
+                         NULL))
         return kErrorNoResource;
 
     return kErrorOk;
@@ -298,7 +313,7 @@ This function implements the event thread. The thread uses IOCTLs to fetch the
 user-internal and kernel-to-user events from kernel layer. The events fetched
 are forwarded to the eventu module for processing.
 
-\param  pArg_p                Thread argument.
+\param[in,out]  pArg_p              Thread argument.
 
 \return Returns system error code.
 \retval 0, if function completed without errors.
@@ -317,13 +332,13 @@ static DWORD WINAPI eventThread(void* pArg_p)
 
     UNUSED_PARAMETER(pArg_p);
 
-    instance_l.hRcvFileHandle = CreateFile(PLK_DEV_FILE,                         // Name of the NT "device" to open
-                                          GENERIC_READ | GENERIC_WRITE,          // Access rights requested
-                                          FILE_SHARE_READ | FILE_SHARE_WRITE,    // Share access - NONE
-                                          NULL,                                  // Security attributes - not used!
-                                          OPEN_EXISTING,                         // Device must exist to open it.
-                                          FILE_ATTRIBUTE_NORMAL,                 // Open for overlapped I/O
-                                          NULL);
+    instance_l.hRcvFileHandle = CreateFile(PLK_DEV_FILE,                        // Name of the NT "device" to open
+                                           GENERIC_READ | GENERIC_WRITE,        // Access rights requested
+                                           FILE_SHARE_READ | FILE_SHARE_WRITE,  // Share access - NONE
+                                           NULL,                                // Security attributes - not used!
+                                           OPEN_EXISTING,                       // Device must exist to open it.
+                                           FILE_ATTRIBUTE_NORMAL,               // Open for overlapped I/O
+                                           NULL);
 
     if (instance_l.hRcvFileHandle == INVALID_HANDLE_VALUE)
     {
@@ -333,11 +348,14 @@ static DWORD WINAPI eventThread(void* pArg_p)
               errNum == ERROR_PATH_NOT_FOUND))
         {
             DEBUG_LVL_ERROR_TRACE("%s() createFile failed!  ERROR_FILE_NOT_FOUND = %d\n",
+                                  __func__,
                                   errNum);
         }
         else
         {
-            DEBUG_LVL_ERROR_TRACE("%s() createFile failed with error %d\n", errNum);
+            DEBUG_LVL_ERROR_TRACE("%s() createFile failed with error %d\n",
+                                  __func__,
+                                  errNum);
         }
 
         return kErrorNoResource;
@@ -347,35 +365,49 @@ static DWORD WINAPI eventThread(void* pArg_p)
 
     while (!instance_l.fStopThread)
     {
-        ret = DeviceIoControl(instance_l.hRcvFileHandle, PLK_CMD_GET_EVENT,
-                              NULL, 0, eventBuf, eventBufSize,
-                              &bytesReturned, NULL);
+        ret = DeviceIoControl(instance_l.hRcvFileHandle,
+                              PLK_CMD_GET_EVENT,
+                              NULL,
+                              0,
+                              eventBuf,
+                              eventBufSize,
+                              &bytesReturned,
+                              NULL);
         if (!ret)
         {
             if (DEVICE_CLOSE_IO == GetLastError())
             {
-                DEBUG_LVL_ALWAYS_TRACE("Closing Event Thread\n");
+                DEBUG_LVL_EVENTU_TRACE("%s(): Closing event thread\n", __func__);
             }
             else
             {
-                DEBUG_LVL_ERROR_TRACE("[AppEvent]:Error in DeviceIoControl : %d\n", GetLastError());
+                DEBUG_LVL_ERROR_TRACE("%s(): Error in DeviceIoControl: %d\n",
+                                      __func__,
+                                      GetLastError());
             }
-
             break;
         }
 
         if (bytesReturned != 0)
         {
-            /*TRACE ("%s() User: got event type:%d(%s) sink:%d(%s)\n", __func__,
-            pEvent->eventType, debugstr_getEventTypeStr(pEvent->eventType),
-            pEvent->eventSink, debugstr_getEventSinkStr(pEvent->eventSink));*/
+            DEBUG_LVL_EVENTU_TRACE("%s() User: got event type:%d(%s) sink:%d(%s)\n",
+                                   __func__,
+                                   pEvent->eventType,
+                                   debugstr_getEventTypeStr(pEvent->eventType),
+                                   pEvent->eventSink,
+                                   debugstr_getEventSinkStr(pEvent->eventSink));
             if (pEvent->eventArgSize != 0)
                 pEvent->eventArg.pEventArg = (UINT8*)pEvent + sizeof(tEvent);
 
             ret = eventu_process(pEvent);
         }
-        /*else
-            TRACE("%s() ret = %d %d\n", __func__, ret, bytesReturned);*/
+        else
+        {
+            DEBUG_LVL_EVENTU_TRACE("%s() ret = %d %d\n",
+                                   __func__,
+                                   ret,
+                                   bytesReturned);
+        }
     }
 
     CloseHandle(instance_l.hRcvFileHandle);

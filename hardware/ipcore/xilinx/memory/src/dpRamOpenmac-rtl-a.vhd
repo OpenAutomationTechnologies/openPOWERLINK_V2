@@ -97,18 +97,16 @@ begin
                 readdataA <= vDpram(to_integer(unsigned(iAddress_A)));
                 ---------------------------------------------------------------
 
-                if iWriteEnable_A = cActivated then
-                    for i in iByteenable_A'range loop
-                        if iByteenable_A(i) = cActivated then
-                            -- write byte to DPRAM
-                            vDpram(to_integer(unsigned(iAddress_A)))(
-                                (i+1)*cByte-1 downto i*cByte
-                            ) := iWritedata_A(
-                                (i+1)*cByte-1 downto i*cByte
-                            );
-                        end if; --byteenable
-                    end loop;
-                end if; --writeenable
+                for i in iByteenable_A'range loop
+                    if ((iByteenable_A(i) = cActivated) and (iWriteEnable_A = cActivated)) then
+                        -- write byte to DPRAM
+                        vDpram(to_integer(unsigned(iAddress_A)))(
+                            (i+1)*cByte-1 downto i*cByte
+                        ) := iWritedata_A(
+                            (i+1)*cByte-1 downto i*cByte
+                        );
+                    end if; --byteenable
+                end loop;
             end if; --enable
         end if;
     end process PORTA;
@@ -120,18 +118,16 @@ begin
     begin
         if rising_edge(iClk_B) then
             if iEnable_B = cActivated then
-                if iWriteEnable_B = cActivated then
-                    for i in iByteenable_B'range loop
-                        if iByteenable_B(i) = cActivated then
-                            -- write byte to DPRAM
-                            vDpram(to_integer(unsigned(iAddress_B)))(
-                                (i+1)*cByte-1 downto i*cByte
-                            ) := iWritedata_B(
-                                (i+1)*cByte-1 downto i*cByte
-                            );
-                        end if; --byteenable
-                    end loop;
-                end if; --writeenable
+                for i in iByteenable_B'range loop
+                    if ((iByteenable_B(i) = cActivated) and (iWriteEnable_B = cActivated)) then
+                        -- write byte to DPRAM
+                        vDpram(to_integer(unsigned(iAddress_B)))(
+                            (i+1)*cByte-1 downto i*cByte
+                        ) := iWritedata_B(
+                            (i+1)*cByte-1 downto i*cByte
+                        );
+                    end if; --byteenable
+                end loop;
                 -- read word from DPRAM
                 readdataB <= vDpram(to_integer(unsigned(iAddress_B)));
             end if; --enable

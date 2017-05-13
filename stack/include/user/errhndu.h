@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   errhndu.h
+\file   user/errhndu.h
 
 \brief  interface definitions for user error handler module
 
@@ -9,7 +9,7 @@ This file provides the interface for the user error handler module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_errhndu_H_
-#define _INC_errhndu_H_
+#ifndef _INC_user_errhndu_H_
+#define _INC_user_errhndu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -56,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -69,11 +67,11 @@ tOplkError errhndu_init(void);
 tOplkError errhndu_exit(void);
 
 // object callback functions
-tOplkError errhndu_cbObdAccess(tObdCbParam MEM* pParam_p);
-tOplkError errhndu_mnCnLossPresCbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError errhndu_cbObdAccess(const tObdCbParam* pParam_p);
+tOplkError errhndu_mnCnLossPresCbObdAccess(const tObdCbParam* pParam_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_errhndu_H_ */
+#endif /* _INC_user_errhndu_H_ */

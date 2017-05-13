@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,7 +33,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_ami_H_
 #define _INC_common_ami_H_
 
@@ -46,12 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-// Conversion macros for datatype UINT8 (saves code size)
+// Conversion macros for data type UINT8 (saves code size)
 #define ami_setUint8Be(pAddr_p, uint8Val_p) {*(UINT8*)(pAddr_p) = (uint8Val_p);}
 #define ami_setUint8Le(pAddr_p, uint8Val_p) {*(UINT8*)(pAddr_p) = (uint8Val_p);}
 
-#define ami_getUint8Be(pAddr_p) (*(UINT8*)(pAddr_p))
-#define ami_getUint8Le(pAddr_p) (*(UINT8*)(pAddr_p))
+#define ami_getUint8Be(pAddr_p) (*(const UINT8*)(pAddr_p))
+#define ami_getUint8Le(pAddr_p) (*(const UINT8*)(pAddr_p))
 
 //------------------------------------------------------------------------------
 // typedef
@@ -60,68 +59,66 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-// Conversion functions for datatype WORD
+// Conversion functions for data type WORD
 void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
 void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
 
-UINT16 ami_getUint16Be(void* pAddr_p);
-UINT16 ami_getUint16Le(void* pAddr_p);
+UINT16 ami_getUint16Be(const void* pAddr_p) SECTION_AMI_GETUINT16BE;
+UINT16 ami_getUint16Le(const void* pAddr_p) SECTION_AMI_GETUINT16LE;
 
-// Conversion functions for datatype DWORD24
+// Conversion functions for data type DWORD24
 void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p);
 void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p);
 
-UINT32 ami_getUint24Be(void* pAddr_p);
-UINT32 ami_getUint24Le(void* pAddr_p);
+UINT32 ami_getUint24Be(const void* pAddr_p);
+UINT32 ami_getUint24Le(const void* pAddr_p);
 
-// Conversion functions for datatype DWORD
+// Conversion functions for data type DWORD
 void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p);
 void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p);
 
-UINT32 ami_getUint32Be(void* pAddr_p);
-UINT32 ami_getUint32Le(void* pAddr_p);
+UINT32 ami_getUint32Be(const void* pAddr_p);
+UINT32 ami_getUint32Le(const void* pAddr_p);
 
-// Conversion functions for datatype QWORD40
+// Conversion functions for data type QWORD40
 void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p);
 void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 ami_getUint40Be(void* pAddr_p);
-UINT64 ami_getUint40Le(void* pAddr_p);
+UINT64 ami_getUint40Be(const void* pAddr_p);
+UINT64 ami_getUint40Le(const void* pAddr_p);
 
-// Conversion functions for datatype QWORD48
+// Conversion functions for data type QWORD48
 void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p);
 void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 ami_getUint48Be(void* pAddr_p);
-UINT64 ami_getUint48Le(void* pAddr_p);
+UINT64 ami_getUint48Be(const void* pAddr_p);
+UINT64 ami_getUint48Le(const void* pAddr_p);
 
-// Conversion functions for datatype QWORD56
+// Conversion functions for data type QWORD56
 void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p);
 void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 ami_getUint56Be(void* pAddr_p);
-UINT64 ami_getUint56Le(void* pAddr_p);
+UINT64 ami_getUint56Be(const void* pAddr_p);
+UINT64 ami_getUint56Le(const void* pAddr_p);
 
-// Conversion functions for datatype QWORD
+// Conversion functions for data type QWORD
 void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p);
 void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p);
 
-UINT64 ami_getUint64Be(void* pAddr_p);
-UINT64 ami_getUint64Le(void* pAddr_p);
+UINT64 ami_getUint64Be(const void* pAddr_p);
+UINT64 ami_getUint64Le(const void* pAddr_p);
 
 // Conversion functions for type tTimeOfDay
-void ami_setTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
-void ami_getTimeOfDay(void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
+void ami_setTimeOfDay(void* pAddr_p, const tTimeOfDay* pTimeOfDay_p);
+void ami_getTimeOfDay(const void* pAddr_p, tTimeOfDay* pTimeOfDay_p);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* _INC_common_ami_H_ */

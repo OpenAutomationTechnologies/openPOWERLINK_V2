@@ -12,7 +12,7 @@ user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 
+#if defined(CONFIG_INCLUDE_VETH)
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -100,7 +101,7 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
 
 The function initializes the virtual Ethernet module.
 
-\param  aSrcMac_p       MAC address to set for virtual Ethernet interface.
+\param[in]      aSrcMac_p           MAC address to set for virtual Ethernet interface.
 
 \return The function returns a tOplkError error code.
 
@@ -109,7 +110,7 @@ The function initializes the virtual Ethernet module.
 //------------------------------------------------------------------------------
 tOplkError veth_init(const UINT8 aSrcMac_p[6])
 {
-    tOplkError ret = kErrorOk;
+    tOplkError ret;
 
     UNUSED_PARAMETER(aSrcMac_p);
 
@@ -132,7 +133,7 @@ The function shuts down the virtual Ethernet module.
 //------------------------------------------------------------------------------
 tOplkError veth_exit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError ret;
 
     // Unregister the receive callback function
     ret = dllk_deregAsyncHandler(receiveFrameCb);
@@ -152,10 +153,10 @@ tOplkError veth_exit(void)
 
 This function is called by DLLk if a non POWERLINK frame is received.
 
-\param  pFrameInfo_p        Frame info of the received frame
-\param  pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
-                            set this flag to determine if the RxBuffer could be
-                            released immediately.
+\param[in,out]  pFrameInfo_p        Frame info of the received frame
+\param[out]     pReleaseRxBuffer_p  Pointer to buffer release flag. The function must
+                                    set this flag to determine if the RxBuffer could be
+                                    released immediately.
 
 \return The function returns a tOplkError error code.
 */
@@ -163,7 +164,7 @@ This function is called by DLLk if a non POWERLINK frame is received.
 static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
                                  tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError ret;
 
     ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
     if (ret == kErrorReject)
@@ -176,3 +177,5 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH

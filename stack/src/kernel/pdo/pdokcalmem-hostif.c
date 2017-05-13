@@ -13,7 +13,7 @@ layer are separated by host interface IP-Core.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -106,12 +106,12 @@ start of the stack.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_openMem(void)
 {
-    tHostifReturn hifret;
+    tHostifReturn   hifret;
     tHostifInstance pInstance = hostif_getInstance(0);
 
     if (pInstance == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() couldn't get Pcp hostif instance\n",
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't get PCP hostif instance\n",
                               __func__);
         return kErrorNoResource;
     }
@@ -121,7 +121,8 @@ tOplkError pdokcal_openMem(void)
     if (hifret != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
-                              __func__, hifret);
+                              __func__,
+                              hifret);
         return kErrorNoResource;
     }
 
@@ -153,20 +154,25 @@ tOplkError pdokcal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer
+\param[in]      memSize_p           Size of PDO memory
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
+
     if (memSize_p > limPdo_l.span)
     {
         DEBUG_LVL_ERROR_TRACE("%s() out of memory (%d > %d)\n",
-                              __func__, memSize_p, limPdo_l.span);
+                              __func__,
+                              memSize_p,
+                              limPdo_l.span);
         return kErrorNoResource;
     }
 
@@ -180,69 +186,27 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 \brief  Free PDO shared memory
 
 The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment
-\param  memSize_p               Size of PDO memory
+\param[in,out]  pMem_p              Pointer to the shared memory segment
+\param[in]      memSize_p           Size of PDO memory
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
 
     DEBUG_LVL_PDO_TRACE("%s() try to free address %p (%p)\n",
-                        __func__, pMem_p, limPdo_l.pBase);
+                        __func__,
+                        pMem_p,
+                        limPdo_l.pBase);
 
     return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Map PDO shared memory
-
-This routine maps the PDO memory allocated in the kernel layer of the openPOWERLINK
-stack. This allows user stack to access the PDO memory directly.
-
-\param  ppKernelMem_p           Double pointer to the shared memory segment in kernel space.
-\param  ppUserMem_p             Double pointer to the shared memory segment in user space.
-\param  pMemSize_p              Pointer to size of PDO memory.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-tOplkError pdokcal_mapMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, size_t* pMemSize_p)
-{
-    UNUSED_PARAMETER(ppKernelMem_p);
-    UNUSED_PARAMETER(ppUserMem_p);
-    UNUSED_PARAMETER(pMemSize_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Unmap PDO shared memory
-
-Unmap the PDO memory shared with the user layer. The memory will be freed in
-pdokcal_freeMem().
-
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
-
-\ingroup module_pdokcal
-*/
-//------------------------------------------------------------------------------
-void pdokcal_unMapMem(UINT8* pMem_p, size_t memSize_p)
-{
-    UNUSED_PARAMETER(pMem_p);
-    UNUSED_PARAMETER(memSize_p);
 }
 
 //============================================================================//

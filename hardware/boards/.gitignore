@@ -45,3 +45,7 @@ synthesis/
 *.gui
 *.xdc
 *.ucf
+
+# Vivado
+## Dirs
+system/

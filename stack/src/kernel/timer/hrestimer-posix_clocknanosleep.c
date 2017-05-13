@@ -13,7 +13,7 @@ implementation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -61,18 +61,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#undef  HIGH_RESK_TIMER_LATENCY_DEBUG   ///< enable/disable latency debugging
+#undef  HIGH_RESK_TIMER_LATENCY_DEBUG       ///< enable/disable latency debugging
 
-#define TIMER_COUNT           2         ///< number of high-resolution timers
-#define TIMER_MIN_VAL_SINGLE  20000     ///< minimum timer intervall for single timeouts
-#define TIMER_MIN_VAL_CYCLE   100000    ///< minimum timer intervall for continuous timeouts
+#define TIMER_COUNT             2           ///< number of high-resolution timers
+#define TIMER_MIN_VAL_SINGLE    20000       ///< minimum timer interval for single timeouts
+#define TIMER_MIN_VAL_CYCLE     100000      ///< minimum timer interval for continuous timeouts
 
 /* macros for timer handles */
-#define TIMERHDL_MASK         0x0FFFFFFF
-#define TIMERHDL_SHIFT        28
-#define HDL_TO_IDX(Hdl)       ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)         ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)          (((Hdl + 1) & TIMERHDL_MASK) | (Hdl & ~TIMERHDL_MASK))
+#define TIMERHDL_MASK           0x0FFFFFFF
+#define TIMERHDL_SHIFT          28
+#define HDL_TO_IDX(hdl)         ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)           ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)            (((hdl + 1) & TIMERHDL_MASK) | (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -106,7 +106,7 @@ typedef struct
     struct timespec     startTime;          ///< Timestamp of timer start
     ULONGLONG           time;               ///< Timer period in nanoseconds
     pthread_t           timerThreadId;      ///< Handle of timer thread
-    sem_t               syncSem;            ///< Thread synchronisation semaphore
+    sem_t               syncSem;            ///< Thread synchronization semaphore
     BOOL                fTerminate;         ///< Thread termination flag
     BOOL                fContinue;          ///< Flag determines if timer will be restarted continuously
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
@@ -135,12 +135,14 @@ static tHresTimerInstance    hresTimerInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static void* timerThread(void* pArgument_p);
-static inline void timespec_add(struct timespec* time1_p, ULONGLONG time_p,
-                                struct timespec* result_p);
+static inline void timespec_add(const struct timespec* time1_p,
+                                ULONGLONG offset_p,
+                                struct timespec* result_p)
 
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-static inline void timespec_sub(struct timespec* time1_p, struct timespec* time2_p,
-                                struct timespec* result_p);
+static inline void timespec_sub(const struct timespec* time1_p,
+                                const struct timespec* time2_p,
+                                struct timespec* result_p)
 #endif
 
 
@@ -161,10 +163,10 @@ The function initializes the high-resolution timer module
 //------------------------------------------------------------------------------
 tOplkError hrestimer_init(void)
 {
-    tOplkError                  ret = kErrorOk;
-    UINT                        index;
-    struct sched_param          schedParam;
-    tHresTimerInfo*             pTimerInfo;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    struct sched_param  schedParam;
+    tHresTimerInfo*     pTimerInfo;
 
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(hresTimerInstance_l));
 
@@ -200,7 +202,7 @@ tOplkError hrestimer_init(void)
             return kErrorNoResource;
         }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
         pthread_setname_np(pTimerInfo->timerThreadId, "oplk-hrtimer");
 #endif
     }
@@ -221,9 +223,9 @@ The function shuts down the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_exit(void)
 {
-    tHresTimerInfo*         pTimerInfo;
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
+    tHresTimerInfo*     pTimerInfo;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
 
     for (index = 0; index < TIMER_COUNT; index++)
     {
@@ -259,27 +261,29 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, the callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
-    tHresTimerInfo*         pTimerInfo;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
 
     DEBUG_LVL_TIMERH_TRACE("%s() pTimerHdl_p=%08x/%08x\n",
                             __func__, (unsigned int)pTimerHdl_p, (unsigned int)*pTimerHdl_p);
@@ -350,10 +354,10 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 /**
 \brief    Delete a high-resolution timer
 
-The function deletes an created high-resolution timer. The timer is specified
+The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -362,9 +366,9 @@ by its timer handle. After deleting, the handle is reset to zero.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    index;
-    tHresTimerInfo*         pTimerInfo;
+    tOplkError          ret = kErrorOk;
+    UINT                index;
+    tHresTimerInfo*     pTimerInfo;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
@@ -403,7 +407,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -421,7 +425,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -448,21 +452,21 @@ clock_nanosleep() until the timeout is reached. When the timeout is reached
 the callback function registered in the timer info structure is called. If the
 flag m_fContinue is set the thread loops until the timer is deleted.
 
-\param  pArgument_p     Thread parameter. It contains the pointer to the timer
-                        info structure.
+\param[in,out]  pArgument_p         Thread parameter. It contains the pointer to
+                                    the timer info structure.
 
 \return Returns a void* as specified by the pthread interface but it is not used!
 */
 //------------------------------------------------------------------------------
 static void* timerThread(void* pArgument_p)
 {
-    INT                         iRet;
-    tHresTimerInfo*             pTimerInfo;
-    struct timespec             startTime, timeout;
-    ULONGLONG                   period;
-    tTimerHdl                   timerHdl;
+    int                 iRet;
+    tHresTimerInfo*     pTimerInfo;
+    struct timespec     startTime, timeout;
+    ULONGLONG           period;
+    tTimerHdl           timerHdl;
 #ifdef HIGH_RESK_TIMER_LATENCY_DEBUG
-    struct timespec             debugtime, curTime;
+    struct timespec     debugtime, curTime;
 #endif
 
     DEBUG_LVL_TIMERH_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
@@ -560,12 +564,13 @@ static void* timerThread(void* pArgument_p)
 
 The function adds a time offset in nanoseconds to a timespec value.
 
-\param  time1_p     Pointer to timespec to which the offset should be added.
-\param  offset_p    Offset in nanoseconds to add.
-\param  result_p    Pointer to store the result of the calculation.
+\param[in]      time1_p             Pointer to timespec to which the offset should be added.
+\param[in]      offset_p            Offset in nanoseconds to add.
+\param[out]     result_p            Pointer to store the result of the calculation.
 */
 //------------------------------------------------------------------------------
-static inline void timespec_add(struct timespec* time1_p, ULONGLONG offset_p,
+static inline void timespec_add(const struct timespec* time1_p,
+                                ULONGLONG offset_p,
                                 struct timespec* result_p)
 {
     result_p->tv_sec = time1_p->tv_sec;
@@ -589,13 +594,15 @@ static inline void timespec_add(struct timespec* time1_p, ULONGLONG offset_p,
 
 The function subtracts two timespec values.
 
-\param  time1_p     Pointer to first timespec value from which to substract the
-                    second one.
-\param  time2_p     Pointer to second timespec value which will be substracted.
-\param  result_p    Pointer to store the result of the calculation.
+\param[in]      time1_p             Pointer to first timespec value from which
+                                    to substract the second one.
+\param[in]      time2_p             Pointer to second timespec value which will
+                                    be substracted.
+\param[out]     result_p            Pointer to store the result of the calculation.
 */
 //------------------------------------------------------------------------------
-static inline void timespec_sub(struct timespec* time1_p, struct timespec* time2_p,
+static inline void timespec_sub(const struct timespec* time1_p,
+                                const struct timespec* time2_p,
                                 struct timespec* result_p)
 {
     if (time2_p->tv_nsec > time1_p->tv_nsec)

@@ -10,7 +10,7 @@ This source file contains the implementation of the process image functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -80,14 +80,18 @@ output process image.
 */
 typedef struct
 {
-    tOplkApiProcessImage     inputImage;    ///< Input process image
-    tOplkApiProcessImage     outputImage;   ///< Output process image
+    tOplkApiProcessImage        inputImage;     ///< Input process image
+    tOplkApiProcessImage        outputImage;    ///< Output process image
 } tApiProcessImageInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tApiProcessImageInstance  instance_l = { { NULL, 0 }, { NULL, 0 } };
+static tApiProcessImageInstance instance_l =
+{
+    { NULL, 0 },
+    { NULL, 0 }
+};
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -103,8 +107,8 @@ static tApiProcessImageInstance  instance_l = { { NULL, 0 }, { NULL, 0 } };
 
 The function allocates memory for the input and output process images.
 
-\param  sizeProcessImageIn_p          Size for input process image.
-\param  sizeProcessImageOut_p         Size for output process image.
+\param[in]      sizeProcessImageIn_p    Size for input process image.
+\param[in]      sizeProcessImageOut_p   Size for output process image.
 
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk                        Process images are successfully allocated.
@@ -115,28 +119,29 @@ The function allocates memory for the input and output process images.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p)
+tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p,
+                                  UINT sizeProcessImageOut_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
-    TRACE("%s(): Alloc(%u, %u)\n", __func__, sizeProcessImageIn_p,
-                                   sizeProcessImageOut_p);
+    DEBUG_LVL_ALWAYS_TRACE("%s(): Alloc(%u, %u)\n",
+                           __func__,
+                           sizeProcessImageIn_p,
+                           sizeProcessImageOut_p);
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    if ((instance_l.inputImage.pImage != NULL) || (instance_l.outputImage.pImage != NULL))
-    {
+    if ((instance_l.inputImage.pImage != NULL) ||
+        (instance_l.outputImage.pImage != NULL))
         return kErrorApiPIAlreadyAllocated;
-    }
 
     if (sizeProcessImageIn_p != 0)
     {
         instance_l.inputImage.pImage = OPLK_MALLOC(sizeProcessImageIn_p);
         if (instance_l.inputImage.pImage == NULL)
-        {
             return kErrorApiPIOutOfMemory;
-        }
+
         instance_l.inputImage.imageSize = sizeProcessImageIn_p;
         OPLK_MEMSET(instance_l.inputImage.pImage, 0x00, sizeProcessImageIn_p);
     }
@@ -150,13 +155,17 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessIma
             oplk_freeProcessImage();
             return kErrorApiPIOutOfMemory;
         }
+
         instance_l.outputImage.imageSize = sizeProcessImageOut_p;
         OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
     }
 
-    TRACE("%s: Alloc(%p, %u, %p, %u)\n", __func__,
-          instance_l.inputImage.pImage,  instance_l.inputImage.imageSize,
-          instance_l.outputImage.pImage, instance_l.outputImage.imageSize);
+    DEBUG_LVL_ALWAYS_TRACE("%s: Alloc(%p, %u, %p, %u)\n",
+                           __func__,
+                           instance_l.inputImage.pImage,
+                           instance_l.inputImage.imageSize,
+                           instance_l.outputImage.pImage,
+                           instance_l.outputImage.imageSize);
 
     return ret;
 }
@@ -176,7 +185,7 @@ The function frees the allocated process images
 //------------------------------------------------------------------------------
 tOplkError oplk_freeProcessImage(void)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -204,18 +213,18 @@ tOplkError oplk_freeProcessImage(void)
 
 The function links an object in the OD into a location in the process image.
 
-\param  objIndex_p              The object index of the object to link.
-\param  firstSubindex_p         The sub-index of the object where the first
-                                variable should be linked to.
-\param  offsetPI_p              The offset of the first process variable in the
-                                process image.
-\param  fOutputPI_p             Determines if input image or output image should
-                                be used: TRUE = output image, FALSE = imput image
-\param  entrySize_p             The size of one process variable.
-\param  pVarEntries_p           The number of process variables, which shall be
-                                linked to the object dictionary. It returns the
-                                actual number of process variables which were
-                                linked to the object dictionary.
+\param[in]      objIndex_p          The object index of the object to link.
+\param[in]      firstSubindex_p     The sub-index of the object where the first
+                                    variable should be linked to.
+\param[in]      offsetPI_p          The offset of the first process variable in the
+                                    process image.
+\param[in]      fOutputPI_p         Determines if input image or output image should
+                                    be used: TRUE = output image, FALSE = imput image
+\param[in]      entrySize_p         The size of one process variable.
+\param[in,out]  pVarEntries_p       The number of process variables, which shall be
+                                    linked to the object dictionary. It returns the
+                                    actual number of process variables which were
+                                    linked to the object dictionary.
 
 \return The function returns a \ref tOplkError error code.
 \retval kErrorOk                    Object is successfully linked.
@@ -226,12 +235,15 @@ The function links an object in the OD into a location in the process image.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
-                                       UINT offsetPI_p, BOOL fOutputPI_p,
-                                       tObdSize entrySize_p, UINT* pVarEntries_p)
+tOplkError oplk_linkProcessImageObject(UINT objIndex_p,
+                                       UINT firstSubindex_p,
+                                       UINT offsetPI_p,
+                                       BOOL fOutputPI_p,
+                                       tObdSize entrySize_p,
+                                       UINT* pVarEntries_p)
 {
-    tOplkError      ret = kErrorOk;
-    void*           pVar;
+    tOplkError  ret = kErrorOk;
+    void*       pVar;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -244,11 +256,13 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
         if (instance_l.outputImage.pImage == NULL)
             return kErrorApiPISizeExceeded;     // If there's no image, we are too big
 
-        pVar = ((BYTE*)instance_l.outputImage.pImage) + offsetPI_p;
+        pVar = ((UINT8*)instance_l.outputImage.pImage) + offsetPI_p;
+
         if ((offsetPI_p + entrySize_p) > instance_l.outputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kErrorApiPISizeExceeded;
         }
+
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.outputImage.imageSize)
         {   // limit the number of entries
             *pVarEntries_p = (instance_l.outputImage.imageSize - offsetPI_p) / entrySize_p;
@@ -259,11 +273,13 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p, UINT firstSubindex_p,
         if (instance_l.inputImage.pImage == NULL)
             return kErrorApiPISizeExceeded;     // If there's no image, we are too big
 
-        pVar = ((BYTE*)instance_l.inputImage.pImage) + offsetPI_p;
+        pVar = ((UINT8*)instance_l.inputImage.pImage) + offsetPI_p;
+
         if ((offsetPI_p + entrySize_p) > instance_l.inputImage.imageSize)
         {   // at least one entry should fit into the PI, but it doesn't
             return kErrorApiPISizeExceeded;
         }
+
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.inputImage.imageSize)
         {   // limit the number of entries
             *pVarEntries_p = (instance_l.inputImage.imageSize - offsetPI_p) / entrySize_p;
@@ -291,7 +307,7 @@ The function exchanges the input process image.
 //------------------------------------------------------------------------------
 tOplkError oplk_exchangeProcessImageIn(void)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -320,7 +336,7 @@ The function exchanges the output process image.
 //------------------------------------------------------------------------------
 tOplkError oplk_exchangeProcessImageOut(void)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -371,6 +387,28 @@ void* oplk_getProcessImageOut(void)
         return NULL;
 
     return instance_l.outputImage.pImage;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Setup process image
+
+The function sets up the process image according to the CiA302-4 profile.
+
+\deprecated The process image setup has to be done in the application since the
+            object dictionary is defined in the application.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorApiNotSupported       This call is not supported.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_setupProcessImage(void)
+{
+    DEBUG_LVL_ALWAYS_TRACE("Since openPOWERLINK 2.5.0 the process image setup is done in the application.\n");
+
+    return kErrorApiNotSupported;
 }
 
 //============================================================================//

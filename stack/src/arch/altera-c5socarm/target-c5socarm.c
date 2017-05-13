@@ -12,6 +12,7 @@ Altera SoC ARM without OS.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -40,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include <sys/unistd.h>
 #include <alt_timers.h>
 #include <alt_globaltmr.h>
@@ -54,10 +54,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <system.h>
 
-#include <oplk/oplk.h>
-#include <oplk/debug.h>
 #include <common/target.h>
 #include "sleep.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -81,7 +80,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define SECS_TO_MILLISECS    1000
+#define SECS_TO_MILLISECS   1000
 
 //------------------------------------------------------------------------------
 // local types
@@ -97,7 +96,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
 static inline INT       enableCpuIrqInterface(void);
 static inline INT       disableCpuIrqInterface(void);
 
@@ -128,33 +126,44 @@ UINT32 target_getTickCount(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get current timestamp
+
+The function returns the current timestamp in nanoseconds.
+
+\return The function returns the timestamp in nanoseconds
+*/
+//------------------------------------------------------------------------------
+ULONGLONG target_getCurrentTimestamp(void)
+{
+    // Not implemented for this target
+    return 0ULL;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief    Enables global interrupt
 
 This function enables/disables global interrupts.
 
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
+\param[in]      fEnable_p           TRUE = enable interrupts
+                                    FALSE = disable interrupts
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(UINT8 fEnable_p)
+void target_enableGlobalInterrupt(BOOL fEnable_p)
 {
     static INT    lockCount = 0;
 
     if (fEnable_p != FALSE) // restore interrupts
     {
         if (--lockCount == 0)
-        {
             enableCpuIrqInterface();
-        }
     }
     else
     {                       // disable interrupts
         if (lockCount == 0)
-        {
             disableCpuIrqInterface();
-        }
 
         lockCount++;
     }
@@ -174,10 +183,10 @@ openPOWERLINK stack.
 //------------------------------------------------------------------------------
 tOplkError target_init(void)
 {
-    tOplkError          oplkRet = kErrorOk;
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    tOplkError      oplkRet = kErrorOk;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
-#ifdef ALTARM_CACHE_ENABLE
+#if defined(ALTARM_CACHE_ENABLE)
     // Enable Cache
     halRet = alt_cache_system_enable();
 #else
@@ -194,16 +203,16 @@ tOplkError target_init(void)
     halRet = alt_int_global_init();
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("global IRQ controller initialization Failed!!\n");
+        DEBUG_LVL_ERROR_TRACE("Global IRQ controller initialization failed!!\n");
         oplkRet = kErrorGeneralError;
         goto Exit;
     }
 
-    // Initialize the cpu interrupt interface
+    // Initialize the CPU interrupt interface
     halRet = alt_int_cpu_init();
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("CPU IRQ interface initialization Failed!!\n");
+        DEBUG_LVL_ERROR_TRACE("CPU IRQ interface initialization failed!!\n");
         oplkRet = kErrorGeneralError;
         goto Exit;
     }
@@ -212,7 +221,7 @@ tOplkError target_init(void)
     halRet = alt_int_global_enable();
     if (halRet != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("enabling global interrupt receiver failed\n");
+        DEBUG_LVL_ERROR_TRACE("enabling global interrupt receiver failed!!\n");
         oplkRet = kErrorGeneralError;
         goto Exit;
     }
@@ -234,7 +243,7 @@ The function cleans-up target specific stuff.
 //------------------------------------------------------------------------------
 tOplkError target_cleanup(void)
 {
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     disableCpuIrqInterface();
     // Disable all interrupts from the distributor
@@ -243,7 +252,7 @@ tOplkError target_cleanup(void)
     alt_int_global_uninit();
     halRet = alt_cache_system_disable();
 
-    return kErrorOk;
+    return (halRet == ALT_E_SUCCESS) ? kErrorOk : kErrorGeneralError;
 }
 
 //------------------------------------------------------------------------------
@@ -253,7 +262,7 @@ tOplkError target_cleanup(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p            Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_target
 */
@@ -270,17 +279,19 @@ void target_msleep(UINT32 milliSeconds_p)
 The function sets the IP address, subnetMask and MTU of an Ethernet
 interface.
 
-\param  ifName_p                Name of Ethernet interface.
-\param  ipAddress_p             IP address to set for interface.
-\param  subnetMask_p            Subnet mask to set for interface.
-\param  mtu_p                   MTU to set for interface.
+\param[in]      ifName_p            Name of Ethernet interface.
+\param[in]      ipAddress_p         IP address to set for interface.
+\param[in]      subnetMask_p        Subnet mask to set for interface.
+\param[in]      mtu_p               MTU to set for interface.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
+tOplkError target_setIpAdrs(const char* ifName_p,
+                            UINT32 ipAddress_p,
+                            UINT32 subnetMask_p,
                             UINT16 mtu_p)
 {
     UNUSED_PARAMETER(ifName_p);
@@ -300,7 +311,7 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
 
 The function sets the default gateway of an Ethernet interface.
 
-\param  defaultGateway_p            Default gateway to set.
+\param[in]      defaultGateway_p    Default gateway to set.
 
 \return The function returns a tOplkError error code.
 
@@ -319,12 +330,47 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief    Set interrupt context flag
+
+This function enables/disables the interrupt context flag. The flag has to be
+set when the CPU enters the interrupt context. The flag has to be cleared when
+the interrupt context is left.
+
+\param[in]      fEnable_p           TRUE = enable interrupt context flag
+                                    FALSE = disable interrupt context flag
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_setInterruptContextFlag(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get interrupt context flag
+
+This function returns the interrupt context flag.
+
+\return The function returns the state of the interrupt context flag.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+BOOL target_getInterruptContextFlag(void)
+{
+    return FALSE;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Set POWERLINK status/error LED
 
 The function sets the POWERLINK status/error LED.
 
-\param  ledType_p       Determines which LED shall be set/reset.
-\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+\param[in]      ledType_p           Determines which LED shall be set/reset.
+\param[in]      fLedOn_p            Set the addressed LED on (TRUE) or off (FALSE).
 
 \return The function returns a tOplkError error code.
 
@@ -356,20 +402,20 @@ The function enables interrupt reception in the target processor
 interrupt interface.
 
 \return The function returns an integer
-\retval 0                   Success
-\retval -1                  Failure
+\retval 0                           Success
+\retval -1                          Failure
 */
 //------------------------------------------------------------------------------
 static inline INT enableCpuIrqInterface(void)
 {
-    ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
-    INT                 ret = 0;
+    ALT_STATUS_CODE retStatus = ALT_E_SUCCESS;
+    INT             ret = 0;
 
     // CPU interface global enable
     retStatus = alt_int_cpu_enable();
     if (retStatus != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("enabling cpu interrupt receiver failed\n");
+        DEBUG_LVL_ERROR_TRACE("Enabling CPU interrupt receiver failed!!\n");
         ret = -1;
         goto Exit;
     }
@@ -386,14 +432,14 @@ The function disables interrupt reception in the target processor
 interrupt interface.
 
 \return The function returns an integer
-\retval 0                   Success
-\retval -1                  Failure
+\retval 0                           Success
+\retval -1                          Failure
 */
 //------------------------------------------------------------------------------
 static inline INT disableCpuIrqInterface(void)
 {
-    ALT_STATUS_CODE     retStatus = ALT_E_SUCCESS;
-    INT                 ret = 0;
+    ALT_STATUS_CODE retStatus = ALT_E_SUCCESS;
+    INT             ret = 0;
 
     // Reset the CPU interface
     retStatus = alt_int_cpu_disable();
@@ -413,30 +459,30 @@ Exit:
 
 The function returns the timestamp of the provided timer in standard time units.
 
-\param  timerId_p               The ALT_GPT_TIMER_t enum Id of the timer used
-\param  scalingFactor_p         Ratio of provided time duration scale to seconds
+\param[in]      timerId_p           The ALT_GPT_TIMER_t enum Id of the timer used
+\param[in]      scalingFactor_p     Ratio of provided time duration scale to seconds
 
 \return The function returns a unsigned 64 bit value.
 \retval Timestamp from the given timer in standard time unit provided.
 */
 //------------------------------------------------------------------------------
 static inline UINT64 getTimerCurrentScaledCount(ALT_GPT_TIMER_t timerId_p,
-                                                UINT32   scalingFactor_p)
+                                                UINT32 scalingFactor_p)
 {
-    UINT64          timeStamp_l = 0;
-    UINT64          timeStamp_h = 0;
-    UINT64          timeStamp = 0;
-    UINT64          scaledTime = 0;
-    ALT_CLK_t       clkSrc = ALT_CLK_UNKNOWN;
-    UINT32          preScaler = 0;
-    UINT32          freq = 1;
+    UINT64      timeStamp_l = 0;
+    UINT64      timeStamp_h = 0;
+    UINT64      timeStamp = 0;
+    UINT64      scaledTime = 0;
+    ALT_CLK_t   clkSrc = ALT_CLK_UNKNOWN;
+    UINT32      preScaler = 0;
+    UINT32      freq = 1;
 
     preScaler = alt_gpt_prescaler_get(timerId_p);
     if (preScaler <= UINT8_MAX)
     {
         if (timerId_p == ALT_GPT_CPU_GLOBAL_TMR)    // Global Timer
         {
-            alt_globaltmr_get((UINT32*)&timeStamp_h, (UINT32*)&timeStamp_l);
+            alt_globaltmr_get((uint32_t*)&timeStamp_h, (uint32_t*)&timeStamp_l);
             clkSrc = ALT_CLK_MPU_PERIPH;
         }
         else
@@ -445,14 +491,13 @@ static inline UINT64 getTimerCurrentScaledCount(ALT_GPT_TIMER_t timerId_p,
             goto Exit;
         }
 
-        if (alt_clk_freq_get(clkSrc, &freq) == ALT_E_SUCCESS)
+        if (alt_clk_freq_get(clkSrc, (uint32_t*)&freq) == ALT_E_SUCCESS)
         {
             timeStamp_l *= (preScaler + 1);
             timeStamp_h *= (preScaler + 1);
             timeStamp_l *= scalingFactor_p;
             timeStamp_h *= scalingFactor_p;
-            timeStamp = (UINT64)((((timeStamp_h << 32) & ~UINT32_MAX) |
-                                   timeStamp_l) / freq);
+            timeStamp = (UINT64)((((timeStamp_h << 32) & ~UINT32_MAX) | timeStamp_l) / freq);
             scaledTime = (timeStamp > UINT64_MAX) ? UINT64_MAX : (UINT64)timeStamp;
         }
     }
@@ -468,8 +513,8 @@ Exit:
 The function returns the maximum timestamp of the provided timer
 in standard time units.
 
-\param  timerId_p                The ALT_GPT_TIMER_t enum Id of the timer used
-\param  scalingFactor_p          Ratio of provided time duration scale to seconds
+\param[in]      timerId_p           The ALT_GPT_TIMER_t enum Id of the timer used
+\param[in]      scalingFactor_p     Ratio of provided time duration scale to seconds
 
 \return The function returns a unsigned 64 bit value.
 \retval Maximum timestamp from the given timer in standard time unit provided.
@@ -478,13 +523,13 @@ in standard time units.
 static inline UINT64 getTimerMaxScaledCount(ALT_GPT_TIMER_t timerId_p,
                                             UINT32 scalingFactor_p)
 {
-    UINT64          maxScaledTime = 0;
-    UINT32          freq = 1;
-    UINT64          maxTimeStampLow = 0;
-    UINT64          maxTimeStampHigh = 0;
-    UINT64          maxTimeStamp = 0;
-    UINT32          preScaler = 0;
-    ALT_CLK_t       clkSrc;
+    UINT64      maxScaledTime = 0;
+    UINT32      freq = 1;
+    UINT64      maxTimeStampLow = 0;
+    UINT64      maxTimeStampHigh = 0;
+    UINT64      maxTimeStamp = 0;
+    UINT32      preScaler = 0;
+    ALT_CLK_t   clkSrc;
 
     preScaler = alt_gpt_prescaler_get(timerId_p);
 
@@ -495,19 +540,15 @@ static inline UINT64 getTimerMaxScaledCount(ALT_GPT_TIMER_t timerId_p,
         maxTimeStampHigh = (UINT64)UINT32_MAX;
     }
     else
-    {
         goto Exit;
-    }
 
-    if (alt_clk_freq_get(clkSrc, &freq) == ALT_E_SUCCESS)
+    if (alt_clk_freq_get(clkSrc, (uint32_t*)&freq) == ALT_E_SUCCESS)
     {
         maxTimeStampLow *= (preScaler + 1);
         maxTimeStampHigh *= (preScaler + 1);
         maxTimeStampLow *= scalingFactor_p;
         maxTimeStampHigh *= scalingFactor_p;
-        maxTimeStamp = (UINT64)((((maxTimeStampHigh << 32) & ~UINT32_MAX) |
-                                  maxTimeStampLow) / freq);
-
+        maxTimeStamp = (UINT64)((((maxTimeStampHigh << 32) & ~UINT32_MAX) | maxTimeStampLow) / freq);
         maxScaledTime = (maxTimeStamp > UINT64_MAX) ? UINT64_MAX : (UINT64) maxTimeStamp;
     }
 
@@ -515,4 +556,4 @@ Exit:
     return maxScaledTime;
 }
 
-///\}
+/// \}

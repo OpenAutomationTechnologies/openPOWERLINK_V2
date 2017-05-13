@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdou.h
+\file   user/pdou.h
 
 \brief  Include file for user PDO module
 
@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_pdou_H_
-#define _INC_pdou_H_
+#ifndef _INC_user_pdou_H_
+#define _INC_user_pdou_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -67,12 +66,11 @@ typedef struct
     UINT                mappObjectCount;        ///< Number of mapped objects
 } tPdoEventPdoChange;
 
-typedef tOplkError (*tPdoCbEventPdoChange)(tPdoEventPdoChange* pEventPdoChange_p);
+typedef tOplkError (*tPdoCbEventPdoChange)(const tPdoEventPdoChange* pEventPdoChange_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -82,12 +80,12 @@ tOplkError pdou_init(void);
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)
-OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam MEM* pParam_p);
+OPLKDLLEXPORT tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p);
 #else
-#define pdou_cbObdAccess        NULL
+#define pdou_cbObdAccess NULL
 #endif
 
-tOplkError pdou_cbNmtStateChange(tEventNmtStateChange NmtStateChange_p);
+tOplkError pdou_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p);
 
 tOplkError pdou_copyRxPdoToPi(void);
 tOplkError pdou_copyTxPdoFromPi(void);
@@ -97,4 +95,4 @@ tOplkError pdou_registerEventPdoChangeCb(tPdoCbEventPdoChange pfnCbEventPdoChang
 }
 #endif
 
-#endif /* _INC_pdou_H_ */
+#endif /* _INC_user_pdou_H_ */

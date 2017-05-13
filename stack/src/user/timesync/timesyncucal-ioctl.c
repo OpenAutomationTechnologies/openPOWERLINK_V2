@@ -11,7 +11,7 @@ uses a Linux ioctl call for synchronisation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ static OPLK_FILE_HANDLE fd_l;
 
 The function initializes the user CAL timesync module
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -110,6 +110,7 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
     UNUSED_PARAMETER(pfnSyncCb_p);
 
     fd_l = ctrlucal_getFd();
+
     return kErrorOk;
 }
 
@@ -124,6 +125,7 @@ The function cleans up the user CAL timesync module
 //------------------------------------------------------------------------------
 void timesyncucal_exit(void)
 {
+
 }
 
 //------------------------------------------------------------------------------
@@ -132,25 +134,24 @@ void timesyncucal_exit(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+\retval kErrorOk                    Successfully received sync event
+\retval kErrorGeneralError          Error while waiting on sync event
 
 \ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
 tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 {
-    int         ret;
+    int ret;
 
     ret = ioctl(fd_l, PLK_CMD_TIMESYNC_SYNC, timeout_p);
     if (ret == 0)
-    {
         return kErrorOk;
-    }
+
     return kErrorGeneralError;
 }
 
@@ -160,4 +161,4 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

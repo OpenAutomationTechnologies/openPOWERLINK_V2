@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   sdocom.h
+\file   user/sdocom.h
 
 \brief  Definitions for SDO Command Layer module
 
@@ -8,7 +8,7 @@ The file contains definitions for the SDO Command Layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_sdocom_H_
-#define _INC_sdocom_H_
+#ifndef _INC_user_sdocom_H_
+#define _INC_user_sdocom_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -52,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // typedef
 //------------------------------------------------------------------------------
 /// Callback function pointer to inform application about connection
-typedef tOplkError (*tSdoFinishedCb)(tSdoComFinished* pSdoComFinished_p);
+typedef tOplkError (*tSdoFinishedCb)(const tSdoComFinished* pSdoComFinished_p);
 
 /**
 \brief Structure for initializing Read/Write by Index SDO transfer
@@ -82,36 +81,46 @@ the command layer implementations for the SDO stack defined in the init paramete
 */
 typedef struct
 {
-    tOplkError          (*pfnInit)(void);                                ///< Init function pointer
-    tOplkError          (*pfnExit)(void);                                ///< Exit function pointer
-    tOplkError          (*pfnDefineCon)(tSdoComConHdl*, UINT, tSdoType); ///< Define Connection function pointer
-    tOplkError          (*pfnTransByIdx)(tSdoComTransParamByIndex*);     ///< Transfer by Index function pointer
-    tOplkError          (*pfnDeleteCon)(tSdoComConHdl);                  ///< Delete Connection function pointer
-    tOplkError          (*pfnGetState)(tSdoComConHdl, tSdoComFinished*); ///< Get State function pointer
-    UINT                (*pfnGetNodeId)(tSdoComConHdl);                  ///< Get Node Id function pointer
-    tOplkError          (*pfnSdoAbort)(tSdoComConHdl, UINT32);           ///< SDO abort function pointer
+    tOplkError          (*pfnInit)(tComdLayerObdCb, tComdLayerObdCb);       ///< Init function pointer
+    tOplkError          (*pfnExit)(void);                                   ///< Exit function pointer
+#if defined(CONFIG_INCLUDE_SDOC)
+    tOplkError          (*pfnDefineCon)(tSdoComConHdl*, UINT, tSdoType);    ///< Define Connection function pointer
+    tOplkError          (*pfnTransByIdx)(const tSdoComTransParamByIndex*);  ///< Transfer by Index function pointer
+    tOplkError          (*pfnDeleteCon)(tSdoComConHdl);                     ///< Delete Connection function pointer
+    tOplkError          (*pfnGetState)(tSdoComConHdl, tSdoComFinished*);    ///< Get State function pointer
+    UINT                (*pfnGetNodeId)(tSdoComConHdl);                     ///< Get Node Id function pointer
+    tOplkError          (*pfnSdoAbort)(tSdoComConHdl, UINT32);              ///< SDO abort function pointer
+#endif /* defined(CONFIG_INCLUDE_SDOC) */
 } tSdoComFunctions;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError sdocom_init(UINT stackType_p);
+tOplkError sdocom_init(UINT stackType_p,
+                       tComdLayerObdCb pfnObdWrite_p,
+                       tComdLayerObdCb pfnObdRead_p);
 tOplkError sdocom_exit(void);
-tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p, UINT targetNodeId_p, tSdoType sdoType_p);
-tOplkError sdocom_initTransferByIndex(tSdoComTransParamByIndex* pSdoComTransParam_p);
+
+#if defined(CONFIG_INCLUDE_SDOC)
+tOplkError sdocom_defineConnection(tSdoComConHdl* pSdoComConHdl_p,
+                                   UINT targetNodeId_p,
+                                   tSdoType sdoType_p);
+tOplkError sdocom_initTransferByIndex(const tSdoComTransParamByIndex* pSdoComTransParam_p);
 UINT       sdocom_getNodeId(tSdoComConHdl sdoComConHdl_p);
 tOplkError sdocom_undefineConnection(tSdoComConHdl sdoComConHdl_p);
-tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p, tSdoComFinished* pSdoComFinished_p);
-tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
+tOplkError sdocom_getState(tSdoComConHdl sdoComConHdl_p,
+                           tSdoComFinished* pSdoComFinished_p);
+tOplkError sdocom_abortTransfer(tSdoComConHdl sdoComConHdl_p,
+                                UINT32 abortCode_p);
+#endif /* defined(CONFIG_INCLUDE_SDOC) */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_sdocom_H_ */
+#endif /* _INC_user_sdocom_H_ */

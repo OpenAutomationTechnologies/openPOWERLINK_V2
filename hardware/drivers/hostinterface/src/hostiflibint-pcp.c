@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library for PCP.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,13 +103,13 @@ static tHostifReturn controlBridge(tHostif* pHostif_p, BOOL fEnable_p);
 
 This function creates the PCP-specific host interface instance.
 
-\param  pHostif_p               The host interface instance for PCP.
+\param[in]      pHostif_p           The host interface instance for PCP.
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The host interface is configured successfully
-                                with the provided parameters.
-\retval kHostifNoResource       Heap allocation was impossible or to many
-                                instances are present.
+\retval kHostifSuccessful           The host interface is configured successfully
+                                    with the provided parameters.
+\retval kHostifNoResource           Heap allocation was impossible or to many
+                                    instances are present.
 
 \ingroup module_hostiflib
 */
@@ -171,8 +171,8 @@ Exit:
 
 This function deletes a host interface instance.
 
-\param  pHostif_p               The host interface instance that should be
-                                deleted
+\param[in]      pHostif_p           The host interface instance that should be
+                                    deleted
 
 \return The function returns a tHostifReturn error code.
 
@@ -215,17 +215,17 @@ tHostifReturn hostif_deleteInt(tHostif* pHostif_p)
 
 This function reads and verifies the version from the host interface.
 
-\param  pBase_p         Base address to host interface hardware
-\param  pSwVersion_p    Pointer to version provided by sw
+\param[in]      pBase_p             Base address to host interface hardware
+\param[in]      pSwVersion_p        Pointer to version provided by sw
 
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p)
+tHostifReturn hostif_checkVersion(const UINT8* pBase_p, const tHostifVersion* pSwVersion_p)
 {
-    tHostifReturn       ret = kHostifSuccessful;
-    UINT32              versionField = hostif_readVersion(pBase_p);
-    tHostifHwVersion*   pHwVersion = (tHostifHwVersion*)&versionField;
+    tHostifReturn           ret = kHostifSuccessful;
+    UINT32                  versionField = hostif_readVersion(pBase_p);
+    const tHostifHwVersion* pHwVersion = (const tHostifHwVersion*)&versionField;
 
     if (pHwVersion->cnt != HOSTIF_VERSION_COUNT)
         ret = kHostifWrongVersion;
@@ -249,13 +249,13 @@ tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p)
 
 This function enables an IRQ source from the PCP side.
 
-\param  pInstance_p             host interface instance
-\param  irqSrc_p                IRQ source to be controlled
-\param  fEnable_p               enable the IRQ source (TRUE)
+\param[in]      pInstance_p         Host interface instance
+\param[in]      irqSrc_p            IRQ source to be controlled
+\param[in]      fEnable_p           Enable the IRQ source (TRUE)
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -267,7 +267,7 @@ tHostifReturn hostif_irqSourceEnable(tHostifInstance pInstance_p,
     tHostif*      pHostif = (tHostif*)pInstance_p;
     UINT16        irqEnableVal;
 
-    if (pInstance_p == NULL || irqSrc_p >= kHostifIrqSrcLast)
+    if ((pInstance_p == NULL) || (irqSrc_p >= kHostifIrqSrcLast))
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -292,14 +292,14 @@ Exit:
 /**
 \brief  This function sets a state to the host interface
 
-Note that only the Pcp is allowed to write to this register!
+Note that only the PCP is allowed to write to this register!
 
-\param  pInstance_p             host interface instance
-\param  sta_p                   state
+\param[in]      pInstance_p         Host interface instance
+\param[in]      sta_p               State
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -325,15 +325,15 @@ Exit:
 /**
 \brief  This function sets the heart beat value to the host interface
 
-Note that only the Pcp is allowed to write to this register!
+Note that only the PCP is allowed to write to this register!
 
-\param  pInstance_p             Host interface instance
-\param  heartbeat_p             Heart beat value
+\param[in]      pInstance_p         Host interface instance
+\param[in]      heartbeat_p         Heart beat value
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The process function exit without errors.
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
-\retval kHostifWrongProcInst    The caller processor instance is not allowed.
+\retval kHostifSuccessful           The process function exit without errors.
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
+\retval kHostifWrongProcInst        The caller processor instance is not allowed.
 
 \ingroup module_hostiflib
 */
@@ -361,12 +361,12 @@ Exit:
 
 This function returns the user part of the initialization parameters.
 
-\param  pInstance_p             Host interface instance
-\param  ppBufBase_p             Returned buffer base address
+\param[in]      pInstance_p         Host interface instance
+\param[out]     ppBufBase_p         Returned buffer base address
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       Dynamic buffer freed
-\retval kHostifInvalidParameter The caller has provided incorrect parameters.
+\retval kHostifSuccessful           Dynamic buffer freed
+\retval kHostifInvalidParameter     The caller has provided incorrect parameters.
 
 \ingroup module_hostiflib
 */
@@ -376,7 +376,7 @@ tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p)
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = (tHostif*)pInstance_p;
 
-    if (pInstance_p == NULL || ppBase_p == NULL)
+    if ((pInstance_p == NULL) || (ppBase_p == NULL))
     {
         ret = kHostifInvalidParameter;
         goto Exit;
@@ -402,8 +402,8 @@ host interface.
 The function writes the specific enable pattern to hardware and reads it back
 again.
 
-\param  pHostif_p               Host interface instance
-\param  fEnable_p               Enable the bridge with TRUE
+\param[in]      pHostif_p           Host interface instance
+\param[in]      fEnable_p           Enable the bridge with TRUE
 
 \return The function returns a tHostifReturn error code.
 */
@@ -434,4 +434,3 @@ static tHostifReturn controlBridge(tHostif* pHostif_p, BOOL fEnable_p)
 Exit:
     return ret;
 }
-

@@ -629,6 +629,7 @@
   <parameter name="AUTO_MAC_IRQ_INTERRUPTS_USED" value="1" />
   <parameter name="AUTO_GP_IRQ_INTERRUPTS_USED" value="0" />
   <parameter name="cpu0_resetCpuBridge" value="cpu_bridge" />
+  <parameter name="tcmemSize" value="20480" />
  </module>
  <module
    kind="altera_avalon_sysid_qsys"

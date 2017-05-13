@@ -6,7 +6,7 @@ read the corresponding documentation files to get information on how to compile
 and run openPOWERLINK on your desired platform.
 
 If your platform is not supported, please follow the
-[openPOWERLINK Porting Guide](\ref page_porting-guide) for information on how
+[Porting Guide](\ref page_porting-guide) for information on how
 to port openPOWERLINK to your platform.
 
 | Platform             | Linux         | Windows  | Non-OS  |
@@ -14,7 +14,7 @@ to port openPOWERLINK to your platform.
 | X86                  | X             | X        |         |
 | Altera NiosII        |               |          | X       |
 | Xilinx Microblaze    |               |          | X       |
-| Xilinx Zynq          | X             |          | X       |
+| Xilinx Zynq          | X             |          |         |
 | Altera Cyclone V SoC |               |          | X       |
 
 ## Supported Operating Systems

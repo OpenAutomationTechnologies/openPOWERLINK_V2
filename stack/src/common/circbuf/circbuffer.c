@@ -16,7 +16,7 @@ circbuf-arch.h.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -115,10 +115,10 @@ the main instance can clean up and free the buffer by calling circbuf_free().
 
 The function allocates a circular buffer.
 
-\param  id_p            The ID of the buffer to allocate,
-\param  size_p          The size of the buffer to allocate.
-\param  ppInstance_p    A pointer to store the pointer to the instance of the
-                        allocated circular buffer.
+\param[in]      id_p                The ID of the buffer to allocate,
+\param[in]      size_p              The size of the buffer to allocate.
+\param[out]     ppInstance_p        A pointer to store the pointer to the instance
+                                    of the allocated circular buffer.
 
 \return The function returns a tCircBufError error code.
 
@@ -130,6 +130,9 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
     size_t              alignedSize;
     tCircBufInstance*   pInstance;
     tCircBufError       ret;
+
+    // Check parameter validity
+    ASSERT(ppInstance_p != NULL);
 
     if ((size_p == 0) || (id_p >= NR_OF_CIRC_BUFFERS))
     {
@@ -170,7 +173,7 @@ tCircBufError circbuf_alloc(UINT8 id_p, size_t size_p, tCircBufInstance** ppInst
 
 The function releases/frees a circular buffer.
 
-\param  pInstance_p     The instance of the buffer to free.
+\param[in]      pInstance_p         The instance of the buffer to free.
 
 \return The function returns a tCircBufError error code.
 
@@ -179,8 +182,12 @@ The function releases/frees a circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_free(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     circbuf_freeBuffer(pInstance_p);
     circbuf_freeInstance(pInstance_p);
+
     return kCircBufOk;
 }
 
@@ -190,9 +197,9 @@ tCircBufError circbuf_free(tCircBufInstance* pInstance_p)
 
 The function connects to an existing circular buffer.
 
-\param  id_p            The ID of the buffer to connect to.
-\param  ppInstance_p    A pointer to store the pointer to the instance of the
-                        connected circular buffer.
+\param[in]      id_p                The ID of the buffer to connect to.
+\param[out]     ppInstance_p        A pointer to store the pointer to the instance
+                                    of the connected circular buffer.
 
 \return The function returns a tCircBufError error code.
 
@@ -203,6 +210,9 @@ tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p)
 {
     tCircBufError       ret;
     tCircBufInstance*   pInstance;
+
+    // Check parameter validity
+    ASSERT(ppInstance_p != NULL);
 
     if (id_p >= NR_OF_CIRC_BUFFERS)
         return kCircBufInvalidArg;
@@ -227,7 +237,7 @@ tCircBufError circbuf_connect(UINT8 id_p, tCircBufInstance** ppInstance_p)
 
 The function disconnects from a circular buffer.
 
-\param  pInstance_p         The instance of the buffer to disconnect.
+\param[in]      pInstance_p         The instance of the buffer to disconnect.
 
 \return The function returns a tCircBufError error code.
 
@@ -236,6 +246,9 @@ The function disconnects from a circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_disconnect(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     circbuf_disconnectBuffer(pInstance_p);
     circbuf_freeInstance(pInstance_p);
 
@@ -248,23 +261,27 @@ tCircBufError circbuf_disconnect(tCircBufInstance* pInstance_p)
 The function resets a circular buffer. The read and write pointer are set
 to the start address of the buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance to be reset.
-
-\return The function returns a tCircBuf Error code.
+\param[in]      pInstance_p         Pointer to circular buffer instance to be reset.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_reset(tCircBufInstance* pInstance_p)
 {
-    tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
+    tCircBufHeader*     pHeader;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
 
     circbuf_lock(pInstance_p);
     OPLK_DCACHE_INVALIDATE(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
+
+    pHeader = pInstance_p->pCircBufHeader;
     pHeader->readOffset = 0;
     pHeader->writeOffset = 0;
     pHeader->freeSize = pHeader->bufferSize;
     pHeader->dataCount = 0;
+
     OPLK_DCACHE_FLUSH(pInstance_p->pCircBufHeader, sizeof(tCircBufHeader));
     circbuf_unlock(pInstance_p);
 }
@@ -275,37 +292,44 @@ void circbuf_reset(tCircBufInstance* pInstance_p)
 
 The function writes a data block to a circular buffer.
 
-\param  pInstance_p     Pointer to circular buffer instance.
-\param  pData_p         Pointer to the data which should be written.
-\param  size_p          The size of the data to write.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
+\param[in]      pData_p             Pointer to the data which should be written.
+\param[in]      size_p              The size of the data to write.
 
 \return The function returns a tCircBufError error code.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pData_p,
-                                 size_t size_p)
+tCircBufError circbuf_writeData(tCircBufInstance* pInstance_p,
+                                const void* pData_p,
+                                size_t size_p)
 {
     size_t              blockSize;
     size_t              fullBlockSize;
     size_t              chunkSize;
-    tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
-    BYTE*               pCircBuf = pInstance_p->pCircBuf;
+    tCircBufHeader*     pHeader;
+    BYTE*               pCircBuf;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
 
     if ((pData_p == NULL) || (size_p == 0))
         return kCircBufOk;
 
-    blockSize     = (size_p + (CIRCBUF_BLOCK_ALIGNMENT-1)) & ~(CIRCBUF_BLOCK_ALIGNMENT-1);
+    blockSize     = (size_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
     fullBlockSize = blockSize + sizeof(UINT32);
 
     circbuf_lock(pInstance_p);
+
+    pHeader = pInstance_p->pCircBufHeader;
+    pCircBuf = pInstance_p->pCircBuf;
 
     OPLK_DCACHE_INVALIDATE(pHeader, sizeof(tCircBufHeader));
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
-        return kCircBufOutOfMem;
+        return kCircBufBufferFull;
     }
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)
@@ -330,7 +354,7 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
         OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                     pData_p, chunkSize);
         OPLK_DCACHE_FLUSH((pCircBuf + pHeader->writeOffset), chunkSize + sizeof(UINT32));
-        OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, size_p - chunkSize);
+        OPLK_MEMCPY(pCircBuf, (const UINT8*)pData_p + chunkSize, size_p - chunkSize);
         OPLK_DCACHE_FLUSH((pCircBuf), (size_p - chunkSize));
 
         pHeader->writeOffset = blockSize - chunkSize;
@@ -360,11 +384,11 @@ tCircBufError circbuf_writeData (tCircBufInstance* pInstance_p, const void* pDat
 
 The function writes two different source data block to a circular buffer.
 
-\param  pInstance_p     Pointer to circular buffer instance.
-\param  pData_p         Pointer to the first data block to be written.
-\param  size_p          The size of the first data block to be written.
-\param  pData2_p        Pointer to the second data block to be written.
-\param  size2_p         The size of the second data block to be written.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
+\param[in]      pData_p             Pointer to the first data block to be written.
+\param[in]      size_p              The size of the first data block to be written.
+\param[in]      pData2_p            Pointer to the second data block to be written.
+\param[in]      size2_p             The size of the second data block to be written.
 
 \return The function returns a tCircBufError error code.
 
@@ -373,14 +397,17 @@ The function writes two different source data block to a circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
                                         const void* pData_p, size_t size_p,
-                                        const void * pData2_p, size_t size2_p)
+                                        const void* pData2_p, size_t size2_p)
 {
     size_t              blockSize;
     size_t              fullBlockSize;
     size_t              chunkSize;
     size_t              partSize;
-    tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
-    BYTE*               pCircBuf = pInstance_p->pCircBuf;
+    tCircBufHeader*     pHeader;
+    BYTE*               pCircBuf;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
 
     if ((pData_p == NULL) || (size_p == 0) || (pData2_p == NULL) || (size2_p == 0))
     {
@@ -388,8 +415,10 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
         return kCircBufOk;
     }
 
-    blockSize      = (size_p + size2_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
-    fullBlockSize  = blockSize + sizeof(UINT32);
+    pHeader = pInstance_p->pCircBufHeader;
+    pCircBuf = pInstance_p->pCircBuf;
+    blockSize = (size_p + size2_p + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
+    fullBlockSize = blockSize + sizeof(UINT32);
 
     //TRACE("%s() size:%d wroff:%d\n", __func__, pHeader->bufferSize, pHeader->writeOffset);
     //TRACE("%s() ptr1:%p size1:%d ptr2:%p size2:%d\n", __func__, pData_p, size_p, pData2_p, size2_p);
@@ -398,7 +427,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
     if (fullBlockSize > pHeader->freeSize)
     {
         circbuf_unlock(pInstance_p);
-        return kCircBufOutOfMem;
+        return kCircBufBufferFull;
     }
 
     if (pHeader->writeOffset + fullBlockSize <= pHeader->bufferSize)
@@ -431,7 +460,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
                         pData2_p, partSize);
 
             OPLK_DCACHE_FLUSH((pCircBuf + pHeader->writeOffset), chunkSize + sizeof(UINT32));
-            OPLK_MEMCPY(pCircBuf, (UINT8*)pData2_p + partSize, size2_p - partSize);
+            OPLK_MEMCPY(pCircBuf, (const UINT8*)pData2_p + partSize, size2_p - partSize);
             OPLK_DCACHE_FLUSH((pCircBuf), size2_p - partSize);
         }
         else
@@ -440,7 +469,7 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
             OPLK_MEMCPY(pCircBuf + pHeader->writeOffset + sizeof(UINT32),
                         pData_p, chunkSize);
             OPLK_DCACHE_FLUSH((pCircBuf + pHeader->writeOffset), chunkSize + sizeof(UINT32));
-            OPLK_MEMCPY(pCircBuf, (UINT8*)pData_p + chunkSize, partSize);
+            OPLK_MEMCPY(pCircBuf, (const UINT8*)pData_p + chunkSize, partSize);
             OPLK_MEMCPY(pCircBuf + partSize, pData2_p, size2_p);
 
             OPLK_DCACHE_FLUSH((pCircBuf), partSize + size2_p);
@@ -471,10 +500,10 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p,
 
 The function reads a data block from a circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
-\param  pData_p             Pointer to store the read data.
-\param  size_p              The size of the destination buffer to store the data.
-\param  pDataBlockSize_p    Pointer to store the size of the read data.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
+\param[out]     pData_p             Pointer to store the read data.
+\param[in]      size_p              The size of the destination buffer to store the data.
+\param[out]     pDataBlockSize_p    Pointer to store the size of the read data.
 
 \return The function returns a tCircBufError error code.
 
@@ -488,11 +517,18 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
     size_t              blockSize;
     size_t              fullBlockSize;
     size_t              chunkSize;
-    tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
-    BYTE*               pCircBuf = pInstance_p->pCircBuf;
+    tCircBufHeader*     pHeader;
+    BYTE*               pCircBuf;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+    ASSERT(pDataBlockSize_p != NULL);
 
     if ((pData_p == NULL) || (size_p == 0))
         return kCircBufOk;
+
+    pHeader = pInstance_p->pCircBufHeader;
+    pCircBuf = pInstance_p->pCircBuf;
 
     circbuf_lock(pInstance_p);
 
@@ -505,9 +541,9 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
     OPLK_DCACHE_INVALIDATE((pCircBuf + pHeader->readOffset), sizeof(UINT32));
 
-    dataSize = *(UINT32*)(pCircBuf + pHeader->readOffset);
+    dataSize = *(const UINT32*)(pCircBuf + pHeader->readOffset);
     blockSize = (dataSize + (CIRCBUF_BLOCK_ALIGNMENT - 1)) & ~(CIRCBUF_BLOCK_ALIGNMENT - 1);
-    fullBlockSize  = blockSize + sizeof(UINT32);
+    fullBlockSize = blockSize + sizeof(UINT32);
 
     if (dataSize > size_p)
     {
@@ -548,7 +584,6 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
     *pDataBlockSize_p = dataSize;
     return kCircBufOk;
-
 }
 
 //------------------------------------------------------------------------------
@@ -557,18 +592,23 @@ tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
 
 The function returns the available data count
 
-\param  pInstance_p     Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \return The function returns the available data count
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-UINT32 circbuf_getDataCount(tCircBufInstance* pInstance_p)
+UINT32 circbuf_getDataCount(const tCircBufInstance* pInstance_p)
 {
-    tCircBufHeader*     pHeader = pInstance_p->pCircBufHeader;
+    const tCircBufHeader*   pHeader;
 
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
+    pHeader = pInstance_p->pCircBufHeader;
     OPLK_DCACHE_INVALIDATE(&pHeader->dataCount, sizeof(UINT32));
+
     return pHeader->dataCount;
 }
 
@@ -579,27 +619,30 @@ UINT32 circbuf_getDataCount(tCircBufInstance* pInstance_p)
 
 The function returns the maximum used size of the circular buffer.
 
-\param  pInstance_p     Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \return The function returns the maximum used data size of the buffer.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
-UINT32 circbuf_getMaxSize (tCircBufInstance* pInstance_p)
+UINT32 circbuf_getMaxSize(const tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     return pInstance_p->pCircBufHeader->maxSize;
 }
 #endif
 
 //------------------------------------------------------------------------------
 /**
-\brief  Set signalling for a buffer
+\brief  Set signaling for a buffer
 
-The function sets up signalling for a specified buffer.
+The function sets up signaling for a specified buffer.
 
-\param  pInstance_p     Pointer to circular buffer instance.
-\param  pfnSigCb_p      Pointer to signaling callback function.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
+\param[in]      pfnSigCb_p          Pointer to signaling callback function.
 
 \return The function returns a tCircBufError error code.
 
@@ -608,6 +651,9 @@ The function sets up signalling for a specified buffer.
 //------------------------------------------------------------------------------
 tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pfnSigCb_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     pInstance_p->pfnSigCb = pfnSigCb_p;
     return kCircBufOk;
 }
@@ -618,4 +664,4 @@ tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pf
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

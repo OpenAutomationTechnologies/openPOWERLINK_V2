@@ -9,7 +9,8 @@ This header file provides specific macros for Altera NIOS2 CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015 Kalycito Infotech Private Limited
+Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,15 +35,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dualprocshm_nios2_H_
 #define _INC_dualprocshm_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
+#include <stdint.h>         // For uint*_t
+#include <stdlib.h>         // For malloc/free
+#include <string.h>         // For memset/memcpy
 #include <stddef.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <alt_types.h>
 #include <sys/alt_cache.h>
@@ -62,26 +65,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_MAKE_NONCACHEABLE(ptr) \
     (void*)(((unsigned long)ptr) | NIOS2_BYPASS_DCACHE_MASK)
 
-#define DUALPROCSHM_MALLOC(size)              alt_uncached_malloc(size)
-#define DUALPROCSHM_FREE(ptr)                 alt_uncached_free(ptr)
-#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
+#define DUALPROCSHM_MALLOC(size)                (void*)alt_uncached_malloc(size)
+#define DUALPROCSHM_FREE(ptr)                   alt_uncached_free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)      memcpy((dest), (src), (siz))
 #define DPSHM_UNREG_SYNC_INTR(callback, arg)
 #define DPSHM_CLEAR_SYNC_IRQ()
-
-#define CALC_OFFSET(addr_p, baseAddr_p)                                        \
-    ({                                                                         \
-         ULONG offset = 0;                                                     \
-         if ((NIOS2_BYPASS_DCACHE_MASK & addr_p) != 0)                         \
-         {                                                                     \
-             offset =  (addr_p - (ULONG)DPSHM_MAKE_NONCACHEABLE(baseAddr_p));  \
-         }                                                                     \
-         else                                                                  \
-         {                                                                     \
-             offset = (addr_p - baseAddr_p);                                   \
-         }                                                                     \
-                                                                               \
-         offset;                                                               \
-     })
 
 // IO operations
 #define DPSHM_READ8(base)               IORD_8DIRECT((UINT32)base, 0)
@@ -117,32 +105,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
     ((void)0)
 
-#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p)                         \
-    ({                                                                  \
-         INT ret;                                                       \
-                                                                        \
-         ret = alt_ic_isr_register(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ, \
-                                   pfnIrqCb_p, pArg_p, NULL);           \
-         ret;                                                           \
-     })
+#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p) \
+    UNUSED_PARAMETER(pfnIrqCb_p);               \
+    UNUSED_PARAMETER(pArg_p)
 
-#define DPSHM_ENABLE_SYNC_INTR()                                        \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);  \
-         ret;                                                           \
-     })
-#define DPSHM_DISABLE_SYNC_INTR()                                       \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ); \
-         ret;                                                           \
-     })
+#define DPSHM_ENABLE_SYNC_INTR() \
+        alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
-#ifndef NDEBUG
-#define TRACE(...)                      trace(__VA_ARGS__)
-#else
-#define TRACE(...)
-#endif
+#define DPSHM_DISABLE_SYNC_INTR() \
+        alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
 #endif /* _INC_dualprocshm_nios2_H_ */

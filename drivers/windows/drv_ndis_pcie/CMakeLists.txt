@@ -3,6 +3,7 @@
 # CMake file for openPOWERLINK kernel stack (Windows kernel driver)
 #
 # Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -60,6 +61,7 @@ SET(DRIVER_SOURCE_FILES
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-intr.c
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-noos.c
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-winpcie.c
+    ${CONTRIB_SOURCE_DIR}/trace/trace-windows.c
     ${NDISLIB_SOURCE_DIR}/ndispcie/ndis-pcie.c
     ${NDISLIB_SOURCE_DIR}/ndispcie/ndis-pcieMiniport.c
     ${ARCH_SOURCE_DIR}/target-winkernel.c

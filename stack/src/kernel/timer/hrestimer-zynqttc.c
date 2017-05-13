@@ -15,7 +15,7 @@ one-shot and continuous timer support of POWERLINK module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/benchmark.h>
 
 #include <linux/module.h>
 #include <linux/kernel.h>
@@ -116,10 +115,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define TIMERHDL_MASK                       0x0FFFFFFF
 #define TIMERHDL_SHIFT                      28
-#define HDL_TO_IDX(Hdl)                     ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)                       ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)                        (((Hdl + 1) & TIMERHDL_MASK) | \
-                                             (Hdl & ~TIMERHDL_MASK))
+#define HDL_TO_IDX(hdl)                     ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)                       ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)                        (((hdl + 1) & TIMERHDL_MASK) | \
+                                             (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -174,8 +173,7 @@ static void* __iomem            pTtcBaseAddr_l[TIMER_COUNT];
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
-
-static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p);
+static irqreturn_t timerCounterIsr(int irqNum_p, void* pDevInstData_p)
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -194,11 +192,11 @@ The function initializes the high-resolution timer module.
 //------------------------------------------------------------------------------
 tOplkError hrestimer_init(void)
 {
-    INT                 result = 0;
+    int                 result = 0;
     UINT                index;
     tHresTimerInfo*     pTimerInfo;
     UINT8               reg;
-    INT                 irqNo;
+    unsigned int        irqNo;
 
     OPLK_MEMSET(&hresTimerInstance_l, 0, sizeof(tHresTimerInstance));
 
@@ -263,13 +261,13 @@ tOplkError hrestimer_exit(void)
     UINT8               reg;
     UINT                index;
     tHresTimerInfo*     pTimerInfo;
-    INT                 irqNo;
+    unsigned int        irqNo;
 
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
     for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
     {
         reg = XTTCPSS_READ_REG(pTimerInfo->index, XTTCPSS_CNT_CNTRL_OFFSET);
-        // set the necessary counter control param , for now we keep the timer disabled
+        // set the necessary counter control parameter, for now we keep the timer disabled
         reg = (XTTCPSS_CNT_CNTRL_DISABLE);
         XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_CNT_CNTRL_OFFSET, reg);
         irqNo = XTTC_IRQ + pTimerInfo->index;
@@ -283,7 +281,7 @@ tOplkError hrestimer_exit(void)
 
 //------------------------------------------------------------------------------
 /**
- \brief    Modify a high-resolution timer
+\brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
 If the handle to which the pointer points to is zero, the timer must be created
@@ -293,22 +291,24 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutual exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tHresTimerInfo*     pTimerInfo;
@@ -395,7 +395,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     if (fContinue_p != FALSE)
     {
         pTimerInfo->fContinuously = fContinue_p;
-        // Set the interval for continuos timer
+        // Set the interval for continuous timer
         XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_INTR_VAL_OFFSET, (UINT16)counter);
 
         // Enable the interval interrupt
@@ -411,7 +411,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     else
     {
         pTimerInfo->fContinuously = fContinue_p;
-        // Set match counter for oneshot timer
+        // Set match counter for one-shot timer
         XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_MATCH_1_OFFSET, (UINT16)counter);
         // Enable the Match1 interrupt
         reg = XTTCPSS_READ_REG(pTimerInfo->index, XTTCPSS_IER_OFFSET);
@@ -436,10 +436,10 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 /**
 \brief    Delete a high-resolution timer
 
-The function deletes an created high-resolution timer. The timer is specified
-by its timer handle. After deleting the handle is reset to zero.
+The function deletes a created high-resolution timer. The timer is specified
+by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -504,7 +504,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -522,7 +522,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -545,24 +545,27 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 Interrupt service routine for the triple timer counter timer module used by
 POWERLINK kernel module on Xilinx Zynq platform.
 
-\param  irqNum_p            IRQ number
-\param  pDevInstData_p      Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  pDevInstData_p      Pointer to private data provided by request_irq
 
 \return Returns a interrupt handled status.
 */
 //---------------------------------------------------------------------------------
-static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
+static irqreturn_t timerCounterIsr(int irqNum_p, void* pDevInstData_p)
 {
     irqreturn_t         ret = IRQ_HANDLED;
     UINT                index;
-    tHresTimerInfo*     pTimerInfo = (tHresTimerInfo*) pDevInstData_p;
+    tHresTimerInfo*     pTimerInfo = (tHresTimerInfo*)pDevInstData_p;
     UINT8               reg = 0;
+
+    UNUSED_PARAMETER(irqNum_p);
 
     reg = XTTCPSS_READ_REG(pTimerInfo->index, XTTCPSS_ISR_OFFSET);
     if (reg == 0)
     {
         return IRQ_NONE;
     }
+
     // Acknowledge the Interrupt
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_ISR_OFFSET, reg);
     index = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle);

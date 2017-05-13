@@ -2,7 +2,7 @@
 #
 # Microblaze CMake configuration for openPOWERLINK kernel stack process
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -46,9 +46,6 @@ LIST_SUBDIRECTORIES(HW_BOARD_DEMOS ${XIL_HW_LIB_DIR} 2)
 
 IF (CFG_KERNEL_DUALPROCSHM)
     SET(CFG_HW_LIB xilinx-z702/mn-dual-shmem-gpio CACHE STRING
-    "Subfolder of hardware board demo")
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-    SET(CFG_HW_LIB avnet-s6plkeb/mn-single-hostif-drv CACHE STRING
     "Subfolder of hardware board demo")
 ENDIF ()
 
@@ -105,24 +102,9 @@ IF (CFG_KERNEL_DUALPROCSHM)
     ENDIF ()
 
     UNSET(XIL_LIB_DUALPROCSHM CACHE)
-    UNSET(XIL_LIB_HOSTIF CACHE)
     MESSAGE(STATUS "Searching for LIBRARY ${LIB_DUALPROCSHM_NAME} in ${CFG_HW_LIB_DIR}/libdualprocshm-pcp")
     FIND_LIBRARY(XIL_LIB_DUALPROCSHM NAMES ${LIB_DUALPROCSHM_NAME}
                      HINTS ${CFG_HW_LIB_DIR}/libdualprocshm-pcp
-            )
-
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-    IF (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-        SET(LIB_HOSTIFLIB_NAME "hostiflib-pcp_d")
-    ELSE ()
-        SET(LIB_HOSTIFLIB_NAME "hostiflib-pcp")
-    ENDIF ()
-
-    UNSET(XIL_LIB_HOSTIF CACHE)
-    UNSET(XIL_LIB_DUALPROCSHM CACHE)
-    MESSAGE(STATUS "Searching for LIBRARY ${LIB_HOSTIFLIB_NAME} in ${CFG_HW_LIB_DIR}/libhostiflib-pcp")
-    FIND_LIBRARY(XIL_LIB_HOSTIF NAMES ${LIB_HOSTIFLIB_NAME}
-                         HINTS ${CFG_HW_LIB_DIR}/libhostiflib-pcp
             )
 
 ENDIF()
@@ -155,6 +137,7 @@ INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
                     ${OPLK_BASE_DIR}/stack/src/arch/xilinx-microblaze
                     ${OPLK_INCLUDE_DIR}
+                    ${CONTRIB_SOURCE_DIR}
                     ${PROJECT_SOURCE_DIR}
                     ${CFG_HW_LIB_DIR}/include
                    )
@@ -200,13 +183,6 @@ IF (CFG_KERNEL_DUALPROCSHM)
         MESSAGE(FATAL_ERROR "${LIB_DUALPROCSHM_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
     ENDIF ()
 
-ELSEIF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
-
-    IF (NOT ${XIL_LIB_HOSTIF} STREQUAL "XIL_LIB_HOSTIF-NOTFOUND")
-        SET(ARCH_LIBRARIES  ${ARCH_LIBRARIES} ${XIL_LIB_HOSTIF})
-    ELSE ()
-        MESSAGE(FATAL_ERROR "${LIB_HOSTIFLIB_NAME} for board ${CFG_DEMO_BOARD_NAME} and demo ${CFG_DEMO_NAME} not found! Check the parameter CMAKE_BUILD_TYPE to confirm your 'Debug' or 'Release' settings")
-    ENDIF ()
 ENDIF ()
 
 SET(ARCH_EXE_SUFFIX ".elf")

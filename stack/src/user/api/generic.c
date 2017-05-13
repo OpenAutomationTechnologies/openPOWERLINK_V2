@@ -10,7 +10,7 @@ This file contains the implementation of the generic API functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -50,10 +50,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/dllucal.h>
 #include <user/eventu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <oplk/sdo.h>
 #include <user/timesyncucal.h>
 #include <user/timesyncu.h>
+#include <user/obdal.h>
+#include <user/pdou.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 #include <user/cfmu.h>
@@ -115,11 +117,11 @@ static BOOL fStackInitialized_l = FALSE;
 //------------------------------------------------------------------------------
 
 #if defined(CONFIG_INCLUDE_SDOC)
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p);
 #endif
-static tOplkError cbReceivedAsnd(tFrameInfo *pFrameInfo_p);
+static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p);
 #if defined(CONFIG_INCLUDE_VETH)
-static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p);
+static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p);
 #endif
 
 //============================================================================//
@@ -135,19 +137,20 @@ function is called successfully the openPOWERLINK stack can be created by
 calling \ref oplk_create.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Initialization was successful.
-\retval Other                   Error occurred during initialization.
+\retval kErrorOk                    Initialization was successful.
+\retval Other                       Error occurred during initialization.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_initialize(void)
 {
-    tOplkError          ret;
+    tOplkError  ret;
 
     target_init();
 
-    if ((ret = ctrlu_init()) != kErrorOk)
+    ret = ctrlu_init();
+    if (ret != kErrorOk)
     {
         target_cleanup();
         return ret;
@@ -173,17 +176,17 @@ After the stack is initialized the application must start it by performing a
 software reset. This is done by sending the NMT event \ref kNmtEventSwReset.
 The event can be sent by calling \b oplk_execNmtCommand(kNmtEventSwReset).
 
-\param  pInitParam_p            Pointer to the initialization parameters which
-                                must be set by the application.
+\param[in]      pInitParam_p        Pointer to the initialization parameters which
+                                    must be set by the application.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Stack initialization was successful.
-\retval Other                   Error occurred during stack initialization.
+\retval kErrorOk                    Stack initialization was successful.
+\retval Other                       Error occurred during stack initialization.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_create(tOplkApiInitParam* pInitParam_p)
+tOplkError oplk_create(const tOplkApiInitParam* pInitParam_p)
 {
     tOplkError  ret;
 
@@ -211,8 +214,8 @@ by sending the NMT command kNmtEventSwitchOff. The command can be sent by callin
         is possible to re-create the openPOWERLINK stack with \ref oplk_create.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Stack was successfully shut down.
-\retval Other             Error occurred while shutting down the openPOWERLINK stack.
+\retval kErrorOk                    Stack was successfully shut down.
+\retval Other                       Error occurred while shutting down the openPOWERLINK stack.
 
 \ingroup module_api
 */
@@ -266,19 +269,19 @@ sending the NMT event \ref kNmtEventSwReset. The event can be sent by calling
             \ref oplk_create. It is recommended using the new functions for
             stack initialization!
 
-\param  pInitParam_p            Pointer to the init parameters. The init
-                                parameters must be set by the application.
+\param[in]      pInitParam_p        Pointer to the init parameters. The init
+                                    parameters must be set by the application.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Stack was successfully initialized.
-\retval Other                   Error occurred while initializing the openPOWERLINK stack.
+\retval kErrorOk                    Stack was successfully initialized.
+\retval Other                       Error occurred while initializing the openPOWERLINK stack.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_init(tOplkApiInitParam* pInitParam_p)
+tOplkError oplk_init(const tOplkApiInitParam* pInitParam_p)
 {
-    tOplkError          ret;
+    tOplkError  ret;
 
     ret = oplk_initialize();
     if (ret != kErrorOk)
@@ -302,15 +305,15 @@ can be sent by calling oplk_execNmtCommand(kNmtEventSwitchOff);
             stack shutdown!
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Stack was successfully shut down.
-\retval Other             Error occurred while shutting down the openPOWERLINK stack.
+\retval kErrorOk                    Stack was successfully shut down.
+\retval Other                       Error occurred while shutting down the openPOWERLINK stack.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_shutdown(void)
 {
-    tOplkError          ret = kErrorApiNotInitialized;
+    tOplkError  ret;
 
     ret = oplk_destroy();
     oplk_exit();
@@ -327,7 +330,7 @@ NMT commands which are not appropriate in the current NMT state are silently
 ignored. Please keep in mind that the NMT state may change until the NMT command
 is actually executed.
 
-\param  nmtEvent_p              NMT command to send.
+\param[in]      nmtEvent_p          NMT command to send.
 
 \return The function returns a \ref tOplkError error code.
 
@@ -336,7 +339,7 @@ is actually executed.
 //------------------------------------------------------------------------------
 tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -352,41 +355,43 @@ tOplkError oplk_execNmtCommand(tNmtEvent nmtEvent_p)
 The function links an array of application variables onto the specified object
 in the object dictionary (OD).
 
-\param  objIndex_p          Index of the object to link the variable to.
-\param  pVar_p              Pointer to the application variable that should be
-                            linked.
-\param  pVarEntries_p       Pointer to the number of entries to link. The function
-                            stores the number of actually used entries at this
-                            location.
-\param  pEntrySize_p        Pointer to the size of one entry. If the size is
-                            zero, the actual size will be read from the object
-                            dictionary. The function stores the entire size of
-                            all linked entries at this location.
-\param  firstSubindex_p     Specifies the first subindex to be linked.
+\param[in]      objIndex_p          Index of the object to link the variable to.
+\param[in]      pVar_p              Pointer to the application variable that should be
+                                    linked.
+\param[in,out]  pVarEntries_p       Pointer to the number of entries to link. The function
+                                    stores the number of actually used entries at this
+                                    location.
+\param[in,out]  pEntrySize_p        Pointer to the size of one entry. If the size is
+                                    zero, the actual size will be read from the object
+                                    dictionary. The function stores the entire size of
+                                    all linked entries at this location.
+\param[in]      firstSubindex_p     Specifies the first subindex to be linked.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                  The variables are successfully linked to the
-                                  object dictionary.
-\retval kErrorObdIndexNotExist    The object index does not exist in the object
-                                  dictionary.
-\retval kErrorObdSubindexNotExist The subindex does not exist in the object
-                                  dictionary.
+\retval kErrorOk                    The variables are successfully linked to the
+                                    object dictionary.
+\retval kErrorObdIndexNotExist      The object index does not exist in the object
+                                    dictionary.
+\retval kErrorObdSubindexNotExist   The subindex does not exist in the object
+                                    dictionary.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
-                           tObdSize* pEntrySize_p, UINT firstSubindex_p)
+tOplkError oplk_linkObject(UINT objIndex_p,
+                           void* pVar_p,
+                           UINT* pVarEntries_p,
+                           tObdSize* pEntrySize_p,
+                           UINT firstSubindex_p)
 {
-    UINT8           varEntries;
-    UINT8           indexEntries;
-    UINT8 MEM*      pData;
-    UINT            subindex;
-    tVarParam       varParam;
-    tObdSize        entrySize;
-    tObdSize        usedSize;
-
-    tOplkError      ret = kErrorOk;
+    UINT8       varEntries;
+    UINT8       indexEntries;
+    UINT8*      pData;
+    UINT        subindex;
+    tVarParam   varParam;
+    tObdSize    entrySize;
+    tObdSize    usedSize;
+    tOplkError  ret = kErrorOk;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -394,9 +399,9 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     if ((pVar_p == NULL) || (pVarEntries_p == NULL) || (*pVarEntries_p == 0) || (pEntrySize_p == NULL))
         return kErrorApiInvalidParam;
 
-    pData      = (UINT8 MEM*)pVar_p;
+    pData = (UINT8*)pVar_p;
     varEntries = (UINT8)*pVarEntries_p;
-    usedSize   = 0;
+    usedSize = 0;
 
     // init varParam structure with default values
     varParam.index = objIndex_p;
@@ -407,7 +412,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // because user wants to link a variable to a subindex unequal 0x00
         // read number of entries
         entrySize = (tObdSize)sizeof(indexEntries);
-        ret = obd_readEntry(objIndex_p, 0x00, (void*)&indexEntries, &entrySize);
+        ret = obdu_readEntry(objIndex_p, 0x00, (void*)&indexEntries, &entrySize);
         if ((ret != kErrorOk) || (indexEntries == 0x00))
         {
             // Object doesn't exist or invalid entry number
@@ -424,9 +429,7 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
     // This is done in order to avoid setting more entries than there are subindexes in
     // the object.
     if ((indexEntries > (varEntries + firstSubindex_p - 1)) && (varEntries != 0x00))
-    {
         indexEntries = (UINT8)(varEntries + firstSubindex_p - 1);
-    }
 
     // map entries
     for (subindex = firstSubindex_p; subindex <= indexEntries; subindex++)
@@ -434,7 +437,8 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         // if passed entry size is 0, then get size from OD
         if (*pEntrySize_p == 0x00)
         {
-            if ((entrySize = obd_getDataSize(objIndex_p, subindex)) == 0x00)
+            entrySize = obdu_getDataSize(objIndex_p, subindex);
+            if (entrySize == 0x00)
             {
                 // invalid entry size (maybe object doesn't exist or entry of type DOMAIN is empty)
                 return kErrorObdSubindexNotExist;
@@ -452,13 +456,15 @@ tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
         usedSize += entrySize;
         pData += entrySize;
 
-        if ((ret = obd_defineVar(&varParam)) != kErrorOk)
+        ret = obdu_defineVar(&varParam);
+        if (ret != kErrorOk)
             break;
     }
 
     // set number of mapped entries and entry size
     *pVarEntries_p = ((indexEntries - firstSubindex_p) + 1);
     *pEntrySize_p = usedSize;
+
     return ret;
 }
 
@@ -471,35 +477,47 @@ node. If this node is a remote node, it performs an SDO transfer. In such case t
 function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
-\param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
-                            NULL in case of local OD access.
-\param  nodeId_p            Node ID of the node to read. If node ID is 0, the
-                            local OD will be read.
-\param  index_p             The index of the object to read.
-\param  subindex_p          The subindex of the object to read.
-\param  pDstData_le_p       Pointer where to store the read data. The data is in
-                            little endian byte order.
-\param  pSize_p             Pointer to the size of the buffer. For local reads
-                            the function stores the size of the object at this
-                            location.
-\param  sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
-                            UDP or SDO over PDO)
-\param  pUserArg_p          User defined argument which will be passed to the
-                            event callback function.
+\param[in,out]  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
+                                    NULL in case of local OD access.
+\param[in]      nodeId_p            Node ID of the node to read. If node ID is 0, the
+                                    local OD will be read.
+\param[in]      index_p             The index of the object to read.
+\param[in]      subindex_p          The subindex of the object to read.
+\param[out]     pDstData_le_p       Pointer where to store the read data. The data is in
+                                    little endian byte order.
+\param[in,out]  pSize_p             Pointer to the size of the buffer. For local reads
+                                    the function stores the size of the object at this
+                                    location.
+\param[in]      sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
+                                    UDP or SDO over PDO)
+\param[in]      pUserArg_p          User defined argument which will be passed to the
+                                    event callback function.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Entry was successfully read from OD.
-\retval Other             Error occurred while reading the OD.
+\retval kErrorOk                    Entry was successfully read from OD.
+\retval Other                       Error occurred while reading the OD.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
-                           UINT subindex_p, void* pDstData_le_p, UINT* pSize_p,
-                           tSdoType sdoType_p, void* pUserArg_p)
+tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p,
+                           UINT nodeId_p,
+                           UINT index_p,
+                           UINT subindex_p,
+                           void* pDstData_le_p,
+                           UINT* pSize_p,
+                           tSdoType sdoType_p,
+                           void* pUserArg_p)
 {
-    tOplkError      ret = kErrorOk;
-    tObdSize        obdSize;
+    tOplkError  ret = kErrorOk;
+    tObdSize    obdSize;
+
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -507,16 +525,16 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
     if ((index_p == 0) || (pDstData_le_p == NULL) || (pSize_p == NULL) || (*pSize_p == 0))
         return kErrorApiInvalidParam;
 
-    if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
+    if ((nodeId_p == 0) || (nodeId_p == obdu_getNodeId()))
     {   // local OD access can be performed
         obdSize = (tObdSize)*pSize_p;
-        ret = obd_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
+        ret = obdu_readEntryToLe(index_p, subindex_p, pDstData_le_p, &obdSize);
         *pSize_p = (UINT)obdSize;
     }
     else
     {   // perform SDO transfer
 #if defined(CONFIG_INCLUDE_SDOC)
-        tSdoComTransParamByIndex transParamByIndex;
+        tSdoComTransParamByIndex    transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
@@ -530,9 +548,7 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         // init command layer connection
         ret = sdocom_defineConnection(pSdoComConHdl_p, nodeId_p, sdoType_p);
         if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
-        {
             return ret;
-        }
 
         transParamByIndex.pData = pDstData_le_p;
         transParamByIndex.sdoAccessType = kSdoAccessTypeRead;
@@ -543,15 +559,18 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT i
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kErrorOk)
+        ret = sdocom_initTransferByIndex(&transParamByIndex);
+        if (ret != kErrorOk)
             return ret;
 
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
+
     return ret;
 }
 
@@ -564,32 +583,44 @@ node. If this node is a remote node, it performs an SDO transfer. In such case t
 function returns kErrorApiTaskDeferred and the application is informed via the
 event callback function when the task is completed.
 
-\param  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
-                            NULL in case of local OD access.
-\param  nodeId_p            Node ID of the node to write. If node ID is 0, the
-                            local OD will be read.
-\param  index_p             The index of the object to write.
-\param  subindex_p          The subindex of the object to write.
-\param  pSrcData_le_p       Pointer to data. The data must be in little endian
-                            byte order.
-\param  size_p              Size of the data to write.
-\param  sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
-                            UDP or SDO over PDO)
-\param  pUserArg_p          User defined argument which will be passed to the
-                            event callback function.
+\param[in,out]  pSdoComConHdl_p     A pointer to the SDO connection handle. It may be
+                                    NULL in case of local OD access.
+\param[in]      nodeId_p            Node ID of the node to write. If node ID is 0, the
+                                    local OD will be read.
+\param[in]      index_p             The index of the object to write.
+\param[in]      subindex_p          The subindex of the object to write.
+\param[in]      pSrcData_le_p       Pointer to data. The data must be in little endian
+                                    byte order.
+\param[in]      size_p              Size of the data to write.
+\param[in]      sdoType_p           The type of the SDO transfer (SDO over ASnd, SDO over
+                                    UDP or SDO over PDO)
+\param[in]      pUserArg_p          User defined argument which will be passed to the
+                                    event callback function.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Entry was successfully written to the OD.
-\retval Other             Error occurred while writing to the OD.
+\retval kErrorOk                    Entry was successfully written to the OD.
+\retval Other                       Error occurred while writing to the OD.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
-                            UINT subindex_p, void* pSrcData_le_p, UINT size_p,
-                            tSdoType sdoType_p, void* pUserArg_p)
+tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p,
+                            UINT nodeId_p,
+                            UINT index_p,
+                            UINT subindex_p,
+                            const void* pSrcData_le_p,
+                            UINT size_p,
+                            tSdoType sdoType_p,
+                            void* pUserArg_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(pSdoComConHdl_p);
+    UNUSED_PARAMETER(sdoType_p);
+    UNUSED_PARAMETER(pUserArg_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -597,14 +628,14 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
     if ((index_p == 0) || (pSrcData_le_p == NULL) || (size_p == 0))
         return kErrorApiInvalidParam;
 
-    if (nodeId_p == 0 || nodeId_p == obd_getNodeId())
+    if ((nodeId_p == 0) || (nodeId_p == obdu_getNodeId()))
     {   // local OD access can be performed
-        ret = obd_writeEntryFromLe(index_p, subindex_p, pSrcData_le_p, size_p);
+        ret = obdu_writeEntryFromLe(index_p, subindex_p, pSrcData_le_p, size_p);
     }
     else
     {   // perform SDO transfer
 #if defined(CONFIG_INCLUDE_SDOC)
-        tSdoComTransParamByIndex transParamByIndex;
+        tSdoComTransParamByIndex    transParamByIndex;
 
         // check if application provides space for handle
         if (pSdoComConHdl_p == NULL)
@@ -625,7 +656,7 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         if ((ret != kErrorOk) && (ret != kErrorSdoComHandleExists))
             return ret;
 
-        transParamByIndex.pData = pSrcData_le_p;
+        transParamByIndex.pData = (void*)pSrcData_le_p;
         transParamByIndex.sdoAccessType = kSdoAccessTypeWrite;
         transParamByIndex.sdoComConHdl = *pSdoComConHdl_p;
         transParamByIndex.dataSize = size_p;
@@ -634,16 +665,76 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
         transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
         transParamByIndex.pUserArg = pUserArg_p;
 
-        if ((ret = sdocom_initTransferByIndex(&transParamByIndex)) != kErrorOk)
+        ret = sdocom_initTransferByIndex(&transParamByIndex);
+        if (ret != kErrorOk)
             return ret;
 
         ret = kErrorApiTaskDeferred;
 
 #else
-        ret = kErrorApiInvalidParam;
+        // no SDO client implemented, only local access possible!
+        ret = kErrorInvalidNodeId;
 #endif
     }
+
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Finish a user specific object access
+
+The function finishes a user specific object access event
+(\ref kOplkApiEventUserObdAccess) which returned kErrorReject on the
+beginning of the access to signal a delayed answer.
+
+\parblock
+\param[in,out]  pUserObdConHdl_p    Connection handle to user OD. Used members:
+                \li \ref tObdAlConHdl::obdAlHdl
+                \li \ref tObdAlConHdl::plkError
+                \li \ref tObdAlConHdl::origin
+
+                Only used for \ref tObdAlConHdl::accessTyp = kObdAlAccessTypeRead:
+                \li tObdAlConHdl::pSrcData
+                \li tObdAlConHdl::dataSize      Data size to be copied
+
+                Only used for initial read or write access (dataOffset = 0):
+                \li tObdAlConHdl::totalPendSize object size
+\endparblock
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p)
+{
+    return obdal_finishUserObdAccess(pUserObdConHdl_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief Enables or disables forwarding object accesses to non-existing objects
+
+This function enables or disables forwarding of object accesses to objects which
+do not exist in the default object dictionary. Those accesses are forwarded
+to the API with the event \ref kOplkApiEventUserObdAccess if the feature is
+activated, the API needs to handle those accesses appropriately.
+
+\param[in]      fEnable_p           Flag for object access forwarding feature enabling:
+                                    TRUE = enable, FALSE = disable
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_enableUserObdAccess(BOOL fEnable_p)
+{
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    return obdal_enableUserObdAccess(fEnable_p);
 }
 
 //------------------------------------------------------------------------------
@@ -653,19 +744,26 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT 
 The function frees the specified SDO channel. It must be called when the SDO
 channel to a remote node is not needed anymore. This may be done in the event
 callback function when the last SDO transfer to a remote node has completed.
+This function requires access to an SDO client.
 
-\param  sdoComConHdl_p      The SDO connection handle.
+\param[in]      sdoComConHdl_p      The SDO connection handle.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          SDO channel was successfully freed.
-\retval Other             Error occurred while freeing the SDO channel.
+\retval kErrorOk                    SDO channel was successfully freed.
+\retval kErrorIllegalInstance       No SDO client implemented.
+\retval Other                       Error occurred while freeing the SDO channel.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -674,9 +772,7 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 
 #if defined(CONFIG_INCLUDE_CFM)
     if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
-    {
         ret = kErrorApiSdoBusyIntern;
-    }
     else
 #endif
     {
@@ -684,8 +780,10 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
         ret = sdocom_undefineConnection(sdoComConHdl_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
+
     return ret;
 }
 
@@ -694,21 +792,30 @@ tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p)
 \brief  Abort an SDO transfer
 
 The function aborts the running SDO transfer on the specified SDO channel.
+This function requires access to an SDO client.
 
-\param  sdoComConHdl_p      The SDO connection handle.
-\param  abortCode_p         The abort code which shall be sent to the remote
-                            node.
+\param[in]      sdoComConHdl_p      The SDO connection handle.
+\param[in]      abortCode_p         The abort code which shall be sent to the remote
+                                    node.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          SDO transfer was successfully freed.
-\retval Other             Error occurred while aborting the SDO transfer.
+\retval kErrorOk                    SDO channel was successfully freed.
+\retval kErrorIllegalInstance       No SDO client implemented.
+\retval Other                       Error occurred while aborting the SDO transfer.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
+tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p,
+                         UINT32 abortCode_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+
+#if !defined(CONFIG_INCLUDE_SDOC)
+    // Ignore unused parameters
+    UNUSED_PARAMETER(sdoComConHdl_p);
+    UNUSED_PARAMETER(abortCode_p);
+#endif
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -717,16 +824,15 @@ tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 
 #if defined(CONFIG_INCLUDE_CFM)
     if (cfmu_isSdoRunning(sdocom_getNodeId(sdoComConHdl_p)))
-    {
         ret = kErrorApiSdoBusyIntern;
-    }
     else
 #endif
     {
         ret = sdocom_abortTransfer(sdoComConHdl_p, abortCode_p);
     }
 #else
-    ret = kErrorApiInvalidParam;
+    // no SDO client implemented
+    ret = kErrorIllegalInstance;
 #endif
 
     return ret;
@@ -738,31 +844,40 @@ tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p)
 
 The function reads the specified entry from the local object dictionary.
 
-\param  index_p             The index of the object to read.
-\param  subindex_p          The subindex of the object to read.
-\param  pDstData_p          Pointer where to store the read data. The data is in
-                            platform byte order.
-\param  pSize_p             Pointer to the size of the buffer. The function
-                            stores the size of the object at this location.
+\param[in]      index_p             The index of the object to read.
+\param[in]      subindex_p          The subindex of the object to read.
+\param[out]     pDstData_p          Pointer where to store the read data. The data is in
+                                    platform byte order.
+\param[in,out]  pSize_p             Pointer to the size of the buffer. The function
+                                    stores the size of the object at this location.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Entry was successfully read from local OD.
-\retval Other             Error occurred while reading the OD.
+\retval kErrorOk                    Entry was successfully read from local OD.
+\retval Other                       Error occurred while reading the OD.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
+tOplkError oplk_readLocalObject(UINT index_p,
+                                UINT subindex_p,
+                                void* pDstData_p,
                                 UINT* pSize_p)
 {
-    tOplkError      ret = kErrorOk;
-    tObdSize        obdSize;
+    tOplkError  ret = kErrorOk;
+    tObdSize    obdSize;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
+    if ((index_p == 0) ||
+        (subindex_p > 255) ||
+        (pDstData_p == NULL) ||
+        (pSize_p == NULL) ||
+        (*pSize_p == 0))
+        return kErrorApiInvalidParam;
+
     obdSize = (tObdSize)*pSize_p;
-    ret = obd_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
+    ret = obdu_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
     *pSize_p = (UINT)obdSize;
 
     return ret;
@@ -774,26 +889,34 @@ tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p,
 
 The function writes the specified entry to the local object dictionary.
 
-\param  index_p             The index of the object to write.
-\param  subindex_p          The subindex of the object to write.
-\param  pSrcData_p          Pointer to data. The data must be in platform byte
-                            order.
-\param  size_p              Size of the data to write.
+\param[in]      index_p             The index of the object to write.
+\param[in]      subindex_p          The subindex of the object to write.
+\param[in]      pSrcData_p          Pointer to data. The data must be in platform byte
+                                    order.
+\param[in]      size_p              Size of the data to write.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Entry was successfully written to local OD.
-\retval Other             Error occurred while writing to the OD.
+\retval kErrorOk                    Entry was successfully written to local OD.
+\retval Other                       Error occurred while writing to the OD.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_writeLocalObject(UINT index_p, UINT subindex_p, void* pSrcData_p,
+tOplkError oplk_writeLocalObject(UINT index_p,
+                                 UINT subindex_p,
+                                 const void* pSrcData_p,
                                  UINT size_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    return obd_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
+    if ((index_p == 0) ||
+        (subindex_p > 255) ||
+        (pSrcData_p == NULL) ||
+        (size_p == 0))
+        return kErrorApiInvalidParam;
+
+    return obdu_writeEntry(index_p, subindex_p, pSrcData_p, (tObdSize)size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -804,31 +927,32 @@ The function sends a generic ASnd frame to the specified node. The function
 queues the frame into the generic ASnd queue and immediately returns. The
 sending of the frame is then controlled by the asynchronous scheduler.
 
-\param  dstNodeId_p         Destination Node ID to send the ASnd frame to.
-\param  pAsndFrame_p        Pointer to ASnd frame which should be sent.
-\param  asndSize_p          Size of ASnd frame to send. The size contains the
-                            service ID and the payload. The size cannot
-                            exceed the maximum asynchronous size configured
-                            in AsyncMTU.
+\param[in]      dstNodeId_p         Destination Node ID to send the ASnd frame to.
+\param[in]      pAsndFrame_p        Pointer to ASnd frame which should be sent.
+\param[in]      asndSize_p          Size of ASnd frame to send. The size contains the
+                                    service ID and the payload. The size cannot
+                                    exceed the maximum asynchronous size configured
+                                    in AsyncMTU.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          The ASnd frame was successfully queued into the
-                          generic ASnd buffer.
-\retval Other             Error occurred while adding the ASnd frame into
-                          the generic ASnd buffer.
+\retval kErrorOk                    The ASnd frame was successfully queued into the
+                                    generic ASnd buffer.
+\retval Other                       Error occurred while adding the ASnd frame into
+                                    the generic ASnd buffer.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
+tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p,
+                              const tAsndFrame* pAsndFrame_p,
                               size_t asndSize_p)
 {
-    tOplkError      ret;
-    tFrameInfo      frameInfo;
-    BYTE            buffer[C_DLL_MAX_ASYNC_MTU];
-    UINT            frameSize;
-    UINT16          asyncMtu;
-    tObdSize        obdSize;
+    tOplkError  ret;
+    tFrameInfo  frameInfo;
+    UINT8       aBuffer[C_DLL_MAX_ASYNC_MTU];
+    size_t      frameSize;
+    UINT16      asyncMtu;
+    tObdSize    obdSize;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -837,21 +961,22 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
     frameSize = asndSize_p + offsetof(tPlkFrame, data);
 
     // Check for correct input
-    if ((pAsndFrame_p == NULL) || (frameSize >= sizeof(buffer)))
-        return kErrorReject;
+    if ((pAsndFrame_p == NULL) ||
+        (frameSize >= sizeof(aBuffer)))
+        return kErrorApiInvalidParam;
 
     // Check size against configured AsyncMTU value
-    obdSize = sizeof(UINT16);
-    ret = obd_readEntry(0x1F98, 8, &asyncMtu, &obdSize);
+    obdSize = (tObdSize)sizeof(UINT16);
+    ret = obdu_readEntry(0x1F98, 8, &asyncMtu, &obdSize);
     if (ret != kErrorOk)
         return kErrorReject;
 
-    if (asndSize_p > asyncMtu)
+    if (asndSize_p > (size_t)asyncMtu)
         return kErrorReject;
 
     // Set up frame info
-    frameInfo.frameSize = frameSize;
-    frameInfo.frame.pBuffer = (tPlkFrame*)buffer;
+    frameInfo.frameSize = (UINT)frameSize;
+    frameInfo.frame.pBuffer = (tPlkFrame*)aBuffer;
 
     // Copy Asnd data
     OPLK_MEMSET(frameInfo.frame.pBuffer, 0x00, frameInfo.frameSize);
@@ -859,7 +984,7 @@ tOplkError oplk_sendAsndFrame(UINT8 dstNodeId_p, tAsndFrame* pAsndFrame_p,
 
     // Fill in additional data (SrcNodeId is filled by DLL if it is set to 0)
     ami_setUint8Le(&frameInfo.frame.pBuffer->messageType, (UINT8)kMsgTypeAsnd);
-    ami_setUint8Le(&frameInfo.frame.pBuffer->dstNodeId, (UINT8)dstNodeId_p);
+    ami_setUint8Le(&frameInfo.frame.pBuffer->dstNodeId, dstNodeId_p);
     ami_setUint8Le(&frameInfo.frame.pBuffer->srcNodeId, (UINT8)0);
 
     // Request frame transmission
@@ -876,20 +1001,21 @@ The function sends an Ethernet frame with generic priority. The given frame's
 EtherType must be set to a valid pattern unequal 0x0000 and 0x88AB. The lower
 layer inserts the node's MAC address if the source MAC address is set to 0.
 
-\param  pFrame_p        Pointer to frame which should be sent.
-\param  frameSize_p     Size of frame which should be sent.
-                        The size shall include Ethernet header and payload
-                        (e.g. min. Ethernet frame 14 byte + 46 byte = 60 byte).
+\param[in]      pFrame_p            Pointer to frame which should be sent.
+\param[in]      frameSize_p         Size of frame which should be sent.
+                                    The size shall include Ethernet header and payload
+                                    (e.g. min. Ethernet frame 14 byte + 46 byte = 60 byte).
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Ethernet frame was successfully sent.
-\retval kErrorInvalidOperation  EtherType set in frame is invalid.
-\retval Other                   Error occurred while sending the Ethernet frame.
+\retval kErrorOk                    Ethernet frame was successfully sent.
+\retval kErrorInvalidOperation      EtherType set in frame is invalid.
+\retval Other                       Error occurred while sending the Ethernet frame.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
+tOplkError oplk_sendEthFrame(const tPlkFrame* pFrame_p,
+                             size_t frameSize_p)
 {
     tOplkError  ret = kErrorOk;
     tFrameInfo  frameInfo;
@@ -897,15 +1023,15 @@ tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 
     // Check for correct input
     if ((pFrame_p == NULL) || (frameSize_p > C_DLL_MAX_ETH_FRAME))
-        return kErrorReject;
+        return kErrorApiInvalidParam;
 
     etherType = ami_getUint16Be(&pFrame_p->etherType);
     if ((etherType == 0) || (etherType == C_DLL_ETHERTYPE_EPL))
-        return kErrorInvalidOperation;
+        return kErrorApiInvalidParam;
 
     // Set frame info
-    frameInfo.frameSize = frameSize_p;
-    frameInfo.frame.pBuffer = pFrame_p;
+    frameInfo.frameSize = (UINT)frameSize_p;
+    frameInfo.frame.pBuffer = (tPlkFrame*)pFrame_p;
 
     // Forward frame to DLLuCAL
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -920,22 +1046,23 @@ tOplkError oplk_sendEthFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
 The function enables or disables the forwarding of received ASnd frames
 to the application.
 
-\param  serviceId_p         The ASnd service ID for which the forwarding will
-                            be set.
-\param  filterType_p        Specifies which types of ASnd frames should be
-                            received. Could be none, unicast or all frames.
+\param[in]      serviceId_p         The ASnd service ID for which the forwarding will
+                                    be set.
+\param[in]      filterType_p        Specifies which types of ASnd frames should be
+                                    received. Could be none, unicast or all frames.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Forwarding was successfully set.
-\retval Other             Error occurred while setting ASnd forwarding.
+\retval kErrorOk                    Forwarding was successfully set.
+\retval Other                       Error occurred while setting ASnd forwarding.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_p)
+tOplkError oplk_setAsndForward(UINT8 serviceId_p,
+                               tOplkApiAsndFilter filterType_p)
 {
-    tOplkError          ret;
-    tDllAsndFilter      dllFilter;
+    tOplkError      ret;
+    tDllAsndFilter  dllFilter;
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -951,8 +1078,8 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
             dllFilter = kDllAsndFilterAny;
             break;
 
-        default:
         case tOplkApiAsndFilterNone:
+        default:
             dllFilter = kDllAsndFilterNone;
             break;
     }
@@ -970,20 +1097,20 @@ tOplkError oplk_setAsndForward(UINT8 serviceId_p, tOplkApiAsndFilter filterType_
 The function enables or disables the forwarding of received non-POWERLINK
 Ethernet frames to the application.
 
-\param  fEnable_p           Enable received Ethernet frame forwarding with TRUE.
-                            Disable received Ethernet frame forwarding with FALSE.
+\param[in]      fEnable_p           Enable received Ethernet frame forwarding with TRUE.
+                                    Disable received Ethernet frame forwarding with FALSE.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Forwarding was successfully set.
-\retval kErrorIllegalInstance   Virtual Ethernet is not enabled.
-\retval Other                   Error occurred while setting Ethernet forwarding.
+\retval kErrorOk                    Forwarding was successfully set.
+\retval kErrorIllegalInstance       Virtual Ethernet is not enabled.
+\retval Other                       Error occurred while setting Ethernet forwarding.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_setNonPlkForward(BOOL fEnable_p)
 {
-    tOplkError ret;
+    tOplkError  ret;
 
 #if defined(CONFIG_INCLUDE_VETH)
     if (fEnable_p)
@@ -992,6 +1119,7 @@ tOplkError oplk_setNonPlkForward(BOOL fEnable_p)
         ret = dllucal_regNonPlkHandler(NULL);
 #else
     UNUSED_PARAMETER(fEnable_p);
+
     ret = kErrorIllegalInstance;
 #endif
 
@@ -1006,11 +1134,11 @@ The function posts user-defined events to event processing thread, i.e. calls
 user event callback function with event \ref kOplkApiEventUserDef. This function
 is thread safe and is meant for synchronization.
 
-\param  pUserArg_p          User defined pointer.
+\param[in]      pUserArg_p          User defined pointer.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          Event was successfully posted.
-\retval Other             Error while posting the event.
+\retval kErrorOk                    Event was successfully posted.
+\retval Other                       Error while posting the event.
 
 \ingroup module_api
 */
@@ -1042,20 +1170,21 @@ tOplkError oplk_postUserEvent(void* pUserArg_p)
 The function triggers a NMT state change by sending the specified node command
 for the specified node.
 
-\param  nodeId_p            The Node ID for which the node command will be executed.
-\param  nodeCommand_p       The Node command to execute.
+\param[in]      nodeId_p            The Node ID for which the node command will be executed.
+\param[in]      nodeCommand_p       The Node command to execute.
 
 \note   The function is only used on an MN. On a CN it always returns
         \ref kErrorApiInvalidParam.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk          NMT node command was successfully sent.
-\retval Other             Error occurred while sending NMT node command.
+\retval kErrorOk                    NMT node command was successfully sent.
+\retval Other                       Error occurred while sending NMT node command.
 
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p)
+tOplkError oplk_triggerMnStateChange(UINT nodeId_p,
+                                     tNmtNodeCommand nodeCommand_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -1079,8 +1208,8 @@ the stack to read the configuration. It can be used instead of
 oplk_setCdcFilename() when no file system is available (e.g. on an
 embedded system).
 
-\param  pCdc_p          Pointer to the concise device description.
-\param  cdcSize_p       Size of the concise device description
+\param[in]      pCdc_p              Pointer to the concise device description.
+\param[in]      cdcSize_p           Size of the concise device description
 
 \note   The function is only used if the CDC functionality is included in the
         openPOWERLINK stack.
@@ -1095,7 +1224,8 @@ embedded system).
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
+tOplkError oplk_setCdcBuffer(const void* pCdc_p,
+                             size_t cdcSize_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -1118,8 +1248,8 @@ tOplkError oplk_setCdcBuffer(BYTE* pCdc_p, UINT cdcSize_p)
 The function sets the concise device description (CDC) file to be used by
 the stack to read the configuration.
 
-\param  pCdcFilename_p  Filename to be used for reading the concise device
-                        description.
+\param[in]      pCdcFilename_p      Filename to be used for reading the concise device
+                                    description.
 
 \note   The function is only used if the CDC functionality is included in the
         openPOWERLINK stack.
@@ -1134,7 +1264,7 @@ the stack to read the configuration.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
+tOplkError oplk_setCdcFilename(const char* pCdcFilename_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -1156,7 +1286,7 @@ tOplkError oplk_setCdcFilename(char* pCdcFilename_p)
 The function sets the object dictionary (OD) configuration archive file path
 to be used by the stack to store/restore OD configuration.
 
-\param  pBackupPath_p   Path to be used for storing/restoring the OD archive.
+\param[in]      pBackupPath_p       Path to be used for storing/restoring the OD archive.
 
 \note   The function is only used if the configuration store restore
         functionality is included in the openPOWERLINK stack.
@@ -1210,8 +1340,8 @@ tOplkError oplk_process(void)
 The function checks if the kernel part of the stack is alive.
 
 \return Returns the status of the kernel stack.
-\retval TRUE        The kernel stack is alive.
-\retval FALSE       The kernel stack is dead.
+\retval TRUE                        The kernel stack is alive.
+\retval FALSE                       The kernel stack is dead.
 
 \ingroup module_api
 */
@@ -1258,7 +1388,7 @@ build- and release-candidate-number.
 
 */
 //------------------------------------------------------------------------------
-char* oplk_getVersionString(void)
+const char* oplk_getVersionString(void)
 {
     static char* pVersionString = PLK_DEFINED_STRING_VERSION;
 
@@ -1289,7 +1419,7 @@ UINT32 oplk_getStackConfiguration(void)
 
 The function obtains the stack information.
 
-\param  pStackInfo_p    Pointer to memory where the stack info should be stored.
+\param[out]     pStackInfo_p        Pointer to memory where the stack info should be stored.
 
 \return The function returns a \ref tOplkError error code.
 
@@ -1327,13 +1457,13 @@ POWERLINK cycle if the node is configured as Controlled Node (CN).
 If the node is configured as Managing Node (MN), the obtained SoC time information
 is sent to the network in the next POWERLINK cycle.
 
-\param  pTimeInfo_p     Pointer to memory where the SoC time info should be stored.
+\param[out]     pTimeInfo_p         Pointer to memory where the SoC time info should be stored.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                The SoC time information was obtained successfully.
-\retval kErrorApiNotSupported   Forwarding the SoC time information is not supported
-                                by the kernel stack.
-\retval Other                   Error occurred while obtaining the SoC time information.
+\retval kErrorOk                    The SoC time information was obtained successfully.
+\retval kErrorApiNotSupported       Forwarding the SoC time information is not supported
+                                    by the kernel stack.
+\retval Other                       Error occurred while obtaining the SoC time information.
 
 \ingroup module_api
 */
@@ -1353,6 +1483,56 @@ tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p)
 }
 
 //------------------------------------------------------------------------------
+/**
+\brief  Exchange input application process data
+
+The function exchanges the input application process data.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Input process image is successfully exchanged.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_exchangeAppPdoIn(void)
+{
+    tOplkError  ret;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    ret = pdou_copyTxPdoFromPi();
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Exchange output application process data
+
+The function exchanges the output application process data.
+
+\return The function returns a \ref tOplkError error code.
+\retval kErrorOk                    Output process image is successfully exchanged.
+\retval kErrorApiNotInitialized     openPOWERLINK stack is not initialized.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_exchangeAppPdoOut(void)
+{
+    tOplkError  ret;
+
+    if (!ctrlu_stackIsInitialized())
+        return kErrorApiNotInitialized;
+
+    ret = pdou_copyRxPdoToPi();
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
 
 /**
 \brief Wait for sync event
@@ -1366,13 +1546,13 @@ the specified timeout elapsed.
       it is directly called from the stack (see pfnCbSync in
       \ref tOplkApiInitParam).
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk            The sync event occurred.
-\retval kErrorGeneralError  An error or timeout occurred while waiting for the
-                            sync event.
+\retval kErrorOk                    The sync event occurred.
+\retval kErrorGeneralError          An error or timeout occurred while waiting for the
+                                    sync event.
 
 \ingroup module_api
 */
@@ -1391,9 +1571,9 @@ tOplkError oplk_waitSyncEvent(ULONG timeout_p)
 
 The function returns the stored IdentResponse frame of the specified node.
 
-\param  nodeId_p            Node ID of which to get the Ident Response frame.
-\param  ppIdentResponse_p   Pointer to store the address of the IdentResponse
-                            frame.
+\param[in]      nodeId_p            Node ID of which to get the Ident Response frame.
+\param[out]     ppIdentResponse_p   Pointer to store the address of the IdentResponse
+                                    frame.
 
 \note   The function is only used on an MN. On a CN it returns always
         \ref kErrorApiInvalidParam.
@@ -1403,15 +1583,20 @@ The function returns the stored IdentResponse frame of the specified node.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
+tOplkError oplk_getIdentResponse(UINT nodeId_p,
+                                 const tIdentResponse** ppIdentResponse_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
+    if ((nodeId_p <= 0) ||
+        (nodeId_p > 255) ||
+        (ppIdentResponse_p == NULL))
+        return kErrorApiInvalidParam;
+
     return identu_getIdentResponse(nodeId_p, ppIdentResponse_p);
 #else
-
     UNUSED_PARAMETER(nodeId_p);
     UNUSED_PARAMETER(ppIdentResponse_p);
 
@@ -1426,9 +1611,9 @@ tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse
 The function provides the Ethernet Interface MAC address used by the
 Ethernet controller.
 
-\param  pMacAddr_p      Pointer to memory buffer which is used to copy the MAC
-                        address into. The memory buffer must have a size of
-                        6 bytes!
+\param[out]     pMacAddr_p          Pointer to memory buffer which is used to copy
+                                    the MAC address into. The memory buffer must
+                                    have a size of 6 bytes!
 
 \return The function returns a \ref tOplkError error code.
 
@@ -1442,7 +1627,7 @@ tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p)
     if (pMacAddr_p != NULL)
         OPLK_MEMCPY(pMacAddr_p, ctrlu_getEthMacAddr(), 6);
     else
-        ret = kErrorInvalidOperation;
+        ret = kErrorApiInvalidParam;
 
     return ret;
 }
@@ -1458,7 +1643,7 @@ node will be forwarded to the application. The PRes frame is forwarded by
 a \ref kOplkApiEventReceivedPres event. The application has to handle this event
 to get the frame.
 
-\param  nodeId_p            Node ID of which to get the PRes frame.
+\param[in]      nodeId_p            Node ID of which to get the PRes frame.
 
 \return The function returns a \ref tOplkError error code.
 
@@ -1467,19 +1652,20 @@ to get the frame.
 //------------------------------------------------------------------------------
 tOplkError oplk_triggerPresForward(UINT nodeId_p)
 {
-#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
-    tEvent      event;
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD))
+    tEvent  event;
 
-    event.eventSink     = kEventSinkDllk;
-    event.netTime.nsec  = 0;
-    event.netTime.sec   = 0;
-    event.eventType     = kEventTypeRequPresForward;
+    event.eventSink = kEventSinkDllk;
+    event.netTime.nsec = 0;
+    event.netTime.sec = 0;
+    event.eventType = kEventTypeRequPresForward;
     event.eventArg.pEventArg = &nodeId_p;
-    event.eventArgSize  = sizeof(nodeId_p);
+    event.eventArgSize = sizeof(nodeId_p);
 
     return eventu_postEvent(&event);
 #else
     UNUSED_PARAMETER(nodeId_p);
+
     return kErrorApiInvalidParam;
 #endif
 }
@@ -1490,6 +1676,7 @@ tOplkError oplk_triggerPresForward(UINT nodeId_p)
 /// \name Private Functions
 /// \{
 
+#if defined(CONFIG_INCLUDE_SDOC)
 //------------------------------------------------------------------------------
 /**
 \brief  Callback function for SDO transfers
@@ -1498,19 +1685,19 @@ The function implements the callback function for SDO transfers. It will be
 registered for an SDO transfer. When it is called by the SDO stack it sends an
 SDO event to the application.
 
-\param  pSdoComFinished_p   SDO parameter.
+\param[in]      pSdoComFinished_p   SDO parameter.
 
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-#if defined(CONFIG_INCLUDE_SDOC)
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;
 
     eventArg.sdoInfo = *pSdoComFinished_p;
     ret = ctrlu_callUserEventCallback(kOplkApiEventSdo, &eventArg);
+
     return ret;
 }
 #endif
@@ -1522,17 +1709,16 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 The function implements the callback function to handle received ASnd frames.
 Frames will be forwarded to the application by sending a user event.
 
-\param  pFrameInfo_p   Pointer to information about the received frame.
+\param[in]      pFrameInfo_p        Pointer to information about the received frame.
 
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
+static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    asndOffset;
-    tOplkApiEventArg        apiEventArg;
-    tOplkApiEventType       eventType;
+    tOplkError          ret = kErrorOk;
+    UINT                asndOffset;
+    tOplkApiEventArg    apiEventArg;
 
     // Check for correct input
     asndOffset = offsetof(tPlkFrame, data.asnd);
@@ -1545,8 +1731,8 @@ static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
     apiEventArg.receivedAsnd.pFrame = pFrameInfo_p->frame.pBuffer;
     apiEventArg.receivedAsnd.frameSize = pFrameInfo_p->frameSize;
 
-    eventType = kOplkApiEventReceivedAsnd;
-    ret = ctrlu_callUserEventCallback(eventType, &apiEventArg);
+    ret = ctrlu_callUserEventCallback(kOplkApiEventReceivedAsnd, &apiEventArg);
+
     return ret;
 }
 
@@ -1558,12 +1744,12 @@ static tOplkError cbReceivedAsnd(tFrameInfo* pFrameInfo_p)
 The function implements the callback function to handle received Ethernet frames.
 Frames will be forwarded to the application by sending a user event.
 
-\param  pFrameInfo_p   Pointer to information about the received frame.
+\param[in]      pFrameInfo_p        Pointer to information about the received frame.
 
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbReceivedEth(tFrameInfo* pFrameInfo_p)
+static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;

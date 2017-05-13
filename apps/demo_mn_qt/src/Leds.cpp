@@ -9,7 +9,7 @@ The file contains the implementation of the LED widget class.
 \ingroup module_demo_mn_qt
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -39,14 +39,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <Leds.h>
 
-#include "Leds.h"
+#include <QLabel>
+#include <QPixmap>
+#include <QHBoxLayout>
+
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -58,8 +56,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructs a LED widget
 
-\param  count_p         Number of LEDs to show
-\param  parent_p        Pointer to parent widget
+\param[in]      count_p             Number of LEDs to show
+\param[in]      parent_p            Pointer to parent widget
 */
 //------------------------------------------------------------------------------
 Leds::Leds(int count_p, QWidget* parent_p)
@@ -67,62 +65,65 @@ Leds::Leds(int count_p, QWidget* parent_p)
 {
     int nIdx;
 
-    count = count_p;
+    this->count = count_p;
 
     QHBoxLayout* pLedsLayout = new QHBoxLayout;
     setLayout(pLedsLayout);
-
     setContentsMargins(0, 0, 0, 0);
 
     // create array for pointers to LedButtons
-    ppLedLabels = new QLabel*[count_p];
+    this->ppLedLabels = new QLabel*[count_p];
 
-    pActiveLed  = new QPixmap(":/img/ledred.png");
-    pInactiveLed = new QPixmap(":/img/ledgreen.png");
-    pNoLed = new QPixmap(":/img/ledgray.png");
+    this->pActiveLed  = new QPixmap(":/img/ledred.png");
+    this->pInactiveLed = new QPixmap(":/img/ledgreen.png");
+    this->pNoLed = new QPixmap(":/img/ledgray.png");
 
     for (nIdx = 0; nIdx < count_p; nIdx++)
     {
-        ppLedLabels[nIdx] = new QLabel(parent_p);
-        ppLedLabels[nIdx]->setPixmap(*pNoLed);
-        pLedsLayout->addWidget(ppLedLabels[nIdx]);
+        this->ppLedLabels[nIdx] = new QLabel(parent_p);
+        this->ppLedLabels[nIdx]->setPixmap(*this->pNoLed);
+        pLedsLayout->addWidget(this->ppLedLabels[nIdx]);
     }
+
     pLedsLayout->update();
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  set LEDs
+\brief  Set LEDs
 
 setLeds() sets the LEDs according to the data value.
 
-\param  dataIn_p        Data value to show
+\param[in]      dataIn_p            Data value to show
 */
 //------------------------------------------------------------------------------
-void Leds::setLeds(UINT dataIn_p)
+void Leds::setLeds(unsigned int dataIn_p)
 {
     int nIdx;
 
     for (nIdx = 0; nIdx < count; nIdx++)
     {
         if (dataIn_p & (1 << nIdx))
-        {
-            ppLedLabels[nIdx]->setPixmap(*pActiveLed);
-        }
+            this->ppLedLabels[nIdx]->setPixmap(*this->pActiveLed);
         else
-        {
-            ppLedLabels[nIdx]->setPixmap(*pInactiveLed);
-        }
+            this->ppLedLabels[nIdx]->setPixmap(*this->pInactiveLed);
     }
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Disable all LEDs
+
+Disables all LEDs.
+
+*/
+//------------------------------------------------------------------------------
 void Leds::disableLeds(void)
 {
     int nIdx;
 
-    for (nIdx = 0; nIdx < count; ++nIdx)
+    for (nIdx = 0; nIdx < count; nIdx++)
     {
-        ppLedLabels[nIdx]->setPixmap(*pNoLed);
+        this->ppLedLabels[nIdx]->setPixmap(*this->pNoLed);
     }
 }
-

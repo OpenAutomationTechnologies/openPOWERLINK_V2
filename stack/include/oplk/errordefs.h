@@ -8,7 +8,7 @@ Definitions of return values and errors.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_errordefs_H_
 #define _INC_oplk_errordefs_H_
 
@@ -125,7 +124,8 @@ typedef enum
     kErrorInvalidNodeId             = 0x0007,       ///< An invalid NodeId was specified
     kErrorNoResource                = 0x0008,       ///< The resource could not be created
     kErrorShutdown                  = 0x0009,       ///< Stack is shutting down
-    kErrorReject                    = 0x000A,       ///< Reject the subsequent command
+    kErrorReject                    = 0x000A,       /**< \li Reject the subsequent command
+                                                         \li  OD access will not be completed immediately, but by callback */
     kErrorRetry                     = 0x000B,       ///< Retry this command
     kErrorInvalidEvent              = 0x000C,       ///< Invalid event was posted
     kErrorGeneralError              = 0x000D,       ///< General error
@@ -189,6 +189,7 @@ typedef enum
     kErrorSdoUdpNoFreeHandle        = 0x0054,       ///< No free connection handle for Udp
     kErrorSdoUdpSendError           = 0x0055,       ///< Error during sending of frame
     kErrorSdoUdpInvalidHdl          = 0x0056,       ///< The connection handle is invalid
+    kErrorSdoUdpArpInProgress       = 0x0057,       ///< ARP request is in progress or target node MAC unknown
 
     // area for SDO Sequence layer module 0x0060 - 0x006F
     kErrorSdoSeqMissCb              = 0x0060,       ///< No SDO callback function is assigned
@@ -262,7 +263,8 @@ typedef enum
     kErrorApiTaskDeferred           = 0x0140,       ///< openPOWERLINK performs task in background and informs the application (or vice-versa), when it is finished
     kErrorApiInvalidParam           = 0x0142,       ///< Passed invalid parameters to a function (e.g. invalid node id)
     kErrorApiNoObdInitRam           = 0x0143,       ///< No function pointer for ObdInitRam supplied
-    kErrorApiSdoBusyIntern          = 0x0144,       ///< The SDO channel to this node is internally used by the stack (e.g. the CFM) and currently not available for the application.
+    kErrorApiSdoBusyIntern          = 0x0144,       /**< The SDO channel to this node is internally used by the stack (e.g. the CFM)
+                                                         and currently not available for the application (or vice versa). */
     kErrorApiPIAlreadyAllocated     = 0x0145,       ///< Process image is already allocated
     kErrorApiPIOutOfMemory          = 0x0146,       ///< Process image: out of memory
     kErrorApiPISizeExceeded         = 0x0147,       ///< Process image: variable linking or copy job exceeds the size of the PI

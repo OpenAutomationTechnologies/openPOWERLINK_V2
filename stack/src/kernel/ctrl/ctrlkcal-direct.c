@@ -12,7 +12,7 @@ both, kernel and user stack are running in the same instance.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -101,6 +101,7 @@ implementation nothing has to be done!
 tOplkError ctrlkcal_init(void)
 {
     status_l = kCtrlStatusReady;
+
     return kErrorOk;
 }
 
@@ -144,10 +145,10 @@ The function reads a control command stored by the user in the control memory
 block to execute a kernel control function.
 
 \note The function is only implemented to provide the interface, but is not
-      used, because in the direct implemtation the kernel control command can
+      used, because in the direct implementation the kernel control command can
       be directly called by the user control module.
 
-\param  pCmd_p            The command to be executed.
+\param[out]     pCmd_p              The command to be executed.
 
 \return The function returns a tOplkError error code.
 
@@ -157,6 +158,7 @@ block to execute a kernel control function.
 tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 {
     UNUSED_PARAMETER(pCmd_p);
+
     return kErrorOk;
 }
 
@@ -168,10 +170,10 @@ The function sends the return value of an executed command to the user stack
 by storing it in the control memory block.
 
 \note The function is only implemented to provide the interface, but is not
-      used, because in the direct implemtation the kernel control command can
+      used, because in the direct implementation the kernel control command can
       be directly called by the user control module.
 
-\param  retval_p            Return value to send.
+\param[in]      retval_p            Return value to send.
 
 \ingroup module_ctrlkcal
 */
@@ -187,7 +189,7 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
 
 The function stores the status of the kernel stack in the control memory block.
 
-\param  status_p                Status to set.
+\param[in]      status_p            Status to set.
 
 \ingroup module_ctrlkcal
 */
@@ -221,11 +223,11 @@ The function updates its heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
 \note The function is only implemented to provide the interface, but is not
-      used, because in the direct implemtation the kernel and user stack are
+      used, because in the direct implementation the kernel and user stack are
       running in the same instance.
 
-\param  heartbeat_p         Heartbeat counter to store in the control memory
-                            block.
+\param[in]      heartbeat_p         Heartbeat counter to store in the control memory
+                                    block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
@@ -242,13 +244,16 @@ The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the user stack. It is used to notify the user stack about
 parameters modified in the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
     OPLK_MEMCPY(&kernelInitParam_g, pInitParam_p, sizeof(tCtrlInitParam));
 }
 
@@ -258,7 +263,7 @@ void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the user stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code. It returns always
         kErrorOk!
@@ -268,7 +273,11 @@ The function reads the initialization parameter from the user stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
     OPLK_MEMCPY(pInitParam_p, &kernelInitParam_g, sizeof(tCtrlInitParam));
+
     return kErrorOk;
 }
 
@@ -279,9 +288,9 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 The function reads the file chunk descriptor and data from the file transfer
 buffer.
 
-\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
-\param  bufferSize_p    Size of buffer for storing the chunk data
-\param  pBuffer_p       Pointer to buffer for storing the chunk data
+\param[out]     pDesc_p             Pointer to buffer for storing the chunk descriptor
+\param[in]      bufferSize_p        Size of buffer for storing the chunk data
+\param[out]     pBuffer_p           Pointer to buffer for storing the chunk data
 
 \return The function returns a tOplkError code.
 
@@ -289,7 +298,8 @@ buffer.
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                  size_t bufferSize_p, UINT8* pBuffer_p)
+                                  size_t bufferSize_p,
+                                  UINT8* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(bufferSize_p);

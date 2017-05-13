@@ -12,7 +12,8 @@ between user and kernel part running on two different processors.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -45,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/errhnd.h>
 
 #include <dualprocshm.h>
+#include <stddef.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -99,7 +101,7 @@ static UINT8*               pErrHndMem_l;           ///< Pointer to shared memor
 
 The function initializes the user layer CAL module of the error handler.
 
-\param  pLocalObjects_p         Pointer to local error objects
+\param[in]      pLocalObjects_p     Pointer to local error objects
 
 \return The function returns a tOplkError error code.
 
@@ -110,23 +112,25 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     tDualprocReturn         dualRet;
     tDualprocDrvInstance    pInstance = dualprocshm_getLocalProcDrvInst();
-    UINT8*                  pBase;
+    void*                   pBase;
     size_t                  span;
 
     if (pInstance == NULL)
-    {
         return kErrorNoResource;
-    }
 
     if (pErrHndMem_l != NULL)
         return kErrorNoFreeInstance;
 
-    dualRet =  dualprocshm_getMemory(pInstance, DUALPROCSHM_BUFF_ID_ERRHDLR,
-                                     &pBase, &span, FALSE);
+    dualRet =  dualprocshm_getMemory(pInstance,
+                                     DUALPROCSHM_BUFF_ID_ERRHDLR,
+                                     &pBase,
+                                     &span,
+                                     FALSE);
     if (dualRet != kDualprocSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't get Error counter buffer(%d)\n",
-                              __func__, dualRet);
+                              __func__,
+                              dualRet);
         return kErrorNoResource;
     }
 
@@ -137,7 +141,7 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
         return kErrorNoResource;
     }
 
-    pErrHndMem_l = (UINT8*) pBase;
+    pErrHndMem_l = (UINT8*)pBase;
 
     pLocalObjects_l = pLocalObjects_p;
 
@@ -172,26 +176,32 @@ void errhnducal_exit(void)
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[in]      pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p,
+                                       UINT subIndex_p,
+                                       const UINT32* pParam_p)
 {
-    UINT    offset;
+    ptrdiff_t   offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
+    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
     *(UINT32*)(pErrHndMem_l + offset) = *pParam_p;
 
-    OPLK_DCACHE_FLUSH((pErrHndMem_l + offset), sizeof(UINT32));
+    OPLK_DCACHE_FLUSH((pErrHndMem_l + offset), sizeof(*pParam_p));
+
     return kErrorOk;
 }
 
@@ -202,26 +212,32 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[out]     pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p,
+                                      UINT subIndex_p,
+                                      UINT32* pParam_p)
 {
-    UINT    offset;
+    ptrdiff_t   offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
 
-    OPLK_DCACHE_INVALIDATE((pErrHndMem_l + offset), sizeof(UINT32));
+    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
+
+    OPLK_DCACHE_INVALIDATE((pErrHndMem_l + offset), sizeof(*pParam_p));
     *pParam_p = *(UINT32*)(pErrHndMem_l + offset);
+
     return kErrorOk;
 }
 

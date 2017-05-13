@@ -2,7 +2,7 @@
 #
 # Library creation settings file for Altera Nios II
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -64,6 +64,7 @@ ${ARCH_SOURCE_DIR}/altera-nios2 \
 ${HW_DRIVERS_DIR}/openmac/include \
 ${HW_DRIVERS_DIR}/openmac/src \
 ${CONTRIB_SOURCE_DIR}/dualprocshm/include \
+${CONTRIB_SOURCE_DIR} \
 "
 
 CFG_LIB_CFLAGS="\

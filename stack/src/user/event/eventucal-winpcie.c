@@ -18,6 +18,7 @@ the user-internal event queue.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/debugstr.h>
 #include <user/eventucal.h>
 #include <user/eventucalintf.h>
 #include <common/target.h>
@@ -112,7 +112,7 @@ static tEventuCalInstance    instance_l;
 static void         signalUserEvent(void);
 static DWORD WINAPI eventProcess(LPVOID pArg_p);
 static DWORD WINAPI kernelEventThread(LPVOID pArg_p);
-static tOplkError   postEvent(tEvent* pEvent_p);
+static tOplkError   postEvent(const tEvent* pEvent_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -127,8 +127,8 @@ configuration it gets the function pointer interface of the used queue
 implementations and calls the appropriate init functions.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executed correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executed correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -160,7 +160,8 @@ tOplkError eventucal_init(void)
     if (instance_l.hEventProcThread == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Failed to create event Process thread with error: 0x%X\n",
-                              __func__, GetLastError());
+                              __func__,
+                              GetLastError());
         goto Exit;
     }
 
@@ -175,7 +176,8 @@ tOplkError eventucal_init(void)
     if (instance_l.hKernelThread == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Failed to create kernel thread with error: 0x%X\n",
-                              __func__, GetLastError());
+                              __func__,
+                              GetLastError());
         goto Exit;
     }
 
@@ -197,8 +199,8 @@ The function cleans up the user event CAL module. For clean-up it calls the exit
 functions of the queue implementations for each used queue.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
@@ -217,13 +219,15 @@ tOplkError eventucal_exit(void)
         waitResult = WaitForSingleObject(instance_l.hKernelThread, 10000);
         if (waitResult == WAIT_TIMEOUT)
         {
-            TRACE("Kernel event thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTU_TRACE("%s(): Kernel event thread is not terminating, continue shutdown...!\n",
+                                   __func__);
         }
 
         waitResult = WaitForSingleObject(instance_l.hEventProcThread, 10000);
         if (waitResult == WAIT_TIMEOUT)
         {
-            TRACE("User event thread is not terminating, continue shutdown...!\n");
+            DEBUG_LVL_EVENTU_TRACE("%s(): User event thread is not terminating, continue shutdown...!\n",
+                                   __func__);
         }
     }
 
@@ -250,17 +254,20 @@ tOplkError eventucal_exit(void)
 This function posts an event to the user internal queue. It is called from the
 generic user event post function in the event handler.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
+tOplkError eventucal_postUserEvent(const tEvent* pEvent_p)
 {
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     return eventucal_postEventCircbuf(kEventQueueUInt, pEvent_p);
 }
 
@@ -271,17 +278,20 @@ tOplkError eventucal_postUserEvent(tEvent* pEvent_p)
 This function posts an event to the kernel stack. It is called from the
 generic user event post function in the event handler.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 
 \ingroup module_eventucal
 */
 //------------------------------------------------------------------------------
-tOplkError eventucal_postKernelEvent(tEvent* pEvent_p)
+tOplkError eventucal_postKernelEvent(const tEvent* pEvent_p)
 {
+    // Check parameter validity
+    ASSERT(pEvent_p != NULL);
+
     return postEvent(pEvent_p);
 }
 
@@ -313,14 +323,14 @@ This function posts an event to the user to kernel queue. The function uses IOCT
 to forward the event to the kernel driver which then writes it into the
 user to kernel queue.
 
-\param  pEvent_p                Event to be posted.
+\param[in]      pEvent_p            Event to be posted.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk                Function executes correctly
-\retval other error codes       An error occurred
+\retval kErrorOk                    Function executes correctly
+\retval other error codes           An error occurred
 */
 //------------------------------------------------------------------------------
-static tOplkError postEvent(tEvent* pEvent_p)
+static tOplkError postEvent(const tEvent* pEvent_p)
 {
     UINT8       aEventBuf[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];
     UINT32      eventBufSize = sizeof(tEvent) + pEvent_p->eventArgSize;
@@ -331,17 +341,24 @@ static tOplkError postEvent(tEvent* pEvent_p)
 
     if (pEvent_p->eventArgSize != 0)
     {
-        OPLK_MEMCPY((aEventBuf + sizeof(tEvent)), (void*)pEvent_p->eventArg.pEventArg,
+        OPLK_MEMCPY((aEventBuf + sizeof(tEvent)),
+                    pEvent_p->eventArg.pEventArg,
                     pEvent_p->eventArgSize);
     }
 
-    fIoctlRet = DeviceIoControl(instance_l.hSendfileHandle, PLK_CMD_POST_EVENT,
-                                aEventBuf, eventBufSize,
-                                0, 0, &bytesReturned, NULL);
-    if (!fIoctlRet || bytesReturned == 0)
+    fIoctlRet = DeviceIoControl(instance_l.hSendfileHandle,
+                                PLK_CMD_POST_EVENT,
+                                aEventBuf,
+                                eventBufSize,
+                                0,
+                                0,
+                                &bytesReturned,
+                                NULL);
+    if (!fIoctlRet || (bytesReturned == 0))
     {
-        DEBUG_LVL_ERROR_TRACE("%x() Failed to post event: error (0x%X)\n",
-                              __func__, GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s() Failed to post event: error (0x%X)\n",
+                              __func__,
+                              GetLastError());
         return kErrorNoResource;
     }
 
@@ -354,7 +371,7 @@ static tOplkError postEvent(tEvent* pEvent_p)
 
 This function contains the main function for the user event handler thread.
 
-\param  pArg_p    Thread parameter. Not used!
+\param[in,out]  pArg_p              Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 
@@ -368,12 +385,16 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
 
     if (!SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
-                              __func__, GetLastError());
-        DEBUG_LVL_ERROR_TRACE("%s() The thread will execute with normal priority\n");
+        DEBUG_LVL_ERROR_TRACE("%s(): Failed to boost thread priority with error: 0x%X\n",
+                              __func__,
+                              GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s(): The thread will execute with normal priority\n",
+                              __func__);
     }
 
-    DEBUG_LVL_EVENTU_TRACE("User event thread %d waiting for events...\n", GetCurrentThreadId());
+    DEBUG_LVL_EVENTU_TRACE("%s(): User event thread %d waiting for events...\n",
+                           __func__,
+                           GetCurrentThreadId());
 
     while (!instance_l.fStopUserThread)
     {
@@ -382,17 +403,16 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
         {
             case WAIT_OBJECT_0:
                 if (eventucal_getEventCountCircbuf(kEventQueueUInt) > 0)
-                {
                     eventucal_processEventCircbuf(kEventQueueUInt);
-                }
                 break;
 
             case WAIT_TIMEOUT:
                 break;
 
             default:
-                DEBUG_LVL_ERROR_TRACE("%s() Semaphore wait unknown error! Error:(0x%X)\n",
-                                      __func__, GetLastError());
+                DEBUG_LVL_ERROR_TRACE("%s(): Semaphore wait unknown error! Error:(0x%X)\n",
+                                      __func__,
+                                      GetLastError());
                 if (GetLastError() == ERROR_INVALID_HANDLE)
                     instance_l.fStopUserThread = TRUE;
                 break;
@@ -400,7 +420,7 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
     }
 
     instance_l.fStopUserThread = FALSE;
-    DEBUG_LVL_EVENTU_TRACE("User Event Thread is exiting!\n");
+    DEBUG_LVL_EVENTU_TRACE("%s(): User event thread is exiting!\n", __func__);
     return 0;
 
 }
@@ -411,7 +431,7 @@ static DWORD WINAPI eventProcess(LPVOID pArg_p)
 
 This function contains the main function for the kernel event handler thread.
 
-\param  pArg_p    Thread parameter. Not used!
+\param[in,out]  pArg_p              Thread parameter. Not used!
 
 \return The function returns the thread exit code.
 
@@ -430,9 +450,11 @@ static DWORD WINAPI kernelEventThread(LPVOID pArg_p)
 
     if (!SetThreadPriority(GetCurrentThread(), (THREAD_PRIORITY_TIME_CRITICAL - 1)))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Failed to boost thread priority with error: 0x%X\n",
-                              __func__, GetLastError());
-        DEBUG_LVL_ERROR_TRACE("%s() The thread will execute with normal priority\n");
+        DEBUG_LVL_ERROR_TRACE("%s(): Failed to boost thread priority with error: 0x%X\n",
+                              __func__,
+                              GetLastError());
+        DEBUG_LVL_ERROR_TRACE("%s(): The thread will execute with normal priority\n",
+                              __func__);
     }
 
     instance_l.hRcvfileHandle = CreateFile(PLK_DEV_FILE,                        // Name of the NT "device" to open
@@ -447,37 +469,42 @@ static DWORD WINAPI kernelEventThread(LPVOID pArg_p)
     {
         errNum = GetLastError();
 
-        if (!(errNum == ERROR_FILE_NOT_FOUND || errNum == ERROR_PATH_NOT_FOUND))
+        if (!((errNum == ERROR_FILE_NOT_FOUND) || (errNum == ERROR_PATH_NOT_FOUND)))
         {
             DEBUG_LVL_ERROR_TRACE("%s() createFile failed!  ERROR_FILE_NOT_FOUND = %d\n",
-                                  __func__, errNum);
+                                  __func__,
+                                  errNum);
         }
         else
         {
             DEBUG_LVL_ERROR_TRACE("%s() createFile failed with error = %d\n",
-                                  __func__, errNum);
+                                  __func__,
+                                  errNum);
         }
-
         return kErrorNoResource;
     }
 
     while (!instance_l.fStopKernelThread)
     {
         target_msleep(1);
-        fIoctlRet = DeviceIoControl(instance_l.hRcvfileHandle, PLK_CMD_GET_EVENT,
-                              NULL, 0, aEventBuf, eventBufSize,
-                              &bytesReturned, NULL);
+        fIoctlRet = DeviceIoControl(instance_l.hRcvfileHandle,
+                                    PLK_CMD_GET_EVENT,
+                                    NULL,
+                                    0,
+                                    aEventBuf,
+                                    eventBufSize,
+                                    &bytesReturned,
+                                    NULL);
         if (!fIoctlRet)
         {
             if (GetLastError() == DEVICE_CLOSE_IO)
             {
-                DEBUG_LVL_ALWAYS_TRACE("Closing Event Thread\n");
+                DEBUG_LVL_EVENTU_TRACE("Closing event thread\n");
             }
             else
             {
                 DEBUG_LVL_ERROR_TRACE("%s():Error in DeviceIoControl : %d\n", GetLastError());
             }
-
             break;
         }
 
@@ -511,6 +538,7 @@ static void signalUserEvent(void)
     if (!ReleaseSemaphore(instance_l.hSemUserData, 1, NULL))
     {
         DEBUG_LVL_ERROR_TRACE("%s() Failed to signal user event (0x%X)\n",
+                              __func__,
                               GetLastError());
     }
 }

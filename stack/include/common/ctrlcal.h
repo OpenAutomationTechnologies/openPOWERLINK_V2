@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_ctrlcal_H_
 #define _INC_common_ctrlcal_H_
 
@@ -54,7 +53,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -62,9 +60,12 @@ extern "C"
 
 tOplkError ctrlcal_init(UINT size_p);
 tOplkError ctrlcal_exit(void);
-
-void       ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p);
-tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p);
+void       ctrlcal_writeData(UINT offset_p,
+                             const void* pSrc_p,
+                             size_t length_p);
+tOplkError ctrlcal_readData(void* pDest_p,
+                            UINT offset_p,
+                            size_t length_p);
 
 #ifdef __cplusplus
 }

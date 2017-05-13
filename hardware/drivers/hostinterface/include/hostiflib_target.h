@@ -10,7 +10,7 @@ the target specific header file (e.g. hostiflib_nios.h).
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_hostiflib_target_H_
 #define _INC_hostiflib_target_H_
 
@@ -46,17 +45,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdint.h>
 
 #if defined(__NIOS2__)
-
 #include "hostiflib_nios.h"
-
 #elif defined(__MICROBLAZE__)
-
 #include "hostiflib_microblaze.h"
-
 #else
-
 #error "Target is not supported! Please revise hostiflib_target.h"
-
 #endif
 
 #ifndef HOSTIF_INLINE

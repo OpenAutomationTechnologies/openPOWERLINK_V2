@@ -68,7 +68,6 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     omethFilterSetByteMask      - change 1 filter mask byte of a filter
     omethFilterSetByteValue     - change 1 filter value byte of a filter
     omethFilterSetArgument      - change the callback argument which a specific filter passes to the callback
-    omethFilterSetNoMatchIRQ    - enable the NoMatch-IRQ
     omethFilterSetHubPort       - set HUB port to which the filter should be limited (MAC Version >= 1.67 required)
     omethSetSCNM                - define a filter for the slot communication management
     omethResponseInit           - prepare a filter for auto response
@@ -134,6 +133,7 @@ typedef struct OMETH_FILTER*    OMETH_FILTER_H;    // handle for receive filter
 #include <omethlib_target.h>    // target specific defines (BIG/LITTLE endian)
 
 #define OMETH_MAC_TYPE_01        0x01    // 16 filters,16 rx,16 tx
+#define OMETH_MAC_TYPE_02        0x02    // 16 filters, 32 rx and 32 tx
 
 #define OMETH_MODE_HALFDUPLEX        0x0001    // half duplex supported
 #define OMETH_MODE_FULLDUPLEX        0x0002    // full duplex supported
@@ -209,7 +209,7 @@ typedef struct
 
     unsigned long txCollision;        // total tx collisions on the bus
     unsigned long txDone[16];        // [0]..number of sent frames with 0 collisions ...
-    unsigned long txSpuriousInt;    // tx int occured but no frame sent ??
+    unsigned long txSpuriousInt;    // tx int occurred but no frame sent ??
 }ometh_stat_typ;
 
 
@@ -797,21 +797,6 @@ int                omethFilterSetHook
 (
  OMETH_FILTER_H    hFilter,
  OMETH_HOOK_H    hHook            /* handle from omethHookCreate()        */
-);
-
-/*****************************************************************************
-*
-* omethFilterSetNoMatchIRQ - set/clear irq enable for no_match event on this filter
-*
-*    If a received frame does not match any of the installed filters, the NoMatch-IRQ
-*    will be generated if enabled with this function (can be applied to any of the installed
-*    filters)
-*
-*/
-int                omethFilterSetNoMatchIRQ
-(
- OMETH_FILTER_H    hFilter,        /* filter handle                            */
- int            irqEnable        /* TRUE: IRQ will be triggerd if frame does not match this filter */
 );
 
 /*****************************************************************************

@@ -2,7 +2,7 @@
 #
 # Stack files settings for Altera Nios II
 #
-# Copyright (c 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -53,7 +53,6 @@ ${COMMON_SOURCE_DIR}/dll/dllcal-direct.c \
 
 USER_MN_SOURCES="\
 ${USER_SOURCE_DIR}/obd/obdcdc.c \
-${USER_SOURCE_DIR}/api/processimage-cia302.c \
 ${USER_SOURCE_DIR}/cfmu.c \
 "
 
@@ -65,8 +64,8 @@ ${USER_SOURCE_DIR}/api/generic.c \
 ${USER_SOURCE_DIR}/api/sdotest.c \
 ${USER_SOURCE_DIR}/api/service.c \
 ${USER_SOURCE_DIR}/api/processimage.c \
-${USER_SOURCE_DIR}/obd/obd.c \
-${USER_SOURCE_DIR}/obd/obdcreate.c \
+${USER_SOURCE_DIR}/obd/obdu.c \
+${USER_SOURCE_DIR}/obd/obdal.c \
 ${USER_SOURCE_DIR}/dll/dllucal.c \
 ${USER_SOURCE_DIR}/event/eventu.c \
 ${USER_SOURCE_DIR}/nmt/nmtu.c \
@@ -194,6 +193,7 @@ ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c \
 ${KERNEL_SOURCE_DIR}/timesync/timesynck.c \
 ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c \
+${KERNEL_SOURCE_DIR}/errhnd/errhndkcal.c \
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \
 ${KERNEL_SOURCE_DIR}/led/ledk.c \
 ${KERNEL_SOURCE_DIR}/led/ledktimer.c \

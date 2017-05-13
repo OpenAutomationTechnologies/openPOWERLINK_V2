@@ -16,7 +16,7 @@
    {
       datum _sortIndex
       {
-         value = "7";
+         value = "8";
          type = "int";
       }
       datum sopceditor_expanded
@@ -34,8 +34,16 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
+      }
+   }
+   element atomicmodify_1
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
       }
    }
    element clk100
@@ -94,7 +102,7 @@
    {
       datum _sortIndex
       {
-         value = "9";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
@@ -123,7 +131,7 @@
    {
       datum _sortIndex
       {
-         value = "11";
+         value = "12";
          type = "int";
       }
       datum sopceditor_expanded
@@ -178,7 +186,7 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -187,8 +195,26 @@
          type = "boolean";
       }
    }
+   element atomicmodify_1.s0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "524288";
+         type = "String";
+      }
+   }
    element atomicmodify_0.s0
    {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
       datum baseAddress
       {
          value = "524288";
@@ -199,7 +225,7 @@
    {
       datum _sortIndex
       {
-         value = "8";
+         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -228,10 +254,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName">mnSingleDualProcDrv.qpf</parameter>
+ <parameter name="projectName" value="mnSinglePcieDrv.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1445584380946" />
+ <parameter name="timeStamp" value="1466408447014" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -380,6 +406,7 @@
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
   <parameter name="cpu0_resetCpuBridge" value="flash_bridge" />
+  <parameter name="tcmemSize" value="20480" />
  </module>
  <module
    kind="altera_generic_tristate_controller"
@@ -502,6 +529,10 @@
   <parameter name="clockFrequencyKnown" value="true" />
   <parameter name="inputClockFrequency" value="0" />
   <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module kind="atomicmodify" version="1.1.0" enabled="1" name="atomicmodify_1">
+  <parameter name="sys_m0Addrw" value="19" />
+  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
  <connection
    kind="reset"
@@ -782,6 +813,39 @@
    start="pcie_subsytem.sync_irq"
    end="openmac_0.timerPulse">
   <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="atomicmodify_1.c0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="atomicmodify_1.r0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="atomicmodify_1.r0" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="atomicmodify_1.m0"
+   end="SSRAM_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcie_subsytem.bar0"
+   end="atomicmodify_1.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00080000" />
+  <parameter name="defaultConnection" value="false" />
  </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />

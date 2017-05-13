@@ -7,7 +7,7 @@
 The file contains the definitions for the interface selection dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,15 +32,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_InterfaceSelectDialog_H_
-#define _INC_InterfaceSelectDialog_H_
+#ifndef _INC_demo_InterfaceSelectDialog_H_
+#define _INC_demo_InterfaceSelectDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QDialog>
+#include <QString>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -49,11 +48,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLabel;
 class QListWidget;
 class QListWidgetItem;
-class QPushButton;
-
 
 //------------------------------------------------------------------------------
 /**
@@ -64,16 +60,17 @@ The class implements the PCAP interface selection dialog.
 //------------------------------------------------------------------------------
 class InterfaceSelectDialog : public QDialog
 {
-
-Q_OBJECT
+    Q_OBJECT
 
 public:
     InterfaceSelectDialog();
-    int fillList(QString devName_p);
-    QString getDevName(void);
+
+    int fillList(const QString& rDevName_p);
+    const QString& getDevName(void) const;
 
 private slots:
-    void itemChanged(QListWidgetItem* current, QListWidgetItem* previous);
+    void itemChanged(QListWidgetItem* current,
+                     QListWidgetItem* previous);
 
 private:
     QListWidget*    deviceListWidget;
@@ -81,5 +78,4 @@ private:
     QString         devDesc;
 };
 
-#endif /* _INC_InterfaceSelectDialog_H_ */
-
+#endif /* _INC_demo_InterfaceSelectDialog_H_ */

@@ -11,7 +11,7 @@ This file contains the implementation of the NMT user module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,9 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/nmtu.h>
 #include <user/timeru.h>
 #include <user/eventu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
 #include <user/dllucal.h>
 #endif
 
@@ -79,15 +79,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    tNmtState                       localNmtState;
-    tNmtuStateChangeCallback        pfnNmtChangeCb;
-    tTimerHdl                       timerHdl;
+    tNmtState                   localNmtState;
+    tNmtuStateChangeCallback    pfnNmtChangeCb;
+    tTimerHdl                   timerHdl;
 } tNmtuInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tNmtuInstance        nmtuInstance_g;
+static tNmtuInstance    nmtuInstance_g;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -123,6 +123,7 @@ The function initializes an instance of the NMT user module
 tOplkError nmtu_init(void)
 {
     nmtuInstance_g.pfnNmtChangeCb = NULL;
+
     return kErrorOk;
 }
 
@@ -139,7 +140,7 @@ The function shuts down the NMT user module instance
 //------------------------------------------------------------------------------
 tOplkError nmtu_exit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     nmtuInstance_g.pfnNmtChangeCb = NULL;
     ret = timeru_deleteTimer(&nmtuInstance_g.timerHdl);
@@ -153,7 +154,7 @@ tOplkError nmtu_exit(void)
 
 The function posts an NMT event for the NMT kernel module.
 
-\param  nmtEvent_p      NMT event to post.
+\param[in]      nmtEvent_p          NMT event to post.
 
 \return The function returns a tOplkError error code.
 
@@ -199,17 +200,17 @@ tNmtState nmtu_getNmtState(void)
 
 The function processes events sent to the NMT user module.
 
-\param  pEvent_p            Pointer to event which should be processed.
+\param[in]      pEvent_p            Pointer to event which should be processed.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_nmtu
 */
 //------------------------------------------------------------------------------
-tOplkError nmtu_processEvent(tEvent* pEvent_p)
+tOplkError nmtu_processEvent(const tEvent* pEvent_p)
 {
-    tOplkError                  ret = kErrorOk;
-    tEventNmtStateChange*       pNmtStateChange;
+    tOplkError              ret = kErrorOk;
+    tEventNmtStateChange*   pNmtStateChange;
 
     switch (pEvent_p->eventType)
     {
@@ -221,9 +222,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
 
             // call cb-functions to inform higher layer
             if (nmtuInstance_g.pfnNmtChangeCb != NULL)
-            {
                 ret = nmtuInstance_g.pfnNmtChangeCb(*pNmtStateChange);
-            }
 
             if (ret == kErrorOk)
             {
@@ -238,8 +237,9 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
 #endif
                         {
                             ret = kErrorNmtInvalidState;
-                            DEBUG_LVL_ERROR_TRACE("nmtu_processEvent(): unhandled NMT state 0x%X\n",
-                                  pNmtStateChange->newNmtState);
+                            DEBUG_LVL_ERROR_TRACE("%s(): unhandled NMT state 0x%X\n",
+                                                  __func__,
+                                                  pNmtStateChange->newNmtState);
                         }
                     }
                 }
@@ -249,13 +249,15 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
             {   // application wants to change NMT state itself, it's OK
                 ret = kErrorOk;
             }
-            DEBUG_LVL_NMTU_TRACE("nmtu_processEvent(): NMT state machine announce change of NMT State\n");
+            DEBUG_LVL_NMTU_TRACE("%s(): NMT state machine announce change of NMT state\n",
+                                 __func__);
             break;
 
         default:
             ret = kErrorNmtInvalidEvent;
             break;
     }
+
     return ret;
 }
 
@@ -265,7 +267,7 @@ tOplkError nmtu_processEvent(tEvent* pEvent_p)
 
 The function registers a callback function for NMT state change events.
 
-\param  pfnNmtStateChangeCb_p      Pointer to callback function
+\param[in]      pfnNmtStateChangeCb_p   Pointer to callback function
 
 \return The function returns a tOplkError error code.
 
@@ -275,6 +277,7 @@ The function registers a callback function for NMT state change events.
 tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChangeCb_p)
 {
     nmtuInstance_g.pfnNmtChangeCb = pfnNmtStateChangeCb_p;
+
     return kErrorOk;
 }
 
@@ -284,7 +287,7 @@ tOplkError nmtu_registerStateChangeCb(tNmtuStateChangeCallback pfnNmtStateChange
 /// \name Private Functions
 /// \{
 
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
 
 //------------------------------------------------------------------------------
 /**
@@ -300,7 +303,7 @@ for each active node. The list of active nodes is read from object 0x1F81.
 //------------------------------------------------------------------------------
 static tOplkError configureDll(void)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError      ret;
     UINT32          nodeCfg;
     tObdSize        obdSize;
     tDllNodeInfo    dllNodeInfo;
@@ -309,20 +312,16 @@ static tOplkError configureDll(void)
 
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof(count);
-    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    ret = obdu_readEntry(0x1F81, 0, &count, &obdSize);
     if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
-    {
         return kErrorOk;
-    }
     else if (ret != kErrorOk)
-    {
         return ret;
-    }
 
     for (index = 1; index <= count; index++)
     {
         obdSize = sizeof(nodeCfg);
-        ret = obd_readEntry(0x1F81, index, &nodeCfg, &obdSize);
+        ret = obdu_readEntry(0x1F81, index, &nodeCfg, &obdSize);
         if (ret == kErrorObdSubindexNotExist)
         {   // not all subindexes of object 0x1F81 have to exist
             continue;
@@ -337,26 +336,22 @@ static tOplkError configureDll(void)
             dllNodeInfo.nodeId = index;
 
             obdSize = sizeof(dllNodeInfo.presPayloadLimit);
-            ret = obd_readEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
+            ret = obdu_readEntry(0x1F8D, index, &dllNodeInfo.presPayloadLimit, &obdSize);
             if ((ret == kErrorObdIndexNotExist) || (ret == kErrorObdSubindexNotExist))
-            {
                 dllNodeInfo.presPayloadLimit = 0;
-            }
             else if (ret != kErrorOk)
-            {
                 return ret;
-            }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
             if ((nodeCfg & (NMT_NODEASSIGN_NODE_IS_CN | NMT_NODEASSIGN_PRES_CHAINING)) == NMT_NODEASSIGN_NODE_IS_CN)
             {   // node is CN
                 obdSize = sizeof(dllNodeInfo.preqPayloadLimit);
-                ret = obd_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
+                ret = obdu_readEntry(0x1F8B, index, &dllNodeInfo.preqPayloadLimit, &obdSize);
                 if (ret != kErrorOk)
                     return ret;
 
                 obdSize = sizeof(dllNodeInfo.presTimeoutNs);
-                ret = obd_readEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
+                ret = obdu_readEntry(0x1F92, index, &dllNodeInfo.presTimeoutNs, &obdSize);
                 if (ret != kErrorOk)
                     return ret;
             }
@@ -383,8 +378,8 @@ static tOplkError configureDll(void)
 
 The function processes a state change to a general NMT state.
 
-\param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tOplkError return value.
+\param[in]      newNmtState_p       New NMT state.
+\param[out]     pRet_p              Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
@@ -392,14 +387,15 @@ The function processes a state change to a general NMT state.
 //------------------------------------------------------------------------------
 static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kErrorOk;
-    UINT                nodeId;
-    BOOL                fHandled = TRUE;
+    tOplkError  ret = kErrorOk;
+    UINT        nodeId;
+    BOOL        fHandled = TRUE;
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-    UINT32              startUp;
-    tObdSize            obdSize;
+    UINT32      startUp;
+    tObdSize    obdSize;
 #endif
 
+    // Check parameter
     switch (newNmtState_p)
     {
         // POWERLINK stack is not running
@@ -424,18 +420,16 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 
         // build the configuration with infos from OD
         case kNmtGsResetConfiguration:
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
             // configure the DLL (PReq/PRes payload limits and PRes timeout)
             ret = configureDll();
             if (ret != kErrorOk)
-            {
                 break;
-            }
 #endif // NMT_MAX_NODE_ID > 0
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
             obdSize = sizeof(startUp);
-            ret = obd_readEntry(0x1F80, 0x00, &startUp, &obdSize);
+            ret = obdu_readEntry(0x1F80, 0x00, &startUp, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -446,14 +440,14 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
             }
 #endif
             // get node ID from OD
-            nodeId = obd_getNodeId();
+            nodeId = obdu_getNodeId();
             //check node ID if not should be master or slave
             if (nodeId == C_ADR_MN_DEF_NODE_ID)
             {   // node shall be MN
 #if defined(CONFIG_INCLUDE_NMT_MN)
                 ret = nmtu_postNmtEvent(kNmtEventEnterMsNotActive);
 #else
-                DEBUG_LVL_ERROR_TRACE("processGeneralStateChange(): no MN functionality implemented\n");
+                DEBUG_LVL_ERROR_TRACE("%s(): no MN functionality implemented\n", __func__);
 #endif
             }
             else
@@ -478,8 +472,8 @@ static BOOL processGeneralStateChange(tNmtState newNmtState_p, tOplkError* pRet_
 
 The function processes a state change to an MN NMT state.
 
-\param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tOplkError return value.
+\param[in]      newNmtState_p       New NMT state.
+\param[out]     pRet_p              Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
@@ -487,12 +481,12 @@ The function processes a state change to an MN NMT state.
 //------------------------------------------------------------------------------
 static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kErrorOk;
-    BOOL                fHandled = TRUE;
-    UINT32              waitTime;
-    UINT32              startUp;
-    tNmtEvent           timerEvent = kNmtEventTimerMsPreOp1;
-    tObdSize            obdSize;
+    tOplkError  ret = kErrorOk;
+    BOOL        fHandled = TRUE;
+    UINT32      waitTime;
+    UINT32      startUp;
+    tNmtEvent   timerEvent = kNmtEventTimerMsPreOp1;
+    tObdSize    obdSize;
 
     switch (newNmtState_p)
     {
@@ -501,7 +495,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // create timer to switch automatically to BasicEthernet/PreOp1 if no other MN active in network
             // check NMT_StartUp_U32.Bit13
             obdSize = sizeof(startUp);
-            ret = obd_readEntry(0x1F80, 0x00, &startUp, &obdSize);
+            ret = obdu_readEntry(0x1F80, 0x00, &startUp, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -514,7 +508,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
         case kNmtRmsNotActive:
             // read NMT_BootTime_REC.MNWaitNotAct_U32 from OD
             obdSize = sizeof(waitTime);
-            ret = obd_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
+            ret = obdu_readEntry(0x1F89, 0x01, &waitTime, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -528,20 +522,20 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
             // read NMT_BootTime_REC.MNWaitPreOp1_U32 from OD
             obdSize = sizeof(waitTime);
-            ret = obd_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
+            ret = obdu_readEntry(0x1F89, 0x03, &waitTime, &obdSize);
             if (ret != kErrorOk)
             {
                 // ignore error, because this timeout is optional
                 waitTime = 0;
             }
+
             if (waitTime == 0)
             {   // delay is deactivated, immediately post timer event
                 ret = nmtu_postNmtEvent(kNmtEventTimerMsPreOp2);
             }
             else
-            {
                 ret = setupNmtTimerEvent(waitTime, kNmtEventTimerMsPreOp2);
-            }
+
             // potential error is forwarded to event queue which generates error event
             break;
 
@@ -558,7 +552,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             break;
 
         // no POWERLINK cycle
-        // -> normal ethernet communication
+        // -> normal Ethernet communication
         case kNmtMsBasicEthernet:
             break;
 
@@ -566,6 +560,7 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             fHandled = FALSE;
             break;
     }
+
     *pRet_p = ret;
     return fHandled;
 }
@@ -577,8 +572,8 @@ static BOOL processMnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
 The function processes a state change to a CN NMT state.
 
-\param  newNmtState_p           New NMT state.
-\param  pRet_p                  Pointer to store tOplkError return value.
+\param[in]      newNmtState_p       New NMT state.
+\param[out]     pRet_p              Pointer to store tOplkError return value.
 
 \return The function returns \b TRUE if a state was found or \b FALSE if the
         state was not found.
@@ -586,10 +581,10 @@ The function processes a state change to a CN NMT state.
 //------------------------------------------------------------------------------
 static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 {
-    tOplkError          ret = kErrorOk;
-    BOOL                fHandled = TRUE;
-    UINT32              basicEthernetTimeout;
-    tObdSize            obdSize;
+    tOplkError  ret = kErrorOk;
+    BOOL        fHandled = TRUE;
+    UINT32      basicEthernetTimeout;
+    tObdSize    obdSize;
 
     switch (newNmtState_p)
     {
@@ -599,7 +594,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             // is available in the network
             // read NMT_CNBasicEthernetTimeout_U32 from OD
             obdSize = sizeof(basicEthernetTimeout);
-            ret = obd_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
+            ret = obdu_readEntry(0x1F99, 0x00, &basicEthernetTimeout, &obdSize);
             if (ret != kErrorOk)
                 break;
 
@@ -633,7 +628,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             break;
 
         // no POWERLINK cycle
-        // -> normal ethernet communication
+        // -> normal Ethernet communication
         case kNmtCsBasicEthernet:
             break;
 
@@ -641,6 +636,7 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
             fHandled = FALSE;
             break;
     }
+
     *pRet_p = ret;
     return fHandled;
 }
@@ -651,24 +647,30 @@ static BOOL processCnStateChange(tNmtState newNmtState_p, tOplkError* pRet_p)
 
 The function sets up a timer which posts an NMT Event.
 
-\param  timeout_p           Timeout to set in microseconds.
-\param  event_p             Event to post after timeout.
+\param[in]      timeout_p           Timeout to set in microseconds.
+\param[in]      event_p             Event to post after timeout.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError setupNmtTimerEvent(UINT32 timeout_p, tNmtEvent event_p)
 {
-    tOplkError      ret;
-    tTimerArg       timerArg;
+    tOplkError  ret;
+    tTimerArg   timerArg;
 
-    timeout_p = timeout_p / 1000; // convert us into ms
-    if (timeout_p == 0)  // timer was below one ms -> set one ms
+    // convert us into ms (ceil div)
+    timeout_p = (timeout_p % 1000) ?
+                (timeout_p / 1000 + 1) : (timeout_p / 1000);
+
+    // timer was 0 -> set one ms
+    if (timeout_p == 0)
         timeout_p = 1;
+
     timerArg.eventSink = kEventSinkNmtk;
     timerArg.argument.value = (UINT32)event_p;
-    ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, timerArg);
+    ret = timeru_modifyTimer(&nmtuInstance_g.timerHdl, (ULONG)timeout_p, &timerArg);
+
     return ret;
 }
 
-///\}
+/// \}

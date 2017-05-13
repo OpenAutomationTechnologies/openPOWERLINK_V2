@@ -10,7 +10,7 @@ Initialize the system timer and count the milliseconds
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2014, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -40,10 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-
 #include "systemtimer.h"
 
-#include <xintc.h>           //interrupt controller higher level
+#include <xintc.h>              //interrupt controller higher level
 #include <mb_interface.h>
 #include <xparameters.h>
 
@@ -54,18 +53,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#ifndef CONFIG_PCP
+#if !defined(CONFIG_PCP)
 #error "CONFIG_PCP is needed for this implementation!"
 #endif
 
 #if (CONFIG_PCP == FALSE)
 #define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
 #define TGT_TIMER_INTR          XPAR_HOST_INTC_FIT_TIMER_0_INTERRUPT_INTR
-
 #elif (CONFIG_PCP == TRUE)
 #define TGT_INTC_BASE           XPAR_INTC_0_BASEADDR
 #define TGT_TIMER_INTR          XPAR_PCP_INTC_FIT_TIMER_0_INTERRUPT_INTR
-
 #else
 #error  "Unable to determine the processor instance"
 #endif
@@ -95,13 +92,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
-static UINT32    msCount_l = 0;
+static unsigned int msCount_l = 0;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
 static void irqHandler(void* pArg_p);
 
 //============================================================================//
@@ -118,8 +113,10 @@ static void irqHandler(void* pArg_p);
 void timer_init(void)
 {
     //register fit interrupt handler
-    XIntc_RegisterHandler(TGT_INTC_BASE, TGT_TIMER_INTR,
-                          (XInterruptHandler)irqHandler, 0);
+    XIntc_RegisterHandler(TGT_INTC_BASE,
+                          TGT_TIMER_INTR,
+                          (XInterruptHandler)irqHandler,
+                          0);
 
     //enable the fit interrupt
     XIntc_EnableIntr(TGT_INTC_BASE, TGT_TIMER_INTR_MASK);
@@ -134,7 +131,7 @@ void timer_init(void)
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-UINT32 timer_getMSCount(void)
+unsigned int timer_getMsCount(void)
 {
     return msCount_l;
 }
@@ -150,16 +147,16 @@ UINT32 timer_getMSCount(void)
 /**
 \brief    User timer interrupt handler
 
-\param pArg_p       Interrupt handler argument
+\param[in]      pArg_p              Interrupt handler argument
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
 static void irqHandler(void* pArg_p)
 {
-    UNUSED_PARAMETER(pArg_p);
+    (void)pArg_p;       // Unused parameter
 
     msCount_l++;
 }
 
-///\}
+/// \}

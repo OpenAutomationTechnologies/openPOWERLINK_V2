@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/ctrl/ctrlcal-posixshm.c
+\file   ctrlcal-posixshm.c
 
 \brief  Posix shared memory implementation for control CAL module
 
@@ -11,7 +11,7 @@ memory block control CAL modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_SHM_NAME     "/shmCtrlCal"
+#define CTRL_SHM_NAME       "/shmCtrlCal"
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static int          fd_l;
-static BYTE*        pCtrlMem_l;
+static UINT8*       pCtrlMem_l;
 static int          size_l;
 static BOOL         fCreator_l;
 
@@ -100,7 +100,7 @@ static BOOL         fCreator_l;
 
 The function initializes the control CAL module.
 
-\param  size_p      The size of the memory control block.
+\param[in]      size_p              The size of the memory control block.
 
 \return The function returns a tOplkError error code.
 
@@ -109,9 +109,10 @@ The function initializes the control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlcal_init(UINT size_p)
 {
-    struct stat             stat;
+    struct stat stat;
 
-    if ((fd_l = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0)) < 0)
+    fd_l = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0);
+    if (fd_l < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kErrorNoResource;
@@ -150,6 +151,7 @@ tOplkError ctrlcal_init(UINT size_p)
         OPLK_MEMSET(pCtrlMem_l, 0, size_p);
     }
     size_l = size_p;
+
     return kErrorOk;
 }
 
@@ -166,7 +168,7 @@ The function cleans up the control CAL module.
 //------------------------------------------------------------------------------
 tOplkError ctrlcal_exit(void)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (pCtrlMem_l != NULL)
     {
@@ -178,6 +180,7 @@ tOplkError ctrlcal_exit(void)
         pCtrlMem_l = 0;
         size_l = 0;
     }
+
     return ret;
 }
 
@@ -187,20 +190,26 @@ tOplkError ctrlcal_exit(void)
 
 The function writes data to the control block.
 
-\param  offset_p            Offset in memory block to store the data.
-\param  pSrc_p              Pointer to the data which should be stored.
-\param  length_p            The length of the data to be stored.
+\param[in]      offset_p            Offset in memory block to store the data.
+\param[in]      pSrc_p              Pointer to the data which should be stored.
+\param[in]      length_p            The length of the data to be stored.
 
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-void ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p)
+void ctrlcal_writeData(UINT offset_p,
+                       const void* pSrc_p,
+                       size_t length_p)
 {
+    // Check parameter validity
+    ASSERT(pSrc_p != NULL);
+
     if (pCtrlMem_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() instance == NULL!\n", __func__);
         return;
     }
+
     OPLK_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
 }
 
@@ -210,17 +219,22 @@ void ctrlcal_writeData(UINT offset_p, void* pSrc_p, size_t length_p)
 
 The function reads data from the control block.
 
-\param  pDest_p             Pointer to store the read data.
-\param  offset_p            Offset in memory block from which to read.
-\param  length_p            The length of the data to be read.
+\param[out]     pDest_p             Pointer to store the read data.
+\param[in]      offset_p            Offset in memory block from which to read.
+\param[in]      length_p            The length of the data to be read.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
+tOplkError ctrlcal_readData(void* pDest_p,
+                            UINT offset_p,
+                            size_t length_p)
 {
+    // Check parameter validity
+    ASSERT(pDest_p != NULL);
+
     if (pCtrlMem_l == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() pCtrlMem_l == NULL!\n", __func__);
@@ -228,6 +242,7 @@ tOplkError ctrlcal_readData(void* pDest_p, UINT offset_p, size_t length_p)
     }
 
     OPLK_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
+
     return kErrorOk;
 }
 

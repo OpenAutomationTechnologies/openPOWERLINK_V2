@@ -9,7 +9,7 @@ Altera Cyclone-V development board(D) for handling LCD module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2015, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -55,10 +55,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <socal/hps.h>
 #include <socal/socal.h>
 
-#include <oplk/debug.h>
 #include <system.h>
-#include "lcdl.h"
 #include <sleep.h>
+#include <trace/trace.h>
+#include "lcdl.h"
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -126,19 +127,18 @@ typedef enum
 // Command description
 typedef struct
 {
-    UINT8       command;
-    UINT8       padding;
-    UINT16      executionDuration;
+    uint8_t     command;
+    uint8_t     padding;
+    uint16_t    executionDuration;
 } tLcdCmdDesc;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
-ALT_I2C_DEV_t*                  deviceHandle_l;
+ALT_I2C_DEV_t*          deviceHandle_l;
 
 // Descriptions for all supported commands
-static tLcdCmdDesc       lcdCommands_l[] =
+static tLcdCmdDesc      lcdCommands_l[] =
 {
     {0x41, 0, 100},     // LCD_COMMAND_DISPLAY_ON,
     {0x42, 0, 100},     // LCD_COMMAND_DISPLAY_OFF,
@@ -160,7 +160,7 @@ static tLcdCmdDesc       lcdCommands_l[] =
     {0x61, 1, 3000},    // LCD_COMMAND_CHANGE_RS_232_BAUD_RATE,
     {0x62, 1, 3000},    // LCD_COMMAND_CHANGE_I2C_ADDRESS,
     {0x70, 0, 4000},    // LCD_COMMAND_DISPLAY_FIRMWARE_VERSION_NUMBER,
-    {0x71, 0, 10000}, // LCD_COMMAND_DISPLAY_RS_232_BAUD_RATE,
+    {0x71, 0, 10000},   // LCD_COMMAND_DISPLAY_RS_232_BAUD_RATE,
     {0x72, 0, 4000},    // LCD_COMMAND_DISPLAY_I2C_ADDRESS,
 };
 
@@ -168,9 +168,9 @@ static tLcdCmdDesc       lcdCommands_l[] =
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static inline ALT_STATUS_CODE   sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
-                                              tLcdCmd command_p,
-                                              UINT8* pArg_p);
+static inline ALT_STATUS_CODE sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
+                                             tLcdCmd command_p,
+                                             const uint8_t* pArg_p);
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
@@ -184,9 +184,9 @@ This function writes a sequence of initialization parameters to the LCD.
 //------------------------------------------------------------------------------
 void lcdl_init(void)
 {
-    INT                         ret = 0;
-    ALT_I2C_MASTER_CONFIG_t     cfg;
-    UINT32                      speed;
+    int                     ret = 0;
+    ALT_I2C_MASTER_CONFIG_t cfg;
+    uint32_t                speed;
 
     // Init I2C module
     if (alt_i2c_init(ALT_I2C_I2C0, deviceHandle_l) != ALT_E_SUCCESS)
@@ -207,13 +207,12 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, &speed) != ALT_E_SUCCESS)
+    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, (uint32_t*)&speed) != ALT_E_SUCCESS)
     {
         ret = -1;
         goto Exit;
     }
-
-    PRINTF("LCD INFO: Current I2C speed = %d Hz.\n", (INT)speed);
+    TRACE("LCD INFO: Current I2C speed = %d Hz.\n", (int)speed);
 
     if (alt_i2c_master_config_speed_set(deviceHandle_l, &cfg, LCD_I2C_SPEED) != ALT_E_SUCCESS)
     {
@@ -221,14 +220,14 @@ void lcdl_init(void)
         goto Exit;
     }
 
-    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, &speed) != ALT_E_SUCCESS)
+    if (alt_i2c_master_config_speed_get(deviceHandle_l, &cfg, (uint32_t*)&speed) != ALT_E_SUCCESS)
     {
         ret = -1;
         goto Exit;
     }
     else
     {
-        PRINTF("LCD INFO: New I2C speed = %d Hz.\n", (INT)speed);
+        TRACE("LCD INFO: New I2C speed = %d Hz.\n", (int)speed);
         cfg.addr_mode = ALT_I2C_ADDR_MODE_7_BIT;
         cfg.restart_enable = ALT_E_TRUE;
 
@@ -266,10 +265,10 @@ void lcdl_init(void)
     }
 
  Exit:
-     if (ret != 0)
-         DEBUG_LVL_ERROR_TRACE("LCD ERR: Initialization Failed!!\n");
-
-     return;
+    if (ret != 0)
+    {
+        TRACE("LCD ERR: Initialization failed!!\n");
+    }
 }
 
 //------------------------------------------------------------------------------
@@ -300,7 +299,7 @@ void lcdl_clear(void)
     // Clear screen
     if (sendLcdCommand(deviceHandle_l, kLcdCmdClearScreen, NULL) != ALT_E_SUCCESS)
     {
-        DEBUG_LVL_ERROR_TRACE("LCD ERR: Failed to clear screen\n");
+        TRACE("LCD ERR: Failed to clear screen\n");
     }
 }
 
@@ -310,14 +309,14 @@ void lcdl_clear(void)
 
 Changes to specified line of the LCD.
 
-\param  line_p      Specifies the line
+\param[in]      line_p              Specifies the line
 
 \return The function returns 0 if the line is changed successfully, -1 otherwise.
 */
 //------------------------------------------------------------------------------
-INT lcdl_changeToLine(unsigned INT line_p)
+int lcdl_changeToLine(unsigned int line_p)
 {
-    UINT8      param;
+    uint8_t param;
 
     if (line_p < 2)
         param = LCD_POS_1ST_LINE;
@@ -336,32 +335,32 @@ INT lcdl_changeToLine(unsigned INT line_p)
 
 Writes text to the LCD currently selected.
 
-\param  sText_p     The text to print
+\param[in]      sText_p             The text to print
 */
 //------------------------------------------------------------------------------
 void lcdl_printText(const char* sText_p)
 {
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    INT                 txtLen = strlen(sText_p);
-    const char          padTxt = ' ';
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
+    size_t          txtLen = strlen(sText_p);
+    const char      padTxt = ' ';
 
-    for (INT i = 0; i < LCDL_COLUMN; i++)
+    for (size_t i = 0; i < LCDL_COLUMN; i++)
     {
         if (i < txtLen)
-            halRet = alt_i2c_master_transmit(deviceHandle_l, &sText_p[i],
-                                             1, ALT_E_FALSE, ALT_E_TRUE);
+            halRet = alt_i2c_master_transmit(deviceHandle_l,
+                                             &sText_p[i],
+                                             1,
+                                             ALT_E_FALSE,
+                                             ALT_E_TRUE);
         else
-            halRet = alt_i2c_master_transmit(deviceHandle_l, &padTxt,
-                                             1, ALT_E_FALSE, ALT_E_TRUE);
+            halRet = alt_i2c_master_transmit(deviceHandle_l,
+                                             &padTxt,
+                                             1,
+                                             ALT_E_FALSE,
+                                             ALT_E_TRUE);
 
         if (halRet != ALT_E_SUCCESS)
-        {
             break;
-        }
-
-        // usleep(LCD_PRINT_DELAY_US); // Remove to avoid delays in execution
-                                       // of POWERLINK, as LCD print works fine
-                                       // in our case without this delay.
     }
 }
 
@@ -377,35 +376,34 @@ void lcdl_printText(const char* sText_p)
 
 The function sends a I2C command to the LCD module.
 
- \param deviceHdl_p     I2C device
- \param command_p       Opcode of command to be sent
- \param pArg_p          Command parameters or NULL for no parameters
+\param[in,out]  deviceHdl_p         I2C device
+\param[in]      command_p           Opcode of command to be sent
+\param[in]      pArg_p              Command parameters or NULL for no parameters
 
- \return    returns a ALT_STATUS_CODE error code.
+ \return Returns an ALT_STATUS_CODE error code.
 */
 //------------------------------------------------------------------------------
 static inline ALT_STATUS_CODE sendLcdCommand(ALT_I2C_DEV_t* deviceHdl_p,
-                                      tLcdCmd command_p,
-                                      UINT8* pArg_p)
+                                             tLcdCmd command_p,
+                                             const uint8_t* pArg_p)
 {
-    ALT_STATUS_CODE         halRet = ALT_E_SUCCESS;
-    tLcdCmdDesc             lcdCommandDesc = lcdCommands_l[(INT)command_p];
-    UINT8                   data[10];
-    UINT8                   dataLen = 0;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
+    tLcdCmdDesc     lcdCommandDesc = lcdCommands_l[(int)command_p];
+    uint8_t         data[10];
+    uint8_t         dataLen = 0;
 
     data[dataLen++] = LCD_ESCAPE_CHAR;
     data[dataLen++] = lcdCommandDesc.command;
-    for (INT i = 0; i < lcdCommandDesc.padding; i++)
-    {
+    for (uint8_t i = 0; i < lcdCommandDesc.padding; i++)
         data[dataLen++] = pArg_p[i];
-    }
 
-    halRet = alt_i2c_master_transmit(deviceHdl_p, data, dataLen,
-                                     ALT_E_FALSE, ALT_E_TRUE);
-    // usleep(lcdCommandDesc.executionDuration);    // Remove to avoid delays in execution
-                                                    // of POWERLINK, as LCD print works fine
-                                                    // in our case without this delay.
+    halRet = alt_i2c_master_transmit(deviceHdl_p,
+                                     data,
+                                     dataLen,
+                                     ALT_E_FALSE,
+                                     ALT_E_TRUE);
 
     return halRet;
 }
-///\}
+
+/// \}

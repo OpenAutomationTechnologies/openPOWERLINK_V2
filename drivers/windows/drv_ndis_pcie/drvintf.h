@@ -10,6 +10,7 @@ Driver interface for the kernel daemon - Header file
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_drvintf_H_
 #define _INC_drvintf_H_
 
@@ -43,11 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/driver.h>
 #include <common/ctrl.h>
-#include <common/target.h>
-#include <kernel/ctrlk.h>
-#include <kernel/ctrlkcal.h>
-#include <kernel/dllkcal.h>
-#include <kernel/pdokcal.h>
 #include <common/ctrlcal-mem.h>
 
 //------------------------------------------------------------------------------
@@ -66,35 +61,39 @@ driver file handle while the cleanup is in progress.
 */
 typedef struct
 {
-    IO_REMOVE_LOCK    driverAccessLock;     ///< Driver lock for IO access.
+    IO_REMOVE_LOCK      driverAccessLock;       ///< Driver lock for IO access.
 } tFileContext;
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
+
 tOplkError drv_init(void);
 void       drv_exit(void);
 tOplkError drv_executeCmd(tCtrlCmd* ctrlCmd_p);
 tOplkError drv_readInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError drv_storeInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError drv_storeInitParam(const tCtrlInitParam* pInitParam_p);
 tOplkError drv_getStatus(UINT16* pStatus_p);
 tOplkError drv_getHeartbeat(UINT16* pHeartbeat_p);
-tOplkError drv_sendAsyncFrame(tIoctlDllCalAsync* pAsyncFrameInfo_p);
-tOplkError drv_writeErrorObject(tErrHndIoctl* pWriteObject_p);
+tOplkError drv_sendAsyncFrame(const tIoctlDllCalAsync* pAsyncFrameInfo_p);
+tOplkError drv_writeErrorObject(const tErrHndIoctl* pWriteObject_p);
 tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p);
-tOplkError drv_postEvent(void* pEvent_p);
-tOplkError drv_getEvent(void* pEvent_p, size_t* pSize_p);
-tOplkError drv_getPdoMem(UINT32* pPdoMemOffs_p, size_t memSize_p);
-tOplkError drv_getBenchmarkMem(UINT8** ppBenchmarkMem_p);
-void       drv_freeBenchmarkMem(UINT8* pBenchmarkMem_p);
-tOplkError drv_mapKernelMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p, UINT32* pSize_p);
-void       drv_unmapKernelMem(UINT8* pUserMem_p);
-tOplkError drv_writeFileBuffer(tIoctlFileChunk* pIoctlFileChunk_p);
+tOplkError drv_postEvent(const void* pEvent_p);
+tOplkError drv_getEvent(void* pEvent_p,
+                        size_t* pSize_p);
+tOplkError drv_getPdoMem(UINT32* pPdoMemOffs_p,
+                         size_t memSize_p);
+tOplkError drv_getBenchmarkMem(void** ppBenchmarkMem_p);
+void       drv_freeBenchmarkMem(void* pBenchmarkMem_p);
+tOplkError drv_mapKernelMem(void** ppKernelMem_p,
+                            void** ppUserMem_p,
+                            UINT32* pSize_p);
+void       drv_unmapKernelMem(void* pUserMem_p);
+tOplkError drv_writeFileBuffer(const tIoctlFileChunk* pIoctlFileChunk_p);
 size_t     drv_getFileBufferSize(void);
 
 #ifdef __cplusplus

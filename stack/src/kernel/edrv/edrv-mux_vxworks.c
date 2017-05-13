@@ -10,7 +10,7 @@ This file contains the implementation of the VxWorks MUX Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -62,7 +62,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <net/if.h>
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 #include "hrtimerLib.h"
 #endif
 
@@ -89,7 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define EDRV_MAX_FRAME_SIZE     0x600
+#define EDRV_MAX_FRAME_SIZE     0x0600
 
 //------------------------------------------------------------------------------
 // local types
@@ -113,7 +113,7 @@ typedef struct
     SEM_ID              txWakeupSem;                        ///< Semaphore to wake up the TX sender task
     BOOL                fStopTxTask;                        ///< Flag indicating whether the TX sender task shall be stopped
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     struct timespec     txSendTime;                         ///< Time of issuing a TX frame
     struct timespec     txCbTime;                           ///< Time of entering the TX sender task
     struct timespec     maxTxLatency;                       ///< Max time difference between issuing a frame and entering the sender task
@@ -129,13 +129,13 @@ static tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
-                          LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p);
+static BOOL   packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
+                            LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p);
 static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p);
 static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p);
-static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p);
-static INT txTask(INT iArg_p);
-static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName, UINT8* pMacAddr_p);
+static void   muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p);
+static int    txTask(int iArg_p);
+static void   getMacAddr(PROTO_COOKIE pCookie_p, const char* pIfName, UINT8* pMacAddr_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -147,20 +147,21 @@ static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName, UINT8* pMacAddr_p)
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
-    tOplkError      ret;
+    tOplkError      ret = kErrorOk;
     NETBUF_CFG      bufCfgData;
     NETBUF_CL_DESC  clDescTblData;
 
-    ret = kErrorOk;
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -208,24 +209,23 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
         goto Exit;
     }
 
-    /* if no MAC address was specified read MAC address of used
-     * ethernet interface
-     */
-    if ((pEdrvInitParam_p->aMacAddr[0] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[1] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[2] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[3] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[4] == 0) &&
-        (pEdrvInitParam_p->aMacAddr[5] == 0))
-    {   // read MAC address from controller
-        getMacAddr(edrvInstance_l.pCookie,
-                   pEdrvInitParam_p->hwParam.pDevName,
-                   pEdrvInitParam_p->aMacAddr);
-    }
-
-    // save the init data (with updated MAC address)
+    // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
 
+    /* if no MAC address was specified read MAC address of used
+     * Ethernet interface
+     */
+    if ((edrvInstance_l.initParam.aMacAddr[0] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[1] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[2] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[3] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
+        (edrvInstance_l.initParam.aMacAddr[5] == 0))
+    {   // read MAC address from controller
+        getMacAddr(edrvInstance_l.pCookie,
+                   edrvInstance_l.initParam.hwParam.pDevName,
+                   edrvInstance_l.initParam.aMacAddr);
+    }
 
     if ((edrvInstance_l.mutex =
                     semMCreate(SEM_Q_PRIORITY | SEM_INVERSION_SAFE)) == NULL)
@@ -331,7 +331,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -342,7 +342,7 @@ UINT8* edrv_getMacAddr(void)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -354,6 +354,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     tOplkError  ret = kErrorOk;
     INT         muxRet;
     M_BLK_ID    pPacket;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->txBufferNumber.pArg != NULL)
     {
@@ -395,7 +398,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         ret = kErrorInvalidOperation;
     }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
      hrtimer_clock_gettime(0, &edrvInstance_l.txSendTime);
 #endif
 
@@ -412,7 +415,7 @@ Exit:
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -423,6 +426,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError ret = kErrorOk;
 
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -430,7 +436,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -449,7 +455,7 @@ Exit:
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -458,7 +464,12 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT8* pBuffer = pBuffer_p->pBuffer;
+    UINT8* pBuffer;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
+    pBuffer = pBuffer_p->pBuffer;
 
     // mark buffer as free, before actually freeing it
     pBuffer_p->pBuffer = NULL;
@@ -479,18 +490,20 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -506,20 +519,24 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
+
     if (muxMCastAddrDel(edrvInstance_l.pCookie, (char*)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error clearing multicast addresses\n");
         return kErrorEdrvInit;
     }
+
     return kErrorOk;
 }
 
@@ -529,15 +546,18 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
+
     if (muxMCastAddrAdd(edrvInstance_l.pCookie, (char*)pMacAddr_p) != OK)
     {
         DEBUG_LVL_EDRV_TRACE("error adding multicast addresses\n");
@@ -546,7 +566,7 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
     return kErrorOk;
 }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Show Ethernet driver information
@@ -556,7 +576,7 @@ This function shows the Ethernet driver information.
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-void EdrvShow(void)
+void edrv_showDiagnose(void)
 {
     printf("Max Tx Callback Latency: %ld ns\n",
             edrvInstance_l.maxTxLatency.tv_nsec);
@@ -575,17 +595,20 @@ void EdrvShow(void)
 
 This function is the packet handler forwarding the frames to the dllk.
 
-\param  pCookie_p           Pointer to MUX interface
-\param  type_p              Network service type of the packet
-\param  pPkt_p              M_BLK tuple chain of the packet
-\param  pLLHInfo_p          Pointer to link level header structure
-\param  pNetCallbackId_p    Handle installed at bind time
+\param[in,out]  pCookie_p           Pointer to MUX interface
+\param[in]      type_p              Network service type of the packet
+\param[in]      pPkt_p              M_BLK tuple chain of the packet
+\param[in,out]  pLLHInfo_p          Pointer to link level header structure
+\param[in,out]  pNetCallbackId_p    Handle installed at bind time
 
 \return The function returns a BOOL.
 */
 //------------------------------------------------------------------------------
-static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
-                          LL_HDR_INFO* pLLHInfo_p, void* pNetCallbackId_p)
+static BOOL packetHandler(void* pCookie_p,
+                          LONG type_p,
+                          M_BLK_ID pPkt_p,
+                          LL_HDR_INFO* pLLHInfo_p,
+                          void* pNetCallbackId_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pNetCallbackId_p;
     tEdrvRxBuffer   rxBuffer;
@@ -617,8 +640,8 @@ static BOOL packetHandler(void* pCookie_p, LONG type_p, M_BLK_ID pPkt_p,
 
 This function shuts down the Edrv MUX.
 
-\param  pCookie_p           Pointer to MUX interface
-\param  pNetCallbackId_p    Handle installed at bind time
+\param[in,out]  pCookie_p           Pointer to MUX interface
+\param[in,out]  pNetCallbackId_p    Handle installed at bind time
 
 \return The function returns a STATUS error code.
 */
@@ -638,8 +661,8 @@ static STATUS muxShutdown(void* pCookie_p, void* pNetCallbackId_p)
 
 This function restarts the Edrv MUX.
 
-\param  pEnd_p              END_OBJ passed to the MUX by the driver
-\param  pNetCallbackId_p    Handle installed at bind time
+\param[in,out]  pEnd_p              END_OBJ passed to the MUX by the driver
+\param[in,out]  pNetCallbackId_p    Handle installed at bind time
 
 \return The function returns a STATUS error code.
 */
@@ -659,9 +682,9 @@ static STATUS muxRestart(void* pEnd_p, void* pNetCallbackId_p)
 
 This is the error callback function of the Edrv MUX.
 
-\param  pEnd_p              END_OBJ passed to the MUX by the driver
-\param  pError_p            Pointer to structure containing the error
-\param  pNetCallbackId_p    Handle installed at bind time
+\param[in,out]  pEnd_p              END_OBJ passed to the MUX by the driver
+\param[in,out]  pError_p            Pointer to structure containing the error
+\param[in,out]  pNetCallbackId_p    Handle installed at bind time
 */
 //------------------------------------------------------------------------------
 static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p)
@@ -679,16 +702,16 @@ static void muxError(END_OBJ* pEnd_p, END_ERR* pError_p, void* pNetCallbackId_p)
 
 This is transmit callback task.
 
-\param  arg_p   Task argument contains the instance pointer
+\param[in]      arg_p               Task argument contains the instance pointer
 
 \return The function returns 0.
 */
 //------------------------------------------------------------------------------
-static INT txTask(INT arg_p)
+static int txTask(int arg_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)arg_p;
     STATUS          result;
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     struct timespec txLatency;
 #endif
 
@@ -700,7 +723,7 @@ static INT txTask(INT arg_p)
             break;
         }
 
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
         hrtimer_clock_gettime(0, &edrvInstance_l.txCbTime);
         txLatency = hrtimer_subTimespec(edrvInstance_l.txCbTime,
                                         edrvInstance_l.txSendTime);
@@ -757,12 +780,12 @@ static INT txTask(INT arg_p)
 
 This function gets the interface's MAC address.
 
-\param  pCookie_p   Pointer to MUX interface
-\param  pIfName_p   Ethernet interface device name
-\param  pMacAddr_p  Pointer to store MAC address
+\param[in]      pCookie_p           Pointer to MUX interface
+\param[in]      pIfName_p           Ethernet interface device name
+\param[out]     pMacAddr_p          Pointer to store MAC address
 */
 //------------------------------------------------------------------------------
-static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_p)
+static void getMacAddr(PROTO_COOKIE pCookie_p, const char* pIfName_p, UINT8* pMacAddr_p)
 {
     char aData[6];
 
@@ -772,4 +795,4 @@ static void getMacAddr(PROTO_COOKIE pCookie_p, char* pIfName_p, UINT8* pMacAddr_
     OPLK_MEMCPY(pMacAddr_p, aData, 6);
 }
 
-///\}
+/// \}

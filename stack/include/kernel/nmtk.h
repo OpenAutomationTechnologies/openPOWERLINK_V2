@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   nmtk.h
+\file   kernel/nmtk.h
 
 \brief  Definitions for NMT kernel module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the NMT kernel module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_nmtk_H_
-#define _INC_nmtk_H_
+#ifndef _INC_kernel_nmtk_H_
+#define _INC_kernel_nmtk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -56,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -64,10 +62,10 @@ extern "C"
 
 tOplkError nmtk_init(void);
 tOplkError nmtk_exit(void);
-tOplkError nmtk_process(tEvent* pEvent_p);
+tOplkError nmtk_process(const tEvent* pEvent_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_nmtk_H_
+#endif  /* _INC_kernel_nmtk_H_ */

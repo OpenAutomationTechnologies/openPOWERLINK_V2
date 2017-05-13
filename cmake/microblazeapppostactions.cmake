@@ -2,7 +2,7 @@
 #
 # CMake file for microblaze post build actions
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,7 +38,6 @@ MARK_AS_ADVANCED(XIL_VERIFY_ELF)
 ##############################################################################
 # Set paths
 SET(XIL_HW_SPEC ${CFG_HW_LIB_DIR}/hw_platform)
-SET(XIL_XPS_DEMO_DIR ${CFG_DEMO_DIR}/xps)
 
 ##############################################################################
 # Demo post build action
@@ -46,8 +45,8 @@ ADD_CUSTOM_COMMAND(
     TARGET ${EXECUTABLE_NAME}
     POST_BUILD
     COMMAND mb-size ${EXECUTABLE_NAME} | tee "${PROJECT_NAME}.size"
-    COMMAND elfcheck ${EXECUTABLE_NAME} -hw ${XIL_HW_SPEC}/system.xml -pe ${EXECUTABLE_CPU_NAME} | tee "${PROJECT_NAME}.elfcheck"
-    COMMAND data2mem -bd ${EXECUTABLE_NAME} -d -o m ${PROJECT_NAME}.mem
+    COMMAND arm-xilinx-eabi-objcopy -I elf32-little -O elf32-little -R .local_memory -R .vectors.* ${EXECUTABLE_NAME} ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
+    COMMAND make create-bit
 )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES
@@ -58,46 +57,20 @@ SET_DIRECTORY_PROPERTIES(PROPERTIES
 SET(ADD_CLEAN_FILES ${ADD_CLEAN_FILES}
                     ${EXECUTABLE_NAME}
                     ${PROJECT_NAME}.size
-                    ${PROJECT_NAME}.elfcheck
-                    ${PROJECT_NAME}.mem
-                    ${PROJECT_NAME}.tmp
-                    ${PROJECT_NAME}.map
+                    ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
    )
 
 ##############################################################################
-# Add targets for the download of the bitstream
-FIND_PROGRAM(XIL_MB_XMD NAMES xmd
-             DOC "Xilinx Microblaze Debug"
-            )
-
-FIND_PROGRAM(XIL_IMPACT NAMES impact
-             DOC "Xilinx iMPACT"
-            )
-
-IF(NOT ${XIL_IMPACT} STREQUAL "XIL_IMPACT-NOTFOUND")
-    ADD_CUSTOM_TARGET(
-            download-bits
-            COMMAND ${XIL_IMPACT} -batch download.cmd
-            WORKING_DIRECTORY ${XIL_HW_SPEC}
-    )
-ENDIF()
-
-IF(NOT ${XIL_MB_XMD} STREQUAL "XIL_MB_XMD-NOTFOUND")
-    ADD_CUSTOM_TARGET(
-            download-elf
-            COMMAND ${XIL_MB_XMD} -hw ${XIL_HW_SPEC}/system.xml -tcl ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl ${EXECUTABLE_NAME} ${XIL_VERIFY_ELF}
-    )
-ENDIF()
+# Add targets for the generating bitstream
+ADD_CUSTOM_TARGET(
+    create-bit
+    COMMAND data2mem -bm ${XIL_HW_SPEC}/system_wrapper_bd.bmm -bt ${XIL_HW_SPEC}/system_wrapper.bit -bd ${PROJECT_BINARY_DIR}/oplkdrv_daemon.elf tag system_i_pcp -o b ${XIL_HW_SPEC}/download.bit
+    WORKING_DIRECTORY ${XIL_HW_SPEC}
+)
 
 ################################################################################
 # Set architecture specific installation files
-INSTALL(FILES ${XIL_TOOLS_DIR}/xmd-downloadelf.tcl
-              ${XIL_HW_SPEC}/download.bit
-              ${XIL_HW_SPEC}/download.cmd
-              ${XIL_HW_SPEC}/system.xml
-              ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.mem
+INSTALL(FILES ${XIL_HW_SPEC}/download.bit
+              ${PROJECT_BINARY_DIR}/oplkdrv_daemon_o.elf
         DESTINATION ${ARCH_INSTALL_POSTFIX}
-       )
-INSTALL(PROGRAMS ${XIL_TOOLS_DIR}/elfdownload.make
-        DESTINATION ${ARCH_INSTALL_POSTFIX} RENAME Makefile
        )

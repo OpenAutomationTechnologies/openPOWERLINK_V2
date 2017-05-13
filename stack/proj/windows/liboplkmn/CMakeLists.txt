@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK MN library on Windows
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -38,9 +38,6 @@ IF(CFG_WINDOWS_DLL)
 ELSE()
     SET(LIB_TYPE "STATIC")
 ENDIF()
-
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
 
 # set general sources of POWERLINK library
 SET (LIB_SOURCES
@@ -81,11 +78,11 @@ IF(CFG_INCLUDE_MN_REDUNDANCY)
     ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
 ENDIF()
 ADD_DEFINITIONS(-DCONFIG_MN)
+ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     ${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include
     )
 
@@ -127,10 +124,6 @@ SOURCE_GROUP("Header Files\\External Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Header Files\\Internal Header Files" FILES ${STACK_HEADERS})
 SOURCE_GROUP("Header Files\\Kernel Header Files" FILES ${KERNEL_HEADERS})
 SOURCE_GROUP("Header Files\\User Header Files" FILES ${USER_HEADERS})
-SOURCE_GROUP("Object Dictionary" FILES
-    ${OBJDICT_HEADERS}
-    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
-    )
 
 # Define library and installation rules
 ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})

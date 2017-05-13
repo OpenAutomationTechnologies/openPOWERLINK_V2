@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdoucal.h
+\file   user/pdoucal.h
 
 \brief  include file for user PDO Communication Abstraction Layer module
 
@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_pdoucal_H_
-#define _INC_pdoucal_H_
+#ifndef _INC_user_pdoucal_H_
+#define _INC_user_pdoucal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,7 +54,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -64,26 +62,34 @@ extern "C"
 tOplkError pdoucal_init(void);
 tOplkError pdoucal_exit(void);
 
-tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p);
-tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p);
-tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
+tOplkError pdoucal_postPdokChannelAlloc(const tPdoAllocationParam* pAllocationParam_p);
+tOplkError pdoucal_postConfigureChannel(const tPdoChannelConf* pChannelConf_p);
+tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p,
+                                       size_t txPdoMemSize_p);
 
 // PDO memory functions
 tOplkError pdoucal_openMem(void);
 tOplkError pdoucal_closeMem(void);
-tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** pPdoMem_p);
-tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p);
+tOplkError pdoucal_allocateMem(size_t memSize_p,
+                               UINT8** pPdoMem_p);
+tOplkError pdoucal_freeMem(UINT8* pMem_p,
+                           size_t memSize_p);
 
 //PDO buffer functions
-tOplkError pdoucal_initPdoMem(tPdoChannelSetup* pPdoChannels_p, size_t rxPdoMemSize_p,
+tOplkError pdoucal_initPdoMem(const tPdoChannelSetup* pPdoChannels_p,
+                              size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdoucal_cleanupPdoMem(void);
-BYTE*      pdoucal_getTxPdoAdrs(UINT channelId_p);
-tOplkError pdoucal_setTxPdo(UINT channelId_p, BYTE* pPdo_p, WORD pdoSize_p);
-tOplkError pdoucal_getRxPdo(BYTE** ppPdo_p, UINT channelId_p, WORD pdoSize_p);
+UINT8*     pdoucal_getTxPdoAdrs(UINT channelId_p);
+tOplkError pdoucal_setTxPdo(UINT channelId_p,
+                            UINT8* pPdo_p,
+                            WORD pdoSize_p);
+tOplkError pdoucal_getRxPdo(UINT8** ppPdo_p,
+                            UINT channelId_p,
+                            WORD pdoSize_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_pdoucal_H_ */
+#endif /* _INC_user_pdoucal_H_ */

@@ -53,6 +53,7 @@ entity toplevel is
         EXT_CLK             : in    std_logic;
         -- PHY Interfaces
         PHY_GXCLK           : out   std_logic_vector(1 downto 0);
+        PHY_LINK_n          : in    std_logic_vector(1 downto 0);
         PHY_RXCLK           : in    std_logic_vector(1 downto 0);
         PHY_RXER            : in    std_logic_vector(1 downto 0);
         PHY_RXDV            : in    std_logic_vector(1 downto 0);
@@ -79,7 +80,7 @@ entity toplevel is
         -- NODE_SWITCH
         NODE_SWITCH         : in    std_logic_vector(7 downto 0);
         -- KEY
-        KEY                 : in    std_logic_vector(3 downto 0);
+        KEY_n               : in    std_logic_vector(3 downto 0);
         -- LED
         LEDG                : out   std_logic_vector(7 downto 0);
         LEDR                : out   std_logic_vector(15 downto 0);
@@ -130,6 +131,7 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                           : out   std_logic_vector(1 downto 0);
             openmac_0_smi_clk                               : out   std_logic_vector(1 downto 0);
             openmac_0_smi_dio                               : inout std_logic_vector(1 downto 0)  := (others => 'X');
+            openmac_0_pktactivity_export                    : out   std_logic;
             -- BENCHMARK
             pcp_0_benchmark_pio_export                      : out   std_logic_vector(7 downto 0);
             -- EPCS
@@ -146,15 +148,12 @@ architecture rtl of toplevel is
             node_switch_pio_export                          : in    std_logic_vector(7 downto 0)  := (others => 'X');
             -- STATUS ERROR LED
             powerlink_led_export                            : out   std_logic_vector(1 downto 0);
-            -- HEX
-            hex_pio_export                                  : out   std_logic_vector(31 downto 0);
-            -- LEDR
-            ledr_pio_export                                 : out   std_logic_vector(15 downto 0);
-            -- KEY
-            key_pio_export                                  : in    std_logic_vector(3 downto 0)  := (others => 'X');
             -- CPU RESET REQUEST
             pcp_0_cpu_resetrequest_resetrequest             : in    std_logic                     := 'X';
-            pcp_0_cpu_resetrequest_resettaken               : out   std_logic
+            pcp_0_cpu_resetrequest_resettaken               : out   std_logic;
+            -- Application ports
+            app_pio_in_port                                 : in    std_logic_vector(31 downto 0) := (others => 'X');
+            app_pio_out_port                                : out   std_logic_vector(31 downto 0)
         );
     end component cnSingleGpio;
 
@@ -176,12 +175,15 @@ architecture rtl of toplevel is
     signal pllLocked        : std_logic;
     signal sramAddr         : std_logic_vector(SRAM_ADDR'high downto 0);
     signal plk_status_error : std_logic_vector(1 downto 0);
+    signal openmac_activity : std_logic;
 
     type tSevenSegArray is array (natural range <>) of std_logic_vector(6 downto 0);
     constant cNumberOfHex   : natural := 8;
     signal hex              : std_logic_vector(cNumberOfHex*4-1 downto 0);
     signal sevenSegArray    : tSevenSegArray(cNumberOfHex-1 downto 0);
 
+    signal app_input        : std_logic_vector(31 downto 0);
+    signal app_output       : std_logic_vector(31 downto 0);
 begin
     SRAM_ADDR   <= sramAddr(SRAM_ADDR'range);
 
@@ -191,7 +193,32 @@ begin
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
 
-    LEDG        <= "000000" & plk_status_error;
+    ---------------------------------------------------------------------------
+    -- Green LED assignments
+    LEDG        <= plk_status_error(0) &  -- POWERLINK Status LED
+                   "000" &  -- Reserved
+                   (openmac_activity and not PHY_LINK_n(0)) & -- Gated activity
+                   not PHY_LINK_n(0) & -- Link
+                   (openmac_activity and not PHY_LINK_n(1)) & -- Gated activity
+                   not PHY_LINK_n(1); -- Link
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Red LED assignments
+    LEDR        <= x"000" & -- Reserved
+                   "000" & -- Reserved
+                   plk_status_error(1); -- POWERLINK Error LED
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Application Input and Output assignments
+
+    -- Input: Map KEY nibble to Application Input
+    app_input   <= x"0000000" & not KEY_n;
+
+    -- Output: Map Application Output to HEX LEDs
+    hex         <= app_output;
+    ---------------------------------------------------------------------------
 
     inst : component cnSingleGpio
         port map (
@@ -213,6 +240,7 @@ begin
             openmac_0_smi_nPhyRst                           => PHY_RESET_n,
             openmac_0_smi_clk                               => PHY_MDC,
             openmac_0_smi_dio                               => PHY_MDIO,
+            openmac_0_pktactivity_export                    => openmac_activity,
 
             tri_state_0_tcm_address_out                     => sramAddr,
             tri_state_0_tcm_read_n_out                      => SRAM_OE_n,
@@ -236,9 +264,8 @@ begin
             lcd_RS                                          => LCD_RS,
             lcd_RW                                          => LCD_RW,
 
-            hex_pio_export                                  => hex,
-            ledr_pio_export                                 => LEDR,
-            key_pio_export                                  => KEY
+            app_pio_in_port                                 => app_input,
+            app_pio_out_port                                => app_output
         );
 
     -- Pll Instance

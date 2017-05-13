@@ -7,7 +7,7 @@
 This file contains the definitions of the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,24 +33,25 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_Api_H_
-#define _INC_Api_H_
+#ifndef _INC_demo_Api_H_
+#define _INC_demo_Api_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <QObject>
+#include <QString>
 
-#include "ProcessThread.h"
-#include "DataInOutThread.h"
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // class declarations
 //------------------------------------------------------------------------------
-class MainWindow;
 class QWidget;
 
+class MainWindow;
+class ProcessThread;
+class DataInOutThread;
 
 //------------------------------------------------------------------------------
 /**
@@ -64,20 +65,24 @@ class Api : public QObject
     Q_OBJECT
 
 public:
-    Api(MainWindow* pMainWindow_p, UINT uiNodeId_p, QString devName_p);
+    Api(MainWindow* pMainWindow_p,
+        UINT nodeId_p,
+        const QString& rDevName_p);
     ~Api();
+
     static UINT defaultNodeId();
 
 signals:
-    void              userDefEvent(void* pUserArg_p);
-    void              sdoFinished(tSdoComFinished sdoInfo_p);
+    void userDefEvent(void* pUserArg_p);
+    void sdoFinished(tSdoComFinished sdoInfo_p);
 
 private:
     tOplkApiInitParam   initParam;
 
     ProcessThread*      pProcessThread;
     DataInOutThread*    pDataInOutThread;
+
+    const char*         pCdcFilename;
 };
 
-#endif /*_INC_Api_H_*/
-
+#endif /*_INC_demo_Api_H_*/

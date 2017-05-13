@@ -17,7 +17,8 @@ a shared memory byte for each circular buffer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014 Kalycito Infotech Private Limited
+Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -114,10 +115,10 @@ static tCircBufInstance     instance_l[NR_OF_CIRC_BUFFERS];
 
 The function allocates the memory needed for the circular buffer instance.
 
-\param  id_p                ID of the circular buffer.
-\param  fNew_p              The parameter determines if a new circular buffer
-                            instance should be created (TRUE) or if it should
-                            connect to an existing instance (FALSE).
+\param[in]      id_p                ID of the circular buffer.
+\param[in]      fNew_p              The parameter determines if a new circular buffer
+                                    instance should be created (TRUE) or if it should
+                                    connect to an existing instance (FALSE).
 
 \return The function returns the pointer to the buffer instance or NULL on error.
 
@@ -159,7 +160,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
 
 The function frees the allocated memory used by the circular buffer instance.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
@@ -175,9 +176,9 @@ void circbuf_freeInstance(tCircBufInstance* pInstance_p)
 
 The function allocates the memory needed for the circular buffer.
 
-\param  pInstance_p         Pointer to the circular buffer instance.
-\param  pSize_p             Size of memory to allocate.
-                            Returns the actually allocated buffer size.
+\param[in]      pInstance_p         Pointer to the circular buffer instance.
+\param[in,out]  pSize_p             Size of memory to allocate.
+                                    Returns the actually allocated buffer size.
 
 \return The function returns a tCircBuf Error code.
 
@@ -186,13 +187,19 @@ The function allocates the memory needed for the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p)
 {
-    size_t size = *pSize_p + sizeof(tCircBufHeader);
+    size_t  size;
+
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+    ASSERT(pSize_p != NULL);
+
+    size = *pSize_p + sizeof(tCircBufHeader);
 
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
         tDualprocReturn ret;
-        UINT8*          pBuffAddr;
+        void*           pBuffAddr;
 
         ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance, pInstance_p->bufferId,
                                     &pBuffAddr, &size, TRUE);
@@ -226,13 +233,16 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
 
 The function frees the allocated memory used by the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
@@ -260,7 +270,7 @@ void circbuf_freeBuffer(tCircBufInstance* pInstance_p)
 
 The function connects the calling thread to the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \return The function returns a tCircBuf Error code.
 
@@ -269,11 +279,14 @@ The function connects the calling thread to the circular buffer.
 //------------------------------------------------------------------------------
 tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
         tDualprocReturn ret;
-        UINT8*          pBuffAddr;
+        void*           pBuffAddr;
         size_t          size;
 
         ret = dualprocshm_getMemory(pInstance_p->pCircBufArchInstance,
@@ -297,13 +310,16 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
 
 The function disconnects the calling thread from the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_disconnectBuffer(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
@@ -326,13 +342,16 @@ void circbuf_disconnectBuffer(tCircBufInstance* pInstance_p)
 
 The function enters a locked section of the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_lock(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
@@ -359,13 +378,16 @@ void circbuf_lock(tCircBufInstance* pInstance_p)
 
 The function leaves a locked section of the circular buffer.
 
-\param  pInstance_p         Pointer to circular buffer instance.
+\param[in]      pInstance_p         Pointer to circular buffer instance.
 
 \ingroup module_lib_circbuf
 */
 //------------------------------------------------------------------------------
 void circbuf_unlock(tCircBufInstance* pInstance_p)
 {
+    // Check parameter validity
+    ASSERT(pInstance_p != NULL);
+
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         // Queue uses memory provided by dualprocshm
@@ -392,4 +414,4 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

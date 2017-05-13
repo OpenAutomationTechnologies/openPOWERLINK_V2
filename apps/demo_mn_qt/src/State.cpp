@@ -7,7 +7,7 @@
 This file contains the implementation of the State class
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,15 +37,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-#include <QToolButton>
-#include <QPalette>
-#include <QColor>
-#include <QLabel>
+#include <State.h>
+#include <Leds.h>
 
-#include "State.h"
-#include "Leds.h"
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QToolButton>
+#include <QPixmap>
 
 
 //============================================================================//
@@ -91,7 +89,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructs a State object
 
-\param  parent          pointer to parent widget
+\param[in,out]  parent              pointer to parent widget
 */
 //------------------------------------------------------------------------------
 State::State(QWidget* parent)
@@ -101,33 +99,30 @@ State::State(QWidget* parent)
     LabelFont.setBold(true);
     LabelFont.setPointSize(18);
 
-    pRedLed = new QPixmap(":/img/ledred.png");
-    pYellowLed = new QPixmap(":/img/ledyellow.png");
-    pGreenLed = new QPixmap(":/img/ledgreen.png");
+    this->pRedLed = new QPixmap(":/img/ledred.png");
+    this->pYellowLed = new QPixmap(":/img/ledyellow.png");
+    this->pGreenLed = new QPixmap(":/img/ledgreen.png");
 
     QHBoxLayout* pStateLayout = new QHBoxLayout;
     setLayout(pStateLayout);
-
     pStateLayout->addStretch(0);
 
-    pNmtSectionLabel = new QLabel("NMT State:");
-    pNmtSectionLabel->setFont(LabelFont);
-    pStateLayout->addWidget(pNmtSectionLabel);
+    this->pNmtSectionLabel = new QLabel("NMT State:");
+    this->pNmtSectionLabel->setFont(LabelFont);
+    pStateLayout->addWidget(this->pNmtSectionLabel);
     pStateLayout->addSpacing(20);
 
-    pStatusLed = new QLabel();
-    pStatusLed->setPixmap(*pRedLed);
+    this->pStatusLed = new QLabel();
+    this->pStatusLed->setPixmap(*pRedLed);
     pStateLayout->addSpacing(10);
-    pStateLayout->addWidget(pStatusLed);
+    pStateLayout->addWidget(this->pStatusLed);
 
-    pNmtStateLabel = new QLabel("Off");
+    this->pNmtStateLabel = new QLabel("Off");
     QFont tmpFont1("Arial", 16, QFont::Bold);
-    pNmtStateLabel->setFont(tmpFont1);
+    this->pNmtStateLabel->setFont(tmpFont1);
     pStateLayout->addSpacing(10);
-    pStateLayout->addWidget(pNmtStateLabel);
-
+    pStateLayout->addWidget(this->pNmtStateLabel);
     pStateLayout->addStretch(1);
-
 }
 
 //------------------------------------------------------------------------------
@@ -136,29 +131,30 @@ State::State(QWidget* parent)
 
 Sets the POWERLINK status LED depending on the POWERLINK state.
 
-\param  status_p        POWERLINK status
+\param[in]      status_p            POWERLINK status
 */
 //------------------------------------------------------------------------------
 void State::setStatusLed(int status_p)
 {
-    pStatusLed->show();
+    this->pStatusLed->show();
+
     switch (status_p)
     {
         case 0:
-            pStatusLed->setPixmap(*pRedLed);
+            this->pStatusLed->setPixmap(*this->pRedLed);
             break;
 
         case 1:
-            pStatusLed->setPixmap(*pYellowLed);
+            this->pStatusLed->setPixmap(*this->pYellowLed);
             break;
 
         case 2:
-            pStatusLed->setPixmap(*pGreenLed);
+            this->pStatusLed->setPixmap(*this->pGreenLed);
             break;
 
         case -1:
         default:
-            pStatusLed->setPixmap(*pRedLed);
+            this->pStatusLed->setPixmap(*this->pRedLed);
             break;
     }
 }
@@ -169,12 +165,11 @@ void State::setStatusLed(int status_p)
 
 Sets the text to show for the POWERLINK state.
 
-\param  strState_p       POWERLINK status text
+\param[in]      strState_p          POWERLINK status text
 */
 //------------------------------------------------------------------------------
 void State::setNmtStateText(const QString& strState_p)
 {
-    pNmtStateLabel->show();
-    pNmtStateLabel->setText(strState_p);
+    this->pNmtStateLabel->show();
+    this->pNmtStateLabel->setText(strState_p);
 }
-

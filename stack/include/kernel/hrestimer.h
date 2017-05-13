@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   hrestimer.h
+\file   kernel/hrestimer.h
 
 \brief  Definitions for high-resolution timer module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the high-resolution timer module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_hrestimer_H_
-#define _INC_hrestimer_H_
+#ifndef _INC_kernel_hrestimer_H_
+#define _INC_kernel_hrestimer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,11 +56,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This type defines a function pointer to a timer callback function.
 
-\param pEventArg_p       Pointer to timer event argument
+\param[in]      pEventArg_p         Pointer to timer event argument
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tTimerkCallback)(tTimerEventArg* pEventArg_p);
+typedef tOplkError (*tTimerkCallback)(const tTimerEventArg* pEventArg_p);
 
 /// Callback function pointer for hres timer callback function
 typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
@@ -69,7 +68,6 @@ typedef void (*tHresCallback)(tTimerHdl* pTimerHdl_p);
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -77,9 +75,15 @@ extern "C"
 
 tOplkError hrestimer_init(void);
 tOplkError hrestimer_exit(void);
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p) SECTION_HRTIMER_MODTIMER;
+tOplkError hrestimer_setAbsoluteTimer(tTimerHdl* pTimerHdl_p,
+                                      tTimestamp time_p,
+                                      tTimerkCallback pfnCallback_p,
+                                      ULONG argument_p) SECTION_HRTIMER_SETTIMER;
 tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p);
 void       hrestimer_controlExtSyncIrq(BOOL fEnable_p);
 void       hrestimer_setExtSyncIrqTime(tTimestamp time_p);
@@ -88,4 +92,4 @@ void       hrestimer_setExtSyncIrqTime(tTimestamp time_p);
 }
 #endif
 
-#endif  // #ifndef _INC_hrestimer_H_
+#endif  /* _INC_kernel_hrestimer_H_ */

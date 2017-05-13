@@ -10,7 +10,7 @@ This file contains the main implementation of the user timesync module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,6 +41,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <common/target.h>
+#include <user/timesyncu.h>
 #include <user/timesyncucal.h>
 
 //============================================================================//
@@ -96,7 +97,7 @@ static tTimesyncSocTime* getSocTime(void);
 
 The function initializes the user timesync module.
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -144,7 +145,7 @@ void timesyncu_exit(void)
 
 The function obtains the SoC time information.
 
-\param  pSocTime_p              Pointer to memory to store SoC time information
+\param[out]     pSocTime_p          Pointer to memory to store SoC time information
 
 \return The function returns a tOplkError error code.
 
@@ -169,7 +170,7 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
     pSocTime = getSocTime();
     if (pSocTime != NULL)
     {
-        // Assign timesync to api structure members
+        // Assign timesync to API structure members
         pSocTime_p->fValidRelTime = (pSocTime->fRelTimeValid != 0);
         pSocTime_p->relTime = pSocTime->relTime;
         pSocTime_p->netTime = pSocTime->netTime;

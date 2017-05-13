@@ -7,7 +7,7 @@
 This file contains the implementation of the Output class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -37,11 +37,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <Output.h>
+#include <Leds.h>
+
 #include <QVBoxLayout>
 #include <QLabel>
 
-#include "Output.h"
-#include "Leds.h"
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -53,14 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 Constructs an Output widget.
 
-\param          parent                  pointer parent window
+\param[in]      parent              Pointer to parent window
 */
 //------------------------------------------------------------------------------
 Output::Output(QWidget* parent)
     : QWidget(parent)
 {
-    pOutputLayout = new QVBoxLayout;
-    setLayout(pOutputLayout);
+    this->pOutputLayout = new QVBoxLayout;
+    setLayout(this->pOutputLayout);
 
     QFont LabelFont;
     LabelFont.setBold(true);
@@ -68,17 +69,17 @@ Output::Output(QWidget* parent)
 
     QLabel* pDigiOutLabel = new QLabel("Digital Outputs:");
     pDigiOutLabel->setFont(LabelFont);
-    pOutputLayout->addWidget(pDigiOutLabel);
+    this->pOutputLayout->addWidget(pDigiOutLabel);
 
-    ppLeds = new Leds*[NODE_ID_MAX];
+    this->ppLeds = new Leds*[NODE_ID_MAX];
     for (int i = 0; i < NODE_ID_MAX; i++)
     {
-        ppLeds[i] = new Leds(LED_NUM);
-        ppLeds[i]->hide();
-        pOutputLayout->addWidget(ppLeds[i]);
+        this->ppLeds[i] = new Leds(LED_NUM);
+        this->ppLeds[i]->hide();
+        this->pOutputLayout->addWidget(ppLeds[i]);
     }
 
-    pOutputLayout->addStretch(1);
+    this->pOutputLayout->addStretch(1);
 }
 
 //------------------------------------------------------------------------------
@@ -87,13 +88,13 @@ Output::Output(QWidget* parent)
 
 Sets the output value of a CN
 
-\param  dataIn_p            Output Value to set
-\param  nodeId_p            Node ID of CN
+\param[in]      dataIn_p            Output Value to set
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void Output::setValue(int dataIn_p, int nodeId_p)
 {
-    ppLeds[nodeId_p]->setLeds(dataIn_p);
+    this->ppLeds[nodeId_p]->setLeds(dataIn_p);
 }
 
 //------------------------------------------------------------------------------
@@ -103,12 +104,12 @@ void Output::setValue(int dataIn_p, int nodeId_p)
 Disable the output LEDs to show that they are not actively controlled by the
 application.
 
-\param  nodeId_p            Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void Output::disable(int nodeId_p)
 {
-    ppLeds[nodeId_p]->disableLeds();
+    this->ppLeds[nodeId_p]->disableLeds();
 }
 
 //------------------------------------------------------------------------------
@@ -117,19 +118,18 @@ void Output::disable(int nodeId_p)
 
 Adds a controlled node to the node list.
 
-\param  nodeId_p               Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void Output::addNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppLeds[nodeId_p]->show();
-        ppLeds[nodeId_p]->disableLeds();
-        //apNodes[nodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
-        pOutputLayout->update();
+        this->ppLeds[nodeId_p]->show();
+        this->ppLeds[nodeId_p]->disableLeds();
+        this->pOutputLayout->update();
     }
-
 }
 
 //------------------------------------------------------------------------------
@@ -138,20 +138,21 @@ void Output::addNode(int nodeId_p)
 
 Removes a controlled node from the node list.
 
-\param  nodeId_p               Node ID of CN
+\param[in]      nodeId_p            Node ID of CN
 */
 //------------------------------------------------------------------------------
 void Output::removeNode(int nodeId_p)
 {
-    if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
+    if ((nodeId_p >= 0) &&
+        (nodeId_p <= NODE_ID_MAX))
     {
-        ppLeds[nodeId_p]->hide();
+        this->ppLeds[nodeId_p]->hide();
     }
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  remove all CNs
+\brief  Remove all CNs
 
 Removes all controlled nodes from the node list.
 */
@@ -163,7 +164,6 @@ void Output::removeAllNodes()
     // count() gives all widgets (hidden ones too)
     for (nIdx = 0; nIdx < NODE_ID_MAX; nIdx++)
     {
-        ppLeds[nIdx]->hide();
+        this->ppLeds[nIdx]->hide();
     }
 }
-

@@ -16,7 +16,7 @@ and does not need an extra CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 \brief Instance of shared buffer implementation of error handler CAL
 
 This structure implements the instance variable of the shared buffer
-implementation of the user error handler CAL moduel.
+implementation of the user error handler CAL module.
 */
 typedef struct
 {
@@ -101,7 +101,7 @@ typedef struct
 //------------------------------------------------------------------------------
 static tErrIoctlInstance        instance_l;             ///< Error handler instance
 static BOOL                     fInitialized_l = FALSE; ///< Flag determines if module is initialized
-static tErrHndObjects*          pLocalObjects_l;       ///< Pointer to user error objects
+static tErrHndObjects*          pLocalObjects_l;        ///< Pointer to user error objects
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -117,7 +117,7 @@ static tErrHndObjects*          pLocalObjects_l;       ///< Pointer to user erro
 
 The function initializes the user layer CAL module of the error handler.
 
-\param  pLocalObjects_p         Pointer to local error objects
+\param[in]      pLocalObjects_p     Pointer to local error objects
 
 \return Always returns kErrorOk
 
@@ -159,16 +159,18 @@ void errhnducal_exit(void)
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[in]      pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p,
+                                       UINT subIndex_p,
+                                       const UINT32* pParam_p)
 {
     int             ret;
     tErrHndIoctl    errObj;
@@ -176,7 +178,10 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    errObj.offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
+    errObj.offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
     errObj.errVal = *pParam_p;
 
     ret = ioctl(instance_l.fd, PLK_CMD_ERRHND_WRITE, (ULONG)&errObj);
@@ -188,21 +193,23 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
 
 //------------------------------------------------------------------------------
 /**
-\brief    read an error handler object
+\brief    Read an error handler object
 
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[out]     pParam_p            Pointer to object in error handlers memory space
 
 \return Returns a tOplkError error code.
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p,
+                                      UINT subIndex_p,
+                                      UINT32* pParam_p)
 {
     int             ret;
     tErrHndIoctl    errObj;
@@ -210,11 +217,13 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    errObj.offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
+
+    errObj.offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
     errObj.errVal = 0;
 
     ret = ioctl(instance_l.fd, PLK_CMD_ERRHND_READ, (ULONG)&errObj);
-
     if (ret != 0)
         return kErrorGeneralError;
 
@@ -230,4 +239,4 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

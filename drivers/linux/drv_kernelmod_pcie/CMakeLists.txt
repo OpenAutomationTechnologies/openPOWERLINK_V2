@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK user PCIe interface (Linux kernel PCIe module)
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
@@ -45,6 +45,9 @@ MESSAGE(STATUS "CMAKE_SYSTEM_PROCESSOR is ${CMAKE_SYSTEM_PROCESSOR}")
 STRING(TOLOWER "${CMAKE_SYSTEM_NAME}" SYSTEM_NAME_DIR)
 STRING(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR_DIR)
 
+# Since 3.14 kernel Werror=date-time is automatically used if the compiler supports it.
+SET(MODULE_DEFS "${MODULE_DEFS} -Wno-date-time")
+
 ################################################################################
 # Configuration options
 
@@ -56,7 +59,7 @@ ENDIF()
 
 OPTION (CFG_OPLK_MN "Compile openPOWERLINK MN (Otherwise CN)" ON)
 
-SET(CFG_DEBUG_LVL "0xEC000000L" CACHE STRING "Debug Level for debug output")
+SET(CFG_DEBUG_LVL "0xC0000000L" CACHE STRING "Debug Level for debug output")
 
 SET(CFG_KERNEL_DIR "" CACHE PATH
         "Select the kernel directory to be used, if not specified, system kernel dir will be used!")
@@ -114,18 +117,14 @@ ENDFOREACH()
 
 ###############################################################################
 #
-# Specifiy standard include directories
+# Specify standard include directories
 #
 
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${OPLK_INCLUDE_DIR})
-INCLUDE_DIRECTORIES(${STACK_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${COMMON_SOURCE_DIR}/circbuf)
-INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/errhnd)
-INCLUDE_DIRECTORIES(${KERNEL_SOURCE_DIR}/dll)
-INCLUDE_DIRECTORIES(${STACK_INCLUDE_DIR}/target)
-INCLUDE_DIRECTORIES(${STACK_INCLUDE_DIR}/target/linux)
 INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/dualprocshm/include)
+INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR})
 
 GET_PROPERTY(DRIVER_INCLUDE_DIRS DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 FOREACH(NEXT_INCLUDE_DIR ${DRIVER_INCLUDE_DIRS})
@@ -133,7 +132,7 @@ FOREACH(NEXT_INCLUDE_DIR ${DRIVER_INCLUDE_DIRS})
 ENDFOREACH()
 
 #
-# Specifiy source files
+# Specify source files
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}

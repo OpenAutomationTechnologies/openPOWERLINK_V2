@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac-nios2.h
+\file   target/openmac-microblaze.h
 
 \brief  Definition for openMAC drivers on Microblaze
 
@@ -11,7 +11,7 @@ specific to Microblaze targets.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_openmac_microblaze_H_
-#define _INC_openmac_microblaze_H_
+#ifndef _INC_target_openmac_microblaze_H_
+#define _INC_target_openmac_microblaze_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -54,9 +54,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #define OPENMAC_MEMUNCACHED(pMem_p, size_p)                 pMem_p
-#define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              microblaze_flush_dcache_range((UINT32)pMem_p, size_p)
-#define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         microblaze_invalidate_dcache_range((UINT32)pMem_p, size_p)
+#define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              Xil_L1DCacheFlushRange((UINT32)(pMem_p), size_p)
+#define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         Xil_L1DCacheInvalidateRange((UINT32)(pMem_p), size_p)
 #define OPENMAC_GETDMAOBSERVER()                            Xil_In16(OPENMAC_DOB_BASE)
+#define OPENMAC_GETPENDINGIRQ()                             0
+//FIXME: Test IRQ timing on Xilinx, and implement OPENMAC_GETPENDINGIRQ macro if required
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 
@@ -82,7 +84,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -92,4 +93,4 @@ extern "C"
 }
 #endif
 
-#endif /* _INC_openmac_microblaze_H_ */
+#endif /* _INC_target_openmac_microblaze_H_ */

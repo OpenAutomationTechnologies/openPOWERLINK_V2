@@ -11,7 +11,7 @@ This implementation uses the host interface ipcore from the user side.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "errhnducal.h"
 
 #include <hostiflib.h>
+#include <stddef.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -97,11 +98,11 @@ static UINT8*           pHostifMem_l;       ///< Pointer to hostinterface memory
 
 The function initializes the user layer CAL module of the error handler.
 
-\param  pLocalObjects_p         Pointer to local error objects
+\param[in]      pLocalObjects_p     Pointer to local error objects
 
 \return     tOplkError
-\retval     kErrorOk              Returned successfully
-\retval     kErrorNoResource      IP-Core instance has not been found
+\retval     kErrorOk                Returned successfully
+\retval     kErrorNoResource        IP-Core instance has not been found
 
 \ingroup module_errhnducal
 */
@@ -109,40 +110,38 @@ The function initializes the user layer CAL module of the error handler.
 tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     tHostifInstance pHostifInstance = hostif_getInstance(0);
-    tOplkError      Ret = kErrorOk;
+    tOplkError      ret = kErrorOk;
     tHostifReturn   hostifRet;
     UINT8*          pBase;
     UINT            span;
 
     if (pHostifInstance == NULL)
     {
-        Ret = kErrorNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
     // get linear buffer and check span
     hostifRet = hostif_getBuf(pHostifInstance, kHostifInstIdErrCount, &pBase, &span);
-
     if (hostifRet != kHostifSuccessful)
     {
-        Ret = kErrorNoResource;
+        ret = kErrorNoResource;
         goto Exit;
     }
 
     if (span < sizeof(tErrHndObjects))
     {
         DEBUG_LVL_ERROR_TRACE("%s: Error Handler Object Buffer too small\n",
-                __func__);
-        Ret = kErrorNoResource;
+                              __func__);
+        ret = kErrorNoResource;
         goto Exit;
     }
 
     pHostifMem_l = pBase;
-
     pLocalObjects_l = pLocalObjects_p;
 
 Exit:
-    return Ret;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -167,23 +166,27 @@ void errhnducal_exit(void)
 The function writes an error handler object to the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[in]      pParam_p            Pointer to object in error handlers memory space
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_writeErrorObject(UINT index_p,
+                                       UINT subIndex_p,
+                                       const UINT32* pParam_p)
 {
-    UINT    offset;
+    ptrdiff_t   offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
 
-    OPLK_MEMCPY(pHostifMem_l + offset, (UINT8*)pParam_p, sizeof(UINT32));
+    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
+    OPLK_MEMCPY(pHostifMem_l + offset, pParam_p, sizeof(*pParam_p));
 
     return kErrorOk;
 }
@@ -195,23 +198,27 @@ tOplkError errhnducal_writeErrorObject(UINT index_p, UINT subIndex_p, UINT32* pP
 The function reads an error handler object from the shared memory region used
 by user and kernel modules.
 
-\param  index_p             Index of object in object dictionary
-\param  subIndex_p          Subindex of object
-\param  pParam_p            Pointer to object in error handlers memory space
+\param[in]      index_p             Index of object in object dictionary
+\param[in]      subIndex_p          Subindex of object
+\param[out]     pParam_p            Pointer to object in error handlers memory space
 
 \ingroup module_errhnducal
 */
 //------------------------------------------------------------------------------
-tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pParam_p)
+tOplkError errhnducal_readErrorObject(UINT index_p,
+                                      UINT subIndex_p,
+                                      UINT32* pParam_p)
 {
-    UINT    offset;
+    ptrdiff_t   offset;
 
     UNUSED_PARAMETER(index_p);
     UNUSED_PARAMETER(subIndex_p);
 
-    offset = (char*)pParam_p - (char*)pLocalObjects_l;
+    // Check parameter validity
+    ASSERT(pParam_p != NULL);
 
-    OPLK_MEMCPY((UINT8*)pParam_p, pHostifMem_l + offset, sizeof(UINT32));
+    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
+    OPLK_MEMCPY(pParam_p, pHostifMem_l + offset, sizeof(*pParam_p));
 
     return kErrorOk;
 }
@@ -223,4 +230,4 @@ tOplkError errhnducal_readErrorObject(UINT index_p, UINT subIndex_p, UINT32* pPa
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

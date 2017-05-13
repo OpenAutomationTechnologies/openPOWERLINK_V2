@@ -19,6 +19,7 @@ mapped.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -151,8 +152,8 @@ tOplkError pdokcal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory.
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory.
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
@@ -161,15 +162,17 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    instance_l.pKernelVa = OPLK_MALLOC(memSize_p);
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
 
+    instance_l.pKernelVa = OPLK_MALLOC(memSize_p);
     if (instance_l.pKernelVa == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Unable to allocate PDO memory !\n", __func__);
         return kErrorNoResource;
     }
 
-    *ppPdoMem_p = instance_l.pKernelVa;
+    *ppPdoMem_p = (UINT8*)instance_l.pKernelVa;
     instance_l.memSize = memSize_p;
 
     return kErrorOk;
@@ -182,8 +185,8 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 The function frees shared memory which was allocated in the kernel layer for
 transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment
-\param  memSize_p               Size of PDO memory
+\param[in,out]  pMem_p              Pointer to the shared memory segment
+\param[in]      memSize_p           Size of PDO memory
 
 \return The function returns a tOplkError error code.
 

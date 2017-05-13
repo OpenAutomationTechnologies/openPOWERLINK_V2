@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Command Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -66,10 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-
 /**
 \brief  SDO command layer states
 
@@ -78,9 +74,9 @@ machine.
 */
 typedef enum
 {
-    kOplkTestSdoComStateIdle         = 0x00,     // Idle state
-    kOplkTestSdoComStateWaitInit     = 0x10,     // Wait for init connection
-    kOplkTestSdoComStateConnected    = 0x11,     // Connection established
+    kOplkTestSdoComStateIdle      = 0x00,       // Idle state
+    kOplkTestSdoComStateWaitInit  = 0x10,       // Wait for init connection
+    kOplkTestSdoComStateConnected = 0x11,       // Connection established
 } eSdoTestComState;
 
 /**
@@ -116,20 +112,21 @@ typedef struct
 }tSdoTestCom;
 
 
-static const char sdoTestComCbName[]= "TestSdoComuCircularBuf";
-
-
-static tSdoTestCom   sdoTestComInst;
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tSdoTestCom sdoTestComInst_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-
 /// Callback function for receiving and forwarding SDO test command layer frames
-tOplkError  sdotestcom_receiveCb(tSdoComConHdl sdoSeqConHdl_p, tAsySdoCom* pAsySdoCom_p,
-                                 UINT dataSize_p);
+static tOplkError receiveCb(tSdoComConHdl sdoSeqConHdl_p,
+                            const tAsySdoCom* pAsySdoCom_p,
+                            UINT dataSize_p);
 /// Callback function for handling SDO test events
-tOplkError  sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoConState_p);
+static tOplkError conCb(tSdoSeqConHdl sdoSeqConHdl_p,
+                        tAsySdoConState sdoConState_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -141,7 +138,7 @@ tOplkError  sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p, tAsySdoConState sdoCo
 
 This function initializes the SDO command layer test.
 
-\param  sdoComCbApi_p         pointer to the Command layer callback function
+\param[in]      sdoComCbApi_p       pointer to the Command layer callback function
 
 \return The function returns a tOplkError error code.
 
@@ -150,27 +147,27 @@ This function initializes the SDO command layer test.
 //------------------------------------------------------------------------------
 tOplkError sdotestcom_init(sdoApiCbComTest sdoComCbApi_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError    ret;
     tCircBufError cbret;
 
-    OPLK_MEMSET(&sdoTestComInst, 0, sizeof(sdoTestComInst));
+    OPLK_MEMSET(&sdoTestComInst_l, 0, sizeof(sdoTestComInst_l));
 
-    sdoTestComInst.tCmdCon.tState = kOplkTestSdoComStateIdle;
-    sdoTestComInst.tApiCb = sdoComCbApi_p;
+    sdoTestComInst_l.tCmdCon.tState = kOplkTestSdoComStateIdle;
+    sdoTestComInst_l.tApiCb = sdoComCbApi_p;
 
     // Init sequence layer
-    ret = sdoseq_init(sdotestcom_receiveCb, sdotestcom_conCb);
-    if (kErrorOk != ret)
-    {
+    ret = sdoseq_init(receiveCb, conCb);
+    if (ret != kErrorOk)
         return kErrorInvalidOperation;
-    }
 
     // Init circular buffer for module internal communication
-    cbret = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE, CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL, &sdoTestComInst.tCmdCon.pCbBufInst);
+    cbret = circbuf_alloc(CIRCBUF_USER_INTERNAL_QUEUE,
+                          CONFIG_EVENT_SIZE_CIRCBUF_USER_INTERNAL,
+                          &sdoTestComInst_l.tCmdCon.pCbBufInst);
 
-    if (kCircBufOk != cbret)
+    if (cbret != kCircBufOk)
     {
-        (void)sdoseq_exit();
+        sdoseq_exit();
         return kErrorInvalidOperation;
     }
 
@@ -190,25 +187,21 @@ This function shuts down the SDO command layer.
 //------------------------------------------------------------------------------
 tOplkError sdotestcom_exit(void)
 {
-    tOplkError    ret = kErrorOk;
-    tOplkError    Sequret;
-    tCircBufError Cbret;
+    tOplkError      ret = kErrorOk;
+    tOplkError      sequret;
+    tCircBufError   cbret;
 
     // Free shared buffer
-    Cbret = circbuf_free(sdoTestComInst.tCmdCon.pCbBufInst);
+    cbret = circbuf_free(sdoTestComInst_l.tCmdCon.pCbBufInst);
 
     // Release sequence layer resources
-    Sequret = sdoseq_exit();
+    sequret = sdoseq_exit();
 
-    if ((kCircBufOk != Cbret) ||
-       (kErrorOk != Sequret))
-    {
+    if ((cbret != kCircBufOk) ||
+        (sequret != kErrorOk))
         ret = kErrorInvalidOperation;
-    }
     else
-    {
         ret = kErrorOk;
-    }
 
     return ret;
 }
@@ -219,70 +212,60 @@ tOplkError sdotestcom_exit(void)
 
 This function sends an SDO command layer frame.
 
-\param  nodeId_p         Node ID of target node
-\param  sdoType_p        Type of SDO lower layer (Asnd/Udp)
-\param  pSdoCom_p        SDO command layer frame
-\param  sdoSize_p        Size of SDO command layer frame
+\param[in]      nodeId_p            Node ID of target node
+\param[in]      sdoType_p           Type of SDO lower layer (ASnd/UDP)
+\param[in]      pSdoCom_p           SDO command layer frame
+\param[in]      sdoSize_p           Size of SDO command layer frame
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdotest_com
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdoType_p,
-                                tAsySdoCom* pSdoCom_p, size_t sdoSize_p)
+tOplkError sdotestcom_sendFrame(UINT nodeId_p,
+                                tSdoType sdoType_p,
+                                const tAsySdoCom* pSdoCom_p,
+                                size_t sdoSize_p)
 {
-    tOplkError              ret;
-    tSdoTestComCon*         pCmdCon;
-    tEvent                  Event;
-    tCircBufError           CbError;
-    tPlkFrame*              pFrame;
-    tAsySdoCom*             pSdoCom_Dst;
-    size_t                  FrameSize;
+    tOplkError      ret = kErrorOk;
+    tSdoTestComCon* pCmdCon = &sdoTestComInst_l.tCmdCon;
+    tEvent          event;
+    tCircBufError   cbError;
+    tPlkFrame*      pFrame;
+    tAsySdoCom*     pSdoComDst;
+    size_t          frameSize;
 
-    ret       = kErrorOk;
-    pCmdCon   = &sdoTestComInst.tCmdCon;
-    FrameSize = PLK_FRAME_OFFSET_SDO_COMU + sdoSize_p;
+    frameSize = PLK_FRAME_OFFSET_SDO_COMU + sdoSize_p;
 
     // Check if parameters are valid
-    if (FrameSize > C_DLL_MAX_ASYNC_MTU)
-    {
+    if (frameSize > C_DLL_MAX_ASYNC_MTU)
         return kErrorInvalidOperation;
-    }
 
     if (kOplkTestSdoComStateIdle != pCmdCon->tState)
     {
         // If the connection is already in use, node ID and SDO type have to match
         if ((pCmdCon->nodeId != nodeId_p) ||
-           (pCmdCon->tSdoType != sdoType_p))
-        {
+            (pCmdCon->tSdoType != sdoType_p))
             return kErrorInvalidOperation;
-        }
     }
 
     // Get frame buffer
-    pFrame = (tPlkFrame*)OPLK_MALLOC(FrameSize);
+    pFrame = (tPlkFrame*)OPLK_MALLOC(frameSize);
     if (pFrame == NULL)
-    {
-        ret = kErrorNoResource;
-    }
+        return kErrorNoResource;
 
     // Generate frame
-    pSdoCom_Dst = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
+    pSdoComDst = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload;
 
-    OPLK_MEMSET(pFrame, 0, FrameSize);
-    OPLK_MEMCPY(pSdoCom_Dst, pSdoCom_p, sdoSize_p);
+    OPLK_MEMSET(pFrame, 0, frameSize);
+    OPLK_MEMCPY(pSdoComDst, pSdoCom_p, sdoSize_p);
 
     // Save frame in shared buffer
-    CbError = circbuf_writeData(pCmdCon->pCbBufInst,
-                                pFrame, FrameSize);
-
+    cbError = circbuf_writeData(pCmdCon->pCbBufInst, pFrame, frameSize);
     OPLK_FREE(pFrame);
 
-    if (kCircBufOk != CbError)
-    {
+    if (cbError != kCircBufOk)
         ret = kErrorInvalidOperation;
-    }
     else
     {
         // Sequence layer handling
@@ -290,39 +273,34 @@ tOplkError sdotestcom_sendFrame(UINT nodeId_p, tSdoType sdoType_p,
         switch (pCmdCon->tState)
         {
             case kOplkTestSdoComStateIdle:
-
                 // Get new sequence layer connection
                 // When the connection is ready, the callback will trigger sending
                 ret = sdoseq_initCon(&pCmdCon->tSeqHdl, nodeId_p, sdoType_p);
 
-                pCmdCon->tState   = kOplkTestSdoComStateWaitInit;
+                pCmdCon->tState = kOplkTestSdoComStateWaitInit;
                 pCmdCon->tSdoType = sdoType_p;
-                pCmdCon->nodeId   = nodeId_p;
+                pCmdCon->nodeId = nodeId_p;
                 break;
 
             case kOplkTestSdoComStateWaitInit:
-
                 // Connection setup is already in progress
                 // Nothing left to do
                 break;
 
             case kOplkTestSdoComStateConnected:
-
                 // Connection is already up and running,
                 // just trigger frame send event
-                OPLK_MEMSET(&Event.netTime, 0x00, sizeof(Event.netTime));
-                Event.eventType    = kEventTypeSdoAsySend;
-                Event.eventArg.pEventArg    = pCmdCon;
-                Event.eventArgSize = sizeof(*pCmdCon);
-                Event.eventSink    = kEventSinkSdoTest;
-                ret = eventu_postEvent(&Event);
+                OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+                event.eventType = kEventTypeSdoAsySend;
+                event.eventArg.pEventArg = pCmdCon;
+                event.eventArgSize = sizeof(*pCmdCon);
+                event.eventSink = kEventSinkSdoTest;
+                ret = eventu_postEvent(&event);
                 break;
 
             default:
-
                 // Reject unknown states
                 ret = kErrorInvalidOperation;
-
                 break;
         }
     }
@@ -343,11 +321,8 @@ This function closes a SDO command layer connection
 //------------------------------------------------------------------------------
 tOplkError sdotestcom_closeCon(void)
 {
-    tOplkError              ret;
-    tSdoTestComCon*         pCmdCon;
-
-    ret         = kErrorOk;
-    pCmdCon     = &sdoTestComInst.tCmdCon;
+    tOplkError      ret = kErrorOk;
+    tSdoTestComCon* pCmdCon = &sdoTestComInst_l.tCmdCon;
 
     if (kOplkTestSdoComStateIdle != pCmdCon->tState)
     {
@@ -366,47 +341,37 @@ tOplkError sdotestcom_closeCon(void)
 
 Handles events that come from the event module
 
-\param  pOplkEvent_p         event to be handled
+\param[in]      pEvent_p            Event to be handled
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_sdotest_com
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
+tOplkError sdotestcom_cbEvent(const tEvent* pEvent_p)
 {
-    tOplkError               ret;
-    tOplkError               Sequret;
-    tSdoTestComCon*          pCmdCon;
-    tPlkFrame*               pFrame;
-    tCircBufError            Cbret;
-    ULONG                    ulDataSize;
-    size_t                   size_p;
-    size_t                   FrameSize;
+    tOplkError      ret = kErrorOk;
+    tOplkError      sequret;
+    tSdoTestComCon* pCmdCon;
+    tPlkFrame*      pFrame = NULL;
+    tCircBufError   cbret;
+    ULONG           dataSize = 0x00;
+    size_t          size_p = 0x00;
+    size_t          frameSize = C_DLL_MAX_ASYNC_MTU;
 
-    ret         = kErrorOk;
-    pFrame      = NULL;
-    FrameSize   = C_DLL_MAX_ASYNC_MTU;
-    size_p      = 0x00;
-    ulDataSize  = 0x00;
-
-    switch (pOplkEvent_p->eventType)
+    switch (pEvent_p->eventType)
     {
         case kEventTypeSdoAsySend:
-
             // Check parameter
-            if (sizeof(*pCmdCon) == pOplkEvent_p->eventArgSize)
-            {
-                pCmdCon = (tSdoTestComCon*)pOplkEvent_p->eventArg.pEventArg;
-            }
+            if (pEvent_p->eventArgSize == sizeof(*pCmdCon))
+                pCmdCon = (tSdoTestComCon*)pEvent_p->eventArg.pEventArg;
             else
             {
                 ret = kErrorSdoComInvalidParam;
                 goto Exit;
             }
 
-            pFrame = (tPlkFrame*)OPLK_MALLOC(FrameSize);
-
+            pFrame = (tPlkFrame*)OPLK_MALLOC(frameSize);
             if (pFrame == NULL)
             {
                 ret = kErrorNoResource;
@@ -416,38 +381,28 @@ tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
             // Send all frames in that are currently in the shared buffer
             do
             {
-                OPLK_MEMSET(pFrame, 0, FrameSize);
-
-                Cbret = circbuf_readData(pCmdCon->pCbBufInst,
-                                         pFrame, size_p,
-                                         &FrameSize);
-
-                if ((kCircBufOk == Cbret) &&
-                    (ulDataSize > PLK_FRAME_OFFSET_SDO_COMU))
+                OPLK_MEMSET(pFrame, 0, frameSize);
+                cbret = circbuf_readData(pCmdCon->pCbBufInst, pFrame, size_p, &frameSize);
+                if ((cbret == kCircBufOk) &&
+                    (dataSize > PLK_FRAME_OFFSET_SDO_COMU))
                 {
-                    Sequret = sdoseq_sendData(pCmdCon->tSeqHdl,
-                                              ulDataSize - PLK_FRAME_OFFSET_SDO_COMU,
+                    sequret = sdoseq_sendData(pCmdCon->tSeqHdl,
+                                              dataSize - PLK_FRAME_OFFSET_SDO_COMU,
                                               pFrame);
 
                     // Send all frames, but return error code if any frame fails
-                    if (Sequret != kErrorOk)
-                    {
-                        ret = Sequret;
-                    }
+                    if (sequret != kErrorOk)
+                        ret = sequret;
                 }
-            }
-            while (Cbret == kCircBufOk);
+            } while (cbret == kCircBufOk);
 
-            // kShbNoReadableData would be the only error free condition
+            // kCircBufNoReadableData would be the only error free condition
             // for the preceding loop to end
-            if (kCircBufNoReadableData != Cbret)
-            {
+            if (cbret != kCircBufNoReadableData)
                 ret = kErrorInvalidOperation;
-            }
             break;
 
         default:
-
             // Reject unknown events
             ret = kErrorInvalidOperation;
             break;
@@ -455,9 +410,7 @@ tOplkError sdotestcom_cbEvent(tEvent* pOplkEvent_p)
 
 Exit:
     if (pFrame != NULL)
-    {
         OPLK_FREE(pFrame);
-    }
 
     return ret;
 }
@@ -474,22 +427,22 @@ Exit:
 
 Receives and forwards SDO command layer frames
 
-\param  sdoSeqConHdl_p         Connection handle
-\param  pAsySdoCom_p           Command layer frame
-\param  dataSize_p             Size of command layer frame
+\param[in]      sdoSeqConHdl_p      Connection handle
+\param[in]      pAsySdoCom_p        Command layer frame
+\param[in]      dataSize_p          Size of command layer frame
 
 \return The function returns a SDO frame.
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                                tAsySdoCom* pAsySdoCom_p,
-                                UINT dataSize_p)
+static tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
+                            const tAsySdoCom* pAsySdoCom_p,
+                            UINT dataSize_p)
 {
     // Ignore unused parameter
-    (void)sdoSeqConHdl_p;
+    UNUSED_PARAMETER(sdoSeqConHdl_p);
 
     // Forward SDO frame to API
-    return sdoTestComInst.tApiCb(pAsySdoCom_p, dataSize_p);
+    return sdoTestComInst_l.tApiCb(pAsySdoCom_p, dataSize_p);
 }
 
 //------------------------------------------------------------------------------
@@ -498,44 +451,38 @@ tOplkError sdotestcom_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
 
 Handle SDO connection events
 
-\param  sdoSeqConHdl_p         Connection handle
-\param  sdoConState_p          State of sequence layer connection
+\param[in]      sdoSeqConHdl_p      Connection handle
+\param[in]      sdoConState_p       State of sequence layer connection
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p,
-                            tAsySdoConState sdoConState_p)
+static tOplkError conCb(tSdoSeqConHdl sdoSeqConHdl_p,
+                        tAsySdoConState sdoConState_p)
 {
-    tOplkError           ret = kErrorOk;
-    tSdoTestComCon*      pCmdCon;
-    tEvent               Event;
+    tOplkError      ret = kErrorOk;
+    tSdoTestComCon* pCmdCon = &sdoTestComInst_l.tCmdCon;
+    tEvent          event;
 
     // Ignore unused parameter
-    (void)sdoSeqConHdl_p;
-
-    ret     = kErrorOk;
-    pCmdCon = &sdoTestComInst.tCmdCon;
+    UNUSED_PARAMETER(sdoSeqConHdl_p);
 
     switch (sdoConState_p)
     {
         case kAsySdoConStateConnected:
-
             pCmdCon->tState = kOplkTestSdoComStateConnected;
 
             // Trigger frame send event
-            OPLK_MEMSET(&Event.netTime, 0x00, sizeof(Event.netTime));
-            Event.eventType    = kEventTypeSdoAsySend;
-            Event.eventArg.pEventArg = pCmdCon;
-            Event.eventArgSize = sizeof(*pCmdCon);
-            Event.eventSink    = kEventSinkSdoTest;
-
-            ret = eventu_postEvent(&Event);
+            OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
+            event.eventType = kEventTypeSdoAsySend;
+            event.eventArg.pEventArg = pCmdCon;
+            event.eventArgSize = sizeof(*pCmdCon);
+            event.eventSink = kEventSinkSdoTest;
+            ret = eventu_postEvent(&event);
             break;
 
         case kAsySdoConStateAckReceived:
         case kAsySdoConStateFrameSent:
-
             // These events are not forwarded to the app, and don't require any
             // handling here, so just do nothing in this case
             break;
@@ -545,7 +492,6 @@ tOplkError sdotestcom_conCb(tSdoSeqConHdl sdoSeqConHdl_p,
         case kAsySdoConStateConClosed:
         case kAsySdoConStateTimeout:
         case kAsySdoConStateTransferAbort:
-
             // Close connection
             pCmdCon->tState = kOplkTestSdoComStateIdle;
             break;

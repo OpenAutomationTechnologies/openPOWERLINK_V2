@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   nmtcnu.h
+\file   user/nmtcnu.h
 
 \brief  Definitions for nmtcnu module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the nmtcnu module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,14 +35,14 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_nmtcnu_H_
-#define _INC_nmtcnu_H_
+#ifndef _INC_user_nmtcnu_H_
+#define _INC_user_nmtcnu_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/nmt.h>
 #include <user/nmtu.h>
 
 //------------------------------------------------------------------------------
@@ -56,7 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -64,13 +63,16 @@ extern "C"
 
 tOplkError nmtcnu_init(UINT nodeId_p);
 tOplkError nmtcnu_exit(void);
-tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p, tNmtCommand nmtCommand_p);
-tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
-                                   void* pNmtCommandData_p, UINT dataSize_p);
+tOplkError nmtcnu_sendNmtRequest(UINT nodeId_p,
+                                 tNmtCommand nmtCommand_p);
+tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p,
+                                   tNmtCommand nmtCommand_p,
+                                   const void* pNmtCommandData_p,
+                                   size_t dataSize_p);
 tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventCb_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_nmtcnu_H_ */
+#endif /* _INC_user_nmtcnu_H_ */

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   pdok.h
+\file   kernel/pdok.h
 
 \brief  Include file for kernel PDO module
 
@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_pdok_H_
-#define _INC_pdok_H_
+#ifndef _INC_kernel_pdok_H_
+#define _INC_kernel_pdok_H_
 
 //---------------------------------------------------------------------------
 // includes
@@ -57,22 +56,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 // function prototypes
 //---------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError pdok_processRxPdo(tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
+tOplkError pdok_processRxPdo(const tPlkFrame* pFrame_p, UINT frameSize_p) SECTION_PDOK_PROCESS_RPDO;
 tOplkError pdok_init(void);
 tOplkError pdok_exit(void);
 tOplkError pdok_deAllocChannelMem(void);
-tOplkError pdok_allocChannelMem(tPdoAllocationParam* pAllocationParam_p);
-tOplkError pdok_configureChannel(tPdoChannelConf* pChannelConf_p);
+tOplkError pdok_allocChannelMem(const tPdoAllocationParam* pAllocationParam_p);
+tOplkError pdok_configureChannel(const tPdoChannelConf* pChannelConf_p);
 tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // #ifndef _INC_pdok_H_
+#endif  /* _INC_kernel_pdok_H_ */

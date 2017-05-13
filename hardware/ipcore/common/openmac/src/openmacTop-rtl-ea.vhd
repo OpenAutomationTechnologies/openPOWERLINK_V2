@@ -1428,6 +1428,11 @@ begin
             );
     end generate GEN_DMAMASTER;
 
+    GEN_NO_DMAMASTER : if not (gPacketBufferLocTx = cPktBufExtern or gPacketBufferLocRx = cPktBufExtern) generate
+        inst_dmaMaster.dma.readError <= '0';
+        inst_dmaMaster.dma.writeError <= '0';
+    end generate GEN_NO_DMAMASTER;
+
     --! Generate MAC activity, which can be used for LED control.
     GEN_ACTIVITY : if gEnableActivity = cTrue generate
         --! The activity generate uses the Tx enable and Rx data valid signal

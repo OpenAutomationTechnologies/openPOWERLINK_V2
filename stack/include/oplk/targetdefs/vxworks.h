@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   targetdefs/vxworks.h
+\file   oplk/targetdefs/vxworks.h
 
 \brief  Target specific definitions for VxWorks
 
@@ -8,7 +8,7 @@ This file contains target specific definitions for VxWorks systems.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_targetdefs_vxworks_H_
-#define _INC_targetdefs_vxworks_H_
+#ifndef _INC_oplk_targetdefs_vxworks_H_
+#define _INC_oplk_targetdefs_vxworks_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -48,16 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <oplk/basictypes.h>
 
-#define ROM_INIT                // variables will be initialized directly in ROM (means no copy from RAM in startup)
-#define ROM                     // code or variables mapped to ROM (i.e. flash)
-                                // usage: CONST BYTE ROM foo = 0x00;
-
-#define MEM                     // Memory attribute to optimize speed and code of pointer access.
-
-#ifndef CONST
-#define CONST const             // variables mapped to ROM (i.e. flash)
-#endif
-
 #define OPLKDLLEXPORT
 
 #define INLINE
@@ -66,7 +55,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define UNUSED_PARAMETER(par)   (void)par
 
-#define PRINTF(...)                      printf(__VA_ARGS__)
+#define PRINTF(...)             printf(__VA_ARGS__)
 
 // Target IO functions
 // - Write
@@ -90,5 +79,4 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLK_MUTEX_T                SEM_ID
 
-#endif /* _INC_targetdefs_vxworks_H_ */
-
+#endif /* _INC_oplk_targetdefs_vxworks_H_ */

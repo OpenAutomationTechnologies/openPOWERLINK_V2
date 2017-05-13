@@ -1,0 +1,31 @@
+//==============================================================================
+/**
+\defgroup module_sim Simulation Interface
+
+\brief Interface to an arbitrary simulation environment.
+
+The Simulation Interface provides an open interface to various simulation
+environments.
+This interface is used by the following modules implementented for the *sim* target:
+
+ - Ethernet Driver (\ref edrv-sim.c)
+ - High Resolution Timer (\ref hrestimer-sim.c)
+ - User Timer (\ref timer-sim.c)
+ - Target (\ref target-sim.c)
+ - Trace (contrib/trace/trace-sim.c)
+
+For connecting the openPOWERLINK stack to an arbitrary simulation environment
+this interface provides the possibility to use function pointers. These function
+pointers can be set for each of the above listed modules individually by the
+following exported functions:
+
+ - \ref sim_setEdrvFunctions
+ - \ref sim_setHresTimerFunctions
+ - \ref sim_setTimerFunctions
+ - \ref sim_setTargetFunctions
+ - \ref sim_setTraceFunctions
+ - \ref sim_setApiEventFunctions
+ - \ref sim_setProcessSyncFunctions
+
+*/
+//==============================================================================

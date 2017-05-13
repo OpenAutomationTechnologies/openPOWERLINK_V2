@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -40,9 +40,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <stdarg.h>
 
-#define _WIN32_WINNT 0x0501     // Windows version must be at least Windows XP
-#define WIN32_LEAN_AND_MEAN     // Do not use extended Win32 API functions
+// Windows version must be at least Windows XP
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
+#undef _WIN32_WINNT
+#endif
+#if !defined(_WIN32_WINNT)
+#define _WIN32_WINNT 0x0501
+#endif
+
+// Do not use extended Win32 API functions
+#if !defined(WIN32_LEAN_AND_MEAN)
+#define WIN32_LEAN_AND_MEAN
+#endif
+
+#if defined(_KERNEL_MODE)
+#include <Wdm.h>
+#else
 #include <Windows.h>
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -54,24 +69,26 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function prints a debug trace message.
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 */
 //------------------------------------------------------------------------------
 void trace(const char* fmt, ...)
 {
-    char    Buffer[0x400];
+    char    aBuffer[0x0400];
     va_list argptr;
 
     va_start(argptr, fmt);
-#if _MSC_VER >= 1400
-    vsprintf_s(Buffer, sizeof(Buffer), fmt, argptr);
+#if (_MSC_VER >= 1400)
+    vsprintf_s(aBuffer, sizeof(aBuffer), fmt, argptr);
 #else
-    vsprintf(Buffer, fmt, argptr);
+    vsprintf(aBuffer, fmt, argptr);
 #endif
     va_end(argptr);
 
-    OutputDebugString((LPSTR)&Buffer);
-
+#if defined(_KERNEL_MODE)
+    DbgPrint((LPSTR)&aBuffer);
+#else
+    OutputDebugString((LPSTR)&aBuffer);
+#endif
 }
-

@@ -11,7 +11,7 @@ Nios II targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,12 +103,12 @@ modules.
 This function registers the interrupt service routine in the host processor
 interrupt services.
 
-\param  pfnIrqCb_p              The interrupt service routine callback
-\param  pArg_p                  Argument pointer provided to the callback
+\param[in]      pfnIrqCb_p          The interrupt service routine callback
+\param[in]      pArg_p              Argument pointer provided to the callback
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       The interrupt service routine was registered
-                                successfully.
+\retval kHostifSuccessful           The interrupt service routine was registered
+                                    successfully.
 
 \ingroup module_hostiflib
 */
@@ -131,11 +131,11 @@ tHostifReturn hostif_sysIrqRegHandler(tHostifIrqCb pfnIrqCb_p, void* pArg_p)
 
 This function enables the interrupt for the host interface driver instance.
 
-\param  fEnable_p   Determines if the interrupt must be enabled (TRUE) or
-                    disabled (FALSE)
+\param[in]      fEnable_p           Determines if the interrupt must be enabled (TRUE) or
+                                    disabled (FALSE)
 
 \return The function returns a tHostifReturn error code.
-\retval kHostifSuccessful       Interrupt enable/disable failed
+\retval kHostifSuccessful           Interrupt enable/disable failed
 
 \ingroup module_hostiflib
 */
@@ -145,13 +145,9 @@ tHostifReturn hostif_sysIrqEnable(BOOL fEnable_p)
     int ret;
 
     if (fEnable_p)
-    {
         ret = alt_ic_irq_enable(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ);
-    }
     else
-    {
         ret = alt_ic_irq_disable(HOSTIF_IRQ_IC_ID, HOSTIF_IRQ);
-    }
 
     if (ret == 0)
         return kHostifSuccessful;

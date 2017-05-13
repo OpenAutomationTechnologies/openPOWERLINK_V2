@@ -8,7 +8,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -53,24 +53,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The function prints a log entry on the console. It prepends the output
 with the current date and time.
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 
 \ingroup module_console
 */
 //------------------------------------------------------------------------------
-void console_printlog(char* fmt, ...)
+void console_printlog(const char* fmt, ...)
 {
-    va_list             arglist;
-    time_t              timeStamp;
-    struct tm*          p_timeVal;
-    char                timeStr[20];
+    va_list     arglist;
+    time_t      timeStamp;
+    struct tm*  p_timeVal;
+    char        timeStr[20];
 
     time(&timeStamp);
     p_timeVal = localtime(&timeStamp);
     strftime(timeStr, 20, "%Y/%m/%d %H:%M:%S", p_timeVal);
-
     fprintf(stderr, "%s - ", timeStr);
+
     va_start(arglist, fmt);
     vfprintf(stderr, fmt, arglist);
     va_end(arglist);
@@ -82,18 +82,17 @@ void console_printlog(char* fmt, ...)
 
 The function adds a string to a log entry on the console (no timestamp).
 
-\param  fmt         Format string
-\param  ...         Arguments to print
+\param[in]      fmt                 Format string
+\param[in]      ...                 Arguments to print
 
 \ingroup module_console
 */
 //------------------------------------------------------------------------------
-void console_printlogadd(char* fmt, ...)
+void console_printlogadd(const char* fmt, ...)
 {
-    va_list             arglist;
+    va_list arglist;
 
     va_start(arglist, fmt);
     vfprintf(stderr, fmt, arglist);
     va_end(arglist);
 }
-

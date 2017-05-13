@@ -12,7 +12,7 @@ module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,11 +57,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef TIMER_SYNC_SECOND_LOSS_OF_SYNC
-#define TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
+#define TIMER_SYNC_SECOND_LOSS_OF_SYNC  FALSE
 #endif
 
 #ifndef CONFIG_EXT_SYNC_PULSE_NS
-#define CONFIG_EXT_SYNC_PULSE_NS            0 // default one clock cycle pulse
+#define CONFIG_EXT_SYNC_PULSE_NS        0 // default one clock cycle pulse
 #endif
 
 //------------------------------------------------------------------------------
@@ -79,25 +79,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TIMER_HDL_SYNC          0
-#define TIMER_HDL_LOSSOFSYNC    1
-#define TIMER_HDL_INVALID       0xFF
+#define TIMER_HDL_SYNC                  0
+#define TIMER_HDL_LOSSOFSYNC            1
+#define TIMER_HDL_INVALID               0xFF
 #if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
-#define TIMER_HDL_LOSSOFSYNC2   2
-#define TIMER_COUNT             3
+#define TIMER_HDL_LOSSOFSYNC2           2
+#define TIMER_COUNT                     3
 #else
-#define TIMER_COUNT             2
+#define TIMER_COUNT                     2
 #endif
 
-#define TIMEDIFF_COUNT_SHIFT    3
-#define TIMEDIFF_COUNT          (1 << TIMEDIFF_COUNT_SHIFT)
+#define TIMEDIFF_COUNT_SHIFT            3
+#define TIMEDIFF_COUNT                  (1 << TIMEDIFF_COUNT_SHIFT)
 
-#define PROPORTIONAL_FRACTION_SHIFT 3
-#define PROPORTIONAL_FRACTION       (1 << PROPORTIONAL_FRACTION_SHIFT)
+#define PROPORTIONAL_FRACTION_SHIFT     3
+#define PROPORTIONAL_FRACTION           (1 << PROPORTIONAL_FRACTION_SHIFT)
 
-#define TIMER_DRV_MIN_TIME_DIFF     500
+#define TIMER_DRV_MIN_TIME_DIFF         500
 
-#define EXT_SYNC_PULSE_MAX       ((1 << OPENMAC_TIMERPULSEREGWIDTH)-1)
+#define EXT_SYNC_PULSE_MAX              ((1 << OPENMAC_TIMERPULSEREGWIDTH) - 1)
 
 //------------------------------------------------------------------------------
 // local types
@@ -112,7 +112,6 @@ typedef struct
     UINT32  absoluteTime;                                           ///< Absolute time when the timer will fire
     BOOL    fEnable;                                                ///< Flag to enable the timer
 } tTimerInfo;
-
 
 /**
 \brief  Sync timer instance
@@ -179,6 +178,7 @@ static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
                                     UINT32* pAbsoluteTime_p,
                                     BOOL* pfAbsoluteTimeAlreadySet_p);
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p);
 
 static tOplkError drvDeleteTimer(UINT timerHdl_p);
 
@@ -266,7 +266,7 @@ tOplkError synctimer_exit(void)
 
 This function registers the synchronization handler callback.
 
-\param  pfnSyncCb_p     Synchronization callback
+\param[in]      pfnSyncCb_p         Synchronization callback
 
 \return The function returns a tOplkError error code.
 
@@ -288,7 +288,7 @@ tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnSyncCb_p)
 
 This function registers the loss of synchronization handler callback.
 
-\param  pfnLossOfSyncCb_p   Loss of synchronization callback
+\param[in]      pfnLossOfSyncCb_p   Loss of synchronization callback
 
 \return The function returns a tOplkError error code.
 
@@ -311,7 +311,7 @@ tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnLossOfS
 
 This function registers the second synchronization handler callback.
 
-\param  pfnLossOfSync2Cb_p  Second synchronization callback
+\param[in]      pfnLossOfSync2Cb_p  Second synchronization callback
 
 \return The function returns a tOplkError error code.
 
@@ -334,7 +334,7 @@ tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnLossOf
 
 This function sets the negative time shift.
 
-\param  advanceShift_p      Time shift in microseconds
+\param[in]      advanceShift_p      Time shift in microseconds
 
 \return The function returns a tOplkError error code.
 
@@ -356,8 +356,8 @@ tOplkError synctimer_setSyncShift(UINT32 advanceShift_p)
 
 This function sets the cycle time.
 
-\param  cycleLen_p      Cycle time in mircroseconds
-\param  minSyncTime_p   Minimum period for sending sync event [us]
+\param[in]      cycleLen_p          Cycle time in microseconds
+\param[in]      minSyncTime_p       Minimum period for sending sync event [us]
 
 \return The function returns a tOplkError error code.
 
@@ -394,7 +394,7 @@ tOplkError synctimer_setCycleLen(UINT32 cycleLen_p, UINT32 minSyncTime_p)
 
 This function sets the loss of synchronization tolerance.
 
-\param  lossOfSyncTolerance_p   Loss of sync tolerance in nanoseconds
+\param[in]      lossOfSyncTolerance_p   Loss of sync tolerance in nanoseconds
 
 \return The function returns a tOplkError error code.
 
@@ -419,7 +419,7 @@ tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p)
 
 This function sets the loss of synchronization tolerance.
 
-\param  lossOfSyncTolerance2_p      Second loss of sync tolerance in nanoseconds
+\param[in]      lossOfSyncTolerance2_p  Second loss of sync tolerance in nanoseconds
 
 \return The function returns a tOplkError error code.
 
@@ -444,24 +444,27 @@ tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p)
 
     return ret;
 }
-
 #endif
+
 //------------------------------------------------------------------------------
 /**
 \brief  Synchronization timer trigger setter
 
 This function sets the synchronization time trigger at a specific time stamp.
 
-\param  pTimeStamp_p    Time stamp when the sync module should trigger
+\param[in]      pTimeStamp_p        Time stamp when the sync module should trigger
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p)
+tOplkError synctimer_syncTriggerAtTimeStamp(const tTimestamp* pTimeStamp_p)
 {
     tOplkError ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pTimeStamp_p != NULL);
 
     ret = drvModifyTimerAbs(TIMER_HDL_LOSSOFSYNC,
                             (pTimeStamp_p->timeStamp + instance_l.lossOfSyncTimeout));
@@ -522,7 +525,7 @@ This function enables/disables the external synchronization interrupt if the
 needed hardware resources are available. Otherwise the call is ignored.
 The external synchronization is used for the host processor.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_synctimer
 */
@@ -557,7 +560,7 @@ void synctimer_controlExtSyncIrq(BOOL fEnable_p)
 
 This function adjusts the synchronization mechanism with a filter.
 
-\param  timeStamp_p     New sync time stamp
+\param[in]      timeStamp_p         New sync time stamp
 
 \return The function returns a tOplkError error code.
 */
@@ -607,7 +610,7 @@ static tOplkError ctrlDoSyncAdjustment(UINT32 timeStamp_p)
 
 This function adds the actual time difference for the next synchronization.
 
-\param  actualTimeDiff_p    Actual time difference
+\param[in]      actualTimeDiff_p    Actual time difference
 */
 //------------------------------------------------------------------------------
 static void ctrlAddActualTimeDiff(UINT32 actualTimeDiff_p)
@@ -647,7 +650,7 @@ static void ctrlCalcMeanTimeDiff(void)
 
     timeDiffSum = 0;
 
-    for (i=0; i < TIMEDIFF_COUNT; i++)
+    for (i = 0; i < TIMEDIFF_COUNT; i++)
     {
         timeDiffSum += instance_l.aActualTimeDiff[i];
     }
@@ -661,7 +664,7 @@ static void ctrlCalcMeanTimeDiff(void)
 
 This function sets the configured time difference.
 
-\param  configuredTimeDiff_p    Configured time difference
+\param[in]      configuredTimeDiff_p    Configured time difference
 */
 //------------------------------------------------------------------------------
 static void ctrlSetConfiguredTimeDiff(UINT32 configuredTimeDiff_p)
@@ -727,8 +730,8 @@ static void ctrlUpdateRejectThreshold(void)
 
 This function returns the absolute time stamp for the next time synchronization.
 
-\param  timerHdl_p          Timer handle
-\param  currentTime_p       Current time
+\param[in]      timerHdl_p          Timer handle
+\param[in]      currentTime_p       Current time
 
 \return Next absolute time value.
 */
@@ -761,8 +764,8 @@ static UINT32 ctrlGetNextAbsoluteTime(UINT timerHdl_p, UINT32 currentTime_p)
 
 This function modifies the timer's absolute timer value.
 
-\param  timerHdl_p      Timer handle
-\param  absoluteTime_p  Absolute time value
+\param[in]      timerHdl_p          Timer handle
+\param[in]      absoluteTime_p      Absolute time value
 
 \return The function returns a tOplkError error code.
 */
@@ -792,17 +795,18 @@ Exit:
 /**
 \brief  Modify relative timer
 
-This function modifies the timer's realtive timer value.
+This function modifies the timer's relative timer value.
 
-\param  timerHdl_p                  Timer handle
-\param  timeAdjustment_p            Relative time adjustment
-\param  pAbsoluteTime_p             Pointer to the timer's absolute time
-\param  pfAbsoluteTimeAlreadySet_p  Some weird flag
+\param[in]      timerHdl_p                  Timer handle
+\param[in]      timeAdjustment_p            Relative time adjustment
+\param[in,out]  pAbsoluteTime_p             Pointer to the timer's absolute time
+\param[out]     pfAbsoluteTimeAlreadySet_p  Some weird flag
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
+static tOplkError drvModifyTimerRel(UINT timerHdl_p,
+                                    INT timeAdjustment_p,
                                     UINT32* pAbsoluteTime_p,
                                     BOOL* pfAbsoluteTimeAlreadySet_p)
 {
@@ -838,11 +842,30 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
+\brief  wait blocking until interrupt is acknowledged
+
+This function blocks further processing until a certain IRQ number
+is no longer pending, which ensures proper timer setup even if the
+hardware delays the IRQ acknowledging. However, it introduces an additional
+but necessary delay.
+
+\param[in]      irqNum_p            IRQ number
+
+*/
+//------------------------------------------------------------------------------
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p)
+{
+    while (OPENMAC_GETPENDINGIRQ() & (1 << irqNum_p));
+}
+
+
+//------------------------------------------------------------------------------
+/**
 \brief  Delete sync timer
 
 This function deletes the timer handle.
 
-\param  timerHdl_p  Timer handle
+\param[in]      timerHdl_p          Timer handle
 
 \return The function returns a tOplkError error code.
 */
@@ -986,7 +1009,7 @@ static void drvCalcExtSyncIrqValue(void)
 
 This function is invoked by the openMAC HW sync timer interrupt.
 
-\param  pArg_p  Interrupt service routine argument
+\param[in,out]  pArg_p              Interrupt service routine argument
 */
 //------------------------------------------------------------------------------
 static void drvInterruptHandler(void* pArg_p)
@@ -1069,10 +1092,11 @@ static void drvInterruptHandler(void* pArg_p)
     }
 
     drvConfigureShortestTimer();
+    drvBlockUntilAcknowledged(HWTIMER_SYNC);
 
     target_setInterruptContextFlag(FALSE);
 
     BENCHMARK_MOD_24_RESET(4);
 }
 
-///\}
+/// \}

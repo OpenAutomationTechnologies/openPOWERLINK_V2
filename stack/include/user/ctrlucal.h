@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlucal.h
+\file   user/ctrlucal.h
 
 \brief  Definitions for user ctrl CAL module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the user ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlucal_H_
-#define _INC_ctrlucal_H_
+#ifndef _INC_user_ctrlucal_H_
+#define _INC_user_ctrlucal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,28 +54,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError          ctrlucal_init(void);
-void                ctrlucal_exit(void);
-tOplkError          ctrlucal_process(void);
-UINT16              ctrlucal_getStatus(void);
-UINT16              ctrlucal_getHeartbeat(void);
-tOplkError          ctrlucal_executeCmd(tCtrlCmdType cmd_p, UINT16* pRetVal_p);
-tOplkError          ctrlucal_checkKernelStack(void);
-void                ctrlucal_storeInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError          ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError          ctrlucal_writeFileBuffer(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p);
-size_t              ctrlucal_getFileBufferSize(void);
-OPLK_FILE_HANDLE    ctrlucal_getFd(void);
-tOplkError          ctrlucal_getMappedMem(UINT32 kernelOffs_p, UINT32 size_p,
-                                          UINT8** ppUserMem_p);
+tOplkError       ctrlucal_init(void);
+void             ctrlucal_exit(void);
+tOplkError       ctrlucal_process(void);
+tOplkError       ctrlucal_executeCmd(tCtrlCmdType cmd_p,
+                                     UINT16* pRetVal_p);
+tOplkError       ctrlucal_checkKernelStack(void);
+UINT16           ctrlucal_getStatus(void);
+UINT16           ctrlucal_getHeartbeat(void);
+void             ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p);
+tOplkError       ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError       ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                          const void* pBuffer_p);
+size_t           ctrlucal_getFileBufferSize(void);
+OPLK_FILE_HANDLE ctrlucal_getFd(void);
+tOplkError       ctrlucal_getMappedMem(UINT32 kernelOffs_p,
+                                       UINT32 size_p,
+                                       UINT8** ppUserMem_p);
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ctrlucal_H_ */
+#endif /* _INC_user_ctrlucal_H_ */

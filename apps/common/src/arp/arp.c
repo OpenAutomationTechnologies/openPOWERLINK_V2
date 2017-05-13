@@ -10,7 +10,7 @@ This file implements an ARP demo for demo targets that have no IP stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,7 +67,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
 #define ARP_ETHERTYPE           0x0806  ///< ARP "EtherType"
 #define ARP_HWTYPE_ETHERNET     1       ///< ARP hardware type Ethernet
 #define ARP_PROTYPE_IPV4        0x0800  ///< ARP protocol type IP V4
@@ -87,18 +86,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 typedef struct
 {
-    UINT8   aDstMac[ARP_HWADDR_LENGTH];                 ///< Ethernet destination MAC address
-    UINT8   aSrcMac[ARP_HWADDR_LENGTH];                 ///< Ethernet source MAC address
-    UINT16  etherType;                                  ///< Ethernet "etherType"
-    UINT16  hardwareType;                               ///< ARP network protocol type
-    UINT16  protocolType;                               ///< ARP internetwork protocol type
-    UINT8   hardwareAddressLength;                      ///< ARP length of hardware address [octets]
-    UINT8   protocolAddressLength;                      ///< ARP length of internetwork address [octets]
-    UINT16  operation;                                  ///< ARP operation
-    UINT8   aSenderHardwareAddress[ARP_HWADDR_LENGTH];  ///< ARP sender hardware address
-    UINT8   aSenderProtocolAddress[ARP_PROADDR_LENGTH]; ///< ARP sender internetwork address
-    UINT8   aTargetHardwareAddress[ARP_HWADDR_LENGTH];  ///< ARP target hardware address
-    UINT8   aTargetProtocolAddress[ARP_PROADDR_LENGTH]; ///< ARP target internetwork address
+    UINT8       aDstMac[ARP_HWADDR_LENGTH];                 ///< Ethernet destination MAC address
+    UINT8       aSrcMac[ARP_HWADDR_LENGTH];                 ///< Ethernet source MAC address
+    UINT16      etherType;                                  ///< Ethernet "etherType"
+    UINT16      hardwareType;                               ///< ARP network protocol type
+    UINT16      protocolType;                               ///< ARP internetwork protocol type
+    UINT8       hardwareAddressLength;                      ///< ARP length of hardware address [octets]
+    UINT8       protocolAddressLength;                      ///< ARP length of internetwork address [octets]
+    UINT16      operation;                                  ///< ARP operation
+    UINT8       aSenderHardwareAddress[ARP_HWADDR_LENGTH];  ///< ARP sender hardware address
+    UINT8       aSenderProtocolAddress[ARP_PROADDR_LENGTH]; ///< ARP sender internetwork address
+    UINT8       aTargetHardwareAddress[ARP_HWADDR_LENGTH];  ///< ARP target hardware address
+    UINT8       aTargetProtocolAddress[ARP_PROADDR_LENGTH]; ///< ARP target internetwork address
 } tArpFrame;
 
 /**
@@ -109,12 +108,12 @@ typedef struct
  */
 typedef struct
 {
-    tArpFrame   frameTemplate;                      ///< ARP frame template
-    UINT8       nodeId;                             ///< The local node ID
-    UINT8       aMacAddr[ARP_HWADDR_LENGTH];        ///< The local node's MAC address in network order
-    UINT8       aIpAddr[ARP_PROADDR_LENGTH];        ///< The local node's IP address in network order
-    UINT8       aDefaultGwIp[ARP_PROADDR_LENGTH];   ///< Default gateway IP address in network order
-    UINT8       aDefaultGwMac[ARP_HWADDR_LENGTH];   ///< Default gateway MAC address in network order
+    tArpFrame   frameTemplate;                              ///< ARP frame template
+    UINT8       nodeId;                                     ///< The local node ID
+    UINT8       aMacAddr[ARP_HWADDR_LENGTH];                ///< The local node's MAC address in network order
+    UINT8       aIpAddr[ARP_PROADDR_LENGTH];                ///< The local node's IP address in network order
+    UINT8       aDefaultGwIp[ARP_PROADDR_LENGTH];           ///< Default gateway IP address in network order
+    UINT8       aDefaultGwMac[ARP_HWADDR_LENGTH];           ///< Default gateway MAC address in network order
 } tArpInstance;
 
 //------------------------------------------------------------------------------
@@ -125,8 +124,8 @@ static tArpInstance arpInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void handleReply(tArpFrame* pFrame_p);
-static int  handleRequest(tArpFrame* pFrame_p);
+static void handleReply(const tArpFrame* pFrame_p);
+static int  handleRequest(const tArpFrame* pFrame_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -138,7 +137,7 @@ static int  handleRequest(tArpFrame* pFrame_p);
 
 The function initializes the ARP module before being used.
 
-\param  nodeId_p    The local node ID
+\param[in]      nodeId_p            The local node ID
 
 \ingroup module_app_common
 */
@@ -151,23 +150,12 @@ void arp_init(UINT8 nodeId_p)
 
     arpInstance_l.nodeId = nodeId_p;
 
-    // Set ARP frame template
-    pFrame = &arpInstance_l.frameTemplate;
-
-    // EtherType: ARP
-    pFrame->etherType = htons(ARP_ETHERTYPE);
-
-    // Hardware Type: Ethernet
-    pFrame->hardwareType = htons(ARP_HWTYPE_ETHERNET);
-
-    // Protocol Type: IP V4
-    pFrame->protocolType = htons(ARP_PROTYPE_IPV4);
-
-    // Hardware Address Length
-    pFrame->hardwareAddressLength = ARP_HWADDR_LENGTH;
-
-    // Protocol Address Length
-    pFrame->protocolAddressLength = ARP_PROADDR_LENGTH;
+    pFrame = &arpInstance_l.frameTemplate;                      // Set ARP frame template
+    pFrame->etherType = htons(ARP_ETHERTYPE);                   // EtherType: ARP
+    pFrame->hardwareType = htons(ARP_HWTYPE_ETHERNET);          // Hardware Type: Ethernet
+    pFrame->protocolType = htons(ARP_PROTYPE_IPV4);             // Protocol Type: IP V4
+    pFrame->hardwareAddressLength = ARP_HWADDR_LENGTH;          // Hardware Address Length
+    pFrame->protocolAddressLength = ARP_PROADDR_LENGTH;         // Protocol Address Length
 }
 
 //------------------------------------------------------------------------------
@@ -190,12 +178,12 @@ void arp_exit(void)
 
 The function sets the local node's MAC address.
 
-\param  pMacAddr_p      Pointer to buffer that holds the MAC address to be set
+\param[in]      pMacAddr_p          Pointer to buffer that holds the MAC address to be set
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-void arp_setMacAddr(UINT8* pMacAddr_p)
+void arp_setMacAddr(const UINT8* pMacAddr_p)
 {
     memcpy(&arpInstance_l.aMacAddr, pMacAddr_p, ARP_HWADDR_LENGTH);
 }
@@ -206,16 +194,16 @@ void arp_setMacAddr(UINT8* pMacAddr_p)
 
 The function sets the local node's IP address.
 
-\param  ipAddr_p    IP address to be set
+\param[in]      ipAddr_p            IP address to be set
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
 void arp_setIpAddr(UINT32 ipAddr_p)
 {
-    UINT32 ipAddr = htonl(ipAddr_p); // Swap to get network order
+    UINT32  ipAddr = htonl(ipAddr_p);               // Swap to get network order
 
-    memcpy(arpInstance_l.aIpAddr, (UINT8*)&ipAddr, ARP_PROADDR_LENGTH);
+    memcpy(arpInstance_l.aIpAddr, &ipAddr, ARP_PROADDR_LENGTH);
 }
 
 //------------------------------------------------------------------------------
@@ -224,16 +212,16 @@ void arp_setIpAddr(UINT32 ipAddr_p)
 
 The function sets the default gateway's IP address.
 
-\param  defGateway_p    Default gateway IP address
+\param[in]      defGateway_p        Default gateway IP address
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
 void arp_setDefGateway(UINT32 defGateway_p)
 {
-    UINT32 defGateway = htonl(defGateway_p); // Swap to get network order
+    UINT32  defGateway = htonl(defGateway_p);       // Swap to get network order
 
-    memcpy(arpInstance_l.aDefaultGwIp, (UINT8*)&defGateway, ARP_PROADDR_LENGTH);
+    memcpy(arpInstance_l.aDefaultGwIp, &defGateway, ARP_PROADDR_LENGTH);
 
     // Invalidate default gateway's MAC address
     memset(arpInstance_l.aDefaultGwMac, 0, ARP_HWADDR_LENGTH);
@@ -245,7 +233,7 @@ void arp_setDefGateway(UINT32 defGateway_p)
 
 The function sends an ARP request to the given POWERLINK node.
 
-\param  ipAddr_p    IP address to destination node
+\param[in]      ipAddr_p            IP address to destination node
 
 \return The function returns 0 if the ARP request has been sent, otherwise -1.
 
@@ -256,7 +244,7 @@ int arp_sendRequest(UINT32 ipAddr_p)
 {
     tArpFrame   frameBuffer;
     tArpFrame*  pFrame = &frameBuffer;
-    UINT32      ipAddr = htonl(ipAddr_p); // Swap to get network order
+    UINT32      ipAddr = htonl(ipAddr_p);           // Swap to get network order
 
     // Copy ARP frame template to frame buffer
     memcpy(pFrame, &arpInstance_l.frameTemplate, sizeof(tArpFrame));
@@ -291,8 +279,8 @@ int arp_sendRequest(UINT32 ipAddr_p)
 
 The function processes a received Ethernet frame for ARP handling.
 
-\param  pFrame_p    Pointer to ARP frame
-\param  size_p      Size of the frame
+\param[in]      pFrame_p            Pointer to ARP frame
+\param[in]      size_p              Size of the frame
 
 \return The function returns 0 if an ARP frame has been received and handled
         successfully, otherwise -1.
@@ -300,7 +288,8 @@ The function processes a received Ethernet frame for ARP handling.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-int arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
+int arp_processReceive(const tPlkFrame* pFrame_p,
+                       UINT size_p)
 {
     int         ret = 0;
     tArpFrame*  pFrame = (tArpFrame*)pFrame_p;
@@ -351,10 +340,10 @@ int arp_processReceive(tPlkFrame* pFrame_p, UINT size_p)
 
 The function handles an ARP Reply frame.
 
-\param  pFrame_p    Pointer to ARP frame
+\param[in]      pFrame_p            Pointer to ARP frame
 */
 //------------------------------------------------------------------------------
-static void handleReply(tArpFrame* pFrame_p)
+static void handleReply(const tArpFrame* pFrame_p)
 {
     PRINTF("ARP: Node with IP Address %d.%d.%d.%d ",
            pFrame_p->aSenderProtocolAddress[0],
@@ -386,22 +375,22 @@ static void handleReply(tArpFrame* pFrame_p)
 
 The function handles an ARP Request frame by sending the corresponding ARP reply.
 
-\param  pFrame_p    Pointer to ARP frame
+\param[in]      pFrame_p            Pointer to ARP frame
 
 \return The function returns 0 if the ARP request has been answered successfully,
         otherwise -1.
 */
 //------------------------------------------------------------------------------
-static int handleRequest(tArpFrame* pFrame_p)
+static int handleRequest(const tArpFrame* pFrame_p)
 {
     int ret = 0;
 
     // Reply if the request is addressing us
     if (memcmp(pFrame_p->aTargetProtocolAddress, arpInstance_l.aIpAddr, ARP_PROADDR_LENGTH) == 0)
     {
-        tArpFrame   frameBuffer;
-        tArpFrame*  pFrame = &frameBuffer;
-        tArpFrame*  pRxFrame = pFrame_p;
+        tArpFrame           frameBuffer;
+        tArpFrame*          pFrame = &frameBuffer;
+        const tArpFrame*    pRxFrame = pFrame_p;
 
         // Copy ARP frame template to frame buffer
         memcpy(pFrame, &arpInstance_l.frameTemplate, sizeof(tArpFrame));

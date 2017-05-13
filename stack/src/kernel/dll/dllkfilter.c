@@ -11,7 +11,7 @@ This file contains the functions to setup the edrv filter structures.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static void setupSoaStatusReqFilter(tEdrvFilter* pFilter_p,
 static void setupSoaNmtReqFilter(tEdrvFilter* pFilter_p,
                                  UINT nodeId_p,
                                  tEdrvTxBuffer* pBuffer_p);
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
 static void setupSoaSyncReqFilter(tEdrvFilter* pFilter_p,
                                   UINT nodeId_p,
                                   tEdrvTxBuffer* pBuffer_p);
@@ -106,7 +106,9 @@ static void setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p,
                                     UINT nodeId_p,
                                     tEdrvTxBuffer* pBuffer_p);
 #if defined(CONFIG_INCLUDE_VETH)
-static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p);
+static void setupVethUnicast(tEdrvFilter* pFilter_p,
+                             const UINT8* pMacAdrs_p,
+                             BOOL fEnable_p);
 static void setupVethBroadcast(tEdrvFilter* pFilter_p, BOOL fEnable_p);
 #endif
 
@@ -143,7 +145,7 @@ void dllkfilter_setupFilters(void)
     setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NMTREQ],
                          dllkInstance_g.dllConfigParam.nodeId,
                          &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ]);
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     setupSoaSyncReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ],
                           dllkInstance_g.dllConfigParam.nodeId,
                           &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
@@ -153,9 +155,9 @@ void dllkfilter_setupFilters(void)
                             &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
 #if defined(CONFIG_INCLUDE_VETH)
     setupVethUnicast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_UNICAST],
-                     edrv_getMacAddr(), TRUE);
-    setupVethBroadcast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_BROADCAST],
-                       TRUE);
+                     edrv_getMacAddr(),
+                     TRUE);
+    setupVethBroadcast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_BROADCAST], TRUE);
 #endif
 }
 
@@ -165,13 +167,16 @@ void dllkfilter_setupFilters(void)
 
 The function sets up a PRes filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  fEnable_p       Flag determines if filter is enabled or disabled.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      fEnable_p           Flag determines if filter is enabled or disabled.
 
 */
 //------------------------------------------------------------------------------
 void dllkfilter_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
 {
+    // Check parameter validity
+    ASSERT(pFilter_p != NULL);
+
     ami_setUint48Be(&pFilter_p->aFilterValue[0], C_DLL_MULTICAST_PRES);
     ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
     ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
@@ -187,16 +192,23 @@ void dllkfilter_setupPresFilter(tEdrvFilter* pFilter_p, BOOL fEnable_p)
 
 The function sets up an PReq filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
-\param  pMacAdrs_p      Pointer to mac address of node.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
+\param[in]      pMacAdrs_p          Pointer to mac address of node.
 
 */
 //------------------------------------------------------------------------------
-void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
-                                tEdrvTxBuffer* pBuffer_p, UINT8* pMacAdrs_p)
+void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p,
+                                UINT nodeId_p,
+                                tEdrvTxBuffer* pBuffer_p,
+                                const UINT8* pMacAdrs_p)
 {
+    // Check parameter validity
+    ASSERT(pFilter_p != NULL);
+    ASSERT(pBuffer_p != NULL);
+    ASSERT(pMacAdrs_p != NULL);
+
     OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
     ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
     ami_setUint16Be(&pFilter_p->aFilterValue[12], C_DLL_ETHERTYPE_EPL);
@@ -222,7 +234,7 @@ void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p, UINT nodeId_p,
 
 The function sets up an ASnd filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
 
 */
 //------------------------------------------------------------------------------
@@ -241,7 +253,7 @@ static void setupAsndFilter(tEdrvFilter* pFilter_p)
 
 The function sets up an SoC filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
 
 */
 //------------------------------------------------------------------------------
@@ -258,7 +270,7 @@ static void setupSocFilter(tEdrvFilter* pFilter_p)
 
 The function sets up an SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
 
 */
 //------------------------------------------------------------------------------
@@ -275,9 +287,9 @@ static void setupSoaFilter(tEdrvFilter* pFilter_p)
 
 The function sets up an IdentReq SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
 
 */
 //------------------------------------------------------------------------------
@@ -310,9 +322,9 @@ static void setupSoaIdentReqFilter(tEdrvFilter* pFilter_p,
 
 The function sets up an StatusReq SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
 
 */
 //------------------------------------------------------------------------------
@@ -345,9 +357,9 @@ static void setupSoaStatusReqFilter(tEdrvFilter* pFilter_p,
 
 The function sets up an NmtReq SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
 
 */
 //------------------------------------------------------------------------------
@@ -361,7 +373,7 @@ static void setupSoaNmtReqFilter(tEdrvFilter* pFilter_p,
     ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
     ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypeSoa);
 #if defined(CONFIG_INCLUDE_MASND)
-    // Ignore bit4 of message type to react on both Asnd and AInv frames
+    // Ignore bit4 of message type to react on both ASnd and AInv frames
     ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xF7);
 #else
     ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
@@ -375,16 +387,16 @@ static void setupSoaNmtReqFilter(tEdrvFilter* pFilter_p,
 }
 
 
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Setup SoA/SyncReq filter
 
 The function sets up an SyncReq SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
 
 */
 //------------------------------------------------------------------------------
@@ -418,9 +430,9 @@ static void setupSoaSyncReqFilter(tEdrvFilter* pFilter_p,
 
 The function sets up an Unspecific SoA filter in the Edrv filter structure.
 
-\param  pFilter_p       Pointer to Edrv filte structure.
-\param  nodeId_p        Node ID for which to set the filter.
-\param  pBuffer_p       Pointer to TX buffer.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      nodeId_p            Node ID for which to set the filter.
+\param[in]      pBuffer_p           Pointer to TX buffer.
 
 */
 //------------------------------------------------------------------------------
@@ -455,13 +467,15 @@ static void setupSoaUnspecReqFilter(tEdrvFilter* pFilter_p,
 The function sets up an virtual Ethernet unicast filter in the Edrv filter
 structure.
 
-\param  pFilter_p       Pointer to Edrv filter structure.
-\param  pMacAdrs_p      Pointer to mac address of node.
-\param  fEnable_p       Flag determines if filter is enabled or disabled.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      pMacAdrs_p          Pointer to MAC address of node.
+\param[in]      fEnable_p           Flag determines if filter is enabled or disabled.
 
 */
 //------------------------------------------------------------------------------
-static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEnable_p)
+static void setupVethUnicast(tEdrvFilter* pFilter_p,
+                             const UINT8* pMacAdrs_p,
+                             BOOL fEnable_p)
 {
     OPLK_MEMCPY(&pFilter_p->aFilterValue[0], pMacAdrs_p, 6);
     ami_setUint48Be(&pFilter_p->aFilterMask[0], C_DLL_MACADDR_MASK);
@@ -477,8 +491,8 @@ static void setupVethUnicast(tEdrvFilter* pFilter_p, UINT8* pMacAdrs_p, BOOL fEn
 The function sets up an virtual Ethernet broadcast filter in the Edrv filter
 structure.
 
-\param  pFilter_p       Pointer to Edrv filter structure.
-\param  fEnable_p       Flag determines if filter is enabled or disabled.
+\param[in,out]  pFilter_p           Pointer to Edrv filter structure.
+\param[in]      fEnable_p           Flag determines if filter is enabled or disabled.
 
 */
 //------------------------------------------------------------------------------

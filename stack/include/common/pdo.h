@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2012, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_pdo_H_
 #define _INC_common_pdo_H_
 
@@ -47,12 +46,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #define PDO_SHMEM_NAME                  "/pdoShm"
 
-// invalid PDO-NodeId
-#define PDO_INVALID_NODE_ID             0xFF
-// NodeId for PReq RPDO
-#define PDO_PREQ_NODE_ID                0x00
-// NodeId for PRes TPDO
-#define PDO_PRES_NODE_ID                0x00
+#define PDO_INVALID_NODE_ID             0xFF    // invalid PDO-NodeId
+#define PDO_PREQ_NODE_ID                0x00    // NodeId for PReq RPDO
+#define PDO_PRES_NODE_ID                0x00    // NodeId for PRes TPDO
 
 //------------------------------------------------------------------------------
 // typedef

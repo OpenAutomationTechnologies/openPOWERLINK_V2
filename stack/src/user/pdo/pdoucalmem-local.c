@@ -4,7 +4,7 @@
 
 \brief  PDO user CAL shared-memory module using local memory
 
-This file contains an implementation for the user PDO CAL shared-memroy module
+This file contains an implementation for the user PDO CAL shared-memory module
 which uses locally allocated memory. The shared memory is used to transfer PDO
 data between user and kernel layer. This implementation is used if user and
 kernel layer run in the same domain and can both access the local memory.
@@ -13,7 +13,7 @@ kernel layer run in the same domain and can both access the local memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-extern BYTE*           pdokcalmem_pPdo_g;
+extern UINT8*   pdokcalmem_pPdo_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -131,22 +131,28 @@ tOplkError pdoucal_closeMem(void)
 
 The function allocates shared memory for the kernel needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p,
+                               UINT8** ppPdoMem_p)
 {
     UNUSED_PARAMETER(memSize_p);
+
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
 
     /* be sure that kernel memory is allocated! */
     while (pdokcalmem_pPdo_g == NULL)
         target_msleep(1);
+
     *ppPdoMem_p = pdokcalmem_pPdo_g;
+
     return kErrorOk;
 }
 
@@ -155,17 +161,17 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, BYTE** ppPdoMem_p)
 \brief  Free PDO shared memory
 
 The function frees shared memory which was allocated in the kernel layer for
-transfering the PDOs.
+transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
@@ -179,4 +185,4 @@ tOplkError pdoucal_freeMem(BYTE* pMem_p, size_t memSize_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

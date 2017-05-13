@@ -38,7 +38,7 @@ __CFG_KERNEL_DIR__.
 To build the kernel driver (e.g. for a MN using the Intel 82573 network interface):
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_edrv/build
-      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV=82573 ..
+      > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE ..
       > make
       > make install
 
@@ -55,7 +55,22 @@ To build the kernel PCIe interface driver:
       > make
       > make install
 
-The default driver installation path is: `<openPOWERLINK_DIR>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
+The default driver installation path is: `<openPOWERLINK_dir>/bin/linux/<ARCH>/oplkdrv_kernelmodule_pcie`
+
+## Building a Linux Kernel Interface Driver for Zynq Hybrid Design {#sect_build_drivers_build_linux_zynq}
+
+To build the kernel space driver, the appropriate kernel sources must be installed
+on your system. The path to the kernel sources can be configured by
+__CFG_KERNEL_DIR__.
+
+To build the kernel interface driver for Zynq hybrid:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
+      > cmake -DCFG_OPLK_MN=TRUE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake
+      > make
+      > make install
+
+The default driver installation path is: `<openPOWERLINK_dir>/bin/linux/<ARCH>/oplkdrv_kernelmodule_zynq`
 
 ## Building a Windows NDIS driver {#sect_build_drivers_build_windows_ndis}
 
@@ -77,34 +92,55 @@ Open a Visual Studio command line and enter the following commands:
 
 * Build driver for Windows 7 (64 bit) in debug mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
 
 * Build driver for Windows 7 (64 bit) in release mode
 
-      > cd <openPOWERLINK_directory>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
 
 `Platform` and `Configuration` parameters can be modified to compile the driver for
 a different platform and Windows version.
 
-The default driver installation path is: `<openPOWERLINK_DIR>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
+The default driver installation path is: `<openPOWERLINK_dir>\bin\windows\<ARCH>\drv_ndis_[pcie;intermediate]_package`
 
-## Building a PCP daemon for Microblaze {#sect_build_drivers_build_daemon_microblaze}
+## Building a PCP daemon for Microblaze (ISE) {#sect_build_drivers_build_daemon_microblazeise}
 
 This section will explain the steps to build the PCP daemon for a Microblaze
-softcore processor in a dual processor design.
-The PCP daemon uses the driver library for the dual processor shared memory interface
-(`liboplkmndrv-dualprocshm`).
+softcore processor with host interface by using the ISE toolchain.
+The PCP daemon uses the driver library for the host interface (`liboplkmndrv-hostif`).
 
-To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL) using shared memory interface):
+To build the PCP daemon:
 
       > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
       > make
       > make install
+
+## Building a PCP daemon for Microblaze (Vivado) {#sect_build_drivers_build_daemon_microblaze}
+
+This section will explain the steps to build the PCP daemon for a Microblaze
+softcore processor with host interface by using the Vivado toolchain.
+The PCP daemon uses the driver library for the host interface (`liboplkmndrv-dualprocshm`).
+
+To build the PCP daemon:
+
+  * On a Windows host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > make
+        > make install
+
+  * On a Linux host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > make
+        > make install
 
 # Configuration Options {#sect_build_drivers_options}
 
@@ -154,35 +190,38 @@ To build the PCP daemon (e.g. for Microblaze in Zynq SoC's programming logic (PL
   If enabled, the openPOWERLINK stack will be compiled with MN functionality,
   otherwise it will be compiled only with CN functionality.
 
-- **CFG_POWERLINK_EDRV**
+- **CFG_POWERLINK_EDRV_<driver name>**
 
   Selects the Ethernet driver used for the kernel-based stack and demos.
   Valid options are:
 
-  - **8139**:  Realtek 8139-based network interface cards (100 MBit/s)
-  - **8111**:  Realtek 8111/8168 network interface cards (1 GBit/s)
+  - **8139**: Realtek 8139-based network interface cards (100 MBit/s)
+  - **8111**: Realtek 8111/8168 network interface cards (1 GBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
   - **82573**: Intel 82573-based network interface cards (1 GBit/s)
-  - **i210**:  Intel I210-based network interface cards (1 GBit/s)
-  - **emacps**:Zynq Emac network interface controller (1 GBit/s)
+  - **i210**: Intel I210-based network interface cards (1 GBit/s)
+  - **emacps**: Zynq Emac network interface controller (1 GBit/s)
 
-## PCP daemon on Microblaze {#sect_build_drivers_options_pcp_daemon}
+  Several kernel drivers can be built at once, just append another
+  CFG_POWERLINK_EDRV_<driver name> to the cmake command:
+
+  > cmake -DCFG_OPLK_MN=TRUE -DCFG_POWERLINK_EDRV_82573=TRUE -DCFG_POWERLINK_EDRV_I210=TRUE
+
+  __NOTE__: Only one of them can be loaded at runtime since openPOWERLINK doesn't support
+  several stack instances.
+
+## PCP daemon on Microblaze (ISE) {#sect_build_drivers_options_pcp_daemon}
 
 Following options are available for a PCP daemon of a dual processor design:
 
 - **CFG_HW_LIB_DIR**
   Path to the hardware platform installation directory your daemon should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 
   Determines which driver library of the stack should be linked with the daemon.
   The following options are available and automatically (implicitly) pre-selected:
-
-  - __PCP Daemon Dual-Proc__
-
-    The openPOWERLINK user part will be running on a separate processor
-    communicating with the daemon through shared memory (dual processor).
 
   - __host-interface__
 

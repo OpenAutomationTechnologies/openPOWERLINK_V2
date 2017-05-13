@@ -13,7 +13,7 @@ The sync module is responsible to synchronize the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -150,6 +150,7 @@ tOplkError timesynckcal_sendSyncEvent(void)
         instance_l.fSync = TRUE;
         wake_up_interruptible(&instance_l.syncWaitQueue);
     }
+
     return kErrorOk;
 }
 
@@ -166,21 +167,22 @@ The function waits for a sync event
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_waitSyncEvent(void)
 {
-    int                 ret;
-    int                 timeout = 1000 * HZ / 1000;
+    int ret;
+    int timeout = 1000 * HZ / 1000;
 
     if (!instance_l.fInitialized)
         return kErrorNoResource;
 
     ret = wait_event_interruptible_timeout(instance_l.syncWaitQueue,
-                                           instance_l.fSync == TRUE, timeout);
+                                           (instance_l.fSync == TRUE),
+                                           timeout);
     if (ret == 0)
         return kErrorRetry;
 
     instance_l.fSync = FALSE;
+
     return kErrorOk;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -188,7 +190,7 @@ tOplkError timesynckcal_waitSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               Enable/disable sync event
+\param[in]      fEnable_p           Enable/disable sync event
 
 \return The function returns a tOplkError error code.
 
@@ -198,8 +200,28 @@ The function enables sync events.
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
+
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
+{
+    // Not implemented yet
+    return NULL;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -207,4 +229,4 @@ tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

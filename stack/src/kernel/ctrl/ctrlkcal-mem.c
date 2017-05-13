@@ -11,7 +11,7 @@ a shared memory block for communication with the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,16 +102,18 @@ the memory block access functions.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_init(void)
 {
-    tCtrlBuf        ctrl;
-    tOplkError      ret = kErrorOk;
+    tCtrlBuf    ctrl;
+    tOplkError  ret;
 
-    if ((ret = ctrlcal_init(sizeof(tCtrlBuf))) != kErrorOk)
+    ret = ctrlcal_init(sizeof(tCtrlBuf));
+    if (ret != kErrorOk)
         return kErrorNoResource;
 
     OPLK_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
     ctrl.magic = CTRL_MAGIC;
     ctrl.status = kCtrlStatusReady;
     ctrlcal_writeData(0, &ctrl, sizeof(tCtrlBuf));
+
     return kErrorOk;
 }
 
@@ -128,7 +130,7 @@ the memory block access functions.
 //------------------------------------------------------------------------------
 void ctrlkcal_exit(void)
 {
-    tCtrlBuf        ctrl;
+    tCtrlBuf    ctrl;
 
     OPLK_MEMSET(&ctrl, 0, sizeof(tCtrlBuf));
     ctrlcal_writeData(0, &ctrl, sizeof(tCtrlBuf));
@@ -158,7 +160,7 @@ tOplkError ctrlkcal_process(void)
 The function reads a control command stored by the user in the control memory
 block to execute a kernel control function.
 
-\param  pCmd_p            The command to be executed.
+\param[out]     pCmd_p              The command to be executed.
 
 \return The function returns a tOplkError error code.
 
@@ -170,11 +172,13 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
     tCtrlCmdType    cmd;
     tOplkError      ret;
 
+    // Check parameter validity
+    ASSERT(pCmd_p != NULL);
+
     ret = ctrlcal_readData(&cmd, offsetof(tCtrlBuf, ctrlCmd.cmd), sizeof(tCtrlCmdType));
     if (ret == kErrorOk)
-    {
         *pCmd_p = cmd;
-    }
+
     return ret;
 }
 
@@ -185,14 +189,14 @@ tOplkError ctrlkcal_getCmd(tCtrlCmdType* pCmd_p)
 The function sends the return value of an executed command to the user stack
 by storing it in the control memory block.
 
-\param  retval_p            Return value to send.
+\param[in]      retval_p            Return value to send.
 
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
 void ctrlkcal_sendReturn(UINT16 retval_p)
 {
-    tCtrlCmd        ctrlCmd;
+    tCtrlCmd    ctrlCmd;
 
     ctrlCmd.cmd = 0;
     ctrlCmd.retVal = retval_p;
@@ -206,7 +210,7 @@ void ctrlkcal_sendReturn(UINT16 retval_p)
 
 The function stores the status of the kernel stack in the control memory block.
 
-\param  status_p                Status to set.
+\param[in]      status_p            Status to set.
 
 \ingroup module_ctrlkcal
 */
@@ -218,13 +222,29 @@ void ctrlkcal_setStatus(tCtrlKernelStatus status_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get the kernel stack status
+
+The function gets the status of the kernel stack.
+
+\return The function returns the status of the kernel stack.
+
+\ingroup module_ctrlkcal
+*/
+//------------------------------------------------------------------------------
+tCtrlKernelStatus ctrlkcal_getStatus(void)
+{
+    return kCtrlStatusUnavailable;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Update the heartbeat counter
 
 The function updates its heartbeat counter in the control memory block which
 can be used by the user stack to detect if the kernel stack is still running.
 
-\param  heartbeat_p         Heartbeat counter to store in the control memory
-                            block.
+\param[in]      heartbeat_p         Heartbeat counter to store in the control memory
+                                    block.
 \ingroup module_ctrlkcal
 */
 //------------------------------------------------------------------------------
@@ -241,15 +261,19 @@ The function stores the openPOWERLINK initialization parameter so that they
 can be accessed by the user stack. It is used to notify the user stack about
 parameters modified in the kernel stack.
 
-\param  pInitParam_p        Specifies where to read the init parameters.
+\param[in]      pInitParam_p        Specifies where to read the init parameters.
 
 \ingroup module_ctrlkcal
 
 */
 //------------------------------------------------------------------------------
-void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
+void ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
-    ctrlcal_writeData(offsetof(tCtrlBuf, initParam), pInitParam_p,
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    ctrlcal_writeData(offsetof(tCtrlBuf, initParam),
+                      pInitParam_p,
                       sizeof(tCtrlInitParam));
 }
 
@@ -259,7 +283,7 @@ void ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p)
 
 The function reads the initialization parameter from the user stack.
 
-\param  pInitParam_p        Specifies where to store the read init parameters.
+\param[out]     pInitParam_p        Specifies where to store the read init parameters.
 
 \return The function returns a tOplkError error code.
 
@@ -268,7 +292,11 @@ The function reads the initialization parameter from the user stack.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
-    return ctrlcal_readData(pInitParam_p, offsetof(tCtrlBuf, initParam),
+    // Check parameter validity
+    ASSERT(pInitParam_p != NULL);
+
+    return ctrlcal_readData(pInitParam_p,
+                            offsetof(tCtrlBuf, initParam),
                             sizeof(tCtrlInitParam));
 }
 
@@ -279,9 +307,9 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
 The function reads the file chunk descriptor and data from the file transfer
 buffer.
 
-\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
-\param  bufferSize_p    Size of buffer for storing the chunk data
-\param  pBuffer_p       Pointer to buffer for storing the chunk data
+\param[out]     pDesc_p             Pointer to buffer for storing the chunk descriptor
+\param[in]      bufferSize_p        Size of buffer for storing the chunk data
+\param[out]     pBuffer_p           Pointer to buffer for storing the chunk data
 
 \return The function returns a tOplkError code.
 
@@ -289,7 +317,8 @@ buffer.
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                  size_t bufferSize_p, UINT8* pBuffer_p)
+                                  size_t bufferSize_p,
+                                  UINT8* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(bufferSize_p);

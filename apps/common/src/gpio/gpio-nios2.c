@@ -11,7 +11,7 @@ applications.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -128,9 +128,9 @@ The function returns the node ID set by the node switches.
 //------------------------------------------------------------------------------
 UINT8 gpio_getNodeid(void)
 {
-    UINT8 nodeid;
+    UINT8   nodeid;
 
-#ifdef NODE_SWITCH_PIO_BASE
+#if defined(NODE_SWITCH_PIO_BASE)
     nodeid = IORD_ALTERA_AVALON_PIO_DATA(NODE_SWITCH_PIO_BASE);
 #else
     nodeid = 0;
@@ -150,17 +150,17 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8 key;
+    UINT32  input;
 
-#ifdef KEY_PIO_BASE
-    key = IORD_ALTERA_AVALON_PIO_DATA(KEY_PIO_BASE);
+#if defined(APP_PIO_BASE)
+    input = IORD_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
@@ -169,15 +169,15 @@ UINT8 gpio_getAppInput(void)
 
 The function sets the application outputs.
 
-\param  val_p               Determines the value to be set to the output
+\param[in]      val_p               Determines the value to be set to the output
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
 void gpio_setAppOutputs(UINT32 val_p)
 {
-#ifdef HEX_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(HEX_PIO_BASE, val_p);
+#if defined(APP_PIO_BASE)
+    IOWR_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE, val_p);
 #else
     UNUSED_PARAMETER(val_p);
 #endif

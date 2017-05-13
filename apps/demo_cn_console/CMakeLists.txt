@@ -2,7 +2,7 @@
 #
 # CMake file of CiA 401 CN console demo application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,17 @@
 PROJECT(demo_cn_console C)
 MESSAGE(STATUS "Configuring demo_cn_console")
 
-CMAKE_MINIMUM_REQUIRED (VERSION 2.8.7)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.7)
+
+# Set CMake Policy to suppress the warning in CMake version 3.3.x
+IF (POLICY CMP0043)
+    CMAKE_POLICY(SET CMP0043 OLD)
+ENDIF()
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/../common/cmake/options.cmake)
+
+OPTION(CFG_IP_STACK "Is an IP stack available (support of SDO/UDP)" OFF)
+OPTION(CFG_STORE_RESTORE "Support storing of OD in non-volatile memory (file system)" OFF)
 
 ################################################################################
 # Setup project files and definitions
@@ -49,6 +57,7 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlog.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
@@ -57,7 +66,26 @@ SET(DEMO_SOURCES
 
 INCLUDE_DIRECTORIES(
     ${DEMO_SOURCE_DIR}
+    ${OBJDICT_DIR}/${OBJDICT}
+    ${CONTRIB_SOURCE_DIR}
     )
+
+# PResChaining is not supported by non-openMAC targets
+#ADD_DEFINITIONS(-DCONFIG_DLL_PRES_CHAINING_CN)
+ADD_DEFINITIONS(-DNMT_MAX_NODE_ID=0)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_PDO)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_ASND)
+ADD_DEFINITIONS(-DCONFIG_INCLUDE_MASND)
+
+IF(CFG_IP_STACK)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_IP)
+    ADD_DEFINITIONS(-DCONFIG_INCLUDE_SDO_UDP)
+ENDIF(CFG_IP_STACK)
+
+IF(CFG_STORE_RESTORE)
+    ADD_DEFINITIONS(-DCONFIG_OBD_USE_STORE_RESTORE)
+ENDIF(CFG_STORE_RESTORE)
+
 
 ################################################################################
 # Setup compile definitions depending on configuration
@@ -97,6 +125,11 @@ ENDIF()
 SOURCE_GROUP("Demo Sources" FILES ${DEMO_SOURCES})
 SOURCE_GROUP("Architecture Specific Sources" FILES ${DEMO_ARCH_SOURCES})
 SOURCE_GROUP("openPOWERLINK Header Files" FILES ${OPLK_HEADERS})
+SOURCE_GROUP("Object Dictionary" FILES
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.c
+    ${COMMON_SOURCE_DIR}/obdcreate/obdcreate.h
+    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
+    )
 
 ################################################################################
 # Set the executable
@@ -115,5 +148,3 @@ TARGET_LINK_LIBRARIES(demo_cn_console ${ARCH_LIBRARIES})
 # Installation rules
 
 INSTALL(TARGETS demo_cn_console RUNTIME DESTINATION ${PROJECT_NAME})
-
-

@@ -239,7 +239,7 @@
  <parameter name="projectName">cn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1438676906994" />
+ <parameter name="timeStamp" value="1460362265479" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -291,6 +291,11 @@
    internal="pcp_0.powerlink_led"
    type="conduit"
    dir="end" />
+ <interface
+   name="openmac_0_pktactivity"
+   internal="openmac_0.pktActivity"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -339,6 +344,7 @@
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="tcmemSize" value="24576" />
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
@@ -443,7 +449,7 @@
   <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
-  <parameter name="gui_actEn" value="false" />
+  <parameter name="gui_actEn" value="true" />
   <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />

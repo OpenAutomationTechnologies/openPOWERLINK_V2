@@ -3,6 +3,7 @@
 # CMake file of openPOWERLINK application MN library with kernelspace interface
 #
 # Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,9 +33,6 @@
 SET(LIB_NAME "oplkmnapp-kernelintf")
 MESSAGE(STATUS "Configuring ${LIB_NAME}")
 
-# Select object dictionary
-SET(OBJDICT CiA302-4_MN)
-
 # Set type of library
 IF(CFG_WINDOWS_DLL)
     SET(LIB_TYPE "SHARED")
@@ -62,11 +60,11 @@ SET (LIB_SOURCES
 
 # Configure compile definitions
 ADD_DEFINITIONS(-DCONFIG_MN)
+ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
 
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     )
 
 # Group Source and Header files
@@ -96,10 +94,6 @@ SOURCE_GROUP("Source Files\\Architecture Source Files" FILES
 SOURCE_GROUP("Header Files\\External Header Files" FILES ${OPLK_HEADERS})
 SOURCE_GROUP("Header Files\\Internal Header Files" FILES ${STACK_HEADERS})
 SOURCE_GROUP("Header Files\\User Header Files" FILES ${USER_HEADERS})
-SOURCE_GROUP("Object Dictionary" FILES
-    ${OBJDICT_HEADERS}
-    ${OBJDICT_DIR}/${OBJDICT}/objdict.h
-    )
 
 # Define library and installation rules
 ADD_LIBRARY(${LIB_NAME} ${LIB_TYPE} ${LIB_SOURCES})

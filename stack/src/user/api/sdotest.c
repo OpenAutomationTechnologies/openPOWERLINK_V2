@@ -10,7 +10,7 @@ This file contains the implementation of the SDO test functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -80,13 +80,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-tOplkApiInitParam initParam;
+static tOplkApiInitParam    initParam_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestCom(tAsySdoCom* asySdoCom_p, UINT dataSize_p);
-static tOplkError oplkCbSdoTestSeq(tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
+static tOplkError oplkCbSdoTestCom(const tAsySdoCom* asySdoCom_p, UINT dataSize_p);
+static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,18 +102,18 @@ static tOplkError oplkCbSdoTestSeq(tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
 
 The function stores the init paramter struct for further use.
 
-\param   pInitParam_p            Pointer to the init parameters. The init
-                                 parameters must be set by the application.
+\param[in]      pInitParam_p        Pointer to the init parameters. The init
+                                    parameters must be set by the application.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
-void oplk_testSdoSetVal(tOplkApiInitParam* pInitParam_p)
+void oplk_testSdoSetVal(const tOplkApiInitParam* pInitParam_p)
 {
-
     /* reset init parameter*/
-    OPLK_MEMSET(&initParam, 0, sizeof(tOplkApiInitParam));
-    OPLK_MEMCPY(&initParam, pInitParam_p,
+    OPLK_MEMSET(&initParam_l, 0, sizeof(tOplkApiInitParam));
+    OPLK_MEMCPY(&initParam_l,
+                pInitParam_p,
                 min(sizeof(tOplkApiInitParam), (size_t)pInitParam_p->sizeOfInitParam));
 }
 
@@ -124,15 +124,15 @@ void oplk_testSdoSetVal(tOplkApiInitParam* pInitParam_p)
 The function initializes the SDO test command layer stack.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Stack was successfully initialized.
-\retval other                   Error occurred while initializing stack.
+\retval kErrorOk                    Stack was successfully initialized.
+\retval other                       Error occurred while initializing stack.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_testSdoComInit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = sdotestcom_init(oplkCbSdoTestCom);
 
@@ -146,15 +146,15 @@ tOplkError oplk_testSdoComInit(void)
 The function initializes the SDO test sequence layer stack.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                Stack was successfully initialized.
-\retval Other                   Error occurred while initializing stack.
+\retval kErrorOk                    Stack was successfully initialized.
+\retval Other                       Error occurred while initializing stack.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_testSdoSeqInit(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = sdotestseq_init(oplkCbSdoTestSeq);
 
@@ -167,54 +167,52 @@ tOplkError oplk_testSdoSeqInit(void)
 
 The function forwards the Send request to the SDO command testing layer.
 
-\param  targetNodeId_p          Node ID of target node
-\param  sdoType_p               Type of SDO lower layer (Asnd/Udp)
-\param  pSdoCom_p*              Pointer to SDO command layer frame
-\param  sdoSize_p               Size of SDO command layer frame
+\param[in]      targetNodeId_p      Node ID of target node
+\param[in]      sdoType_p           Type of SDO lower layer (ASnd/UDP)
+\param[in]      pSdoCom_p           Pointer to SDO command layer frame
+\param[in]      sdoSize_p           Size of SDO command layer frame
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                The function returns sucessfully if the request was forwarded.
-\retval Other                   Error occurred while sending the frame.
+\retval kErrorOk                    The function returns successfully if the request was forwarded.
+\retval Other                       Error occurred while sending the frame.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_testSdoComSend(UINT targetNodeId_p, tSdoType sdoType_p,
-                               tAsySdoCom* pSdoCom_p, size_t sdoSize_p)
+tOplkError oplk_testSdoComSend(UINT targetNodeId_p,
+                               tSdoType sdoType_p,
+                               const tAsySdoCom* pSdoCom_p,
+                               size_t sdoSize_p)
 {
-    tOplkError    ret = kErrorOk;
+    tOplkError  ret;
 
     // Forward request to testing module
     ret = sdotestcom_sendFrame(targetNodeId_p, sdoType_p, pSdoCom_p, sdoSize_p);
     if (ret != kErrorOk)
-    {
         ret = kErrorInvalidOperation;
-    }
 
     return ret;
 }
 //------------------------------------------------------------------------------
 /**
-\brief  SDO command layer test detete connection
+\brief  SDO command layer test delete connection
 
 The functions deletes the SDO command testing layer.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                The function returns sucessfully if the connection was deleted.
-\retval kErrorInvalidOperation  Error occurred while deleting the command layer connection.
+\retval kErrorOk                    The function returns successfully if the connection was deleted.
+\retval kErrorInvalidOperation      Error occurred while deleting the command layer connection.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_testSdoComDelCon(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = sdotestcom_closeCon();
     if (ret != kErrorOk)
-    {
        ret = kErrorInvalidOperation;
-    }
 
     return ret;
 }
@@ -225,29 +223,29 @@ tOplkError oplk_testSdoComDelCon(void)
 
 The functions forwards the send request to the SDO sequence testing layer.
 
-\param  targetNodeId_p         Node ID of target node
-\param  sdoType_p              Type of SDO lower layer (Asnd/Udp)
-\param  pSdoSeq_p*             Pointer to SDO sequence layer frame
-\param  sdoSize_p              Size of SDO sequence layer frame
+\param[in]      targetNodeId_p      Node ID of target node
+\param[in]      sdoType_p           Type of SDO lower layer (ASnd/UDP)
+\param[in]      pSdoSeq_p           Pointer to SDO sequence layer frame
+\param[in]      sdoSize_p           Size of SDO sequence layer frame
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                The function returns sucessfully if the request was forwarded.
-\retval Other                   Error occurred while sending the frame.
+\retval kErrorOk                    The function returns successfully if the request was forwarded.
+\retval Other                       Error occurred while sending the frame.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_testSdoSeqSend(UINT targetNodeId_p, tSdoType sdoType_p,
-                               tAsySdoSeq* pSdoSeq_p, size_t sdoSize_p)
+tOplkError oplk_testSdoSeqSend(UINT targetNodeId_p,
+                               tSdoType sdoType_p,
+                               const tAsySdoSeq* pSdoSeq_p,
+                               size_t sdoSize_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     // Forward request to testing module
     ret = sdotestseq_sendFrame(targetNodeId_p, sdoType_p, pSdoSeq_p, sdoSize_p);
     if (ret != kErrorOk)
-    {
        ret = kErrorInvalidOperation;
-    }
 
     return ret;
 }
@@ -259,21 +257,19 @@ tOplkError oplk_testSdoSeqSend(UINT targetNodeId_p, tSdoType sdoType_p,
 The function deletes the SDO sequence testing layer.
 
 \return The function returns a \ref tOplkError error code.
-\retval kErrorOk                The function returns sucessfully if the connection was deleted.
-\retval kErrorInvalidOperation  Error occurred while deleting the sequence layer connection.
+\retval kErrorOk                    The function returns successfully if the connection was deleted.
+\retval kErrorInvalidOperation      Error occurred while deleting the sequence layer connection.
 
 \ingroup module_sdotest
 */
 //------------------------------------------------------------------------------
 tOplkError oplk_testSdoSeqDelCon(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = sdotestseq_closeCon();
     if (ret != kErrorOk)
-    {
        ret = kErrorInvalidOperation;
-    }
 
     return ret;
 }
@@ -292,25 +288,26 @@ tOplkError oplk_testSdoSeqDelCon(void)
 
 Callback function for SDO command layer test module.
 
-\param  pAsySdoCom_p            Pointer to SDO command layer frame
-\param  dataSize_p              Size of SDO command layer frame
+\param[in]      pAsySdoCom_p        Pointer to SDO command layer frame
+\param[in]      dataSize_p          Size of SDO command layer frame
 
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestCom(tAsySdoCom* pAsySdoCom_p, UINT dataSize_p)
+static tOplkError oplkCbSdoTestCom(const tAsySdoCom* pAsySdoCom_p,
+                                   UINT dataSize_p)
 {
-    tOplkError       ret = kErrorOk;
-    tOplkApiEventArg eventArg;
+    tOplkError          ret;
+    tOplkApiEventArg    eventArg;
 
-    eventArg.receivedSdoCom.pAsySdoCom = pAsySdoCom_p;
+    eventArg.receivedSdoCom.pAsySdoCom = (tAsySdoCom*)pAsySdoCom_p;
     eventArg.receivedSdoCom.dataSize = dataSize_p;
 
-    ret = initParam.pfnCbEvent(kOplkApiEventReceivedSdoCom, &eventArg, initParam.pEventUserArg);
+    ret = initParam_l.pfnCbEvent(kOplkApiEventReceivedSdoCom,
+                                 &eventArg,
+                                 initParam_l.pEventUserArg);
     if (ret != kErrorOk)
-    {
         ret = kErrorInvalidEvent;
-    }
 
     return ret;
 }
@@ -321,25 +318,26 @@ static tOplkError oplkCbSdoTestCom(tAsySdoCom* pAsySdoCom_p, UINT dataSize_p)
 
 Callback function for SDO command layer test module.
 
-\param  pAsySdoSeq_p            Pointer to SDO sequence layer frame
-\param  dataSize_p              Size of SDO sequence layer frame
+\param[in]      pAsySdoSeq_p        Pointer to SDO sequence layer frame
+\param[in]      dataSize_p          Size of SDO sequence layer frame
 
 \return The function returns a \ref tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestSeq(tAsySdoSeq* pAsySdoSeq_p, UINT dataSize_p)
+static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* pAsySdoSeq_p,
+                                   UINT dataSize_p)
 {
-    tOplkError       ret = kErrorOk;
-    tOplkApiEventArg eventArg;
+    tOplkError          ret = kErrorOk;
+    tOplkApiEventArg    eventArg;
 
-    eventArg.receivedSdoSeq.pAsySdoSeq = pAsySdoSeq_p;
+    eventArg.receivedSdoSeq.pAsySdoSeq = (tAsySdoSeq*)pAsySdoSeq_p;
     eventArg.receivedSdoSeq.dataSize = dataSize_p;
 
-    ret = initParam.pfnCbEvent(kOplkApiEventReceivedSdoSeq, &eventArg, initParam.pEventUserArg);
+    ret = initParam_l.pfnCbEvent(kOplkApiEventReceivedSdoSeq,
+                                 &eventArg,
+                                 initParam_l.pEventUserArg);
     if (ret != kErrorOk)
-    {
         ret = kErrorInvalidEvent;
-    }
 
     return ret;
 }

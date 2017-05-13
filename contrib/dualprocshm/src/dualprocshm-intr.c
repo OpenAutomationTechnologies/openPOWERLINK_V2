@@ -12,6 +12,7 @@ the dual processor library.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <dualprocshm.h>
+#include <trace/trace.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -49,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TARGET_MAX_INTERRUPTS    4                              ///< Max interrupts supported
+#define TARGET_MAX_INTERRUPTS   4                   ///< Max interrupts supported
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -62,12 +64,12 @@ interface.
 */
 typedef struct sDualProcShmIntrReg
 {
-    UINT16    irqEnable;                                        ///< Enable IRQs
+    UINT16  irqEnable;                              ///< Enable IRQs
     union
     {
-        volatile UINT16    irqSet;                              ///< Set IRQ (Pcp)
-        volatile UINT16    irqAck;                              ///< Acknowledge IRQ (Host)
-        volatile UINT16    irqPending;                          ///< Pending IRQ
+        volatile UINT16     irqSet;                 ///< Set IRQ (PCP)
+        volatile UINT16     irqAck;                 ///< Acknowledge IRQ (Host)
+        volatile UINT16     irqPending;             ///< Pending IRQ
     } irq;
 } tDualProcShmIntrReg;
 
@@ -79,8 +81,8 @@ for the local instance.
 */
 typedef struct
 {
-    tTargetIrqCb           apfnIrqCb[TARGET_MAX_INTERRUPTS];    ///< User applications interrupt callbacks
-    tDualProcShmIntrReg*   pIntrReg;                            ///< Pointer to interrupt register
+    tTargetIrqCb            apfnIrqCb[TARGET_MAX_INTERRUPTS];   ///< User applications interrupt callbacks
+    tDualProcShmIntrReg*    pIntrReg;                           ///< Pointer to interrupt register
 } tDualProcShmIntrInst;
 
 //------------------------------------------------------------------------------
@@ -98,7 +100,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tDualProcShmIntrInst    intrInst_l;
+static tDualProcShmIntrInst     intrInst_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -112,7 +114,7 @@ static void targetInterruptHandler(void* pArg_p) SECTION_DUALPROCSHM_IRQ_HDL;
 The function registers the common platform interrupt handler and enables the
 interrupts.
 
-\param  pInstance_p      Driver instance
+\param[in]      pInstance_p         Driver instance
 
 \return The function returns a tDualprocReturn error code.
 
@@ -150,7 +152,7 @@ tDualprocReturn dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p)
 
 The function frees the interrupts which are registered before.
 
-\param  pInstance_p      Driver instance
+\param[in]      pInstance_p         Driver instance
 
 \return The function returns a tDualprocReturn error code.
 
@@ -176,9 +178,9 @@ tDualprocReturn dualprocshm_freeInterrupts(tDualprocDrvInstance pInstance_p)
 
 The function registers a interrupt handler for the specified interrupt.
 
-\param  pInstance_p      Driver instance
-\param  irqId_p          Interrupt ID
-\param  pfnIrqHandler_p  Interrupt handler
+\param[in]      pInstance_p         Driver instance
+\param[in]      irqId_p             Interrupt ID
+\param[in]      pfnIrqHandler_p     Interrupt handler
 
 \return The function returns a tDualprocReturn error code.
 
@@ -186,11 +188,13 @@ The function registers a interrupt handler for the specified interrupt.
 */
 //------------------------------------------------------------------------------
 tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
-                                            UINT8 irqId_p, tTargetIrqCb pfnIrqHandler_p)
+                                            UINT8 irqId_p,
+                                            tTargetIrqCb pfnIrqHandler_p)
 {
-    UINT16    irqEnableVal;
+    UINT16  irqEnableVal;
 
-    if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
+    if ((irqId_p >= TARGET_MAX_INTERRUPTS) ||
+        (pInstance_p == NULL))
         return kDualprocInvalidParameter;
 
     if (intrInst_l.pIntrReg == NULL)
@@ -220,9 +224,9 @@ tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
 
 The function enables the specified interrupt.
 
-\param  pInstance_p      Driver instance
-\param  irqId_p          Interrupt ID
-\param  fEnable_p        Enable if TRUE, disable if FALSE
+\param[in]      pInstance_p         Driver instance
+\param[in]      irqId_p             Interrupt ID
+\param[in]      fEnable_p           Enable if TRUE, disable if FALSE
 
 \return The function returns a tDualprocReturn error code.
 
@@ -230,11 +234,13 @@ The function enables the specified interrupt.
 */
 //------------------------------------------------------------------------------
 tDualprocReturn dualprocshm_enableIrq(tDualprocDrvInstance pInstance_p,
-                                      UINT8 irqId_p, BOOL fEnable_p)
+                                      UINT8 irqId_p,
+                                      BOOL fEnable_p)
 {
-    UINT16    irqEnableVal;
+    UINT16  irqEnableVal;
 
-    if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
+    if ((irqId_p >= TARGET_MAX_INTERRUPTS) ||
+        (pInstance_p == NULL))
         return kDualprocInvalidParameter;
 
     if (intrInst_l.pIntrReg == NULL)
@@ -272,21 +278,24 @@ tDualprocReturn dualprocshm_enableIrq(tDualprocDrvInstance pInstance_p,
 
 The function sets the specified interrupt.
 
-\param  pInstance_p      Driver instance
-\param  irqId_p          Interrupt ID.
-\param  fSet_p           Set if TRUE, clear if FALSE
+\param[in]      pInstance_p         Driver instance
+\param[in]      irqId_p             Interrupt ID.
+\param[in]      fSet_p              Set if TRUE, clear if FALSE
 
 \return The function returns a tDualprocReturn Error code.
 
 \ingroup module_dualprocshm
 */
 //------------------------------------------------------------------------------
-tDualprocReturn dualprocshm_setIrq(tDualprocDrvInstance pInstance_p, UINT8 irqId_p, BOOL fSet_p)
+tDualprocReturn dualprocshm_setIrq(tDualprocDrvInstance pInstance_p,
+                                   UINT8 irqId_p,
+                                   BOOL fSet_p)
 {
-    UINT16    irqActive;
-    UINT16    irqEnable;
+    UINT16  irqActive;
+    UINT16  irqEnable;
 
-    if (irqId_p > TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
+    if ((irqId_p > TARGET_MAX_INTERRUPTS) ||
+        (pInstance_p == NULL))
         return kDualprocInvalidParameter;
 
     if (intrInst_l.pIntrReg == NULL)
@@ -329,14 +338,14 @@ It is used to handle multiple interrupt sources with a single interrupt line.
 This handler acknowledges the processed interrupt and calls the corresponding
 callbacks registered with dualprocshm_registerHandler().
 
-\param  pArg_p                  Driver instance passed during initialization.
+\param[in]      pArg_p              Driver instance passed during initialization.
 */
 //------------------------------------------------------------------------------
 static void targetInterruptHandler(void* pArg_p)
 {
-    UINT16    pendings;
-    UINT16    mask;
-    INT       i;
+    UINT16  pendings;
+    UINT16  mask;
+    INT     i;
 
     UNUSED_PARAMETER(pArg_p);
 

@@ -9,7 +9,7 @@ This file contains definitions for the event module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_event_H_
 #define _INC_oplk_event_H_
 
@@ -90,12 +89,12 @@ typedef enum
     kEventTypeNmtMnuNmtCmdSent      = 0x18,     ///< NMT command was actually sent (arg is pointer to tPlkFrame)
     kEventTypeApiUserDef            = 0x19,     ///< user-defined event (arg is user-defined pointer)
     kEventTypeDllkCycleFinish       = 0x1A,     ///< SoA sent, cycle finished (arg is pointer to nothing)
-    kEventTypePdokAlloc             = 0x20,     ///< alloc PDOs (arg is pointer to tPdoAllocationParam)
+    kEventTypePdokAlloc             = 0x20,     ///< allocate PDOs (arg is pointer to tPdoAllocationParam)
     kEventTypePdokConfig            = 0x21,     ///< configure PDO channel (arg is pointer to tPdoChannelConf)
     kEventTypeNmtMnuNodeCmd         = 0x22,     ///< trigger NMT node command (arg is pointer to tNmtNodeCommand)
     kEventTypeGw309AsciiReq         = 0x23,     ///< GW309ASCII request (arg is pointer to pointer of tGw309AsciiRequest)
     kEventTypeNmtMnuNodeAdded       = 0x24,     ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
-    kEventTypePdokSetupPdoBuf       = 0x25,     ///< dealloc PDOs
+    kEventTypePdokSetupPdoBuf       = 0x25,     ///< deallocate PDOs
     kEventTypeTimesynckControl      = 0x26,     ///< Enable/disable the timesync trigger (arg is pointer to BOOL)
     kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
     kEventTypeAsndNotRx             = 0x28,     ///< Didn't receive ASnd frame for DLL user module (arg is pointer to tDllAsndNotRx)
@@ -129,7 +128,7 @@ typedef enum
     kEventSinkNmtu                  = 0x06,     ///< events for Nmtu module
     kEventSinkErrk                  = 0x07,     ///< events for Error handler module
     kEventSinkErru                  = 0x08,     ///< events for Error signaling module
-    kEventSinkSdoAsySeq             = 0x09,     ///< events for asyncronous SDO Sequence Layer module
+    kEventSinkSdoAsySeq             = 0x09,     ///< events for asynchronous SDO Sequence Layer module
     kEventSinkNmtMnu                = 0x0A,     ///< events for NmtMnu module
     // Reserved (0x0B)
     kEventSinkPdokCal               = 0x0C,     ///< events for PdokCal module

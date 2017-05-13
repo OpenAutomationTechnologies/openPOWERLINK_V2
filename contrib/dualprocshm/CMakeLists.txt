@@ -2,7 +2,7 @@
 #
 # CMake file for dual processor shared memory libraries
 #
-# Copyright (c) 2014, Kalycito Infotech Private Limited.
+# Copyright (c) 2016, Kalycito Infotech Private Limited.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -104,6 +104,7 @@ SET(DUALPROCSHM_LIB_INCS
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/src
     ${OPLK_BASE_DIR}/stack/include
+    ${OPLK_BASE_DIR}/contrib
    )
 
 ########################################################################
@@ -118,8 +119,6 @@ ADD_DEFINITIONS(-DCONFIG_DUALPROCSHM_PCP=${CFG_DUALPROCSHM_PCP})
 ########################################################################
 IF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
     include(configure-microblaze)
-ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "zynqarm")
-    include(configure-zynqarm)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "alterac5arm")
     include(configure-c5socarm)
 ELSE()

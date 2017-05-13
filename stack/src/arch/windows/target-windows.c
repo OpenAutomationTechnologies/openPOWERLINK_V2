@@ -11,7 +11,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,42 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <common/target.h>
+
+//============================================================================//
+//            G L O B A L   D E F I N I T I O N S                             //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// module global vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// global function prototypes
+//------------------------------------------------------------------------------
+
+//============================================================================//
+//            P R I V A T E   D E F I N I T I O N S                           //
+//============================================================================//
+
+//------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local types
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// local function prototypes
+//------------------------------------------------------------------------------
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -83,7 +119,7 @@ tOplkError target_cleanup(void)
 The function makes the calling thread sleep until the number of specified
 milliseconds have elapsed.
 
-\param  milliSeconds_p      Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_target
 */
@@ -91,6 +127,59 @@ milliseconds have elapsed.
 void target_msleep(UINT32 milliSeconds_p)
 {
     Sleep(milliSeconds_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Enables global interrupt
+
+This function enables/disables global interrupts.
+
+\param[in]      fEnable_p           TRUE = enable interrupts
+                                    FALSE = disable interrupts
+
+\note This function is implemented empty for the sim target
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_enableGlobalInterrupt(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Set interrupt context flag
+
+This function enables/disables the interrupt context flag. The flag has to be
+set when the CPU enters the interrupt context. The flag has to be cleared when
+the interrupt context is left.
+
+\param[in]      fEnable_p           TRUE = enable interrupt context flag
+                                    FALSE = disable interrupt context flag
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+void target_setInterruptContextFlag(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief    Get interrupt context flag
+
+This function returns the interrupt context flag.
+
+\return The function returns the state of the interrupt context flag.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+BOOL target_getInterruptContextFlag(void)
+{
+    return FALSE;
 }
 
 //------------------------------------------------------------------------------
@@ -111,12 +200,27 @@ UINT32 target_getTickCount(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get current timestamp
+
+The function returns the current timestamp in nanoseconds.
+
+\return The function returns the timestamp in nanoseconds
+*/
+//------------------------------------------------------------------------------
+ULONGLONG target_getCurrentTimestamp(void)
+{
+    // Not implemented for this target
+    return 0ULL;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Set POWERLINK status/error LED
 
 The function sets the POWERLINK status/error LED.
 
-\param  ledType_p       Determines which LED shall be set/reset.
-\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+\param[in]      ledType_p           Determines which LED shall be set/reset.
+\param[in]      fLedOn_p            Set the addressed LED on (TRUE) or off (FALSE).
 
 \return The function returns a tOplkError error code.
 
@@ -138,17 +242,19 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 The function sets the IP address, subnetMask and MTU of an Ethernet
 interface.
 
-\param  ifName_p                Name of Ethernet interface.
-\param  ipAddress_p             IP address to set for interface.
-\param  subnetMask_p            Subnet mask to set for interface.
-\param  mtu_p                   MTU to set for interface.
+\param[in]      ifName_p            Name of Ethernet interface.
+\param[in]      ipAddress_p         IP address to set for interface.
+\param[in]      subnetMask_p        Subnet mask to set for interface.
+\param[in]      mtu_p               MTU to set for interface.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
+tOplkError target_setIpAdrs(const char* ifName_p,
+                            UINT32 ipAddress_p,
+                            UINT32 subnetMask_p,
                             UINT16 mtu_p)
 {
     UNUSED_PARAMETER(ifName_p);
@@ -156,8 +262,39 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
     UNUSED_PARAMETER(subnetMask_p);
     UNUSED_PARAMETER(mtu_p);
 
-    // Note: On a Windows system, the IP address for the VEth interface should be assigned
-    //       using network properties page.
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
 
     return kErrorOk;
 }
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set default gateway for Ethernet interface
+
+The function sets the default gateway of an Ethernet interface.
+
+\param[in]      defaultGateway_p    Default gateway to set.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
+{
+    UNUSED_PARAMETER(defaultGateway_p);
+
+    //Note: The given parameters are ignored because the application must set
+    //      these settings to the used IP stack by itself!
+
+    return kErrorOk;
+}
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

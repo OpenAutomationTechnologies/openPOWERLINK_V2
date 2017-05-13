@@ -16,6 +16,7 @@ user layer by completing pending IOCTLs.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -118,8 +119,10 @@ tOplkError timesynckcal_init(void)
 {
     NDIS_HANDLE    adapterHandle = ndis_getAdapterHandle();
 
-    pInstance_l = NdisAllocateMemoryWithTagPriority(adapterHandle, sizeof(tTimesynckCalInstance),
-                                                   TIMERSYNCK_TAG, NormalPoolPriority);
+    pInstance_l = NdisAllocateMemoryWithTagPriority(adapterHandle,
+                                                    sizeof(tTimesynckCalInstance),
+                                                    TIMERSYNCK_TAG,
+                                                    NormalPoolPriority);
 
     if (pInstance_l == NULL)
         return kErrorNoResource;
@@ -182,6 +185,7 @@ The function waits for a sync event
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_waitSyncEvent(void)
 {
+    tOplkError ret;
     INT        timeout = 1000;
     BOOLEAN    fRet;
 
@@ -189,17 +193,17 @@ tOplkError timesynckcal_waitSyncEvent(void)
         return kErrorNoResource;
 
     fRet = NdisWaitEvent(&pInstance_l->syncWaitEvent, timeout);
-
     if (fRet)
     {
         NdisResetEvent(&pInstance_l->syncWaitEvent);
+        ret = kErrorOk;
     }
     else
     {
-        return kErrorRetry;
+        ret = kErrorRetry;
     }
 
-    return kErrorOk;
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -208,7 +212,7 @@ tOplkError timesynckcal_waitSyncEvent(void)
 
 The function enables sync events.
 
-\param  fEnable_p               Enable/disable sync event.
+\param[in]      fEnable_p           Enable/disable sync event.
 
 \return The function returns a tOplkError error code.
 
@@ -218,8 +222,28 @@ The function enables sync events.
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
     UNUSED_PARAMETER(fEnable_p);
+
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesynckcal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
+{
+    // Not implemented yet
+    return NULL;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

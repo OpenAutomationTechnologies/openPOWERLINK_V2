@@ -70,19 +70,53 @@ The software project for the host can be found in `apps`:
   * B&R POWERLINK managing node
   * other POWERLINK managing node
 
-# Hardware setup of the TERASIC DE2-115 (INK) board {#sect_altera-cn_hardware}
+# Build process overview {#sect_altera-cn_build_overview}
+
+The following build steps need to be executed to run a CN demo:
+
+1. \ref sect_altera-cn_hardware
+
+    Preparation instructions for the demo board can be found in this section.
+
+2. \ref sect_altera-cn_build-hardware
+
+    If you have two TERASIC_DE2-115 boards available, you can consider to build the host processor example
+    design `cn-single-hostif-gpio` for the second board in combination with the PCP design
+    `cn-single-hostif-drv` running on the first board.\n
+    Otherwise, you need to choose only one of the described FPGA projects.
+
+3. \ref sect_altera-cn_makefile_build
+
+    - Build the host processor software
+
+        This only applies to the following FPGA projects:
+        - cn-single-gpio
+        - cn-dual-hostif-gpio
+        - cn-single-hostif-gpio
+
+    - Build the PCP driver software
+
+        This only applies to the following FPGA projects:
+        - cn-dual-hostif-gpio
+        - cn-single-hostif-drv
+
+4. \ref sect_altera-cn_run_demo
+
+    - Program the FPGA bitstream to the FPGA.
+    - Program the software to the FPGA board to run it on the FPGA soft-core(s).
+
+# Hardware setup {#sect_altera-cn_hardware}
+
+## Setup for the TERASIC_DE2-115 (INK) board
 
 In order to get a POWERLINK slave up and running the TERASIC DE2-115 has to be
 set up. This chapter explains how this board needs to be configured and connected
-to the network. \n
-
-## Setup for the TERASIC_DE2-115 (INK).
+to the network.
 
 For general information download the user guide for the board from the
 [TERASIC Website](http://www.terasic.com.tw/cgi-bin/page/archive.pl?Language=English&CategoryNo=139&No=502&PartNo=4).
 
-### PCP example hardware settings
-
+The following settings apply to all examples provided for this board:
 * Set the jumpers JP1, JP2, JP3, JP6 and JP7.
 * Set switch SW 19 to *Run*.
 * Connect the USB-Blaster to your PC via the USB-cable – see
@@ -100,8 +134,25 @@ common ground level.
 
 ![Settings for POWERLINK CN example designs on the INK Board.](\ref a_cn_devboard-terasic-de2-115.png)
 
-#### PCP with an external parallel interface
+\note The application inputs are mapped to object number 0x6000 with subindex
+0x01. The application outputs are mapped to object number 0x6200 with subindex 0x01.
 
+### PCP with GPIO interface
+
+GPIO FPGA pins are connected on the board to the application inputs and outputs.
+This example can be found in `hardware/boards/terasic-de2-115/cn-single-gpio`.\n
+No additional settings required.
+
+### PCP with an FPGA internal interface
+
+The PCP is connected internally in the FPGA to a host processor. The host processor is driving GPIO FPGA pins
+on the board which are connected to the application inputs and outputs.
+This example can be found in `hardware/boards/terasic-de2-115/cn-dual-hostif-gpio`.\n
+No additional settings required.
+
+### PCP with an external parallel interface
+
+The PCP is connected to a host processor via external FPGA pins.
 There are two hardware examples available in the `<OPLK_BASE_DIR>/hardware/boards/terasic-de2-115`
 
 * cn-single-hostif-drv \n
@@ -141,7 +192,27 @@ externally connecting the application processor.
 | HOSTIF_ACK_n  |            AH23     |   39          |  40          |  AG26      |  HOSTIF_IRQ_n         |
 
 
-## Create the FPGA configuration manually
+# Create the FPGA configuration  {#sect_altera-cn_build-hardware}
+
+An FPGA configuration has to be built to implement the driver CPU (PCP) and/or the host CPU (choose one from the table below).
+These FPGA configuration projects can be found in the folder `hardware/boards/terasic-de2-115`.
+The compilation result of the FPGA project will be a binary file (*.sof) which can be loaded into the FPGA.\n
+Afterwards, in section \ref sect_altera-cn_makefile_build a software has to be compiled for driver CPU (PCP) and/or the host CPU.
+
+| design               | host | driver |
+|:--------------------:|:----:|:------:|
+|cn-single-gpio        |x| |
+|cn-dual-hostif-gpio   |x|x|
+|cn-single-hostif-drv  | |x|
+|cn-single-hostif-gpio |x| |
+
+There are two options to build the FPGA binary file (choose one):
+1. Creating the FPGA configuration manually\n
+   This involves using the graphical Quartus tools.
+2. Creating the FPGA configuration by using make\n
+   This is a pure command line approach.
+
+## Option 1: Creating the FPGA configuration manually
 
 This section describes the generation of the FPGA bitstream by using the
 Altera toolchain.
@@ -172,7 +243,7 @@ steps need to be carried out:
   7. After the compilation is completed Quartus displays a message box.
 
 
-## Create the FPGA configuration by using make
+## Option 2: Create the FPGA configuration by using make
 
   1. Open the "Nios II Command Shell"
 
@@ -181,18 +252,7 @@ steps need to be carried out:
 
   3. Execute "make all"
 
-Depending on the example the FPGA configuration has to be built for the driver
-and/or for the host (see table below).
-
-| design               | host | driver |
-|:--------------------:|:----:|:------:|
-|cn-single-gpio        |x| |
-|cn-dual-hostif-gpio   |x| |
-|cn-single-hostif-drv  | |x|
-|cn-single-hostif-gpio |x| |
-
-
-# How to build the Makefiles for the example software {#sect_altera-cn_makefile_build}
+# Build the software  {#sect_altera-cn_makefile_build}
 
 In order to compile and initialize the build system of the desired design a set
 of scripts is provided. Each script builds a Makefile.
@@ -201,8 +261,10 @@ of scripts is provided. Each script builds a Makefile.
 
   2. Makefile for the driver processor software (not needed for the "cn-single-gpio" design).
 
+The Makefile is required for building the software with the "make" tools. After the Makefile
+was generated, the software (*.elf file) can be built.
 
-## How to build the Makefile for the host processor example software
+## Building the host processor software
 
   1. Open the "Nios II Command Shell"
 
@@ -232,7 +294,9 @@ of scripts is provided. Each script builds a Makefile.
 
     `$ make all`
 
-## How to build the Makefile for the driver example software
+## Building the PCP driver software
+
+\note This step is not needed for the "cn-single-gpio" design.
 
 1. Open the "Nios II Command Shell"
 
@@ -264,27 +328,27 @@ of scripts is provided. Each script builds a Makefile.
   `$ make all`
 
 
-## How to run the demo
+# How to run the demo {#sect_altera-cn_run_demo}
 
 The following build steps are necessary to run the demo on the evaluation board.
 
 1. Download the bitstream to the FPGA.
 
-2. Program the software to the soft-core on the FPGA.
+2. Program the software to the soft-core(s) on the FPGA.
 
 3. Connect your POWERLINK slave to a POWERLINK network.
 
 
-### Programm the bitstream to the FPGA
+## Program the bitstream to the FPGA
 
-There are two possibilities to program the bitstream to the FPGA:
+There are two options to program the bitstream to the FPGA (choose one):
 
   1. Using the Quartus II Programmer
 
   2. Using the Makefile
 
 
-#### Using the Quartus II Programmer
+### Option 1: Using the Quartus II Programmer
 
 The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirectory:
 
@@ -300,8 +364,9 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
     ![Open Quartus II Programmer *.sof file](\ref a_cn_qua_prog_o_sof.png)
 
+   - Press the start button
 
-#### Using the Makefile
+### Option 2: Using the Makefile
 
 1. Open the "Nios II Command Shell"
 
@@ -313,12 +378,15 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
   `<OPLK_BASE_DIR>/apps/demo_cn_embedded/build/altera-nios2`
 
-4. Run make download-bits to download the bitstream.
+3. Run make download-bits to download the bitstream.
 
   `$ make download-bits`
 
 
-### Program the software to the soft-core on the FPGA
+## Program the software to the soft-core on the FPGA
+
+\note If the FPGA project is `cn-dual-hostif-gpio`, you need to carry out
+      the following steps for the driver \b and the host (in this order).
 
 1. Open the "Nios II Command Shell"
 
@@ -330,9 +398,9 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
   `<OPLK_BASE_DIR>/apps/demo_cn_embedded/build/altera-nios2`
 
-4. Run make download-elf to download the software.
+3. Run make download-elf to download the software.
 
-  If you build the software in release mode use:
+  If the software was built in release mode use:
 
   - `$ make download-elf`
 
@@ -340,20 +408,23 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
   - `$ make download-elf && nios2-terminal -i <instance USB-Blaster (1 or 0)>`
 
+\note Workaround for testing without a Nios II license:\n
+      If you did not specify a valid Nios II IP-Core license, the terminal windows
+      must not be closed while executing the software in a second terminal window.
+      The Quartus programmer is the preferred way for programming the time limited *.sof.
+\par
+\note A comfortable way to use "make" is described in \ref sect_altera-cn-make-EDS
 
-### Connect your POWERLINK slave to a POWERLINK network
+## Connect your POWERLINK slave to a POWERLINK network
 
 1. Setup the POWERLINK network.
 
 2. Enjoy the running system.
 
-\note Workaround for testing without a Nios II license: If you did not specify a
-valid Nios II IP-Core license, the terminal windows must not be closed while
-executing the software in a second terminal window. The Quartus programmer is
-the preferred way for programming the time limited *.sof.
 
+# Additional information {#sect_altera-cn-addon}
 
-## How to import the project into the Nios II EDS
+## How to import the project into the Nios II EDS {#sect_altera-cn-imort-EDS}
 
 In order to be able to use the "Nios II Software Build Tools for Eclipse" the
 following steps are required for importing the SW reference project.
@@ -371,14 +442,14 @@ quartus/<hardware_design_name>.sopcinfo has been modified since the BSP was gene
 
 \note `Generate the BSP to update the Makefile, and then build again.`
 
-\note `To genrate from Eclipse:`
-  `1. Right-click the BSP project.`
+\note `To generate from Eclipse:`\n
+  `1. Right-click the BSP project.`\n
   `2. In the Nios II Menu, click Generate BSP.`
 
-\note `To generate form the command line:`
+\note `To generate from the command line:`\n
   `nios2-bsp-generate-file --settings=<settings file> --bsp-dir=<target bsp files directory>`
 
-### Import Direct IO example
+#### Import Direct IO example
 
 1. Open the Nios II EDS 13.0 SP1 Software Build Tools for Eclipse
 
@@ -394,7 +465,7 @@ Tools Project" and click "Next"
 directory.
 ![Import the pcp directIO project into the Nios II EDS](\ref a_cn_ec_import_app.png)
 
-6. Choose an approprate project name (e.g. "DirectIO") and set
+6. Choose an appropriate project name (e.g. "DirectIO") and set
 "MinGW Nios II GCC4"(Windows default) or "Linux Nios II GCC4"(Linux default) as toolchain.
 
 7. Click the "Finish" button.
@@ -405,7 +476,7 @@ from the Nios II EDS again, since it will parse those paths with the output of
 about the "make" build process.
 
 
-### Import dual processor example
+#### Import dual processor example
 
 The steps above have to be repeated in the same way when working with the dual
 processor example. In this case, the following directories have to be imported:
@@ -417,7 +488,7 @@ processor example. In this case, the following directories have to be imported:
 ![Import the host project into the Nios II EDS](\ref a_cn_ec_import_app.png)
 
 
-## Using make in Nios II EDS for software compilation
+### Using make in Nios II EDS for software compilation {#sect_altera-cn-make-EDS}
 
 It is handy to execute the Makefile from the "Nios II EDS". For these optional
 feature the "Make Target" view has to be visible. The following steps show how
@@ -444,16 +515,19 @@ table below. However, not all projects will support all listed make targets.
 |erase-epcs    |Erase the local EPCS flash device |
 |program-epcs  |Program the generated flash image to the local EPCS flash device |
 
-# How to write the program to local flash  {#sect_altera-cn_flash}
+## How to write the program to the flash memory  {#sect_altera-cn_flash}
 
-Requirement: Steps in the previous section *How to build the binaries* are
-completed.
+Requirement:\n
+Steps in the previous sections \ref sect_altera-cn_build-hardware and \ref sect_altera-cn_makefile_build are completed.
 
-1. After successfully building the design use the makefile to program the
-   flash:\n
+- Use the Makefile to program the flash:\n
    `$ make program-epcs`
 
-# Troubleshooting {#sect_altera-cn_trouble}
+   This command will store the FPGA bitstream and the software in the board's
+   flash memory. After the next power cycle the complete design will load
+   automatically from flash.
+
+## Troubleshooting {#sect_altera-cn_trouble}
 
 1. It is advised to clean all generated files after switching from one demo to
    the other.

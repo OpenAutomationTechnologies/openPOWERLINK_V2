@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK Linux userspace CN driver library
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -44,7 +44,7 @@ SET (LIB_SOURCES
      ${KERNEL_SOURCES}
      ${CTRL_KCAL_POSIXMEM_SOURCES}
      ${DLL_KCAL_CIRCBUF_SOURCES}
-     ${ERRHND_KCAL_LOCAL_SOURCES}
+     ${ERRHND_KCAL_POSIXMEM_SOURCES}
      ${EVENT_KCAL_LINUXUSER_SOURCES}
      ${PDO_KCAL_POSIXMEM_SOURCES}
      ${HARDWARE_DRIVER_LINUXUSER_SOURCES}
@@ -69,7 +69,6 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -f
 # Additional include directories
 INCLUDE_DIRECTORIES(
     .
-    ${OBJDICT_DIR}/${OBJDICT}
     )
 
 # Define library and installation rules

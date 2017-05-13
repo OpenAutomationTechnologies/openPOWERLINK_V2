@@ -8,7 +8,7 @@ This file defines openPOWERLINK default configuration values.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_defaultcfg_H_
 #define _INC_common_defaultcfg_H_
 
@@ -44,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 // Default configuration macros
-
+//------------------------------------------------------------------------------
 #ifndef CONFIG_DLLCAL_QUEUE
 #define CONFIG_DLLCAL_QUEUE                             CIRCBUF_QUEUE       // Configuration of DLLCAL queue: uses circular buffer per default
 #endif
@@ -102,18 +101,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    // MN should support generic Asnd frames, thus the maximum ID
-    // is set to a large value
-    #define C_DLL_MAX_ASND_SERVICE_IDS                  253
-#else
-    // CN is usually low on resources, thus the maximum ID is
-    // set as low as possible
-    #if (CONFIG_DLL_PRES_CHAINING_CN == FALSE)
-      #define C_DLL_MAX_ASND_SERVICE_IDS                5                   // see tDllAsndServiceId in dll.h
-    #else
-      #define C_DLL_MAX_ASND_SERVICE_IDS                6
-    #endif
-#endif
+
+// MN should support generic Asnd frames, thus the maximum ID
+// is set to a large value
+#define C_DLL_MAX_ASND_SERVICE_IDS                  253
+
+#else /* defined(CONFIG_INCLUDE_NMT_MN) */
+
+// CN is usually low on resources, thus the maximum ID is
+// set as low as possible
+#if (CONFIG_DLL_PRES_CHAINING_CN == FALSE)
+#define C_DLL_MAX_ASND_SERVICE_IDS                  5                       // see tDllAsndServiceId in dll.h
+#else /* (CONFIG_DLL_PRES_CHAINING_CN == FALSE) */
+#define C_DLL_MAX_ASND_SERVICE_IDS                  6
+#endif /* (CONFIG_DLL_PRES_CHAINING_CN == FALSE) */
+
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 
 #if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
 #define TIMER_SYNC_SECOND_LOSS_OF_SYNC                  TRUE
@@ -138,10 +141,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef D_PDO_TPDOChannels_U16
 #if defined(CONFIG_INCLUDE_NMT_MN)
 #define D_PDO_TPDOChannels_U16                          256                 // number of supported TPDO channels
-#else
+#else /* defined(CONFIG_INCLUDE_NMT_MN) */
 #define D_PDO_TPDOChannels_U16                          1                   // number of supported TPDO channels
-#endif
-#endif
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
+#endif /* D_PDO_TPDOChannels_U16 */
 
 /// \{ \name CN Synchronization options
 #define DLL_PROCESS_SYNC_ON_SOC                         0                   ///< Sync on SoC frame
@@ -159,19 +162,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef CONFIG_DLL_PRES_FILTER_COUNT
 #if defined(CONFIG_INCLUDE_NMT_MN)
-#define CONFIG_DLL_PRES_FILTER_COUNT                           -1           // maximum count of Rx filter entries for PRes frames
-#else
-#define CONFIG_DLL_PRES_FILTER_COUNT                           0            // maximum count of Rx filter entries for PRes frames
-#endif
-#endif
+#define CONFIG_DLL_PRES_FILTER_COUNT                    -1                  // maximum count of Rx filter entries for PRes frames
+#else /* defined(CONFIG_INCLUDE_NMT_MN) */
+#define CONFIG_DLL_PRES_FILTER_COUNT                    0                   // maximum count of Rx filter entries for PRes frames
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
+#endif /* CONFIG_DLL_PRES_FILTER_COUNT */
 
 #ifndef NMT_MAX_NODE_ID
-#if defined(CONFIG_INCLUDE_NMT_MN) || (CONFIG_DLL_PRES_FILTER_COUNT != 0)
+#if (defined(CONFIG_INCLUDE_NMT_MN) || (CONFIG_DLL_PRES_FILTER_COUNT != 0))
 #define NMT_MAX_NODE_ID                                 254                 // maximum node-ID with MN or cross-traffic support
-#else
+#else /* (defined(CONFIG_INCLUDE_NMT_MN) || (CONFIG_DLL_PRES_FILTER_COUNT != 0)) */
 #define NMT_MAX_NODE_ID                                 0                   // maximum node-ID with MN or cross-traffic support
-#endif
-#endif
+#endif /* (defined(CONFIG_INCLUDE_NMT_MN) || (CONFIG_DLL_PRES_FILTER_COUNT != 0)) */
+#endif /* NMT_MAX_NODE_ID */
 
 #ifndef D_NMT_MaxCNNumber_U8
 #define D_NMT_MaxCNNumber_U8                            239                 // maximum number of supported regular CNs in the Node ID range 1 .. 239
@@ -192,14 +195,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // configure whether OD access events shall be forwarded
 // to user callback function.
-// Because of reentrancy for local OD accesses, this has to be disabled
+// Because of reentrant behavior for local OD accesses, this has to be disabled
 // when application resides in other address space as the stack
 #ifndef API_OBD_FORWARD_EVENT
 #define API_OBD_FORWARD_EVENT                           TRUE
-#endif
-
-#ifndef OBD_MAX_STRING_SIZE
-#define OBD_MAX_STRING_SIZE                             32                  // is used for objects 0x1008/0x1009/0x100A
 #endif
 
 #ifndef CONFIG_OBD_USE_STORE_RESTORE
@@ -234,18 +233,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 #endif
 
-#if defined(CONFIG_INCLUDE_IP) && !defined(CONFIG_INCLUDE_VETH)
+#if (defined(CONFIG_INCLUDE_IP) && !defined(CONFIG_INCLUDE_VETH))
 #error "CONFIG_INCLUDE_VETH needs to be enabled for using IP objects!"
 #endif
 
 // rough approximation of max. number of timer entries for module user/timer-generic
 #ifndef TIMERU_MAX_ENTRIES
 #if defined(CONFIG_INCLUDE_NMT_MN)
-#define TIMERU_MAX_ENTRIES                              (NMT_MAX_NODE_ID * 3)   // 3 timers for each node
-#else
-#define TIMERU_MAX_ENTRIES                               7                  // LED module 1 + NMT module 1 + SDO sequence layer 5
-#endif
-#endif
+#define TIMERU_MAX_ENTRIES                              (NMT_MAX_NODE_ID * 3)  // 3 timers for each node
+#else /* defined(CONFIG_INCLUDE_NMT_MN) */
+#define TIMERU_MAX_ENTRIES                              7                      // LED module 1 + NMT module 1 + SDO sequence layer 5
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
+#endif /* TIMERU_MAX_ENTRIES */
 
 #ifndef EDRV_FILTER_WITH_RX_HANDLER
 #define EDRV_FILTER_WITH_RX_HANDLER                     FALSE

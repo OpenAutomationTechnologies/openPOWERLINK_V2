@@ -8,7 +8,7 @@ This file contains definitions for the eventlog module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_eventlog_H_
 #define _INC_eventlog_H_
 
@@ -42,7 +41,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
 #include <oplk/nmt.h>
-
 #include "eventlogstring.h"
 
 //------------------------------------------------------------------------------
@@ -52,8 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
-typedef INT (*tEventlogOutputCb)(const char* fmt_p, ...);
+typedef int (*tEventlogOutputCb)(const char* fmt_p, ...);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -64,17 +61,25 @@ extern "C"
 {
 #endif
 
-void eventlog_init(tEventlogFormat format_p, UINT32 filterLevel, UINT32 filterCategory, tEventlogOutputCb pfnOutput_p);
-
-void eventlog_printMessage(tEventlogLevel level_p, tEventlogCategory category_p, char* fmt_p, ...);
-void eventlog_printNodeEvent(tOplkApiEventNode* pNodeEvent_p);
-void eventlog_printStateEvent(tEventNmtStateChange* pStateChangeEvent_p);
-void eventlog_printCfmResultEvent(UINT8 nodeId_p, tNmtNodeCommand nodeCommand_p);
-void eventlog_printCfmProgressEvent(tCfmEventCnProgress* pProgress_p);
-void eventlog_printPdoEvent(tOplkApiEventPdoChange* pPdoChange_p);
-void eventlog_printHistoryEvent(tErrHistoryEntry* pHistory_p);
-void eventlog_printErrorEvent(tEventError* pError_p);
-void eventlog_printPdoMap(UINT16 mapObject_p, UINT8 subIndex_p, UINT64 mapping_p);
+void eventlog_init(tEventlogFormat format_p,
+                   UINT32 filterLevel,
+                   UINT32 filterCategory,
+                   tEventlogOutputCb pfnOutput_p);
+void eventlog_printMessage(tEventlogLevel level_p,
+                           tEventlogCategory category_p,
+                           const char* fmt_p,
+                           ...);
+void eventlog_printNodeEvent(const tOplkApiEventNode* pNodeEvent_p);
+void eventlog_printStateEvent(const tEventNmtStateChange* pStateChangeEvent_p);
+void eventlog_printCfmResultEvent(UINT8 nodeId_p,
+                                  tNmtNodeCommand nodeCommand_p);
+void eventlog_printCfmProgressEvent(const tCfmEventCnProgress* pProgress_p);
+void eventlog_printPdoEvent(const tOplkApiEventPdoChange* pPdoChange_p);
+void eventlog_printHistoryEvent(const tErrHistoryEntry* pHistory_p);
+void eventlog_printErrorEvent(const tEventError* pError_p);
+void eventlog_printPdoMap(UINT16 mapObject_p,
+                          UINT8 subIndex_p,
+                          UINT64 mapping_p);
 
 #ifdef __cplusplus
 }

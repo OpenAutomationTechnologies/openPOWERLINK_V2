@@ -12,7 +12,7 @@ the EMACPS Gigabit Ethernet Controller (GEM) on the Xilinx Zynq SoC.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -69,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19)
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 19))
 #error "Linux Kernel versions older 2.6.19 are not supported by this driver!"
 #endif
 //------------------------------------------------------------------------------
@@ -167,7 +167,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_MAX_RX_DESC_LEN                (EDRV_MAX_RX_DESCRIPTOR - 1)
 
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS                 42                                          // up-to 128 buffers are supported per frame
+#define EDRV_MAX_TX_BUFFERS                 128                                         // up-to 128 buffers are supported per frame
 #endif
 
 #ifndef EDRV_MAX_RX_BUFFERS
@@ -200,7 +200,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_DESC_ADDR_OFFSET               0x00000000
 #define EDRV_DESC_CNTRL_OFFSET              0x00000004
 
-#define DRV_NAME                            "plk"
+#define DRV_NAME                            "plk_edrv"
 
 #define EDRV_READ_REG(dwOffset)                         __raw_readl(edrvInstance_l.pIoAddr + dwOffset)
 #define EDRV_WRITE_REG(dwOffset, dwVal)                 __raw_writel(dwVal, edrvInstance_l.pIoAddr + dwOffset)
@@ -290,10 +290,10 @@ tEdrvInstance    edrvInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static irqreturn_t  edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
-static INT          initOnePlatformDev(struct platform_device*pDev_p);
+static int          initOnePlatformDev(struct platform_device* pDev_p);
 static int          removeOnePlatformDev(struct platform_device*pDev_p);
-static UINT32       getBitFromMac(UINT8* pMac_p, UINT32 bitPos_p);
-static UINT32       calculateHashAddr(UINT8* pMac_p);
+static UINT32       getBitFromMac(const UINT8* pMac_p, UINT32 bitPos_p);
+static UINT32       calculateHashAddr(const UINT8* pMac_p);
 static void         mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p);
 static UINT16       mdioPhyRead(INT phyId_p, INT regAddr_p);
 //------------------------------------------------------------------------------
@@ -304,7 +304,7 @@ static UINT16       mdioPhyRead(INT phyId_p, INT regAddr_p);
 #ifdef CONFIG_OF
 static struct of_device_id          xemacps_of_match[] =
 {
-    {   .compatible = "xlnx,ps7-ethernet-1.00.a", },    // __devinitdata creates warning!
+    {   .compatible = "cdns,zynq-gem", },               // __devinitdata creates warning!
     { /* end of table */}                               // keep devinit in separate data section,
                                                         // linker is not able to link
 };
@@ -335,21 +335,24 @@ static struct platform_driver       edrvDriver_l =
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError      ret = kErrorOk;
     INT             result;
     INT             loop;
 
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
+
     // clear instance structure
-    OPLK_MEMSET(&edrvInstance_l, 0x0, sizeof(edrvInstance_l));
+    OPLK_MEMSET(&edrvInstance_l, 0x00, sizeof(edrvInstance_l));
 
     // save the init data
     edrvInstance_l.initParam = *pEdrvInitParam_p;
@@ -405,7 +408,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -421,18 +424,20 @@ If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array
-\param  count_p             Number of Rx filter array entries
-\param  entryChanged_p      Index of Rx filter entry that shall be changed
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT32 count_p,
-                               UINT32 entryChanged_p, UINT32 changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -448,18 +453,21 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT32 count_p,
 
 This function sets a multicast entry into the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UINT32      hashValue;
     UINT32      hashRegLVal = 0;
     UINT32      hashRegHVal = 0;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     // calculate the hash value to written in register
     hashValue = calculateHashAddr(pMacAddr_p);
@@ -488,18 +496,21 @@ tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function removes the multicast entry from the Ethernet controller.
 
-\param  pMacAddr_p  Multicast address
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UINT32      hashValue;
     UINT32      hashRegLVal = 0;
     UINT32      hashRegHVal = 0;
+
+    // Check parameter validity
+    ASSERT(pMacAddr_p != NULL);
 
     // calculate the hash value to be cleared
     hashValue = calculateHashAddr(pMacAddr_p);
@@ -528,7 +539,7 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -538,6 +549,9 @@ This function allocates a Tx buffer.
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     INT    channel;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_FRAME_SIZE)
     {
@@ -579,7 +593,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -589,6 +603,9 @@ This function releases the Tx buffer.
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     UINT32    bufferNumber;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -606,7 +623,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -619,6 +636,9 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     tEdrvTxDesc*    pTxDesc;
     dma_addr_t      txDmaAddr;
     UINT32          reg;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     bufferNumber = pBuffer_p->txBufferNumber.value;
 
@@ -673,46 +693,6 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer descriptor
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -725,13 +705,13 @@ tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function is the interrupt service routine for the Ethernet driver.
 
-\param  irqNum_p            IRQ number
-\param  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in]      irqNum_p            IRQ number
+\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
 {
     UINT32              isrStatus;
     UINT32              stat = 0;
@@ -739,6 +719,9 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
     tEdrvTxDesc*        pTxDesc;
     tEdrvTxBuffer*      pTxBuffer;
     tEdrvRxDesc*        pRxDesc;
+
+    UNUSED_PARAMETER(irqNum_p);
+    UNUSED_PARAMETER(ppDevInstData_p);
 
     isrStatus = EDRV_READ_REG(EDRV_INTR_STATUS_REG);
     // not a shared handler, yet!
@@ -852,13 +835,10 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                                  pTxBuffer->txFrameSize,
                                  DMA_TO_DEVICE);
 
-                if (pTxBuffer != NULL)
+                // Call Tx handler of Data link layer
+                if (pTxBuffer->pfnTxHandler != NULL)
                 {
-                    // Call Tx handler of Data link layer
-                    if (pTxBuffer->pfnTxHandler != NULL)
-                    {
-                        pTxBuffer->pfnTxHandler(pTxBuffer);
-                    }
+                    pTxBuffer->pfnTxHandler(pTxBuffer);
                 }
             }
         } while (edrvInstance_l.txDescHead != edrvInstance_l.txDescTail);
@@ -874,14 +854,14 @@ Exit:
 
 This function initializes one platform device.
 
-\param  pDev_p   Pointer to corresponding platform device structure
+\param[in,out]  pDev_p              Pointer to corresponding platform device structure
 
 \return The function returns an integer error code.
 \retval 0           Successful
 \retval Otherwise   Error
 */
 //------------------------------------------------------------------------------
-static INT initOnePlatformDev(struct platform_device*pDev_p)
+static int initOnePlatformDev(struct platform_device* pDev_p)
 {
     struct resource*    pResMem;
     struct resource*    pResIrq;
@@ -979,16 +959,16 @@ static INT initOnePlatformDev(struct platform_device*pDev_p)
     // register clean done ----------------------------->
 
     // Initialize MAC clock
-    edrvInstance_l.ambaPerClk = devm_clk_get(&pDev_p->dev, "aper_clk");
+    edrvInstance_l.ambaPerClk = devm_clk_get(&pDev_p->dev, "pclk");
     if (edrvInstance_l.ambaPerClk == NULL)
     {
-        printk("aper_clk clock not found.\n");
+        printk("pclk clock not found.\n");
     }
 
-    edrvInstance_l.devClk = devm_clk_get(&pDev_p->dev, "ref_clk");
+    edrvInstance_l.devClk = devm_clk_get(&pDev_p->dev, "tx_clk");
     if (edrvInstance_l.devClk == NULL)
     {
-        printk("ref_clk clock not found.\n");
+        printk("tx_clk clock not found.\n");
     }
 
     result = clk_prepare_enable(edrvInstance_l.ambaPerClk);
@@ -1017,11 +997,11 @@ static INT initOnePlatformDev(struct platform_device*pDev_p)
     reg |= (MDC_DIV_224 << EDRV_NWCFG_MDCCLK_SHIFT);
     reg |= EDRV_NWCFG_100_MASK;    // set speed to 100Mbps
 
-#ifdef _PROMISCUOUS_MODE_
+#if defined(_PROMISCUOUS_MODE_)
     reg |= EDRV_NWCFG_COPYALLEN_MASK;
-#elif defined _MULTICASTEN_MODE_
+#elif defined(_MULTICASTEN_MODE_)
     reg |= EDRV_NWCFG_MULTICASTEN_MASK;
-#elif defined __UNICASTEN_MODE_
+#elif defined(__UNICASTEN_MODE_)
     reg |= EDRV_NWCFG_UNICASTEN_MASK;
 #endif
     reg |= EDRV_NWCFG_FCSREMOVE_MASK;
@@ -1214,7 +1194,7 @@ Exit:
 
 This function removes one platform device.
 
-\param  pDev_p     Pointer to corresponding platform device structure
+\param[in,out]  pDev_p              Pointer to corresponding platform device structure
 
 \return The function returns an integer error code.
 \retval 0           Successful
@@ -1223,6 +1203,11 @@ This function removes one platform device.
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
     INT    loop;
+
+    // disble interrupts
+    EDRV_WRITE_REG(EDRV_INTR_DIS_REG, ~0x0);
+    // disable Tx and Rx circuit
+    EDRV_WRITE_REG(EDRV_NET_CNTRL_REG, 0x0);
 
     if (pDev_p != edrvInstance_l.pPlatformDev)
     {
@@ -1268,11 +1253,14 @@ static int removeOnePlatformDev(struct platform_device* pDev_p)
     clk_disable_unprepare(edrvInstance_l.devClk);
     clk_disable_unprepare(edrvInstance_l.ambaPerClk);
 
-    EDRV_WRITE_REG(EDRV_INTR_DIS_REG, ~0x0);
-
     free_irq(edrvInstance_l.resIrq, pDev_p);
     release_mem_region(edrvInstance_l.resMemAddr, edrvInstance_l.resMemSize);
-    iounmap(edrvInstance_l.pIoAddr);
+
+    if (edrvInstance_l.pIoAddr != NULL)
+    {
+        iounmap(edrvInstance_l.pIoAddr);
+        edrvInstance_l.pIoAddr = NULL;
+    }
 
     return 0;
 }
@@ -1284,19 +1272,20 @@ static int removeOnePlatformDev(struct platform_device* pDev_p)
 This is a helper routine to calculate hash index for a given MAC
 address. It extracts the value for a specific bit specified by position.
 
-\param  pMac_p       Pointer to MAC address
-\param  bitPos_p     Bit position to extract
+\param[in]      pMac_p              Pointer to MAC address
+\param[in]      bitPos_p            Bit position to extract
 
 \return Returns the value at the specified bit position
 */
 //------------------------------------------------------------------------------
-static UINT32 getBitFromMac(UINT8* pMac_p, UINT32 bitPos_p)
+static UINT32 getBitFromMac(const UINT8* pMac_p, UINT32 bitPos_p)
 {
     UINT8       macAdd;
     UINT32      bitVal;
 
     macAdd = (*(pMac_p + (bitPos_p / 8)));
-    bitVal = ((macAdd >> (bitPos_p & 0x7)) & 0x01);
+    bitVal = ((macAdd >> (bitPos_p & 0x07)) & 0x01);
+
     return bitVal;
 }
 
@@ -1307,12 +1296,12 @@ static UINT32 getBitFromMac(UINT8* pMac_p, UINT32 bitPos_p)
 This routine calculates the hash value for the specified address
 used to create the index table.
 
-\param  pMac_p     Pointer to MAC address
+\param[in]      pMac_p              Pointer to MAC address
 
 \return Returns the hash value for the MAC address
 */
 //------------------------------------------------------------------------------
-static UINT32 calculateHashAddr(UINT8* pMac_p)
+static UINT32 calculateHashAddr(const UINT8* pMac_p)
 {
     UINT32      hashIndex = 0;
     INT         loop;
@@ -1338,9 +1327,9 @@ static UINT32 calculateHashAddr(UINT8* pMac_p)
 This routine writes the specified word into the specified PHY register
 using the MDIO interface.
 
-\param  phyId_p     ID/Address of the PHY to write
-\param  regAddr_p   Register to write
-\param  value_p     Value to write
+\param[in]      phyId_p             ID/Address of the PHY to write
+\param[in]      regAddr_p           Register to write
+\param[in]      value_p             Value to write
 */
 //------------------------------------------------------------------------------
 static void mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p)
@@ -1371,8 +1360,8 @@ static void mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p)
 This routine reads a word from the specified PHY register
 using the MDIO interface.
 
-\param  phyId_p     ID/Address of the PHY to read
-\param  regAddr_p   Register to read
+\param[in]      phyId_p             ID/Address of the PHY to read
+\param[in]      regAddr_p           Register to read
 
 \return Returns the read value.
 */
@@ -1403,4 +1392,4 @@ static UINT16 mdioPhyRead(INT phyId_p, INT regAddr_p)
     return value;
 }
 
-///\}
+/// \}

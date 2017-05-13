@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   synctimer.h
+\file   kernel/synctimer.h
 
 \brief  Definitions for synchronization timer module
 
@@ -10,7 +10,7 @@ This file contains the definitions for the synchronization timer module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_synctimer_H_
-#define _INC_synctimer_H_
+#ifndef _INC_kernel_synctimer_H_
+#define _INC_kernel_synctimer_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -57,7 +56,6 @@ typedef tOplkError (*tSyncTimerCbLossOfSync)(void);
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -67,17 +65,20 @@ tOplkError synctimer_init(void);
 tOplkError synctimer_exit(void);
 tOplkError synctimer_registerHandler(tSyncTimerCbSync pfnTimerSynckCbSync_p);
 tOplkError synctimer_registerLossOfSyncHandler(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync_p);
-tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
 tOplkError synctimer_setSyncShift(UINT32 advanceShift_p);
 tOplkError synctimer_setCycleLen(UINT32 cycleLen_p, UINT32 minSyncTime_p);
 tOplkError synctimer_setLossOfSyncTolerance(UINT32 lossOfSyncTolerance_p);
-tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
-tOplkError synctimer_syncTriggerAtTimeStamp(tTimestamp* pTimeStamp_p);
+tOplkError synctimer_syncTriggerAtTimeStamp(const tTimestamp* pTimeStamp_p);
 tOplkError synctimer_stopSync(void);
 void       synctimer_controlExtSyncIrq(BOOL fEnable_p);
+
+#if (TIMER_SYNC_SECOND_LOSS_OF_SYNC != FALSE)
+tOplkError synctimer_registerLossOfSyncHandler2(tSyncTimerCbLossOfSync pfnTimerSynckCbLossOfSync2_p);
+tOplkError synctimer_setLossOfSyncTolerance2(UINT32 lossOfSyncTolerance2_p);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_synctimer_H_ */
+#endif /* _INC_kernel_synctimer_H_ */

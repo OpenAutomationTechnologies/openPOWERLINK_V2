@@ -2,7 +2,7 @@
 #
 # Linux definitions for demo_mn_console application
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -40,6 +40,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread")
 SET (DEMO_ARCH_SOURCES
      ${COMMON_SOURCE_DIR}/system/system-linux.c
      ${CONTRIB_SOURCE_DIR}/console/console-linux.c
+     ${CONTRIB_SOURCE_DIR}/trace/trace-printf.c
      )
 
 ################################################################################
@@ -54,4 +55,3 @@ SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
 # Set architecture specific installation files
 
 INSTALL(PROGRAMS ${TOOLS_DIR}/linux/set_prio DESTINATION ${PROJECT_NAME})
-

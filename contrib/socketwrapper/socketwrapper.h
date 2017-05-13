@@ -8,7 +8,7 @@ The file contains definitions for the socketwrapper.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_socketwrapper_H_
 #define _INC_socketwrapper_H_
 
@@ -74,21 +73,21 @@ typedef struct
 /**
 \brief  Socket wrapper receive callback
 
-This type defines the socket wrapper recieve callback. It is called by the
+This type defines the socket wrapper receive callback. It is called by the
 socket wrapper module if a frame is received from the socket.
 
-\param  pData_p         Pointer to received data
-\param  dataSize_p      Size of received data
-\param  pRemote_p       Pointer to socket wrapper address structure
+\param[in]      pData_p             Pointer to received data
+\param[in]      dataSize_p          Size of received data
+\param[in]      pRemote_p           Pointer to socket wrapper address structure
 
 */
-typedef void (*tSocketWrapperReceiveCb)(UINT8* pData_p, UINT dataSize_p,
-                                        tSocketWrapperAddress* pRemote_p);
+typedef void (*tSocketWrapperReceiveCb)(const UINT8* pData_p,
+                                        UINT dataSize_p,
+                                        const tSocketWrapperAddress* pRemote_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -96,13 +95,15 @@ extern "C"
 
 tSocketWrapper  socketwrapper_create(tSocketWrapperReceiveCb pfnReceiveCb_p);
 tOplkError      socketwrapper_bind(tSocketWrapper pSocketWrapper_p,
-                                   tSocketWrapperAddress* pSocketAddress_p);
+                                   const tSocketWrapperAddress* pSocketAddress_p);
 void            socketwrapper_close(tSocketWrapper pSocketWrapper_p);
 tOplkError      socketwrapper_send(tSocketWrapper pSocketWrapper_p,
-                                   tSocketWrapperAddress* pRemote_p,
-                                   UINT8* pData_p, UINT dataSize_p);
-
+                                   const tSocketWrapperAddress* pRemote_p,
+                                   const UINT8* pData_p,
+                                   UINT dataSize_p);
 void            socketwrapper_criticalSection(BOOL fEnable_p);
+tOplkError      socketwrapper_arpQuery(tSocketWrapper pSocketWrapper_p,
+                                       UINT32 remoteIpAddress_p);
 
 #ifdef __cplusplus
 }

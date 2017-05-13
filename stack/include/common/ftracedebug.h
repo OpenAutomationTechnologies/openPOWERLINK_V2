@@ -9,7 +9,7 @@ This file contains the definitions for the ftrace debug module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_ftracedebug_H_
 #define _INC_common_ftracedebug_H_
 
@@ -44,7 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if defined(FTRACE_DEBUG)
 #include <stdarg.h>
 #include <fcntl.h>
-#endif
+#endif /* defined(FTRACE_DEBUG) */
 
 //------------------------------------------------------------------------------
 // const defines
@@ -54,12 +53,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define FTRACE_CLOSE()                  ftrace_close()
 #define FTRACE_ENABLE(X)                ftrace_enable(X)
 #define FTRACE_MARKER(...)              ftrace_writeTraceMarker(__VA_ARGS__)
-#else
+#else /* defined(FTRACE_DEBUG) */
 #define FTRACE_OPEN()
 #define FTRACE_CLOSE()
 #define FTRACE_ENABLE(X)
 #define FTRACE_MARKER(...)
-#endif
+#endif /* defined(FTRACE_DEBUG) */
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -69,14 +68,12 @@ extern "C"
 {
 #endif
 
-#ifdef  FTRACE_DEBUG
-
-extern int ftrace_open(void);
-extern int ftrace_close(void);
+#if defined(FTRACE_DEBUG)
+extern int  ftrace_open(void);
+extern int  ftrace_close(void);
 extern void ftrace_enable(int fEnable_p);
-void ftrace_writeTraceMarker(char* fmt, ...);
-
-#endif
+void        ftrace_writeTraceMarker(const char* fmt, ...);
+#endif /* defined(FTRACE_DEBUG) */
 
 #ifdef __cplusplus
 }

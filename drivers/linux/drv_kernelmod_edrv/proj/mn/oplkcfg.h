@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Default debug level:
 // Only debug traces of these modules will be compiled which flags are set in define DEF_DEBUG_LVL.
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                               (0xC00000000L)
+#define DEF_DEBUG_LVL                               0xC0000000L
 #endif
 
 #undef FTRACE_DEBUG
@@ -64,6 +64,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
+// Update device name to avoid conflict in zynq emacps design
+// 267200 corresponds to Z7200 architecture of Zynq family. (Z is represented by 26)
+#if (CONFIG_EDRV == 267200)
+#define PLK_VETH_NAME                               "plk_veth"
+#endif
 
 //==============================================================================
 // Ethernet driver (Edrv) specific defines
@@ -116,4 +121,3 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_TIMER_USE_HIGHRES                    TRUE
 
 #endif // _INC_oplkcfg_H_
-

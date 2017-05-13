@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <hostiflib-mem.h> // For host interface memory sizes
+#include <oplkcfg-board.h> // Board specific configuration
 
 //------------------------------------------------------------------------------
 // const defines
@@ -71,7 +72,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
     ///< enable benchmark for specific stack modules
 #endif
 #ifndef DEF_DEBUG_LVL
-#define DEF_DEBUG_LVL                       0x4C000001L
+#define DEF_DEBUG_LVL                       0xC0000000L
     ///< determine debug level for specific stack modules
 #endif
 /**@}*/
@@ -86,14 +87,13 @@ Note: The settings are specific for MN with openMAC!
     ///< fast TX support by Edrv
 #define CONFIG_EDRV_EARLY_RX_INT            FALSE
     ///< support TX handler call when DMA transfer finished
-#define CONFIG_EDRV_AUTO_RESPONSE           FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE           TRUE
     ///< support auto-response (e.g. openMAC)
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY     TRUE
 #define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
 #define CONFIG_EDRV_MAX_TX2_BUFFERS         64
     ///< set number for second Tx buffer queue to support larger networks
-#define CONFIG_EDRVCYC_NEG_SHIFT_US         100U
-    ///< us (timer irq before next cycle)
 /**@}*/
 
 /**
@@ -135,8 +135,6 @@ These defines are set by the host interface ipcore settings
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC           HOSTIF_SIZE_TXSYNCQ
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH           HOSTIF_SIZE_TXVETHQ
 /**@}*/
-
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   16384
 
 //------------------------------------------------------------------------------
 // typedef

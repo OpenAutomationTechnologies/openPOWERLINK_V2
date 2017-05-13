@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -42,23 +42,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <limits.h>
+#include "app.h"
+#include "event.h"
 
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
+
 #include <system/system.h>
+#include <obdcreate/obdcreate.h>
 #include <getopt/getopt.h>
 #include <console/console.h>
-
 #include <eventlog/eventlog.h>
 
 #if defined(CONFIG_USE_PCAP)
 #include <pcap/pcap-console.h>
 #endif
 
-#include "app.h"
-#include "event.h"
+#include <stdio.h>
+#include <limits.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -67,22 +68,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CYCLE_LEN         50000
-#define NODEID            1                   // could be changed by command param
-#define IP_ADDR           0xc0a86401          // 192.168.100.1
-#define DEFAULT_GATEWAY   0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
-#define SUBNET_MASK       0xFFFFFF00          // 255.255.255.0
+#define CYCLE_LEN           50000
+#define NODEID              1                   // could be changed by command param
+#define IP_ADDR             0xc0a86401          // 192.168.100.1
+#define DEFAULT_GATEWAY     0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define SUBNET_MASK         0xFFFFFF00          // 255.255.255.0
 
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-CONST BYTE aMacAddr_l[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-static BOOL fGsOff_l;
 
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-
 
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
@@ -101,19 +99,27 @@ typedef struct
     tEventlogFormat logFormat;
     UINT32          logLevel;
     UINT32          logCategory;
+    char            devName[128];
 } tOptions;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
+static const UINT8  aMacAddr_l[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static BOOL         fGsOff_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p);
-static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p);
-static void loopMain(void);
-static void shutdownPowerlink(void);
+static int        getOptions(int argc_p,
+                             char* const argv_p[],
+                             tOptions* pOpts_p);
+static tOplkError initPowerlink(UINT32 cycleLen_p,
+                                const char* devName_p,
+                                const UINT8* macAddr_p,
+                                UINT32 nodeId_p);
+static void       loopMain(void);
+static void       shutdownPowerlink(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -125,18 +131,18 @@ static void shutdownPowerlink(void);
 
 This is the main function of the openPOWERLINK console CN demo application.
 
-\param  argc                    Number of arguments
-\param  argv                    Pointer to argument strings
+\param[in]      argc                Number of arguments
+\param[in]      argv                Pointer to argument strings
 
 \return Returns an exit code
 
 \ingroup module_demo_cn_console
 */
 //------------------------------------------------------------------------------
-int main (int argc, char** argv)
+int main(int argc, char* argv[])
 {
-    tOplkError                  ret = kErrorOk;
-    tOptions                    opts;
+    tOplkError  ret = kErrorOk;
+    tOptions    opts;
 
     if (getOptions(argc, argv, &opts) < 0)
         return 0;
@@ -147,24 +153,33 @@ int main (int argc, char** argv)
         return 0;
     }
 
-    eventlog_init(opts.logFormat, opts.logLevel, opts.logCategory, (tEventlogOutputCb)console_printlogadd);
+    eventlog_init(opts.logFormat,
+                  opts.logLevel,
+                  opts.logCategory,
+                  (tEventlogOutputCb)console_printlogadd);
 
     initEvents(&fGsOff_l);
 
     printf("----------------------------------------------------\n");
     printf("openPOWERLINK console CN DEMO application\n");
-    printf("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
+    printf("Using openPOWERLINK stack: %s\n", oplk_getVersionString());
     printf("----------------------------------------------------\n");
 
-    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
-                          "demo_cn_console: Stack Version:%s Stack Configuration:0x%08X",
-                          oplk_getVersionString(), oplk_getStackConfiguration());
+    eventlog_printMessage(kEventlogLevelInfo,
+                          kEventlogCategoryGeneric,
+                          "demo_cn_console: Stack version:%s Stack configuration:0x%08X",
+                          oplk_getVersionString(),
+                          oplk_getStackConfiguration());
 
-    if ((ret = initPowerlink(CYCLE_LEN, aMacAddr_l, opts.nodeId))
-        != kErrorOk)
+    ret = initPowerlink(CYCLE_LEN,
+                        opts.devName,
+                        aMacAddr_l,
+                        opts.nodeId);
+    if (ret != kErrorOk)
         goto Exit;
 
-    if ((ret = initApp()) != kErrorOk)
+    ret = initApp();
+    if (ret != kErrorOk)
         goto Exit;
 
     loopMain();
@@ -189,26 +204,41 @@ Exit:
 
 The function initializes the openPOWERLINK stack.
 
-\param  cycleLen_p              Length of POWERLINK cycle.
-\param  macAddr_p               MAC address to use for POWERLINK interface.
+\param[in]      cycleLen_p          Length of POWERLINK cycle.
+\param[in]      devName_p           Device name string.
+\param[in]      macAddr_p           MAC address to use for POWERLINK interface.
+\param[in]      nodeId_p            POWERLINK node ID.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32 nodeId_p)
+static tOplkError initPowerlink(UINT32 cycleLen_p,
+                                const char* devName_p,
+                                const UINT8* macAddr_p,
+                                UINT32 nodeId_p)
 {
-    tOplkError                  ret = kErrorOk;
-    static tOplkApiInitParam    initParam;
-    static char                 devName[128];
+    tOplkError          ret = kErrorOk;
+    tOplkApiInitParam   initParam;
+    static char         devName[128];
 
     printf("Initializing openPOWERLINK stack...\n");
-    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl,
+    eventlog_printMessage(kEventlogLevelInfo,
+                          kEventlogCategoryControl,
                           "Initializing openPOWERLINK stack");
 
 #if defined(CONFIG_USE_PCAP)
-    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
-                         "Using libpcap for network access");
-    selectPcapDevice(devName);
+    eventlog_printMessage(kEventlogLevelInfo,
+                          kEventlogCategoryGeneric,
+                          "Using libpcap for network access");
+    if (devName_p[0] == '\0')
+    {
+        if (selectPcapDevice(devName) < 0)
+            return kErrorIllegalInstance;
+    }
+    else
+        strncpy(devName, devName_p, 128);
+#else
+    UNUSED_PARAMETER(devName_p);
 #endif
 
     memset(&initParam, 0, sizeof(initParam));
@@ -224,16 +254,16 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
 
     initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = UINT_MAX;
-    initParam.cycleLen                = cycleLen_p;       // required for error detection
-    initParam.isochrTxMaxPayload      = 36;               // const
-    initParam.isochrRxMaxPayload      = 36;               // const
-    initParam.presMaxLatency          = 50000;            // const; only required for IdentRes
-    initParam.preqActPayloadLimit     = 36;               // required for initialisation (+28 bytes)
-    initParam.presActPayloadLimit     = 36;               // required for initialisation of Pres frame (+28 bytes)
-    initParam.asndMaxLatency          = 150000;           // const; only required for IdentRes
-    initParam.multiplCylceCnt         = 0;                // required for error detection
-    initParam.asyncMtu                = 1500;             // required to set up max frame size
-    initParam.prescaler               = 2;                // required for sync
+    initParam.cycleLen                = cycleLen_p;             // required for error detection
+    initParam.isochrTxMaxPayload      = C_DLL_ISOCHR_MAX_PAYL;  // const
+    initParam.isochrRxMaxPayload      = C_DLL_ISOCHR_MAX_PAYL;  // const
+    initParam.presMaxLatency          = 50000;                  // const; only required for IdentRes
+    initParam.preqActPayloadLimit     = 36;                     // required for initialization (+28 bytes)
+    initParam.presActPayloadLimit     = 36;                     // required for initialization of Pres frame (+28 bytes)
+    initParam.asndMaxLatency          = 150000;                 // const; only required for IdentRes
+    initParam.multiplCylceCnt         = 0;                      // required for error detection
+    initParam.asyncMtu                = 1500;                   // required to set up max frame size
+    initParam.prescaler               = 2;                      // required for sync
     initParam.lossOfFrameTolerance    = 500000;
     initParam.asyncSlotTimeout        = 3000000;
     initParam.waitSocPreq             = 1000;
@@ -259,20 +289,50 @@ static tOplkError initPowerlink(UINT32 cycleLen_p, const BYTE* macAddr_p, UINT32
     initParam.pfnCbSync = NULL;
 #endif
 
+    // Initialize object dictionary
+    ret = obdcreate_initObd(&initParam.obdInitParam);
+    if (ret != kErrorOk)
+    {
+        fprintf(stderr,
+                "obdcreate_initObd() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret),
+                ret);
+        eventlog_printMessage(kEventlogLevelFatal,
+                              kEventlogCategoryControl,
+                              "obdcreate_initObd() failed with \"%s\" (0x%04x)\n",
+                              debugstr_getRetValStr(ret),
+                              ret);
+        return ret;
+    }
+
     // initialize POWERLINK stack
     ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "oplk_initialize() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
-        eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "oplk_initialize() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        fprintf(stderr,
+                "oplk_initialize() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret),
+                ret);
+        eventlog_printMessage(kEventlogLevelFatal,
+                              kEventlogCategoryControl,
+                              "oplk_initialize() failed with \"%s\" (0x%04x)\n",
+                              debugstr_getRetValStr(ret),
+                              ret);
         return ret;
     }
 
     ret = oplk_create(&initParam);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "oplk_create() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
-        eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "oplk_create() failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        fprintf(stderr,
+                "oplk_create() failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret),
+                ret);
+        eventlog_printMessage(kEventlogLevelFatal,
+                              kEventlogCategoryControl,
+                              "oplk_create() failed with \"%s\" (0x%04x)\n",
+                              debugstr_getRetValStr(ret),
+                              ret);
         return ret;
     }
 
@@ -292,9 +352,9 @@ This function implements the main loop of the demo application.
 //------------------------------------------------------------------------------
 static void loopMain(void)
 {
-    tOplkError              ret = kErrorOk;
-    char                    cKey = 0;
-    BOOL                    fExit = FALSE;
+    tOplkError  ret;
+    char        cKey = 0;
+    BOOL        fExit = FALSE;
 
 #if !defined(CONFIG_KERNELSTACK_DIRECTLINK)
 
@@ -307,18 +367,16 @@ static void loopMain(void)
     // start processing
     ret = oplk_execNmtCommand(kNmtEventSwReset);
     if (ret != kErrorOk)
-    {
         return;
-    }
 
-    printf("start POWERLINK Stack... ok\n");
+    printf("Start POWERLINK stack... ok\n");
     printf("Digital I/O interface with openPOWERLINK is ready!\n");
     printf("\n-------------------------------\n");
-    printf("Press Esc to leave the programm\n");
+    printf("Press Esc to leave the program\n");
     printf("Press r to reset the node\n");
-    printf("Press i to increase digital input\n");
-    printf("Press d to decrease digital input\n");
-    printf("Press p to print digital outputs\n");
+    printf("Press i to increase the digital input\n");
+    printf("Press d to decrease the digital input\n");
+    printf("Press p to print the digital outputs\n");
     printf("-------------------------------\n\n");
 
     setupInputs();
@@ -328,16 +386,14 @@ static void loopMain(void)
     {
         if (console_kbhit())
         {
-            cKey = (BYTE)console_getch();
+            cKey = (char)console_getch();
 
             switch (cKey)
             {
                 case 'r':
                     ret = oplk_execNmtCommand(kNmtEventSwReset);
                     if (ret != kErrorOk)
-                    {
                         fExit = TRUE;
-                    }
                     break;
 
                 case 'i':
@@ -365,17 +421,22 @@ static void loopMain(void)
         {
             fExit = TRUE;
             printf("Received termination signal, exiting...\n");
-            eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl, "Received termination signal, exiting...");
+            eventlog_printMessage(kEventlogLevelInfo,
+                                  kEventlogCategoryControl,
+                                  "Received termination signal, exiting...");
         }
 
         if (oplk_checkKernelStack() == FALSE)
         {
             fExit = TRUE;
             fprintf(stderr, "Kernel stack has gone! Exiting...\n");
-            eventlog_printMessage(kEventlogLevelFatal, kEventlogCategoryControl, "Kernel stack has gone! Exiting...");
+            eventlog_printMessage(kEventlogLevelFatal,
+                                  kEventlogCategoryControl,
+                                  "Kernel stack has gone! Exiting...");
         }
 
-#if defined(CONFIG_USE_SYNCTHREAD) || defined(CONFIG_KERNELSTACK_DIRECTLINK)
+#if (defined(CONFIG_USE_SYNCTHREAD) || \
+     defined(CONFIG_KERNELSTACK_DIRECTLINK))
         system_msleep(100);
 #else
         processSync();
@@ -386,8 +447,6 @@ static void loopMain(void)
     printf("Press Enter to quit!\n");
     console_getch();
 #endif
-
-    return;
 }
 
 //------------------------------------------------------------------------------
@@ -399,11 +458,12 @@ The function shuts down the demo application.
 //------------------------------------------------------------------------------
 static void shutdownPowerlink(void)
 {
-    UINT                i;
+    UINT    i;
 
     fGsOff_l = FALSE;
 
-#if !defined(CONFIG_KERNELSTACK_DIRECTLINK) && defined(CONFIG_USE_SYNCTHREAD)
+#if (!defined(CONFIG_KERNELSTACK_DIRECTLINK) && \
+     defined(CONFIG_USE_SYNCTHREAD))
     system_stopSyncThread();
     system_msleep(100);
 #endif
@@ -419,7 +479,8 @@ static void shutdownPowerlink(void)
     }
 
     printf("Stack is in state off ... Shutdown\n");
-    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryControl,
+    eventlog_printMessage(kEventlogLevelInfo,
+                          kEventlogCategoryControl,
                           "Stack is in state off ... Shutdown openPOWERLINK");
 
     oplk_destroy();
@@ -433,32 +494,39 @@ static void shutdownPowerlink(void)
 The function parses the supplied command line parameters and stores the
 options at pOpts_p.
 
-\param  argc_p                  Argument count.
-\param  argc_p                  Pointer to arguments.
-\param  pOpts_p                 Pointer to store options
+\param[in]      argc_p              Argument count.
+\param[in]      argv_p              Pointer to arguments.
+\param[out]     pOpts_p             Pointer to store options
 
 \return The function returns the parsing status.
 \retval 0           Successfully parsed
 \retval -1          Parsing error
 */
 //------------------------------------------------------------------------------
-static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
+static int getOptions(int argc_p,
+                      char* const argv_p[],
+                      tOptions* pOpts_p)
 {
-    int                         opt;
+    int opt;
 
     /* setup default parameters */
+    strncpy(pOpts_p->devName, "\0", 128);
     pOpts_p->nodeId = NODEID;
     pOpts_p->logFormat = kEventlogFormatReadable;
     pOpts_p->logCategory = 0xffffffff;
     pOpts_p->logLevel = 0xffffffff;
 
     /* get command line parameters */
-    while ((opt = getopt(argc_p, argv_p, "n:pv:t:")) != -1)
+    while ((opt = getopt(argc_p, argv_p, "n:pv:t:d:")) != -1)
     {
         switch (opt)
         {
             case 'n':
                 pOpts_p->nodeId = strtoul(optarg, NULL, 10);
+                break;
+
+            case 'd':
+                strncpy(pOpts_p->devName, optarg, 128);
                 break;
 
             case 'p':
@@ -474,7 +542,12 @@ static int getOptions(int argc_p, char** argv_p, tOptions* pOpts_p)
                 break;
 
             default: /* '?' */
+#if defined(CONFIG_USE_PCAP)
+                printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+                printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
+#else
                 printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
+#endif
                 printf(" -p: Use parsable log format\n");
                 printf(" -v LOGLEVEL: A bit mask with log levels to be printed in the event logger\n");
                 printf(" -t LOGCATEGORY: A bit mask with log categories to be printed in the event logger\n");

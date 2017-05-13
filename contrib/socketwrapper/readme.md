@@ -50,6 +50,15 @@ The `sdoudp_criticalSection` function is required to be implemented if the
 receive callback is called from a different thread context. Otherwise, the
 function can be left empty.
 
+### ARP query
+
+The `socketwrapper_arpQuery` function is called when a new SDO connection is
+initialized. The SDO UDP module provides the remote IP address (`remoteIpAddress_p`)
+for the SDO connection. This enables triggering ARP to obtain the remote node's
+Ethernet address. The function shall return `kErrorSdoUdpArpInProgress` to
+signalize the pending ARP progress. If the remote node's Ethernet address is
+already known, the function shall return with `kErrorOk`.
+
 ### Receive callback
 
 The socket receive callback `receiveFromSocket` (`sdoudp-socketwrapper.c`) shall

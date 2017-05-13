@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventkcal.h
+\file   kernel/eventkcal.h
 
 \brief  Include file for kernel event CAL module
 
@@ -12,7 +12,7 @@ implementations.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,9 +37,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventkcal_H_
-#define _INC_eventkcal_H_
+#ifndef _INC_kernel_eventkcal_H_
+#define _INC_kernel_eventkcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -58,7 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -66,24 +64,22 @@ extern "C"
 
 tOplkError eventkcal_init(void);
 tOplkError eventkcal_exit(void);
-tOplkError eventkcal_postUserEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
-tOplkError eventkcal_postKernelEvent(tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postUserEvent(const tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
+tOplkError eventkcal_postKernelEvent(const tEvent* pEvent_p) SECTION_EVENTKCAL_POST;
 void       eventkcal_process(void);
 
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
+#if ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
 /* functions used in eventkcal-linuxkernel.c */
 int        eventkcal_postEventFromUser(ULONG arg);
 int        eventkcal_getEventForUser(ULONG arg);
-#elif (TARGET_SYSTEM == _WIN32_) && defined (_KERNEL_MODE)
-
+#elif ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
 // TODO: Check if they can be revised to merge with Linux APIs
-void eventkcal_postEventFromUser(void* pEvent_p);
-void eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p);
-
+void       eventkcal_postEventFromUser(const void* pEvent_p);
+void       eventkcal_getEventForUser(void* pEvent_p, size_t* pSize_p);
 #endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_eventkcal_H_ */
+#endif /* _INC_kernel_eventkcal_H_ */

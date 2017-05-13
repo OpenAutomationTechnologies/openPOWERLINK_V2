@@ -11,7 +11,7 @@ generic timer list. It is used for Windows and non OS targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -72,10 +72,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define TIMERU_TIMER_LIST   0
-#define TIMERU_FREE_LIST    1
+#define TIMERU_TIMER_LIST       0
+#define TIMERU_FREE_LIST        1
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
 #define TIMERU_EVENT_SHUTDOWN   0   // smaller index has higher priority
 #define TIMERU_EVENT_WAKEUP     1
 #endif
@@ -100,7 +100,7 @@ typedef struct
     UINT                    freeEntries;
     UINT                    minFreeEntries;   // minimum number of free entries
                                               // used to check if TIMERU_MAX_ENTRIES is large enough
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     CRITICAL_SECTION        aCriticalSections[2];
     HANDLE                  hProcessThread;
     HANDLE                  ahEvents[2];      // WakeUp and ShutDown event handles
@@ -115,10 +115,10 @@ static tTimeruInstance timeruInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void  enterCriticalSection(int nType_p);
-static void  leaveCriticalSection(int nType_p);
+static void         enterCriticalSection(int nType_p);
+static void         leaveCriticalSection(int nType_p);
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
 static DWORD WINAPI processThread(LPVOID parameter_p);
 #endif
 
@@ -139,7 +139,7 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    int             nIdx;
+    int nIdx;
 
     // reset instance structure
     OPLK_MEMSET(&timeruInstance_l, 0, sizeof(timeruInstance_l));
@@ -152,9 +152,8 @@ tOplkError timeru_init(void)
 
     // fill free timer list
     for (nIdx = 0; nIdx < TIMERU_MAX_ENTRIES-1; nIdx++)
-    {
-        timeruInstance_l.pEntries[nIdx].pNext = &timeruInstance_l.pEntries[nIdx+1];
-    }
+        timeruInstance_l.pEntries[nIdx].pNext = &timeruInstance_l.pEntries[nIdx + 1];
+
     timeruInstance_l.pEntries[TIMERU_MAX_ENTRIES-1].pNext = NULL;
 
     timeruInstance_l.pFreeListFirst = timeruInstance_l.pEntries;
@@ -165,14 +164,14 @@ tOplkError timeru_init(void)
     // -> the only solution = 0
     timeruInstance_l.startTimeInMs = 0;
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_TIMER_LIST]);
     InitializeCriticalSection(&timeruInstance_l.aCriticalSections[TIMERU_FREE_LIST]);
 
     timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]   = CreateEvent(NULL, FALSE, FALSE, NULL);
     timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] = CreateEvent(NULL, FALSE, FALSE, NULL);
-    if (timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP] == NULL ||
-        timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL)
+    if ((timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP] == NULL) ||
+        (timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN] == NULL))
     {
         return kErrorTimerThreadError;
     }
@@ -198,7 +197,7 @@ The function shuts down the user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_exit(void)
 {
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_SHUTDOWN]);
 
     WaitForSingleObject(timeruInstance_l.hProcessThread, INFINITE);
@@ -256,9 +255,7 @@ tOplkError timeru_process(void)
             timeruInstance_l.startTimeInMs += pTimerEntry->timeoutInMs;
         }
         else
-        {
             pTimerEntry = NULL;
-        }
     }
     leaveCriticalSection(TIMERU_TIMER_LIST);
 
@@ -287,16 +284,18 @@ tOplkError timeru_process(void)
 This function creates a timer, sets up the timeout and saves the
 corresponding timer handle.
 
-\param  pTimerHdl_p     Pointer to store the timer handle.
-\param  timeInMs_p      Timeout in milliseconds.
-\param  argument_p      User definable argument for timer.
+\param[out]     pTimerHdl_p         Pointer to store the timer handle.
+\param[in]      timeInMs_p          Timeout in milliseconds.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
+                           ULONG timeInMs_p,
+                           const tTimerArg* pArgument_p)
 {
     tTimerEntry*    pNewEntry;
     tTimerEntry**   ppEntry;
@@ -320,9 +319,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
         timeruInstance_l.pFreeListFirst = pNewEntry->pNext;
         timeruInstance_l.freeEntries--;
         if (timeruInstance_l.minFreeEntries > timeruInstance_l.freeEntries)
-        {
             timeruInstance_l.minFreeEntries = timeruInstance_l.freeEntries;
-        }
     }
     leaveCriticalSection(TIMERU_FREE_LIST);
 
@@ -332,7 +329,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     }
 
     *pTimerHdl_p = (tTimerHdl)pNewEntry;
-    OPLK_MEMCPY(&pNewEntry->timerArg, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pNewEntry->timerArg, pArgument_p, sizeof(tTimerArg));
 
     // insert timer entry in timer list
     enterCriticalSection(TIMERU_TIMER_LIST);
@@ -355,11 +352,9 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     *ppEntry = pNewEntry;
     leaveCriticalSection(TIMERU_TIMER_LIST);
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     if (ppEntry == &timeruInstance_l.pTimerListFirst)
-    {
         SetEvent(timeruInstance_l.ahEvents[TIMERU_EVENT_WAKEUP]);
-    }
 #endif
 
     return kErrorOk;
@@ -372,24 +367,27 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 This function modifies an existing timer. If the timer was not yet created
 it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 
-\param  pTimerHdl_p     Pointer to store the timer handle.
-\param  timeInMs_p      Timeout in milliseconds.
-\param  argument_p      User definable argument for timer.
+\param[in,out]  pTimerHdl_p         Pointer to store the timer handle.
+\param[in]      timeInMs_p          Timeout in milliseconds.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p,
+                              ULONG timeInMs_p,
+                              const tTimerArg* pArgument_p)
 {
-    tOplkError      ret;
+    tOplkError  ret;
 
     ret = timeru_deleteTimer(pTimerHdl_p);
     if (ret != kErrorOk)
         return ret;
 
-    ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
+    ret = timeru_setTimer(pTimerHdl_p, timeInMs_p, pArgument_p);
+
     return ret;
 }
 
@@ -399,11 +397,11 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
 This function deletes an existing timer.
 
-\param  pTimerHdl_p     Pointer to timer handle of timer to delete.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
-\retval kErrorOk                  The timer is deleted.
+\retval kErrorTimerInvalidHandle    An invalid timer handle was specified.
+\retval kErrorOk                    The timer is deleted.
 
 \ingroup module_timeru
 */
@@ -432,9 +430,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
         {
             *ppEntry = pTimerEntry->pNext;
             if (*ppEntry != NULL)
-            {
                 (*ppEntry)->timeoutInMs += pTimerEntry->timeoutInMs;
-            }
             break;
         }
 
@@ -451,6 +447,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     // set handle invalid
     *pTimerHdl_p = 0;
+
     return kErrorOk;
 }
 
@@ -466,7 +463,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
 This function enters a critical section of the timer module.
 
-\param  nType_p         Type of critical section to enter.
+\param[in]      nType_p             Type of critical section to enter.
 */
 //------------------------------------------------------------------------------
 static void enterCriticalSection(int nType_p)
@@ -475,7 +472,7 @@ static void enterCriticalSection(int nType_p)
     UNUSED_PARAMETER(nType_p);
 
     target_enableGlobalInterrupt(FALSE);
-#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#elif ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     EnterCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
@@ -486,7 +483,7 @@ static void enterCriticalSection(int nType_p)
 
 This function leaves a critical section of the timer module.
 
-\param  nType_p         Type of critical section to leave.
+\param[in]      nType_p             Type of critical section to leave.
 */
 //------------------------------------------------------------------------------
 static void leaveCriticalSection(int nType_p)
@@ -495,12 +492,12 @@ static void leaveCriticalSection(int nType_p)
     UNUSED_PARAMETER(nType_p);
 
     target_enableGlobalInterrupt(TRUE);
-#elif (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#elif ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     LeaveCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
 }
 
-#if (TARGET_SYSTEM == _WIN32_ || TARGET_SYSTEM == _WINCE_)
+#if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
 //------------------------------------------------------------------------------
 /**
 \brief  Timer thread function
@@ -508,7 +505,7 @@ static void leaveCriticalSection(int nType_p)
 This function implements the thread which is handling the timer events on
 Windows.
 
-\param  parameter_p         Thread function parameter (not used)
+\param[in,out]  parameter_p         Thread function parameter (not used)
 
 \return The function returns the thread error code.
 */

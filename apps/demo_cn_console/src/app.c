@@ -10,7 +10,7 @@ This file contains a demo application for digital input/output data.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -41,14 +41,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stddef.h>
+#include "app.h"
 
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
-
 #include <eventlog/eventlog.h>
 
-#include "app.h"
+#include <stddef.h>
+#include <stdio.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -81,30 +81,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* structure for input process image */
 typedef struct
 {
-   BYTE    digitalIn;
+   UINT8                digitalIn;
 } PI_IN;
 
 /* structure for output process image */
 typedef struct
 {
-   BYTE    digitalOut;
+   UINT8                digitalOut;
 } PI_OUT;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
 /* process image */
-static PI_IN*   pProcessImageIn_l;
-static PI_OUT*  pProcessImageOut_l;
+static PI_IN*           pProcessImageIn_l;
+static const PI_OUT*    pProcessImageOut_l;
 
 /* application variables */
-static BYTE    digitalIn_g;                 // 8 bit digital input
-static BYTE    digitalOut_g;                // 8 bit digital output
+static UINT8            digitalIn_l;            // 8 bit digital input
+static UINT8            digitalOut_l;           // 8 bit digital output
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initProcessImage(void);
+static tOplkError   initProcessImage(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -123,7 +123,7 @@ The function initializes the synchronous data application
 //------------------------------------------------------------------------------
 tOplkError initApp(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     ret = initProcessImage();
 
@@ -159,7 +159,7 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tOplkError processSync(void)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (oplk_waitSyncEvent(100000) != kErrorOk)
         return ret;
@@ -169,10 +169,10 @@ tOplkError processSync(void)
         return ret;
 
     /* read input image - digital outputs */
-    digitalOut_g = pProcessImageOut_l->digitalOut;
+    digitalOut_l = pProcessImageOut_l->digitalOut;
 
     /* setup output image - digital inputs */
-    pProcessImageIn_l->digitalIn = digitalIn_g;
+    pProcessImageIn_l->digitalIn = digitalIn_l;
 
     ret = oplk_exchangeProcessImageIn();
 
@@ -190,7 +190,7 @@ The function initializes the digital input port.
 //------------------------------------------------------------------------------
 void setupInputs(void)
 {
-    digitalIn_g = 1;
+    digitalIn_l = 1;
 }
 
 //------------------------------------------------------------------------------
@@ -205,10 +205,11 @@ left (increase the value).
 //------------------------------------------------------------------------------
 void increaseInputs(void)
 {
-    if (digitalIn_g == 128)
-        digitalIn_g = 1;
+    if (digitalIn_l == 128)
+        digitalIn_l = 1;
     else
-        digitalIn_g = digitalIn_g << 1;
+        digitalIn_l = digitalIn_l << 1;
+
     printf("\b \b");
     printInputs();
 }
@@ -225,10 +226,11 @@ right (decrease the value).
 //------------------------------------------------------------------------------
 void decreaseInputs(void)
 {
-    if (digitalIn_g == 1)
-        digitalIn_g = 128;
+    if (digitalIn_l == 1)
+        digitalIn_l = 128;
     else
-        digitalIn_g = digitalIn_g >> 1;
+        digitalIn_l = digitalIn_l >> 1;
+
     printf("\b \b");
     printInputs();
 }
@@ -248,10 +250,10 @@ void printOutputs(void)
     int i;
 
     printf("\b \b");
-    printf("Digital Outputs: ");
+    printf("Digital outputs: ");
     for (i = 0; i < 8; i++)
     {
-        if (((digitalOut_g >> i) & 1) == 1)
+        if (((digitalOut_l >> i) & 1) == 1)
             printf("*");
         else
             printf("-");
@@ -272,10 +274,10 @@ void printInputs(void)
 {
     int i;
 
-    printf("Digital Inputs: ");
+    printf("Digital inputs: ");
     for (i = 0; i < 8; i++)
     {
-        if (((digitalIn_g >> i) & 1) == 1)
+        if (((digitalIn_l >> i) & 1) == 1)
             printf("*");
         else
             printf("-");
@@ -300,45 +302,62 @@ The function initializes the process image of the application.
 //------------------------------------------------------------------------------
 static tOplkError initProcessImage(void)
 {
-    tOplkError      ret = kErrorOk;
-    UINT            varEntries;
-    tObdSize        obdSize;
+    tOplkError  ret = kErrorOk;
+    UINT        varEntries;
+    tObdSize    obdSize;
 
     /* Allocate process image */
     printf("Initializing process image...\n");
-    printf("Size of process image: Input = %ld Output = %ld\n", sizeof(PI_IN), sizeof(PI_OUT));
-    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
-                          "Allocating process image: Input:%d Output:%d", sizeof(PI_IN), sizeof(PI_OUT));
+    printf("Size of process image: Input = %lu Output = %lu \n",
+           (ULONG)sizeof(PI_IN),
+           (ULONG)sizeof(PI_OUT));
+    eventlog_printMessage(kEventlogLevelInfo,
+                          kEventlogCategoryGeneric,
+                          "Allocating process image: Input:%lu Output:%lu",
+                          (ULONG)sizeof(PI_IN),
+                          (ULONG)sizeof(PI_OUT));
 
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
-    {
         return ret;
-    }
 
     pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
-    pProcessImageOut_l = (PI_OUT*)oplk_getProcessImageOut();
+    pProcessImageOut_l = (const PI_OUT*)oplk_getProcessImageOut();
 
     /* link process variables used by CN to object dictionary */
     fprintf(stderr, "Linking process image vars:\n");
 
     obdSize = sizeof(pProcessImageIn_l->digitalIn);
     varEntries = 1;
-    ret = oplk_linkProcessImageObject(0x6000, 0x01, offsetof(PI_IN, digitalIn),
-                                      FALSE, obdSize, &varEntries);
+    ret = oplk_linkProcessImageObject(0x6000,
+                                      0x01,
+                                      offsetof(PI_IN, digitalIn),
+                                      FALSE,
+                                      obdSize,
+                                      &varEntries);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "linking process vars failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        fprintf(stderr,
+                "Linking process vars failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret),
+                ret);
         return ret;
     }
 
     obdSize = sizeof(pProcessImageOut_l->digitalOut);
     varEntries = 1;
-    ret = oplk_linkProcessImageObject(0x6200, 0x01, offsetof(PI_OUT, digitalOut),
-                                      TRUE, obdSize, &varEntries);
+    ret = oplk_linkProcessImageObject(0x6200,
+                                      0x01,
+                                      offsetof(PI_OUT, digitalOut),
+                                      TRUE,
+                                      obdSize,
+                                      &varEntries);
     if (ret != kErrorOk)
     {
-        fprintf(stderr, "linking process vars failed with \"%s\" (0x%04x)\n", debugstr_getRetValStr(ret), ret);
+        fprintf(stderr,
+                "Linking process vars failed with \"%s\" (0x%04x)\n",
+                debugstr_getRetValStr(ret),
+                ret);
         return ret;
     }
 

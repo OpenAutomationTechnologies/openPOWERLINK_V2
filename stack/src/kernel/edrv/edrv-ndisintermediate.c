@@ -20,6 +20,7 @@ are registered with NDIS.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <common/ami.h>
 #include <kernel/edrv.h>
 
@@ -62,28 +63,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #ifndef EDRV_MAX_TX_BUFFERS
-#define EDRV_MAX_TX_BUFFERS    256
+#define EDRV_MAX_TX_BUFFERS     256
 #endif
 
 #ifndef EDRV_MAX_TX_QUEUE
-#define EDRV_MAX_TX_QUEUE      16
+#define EDRV_MAX_TX_QUEUE       16
 #endif
-#define EDRV_TX_QUEUE_MASK     (EDRV_MAX_TX_QUEUE - 1)
+#define EDRV_TX_QUEUE_MASK      (EDRV_MAX_TX_QUEUE - 1)
 
 #ifndef EDRV_MAX_RX_BUFFERS
-#define EDRV_MAX_RX_BUFFERS    256
+#define EDRV_MAX_RX_BUFFERS     256
 #endif
 
 #ifndef EDRV_MAX_RX_DESCS
-#define EDRV_MAX_RX_DESCS      16
+#define EDRV_MAX_RX_DESCS       16
 #endif
-#define EDRV_RX_DESC_MASK      (EDRV_MAX_RX_DESCS - 1)
+#define EDRV_RX_DESC_MASK       (EDRV_MAX_RX_DESCS - 1)
 
-#define EDRV_MAX_BUFFER_SIZE    0x600
+#define EDRV_MAX_BUFFER_SIZE    0x0600
 
-#define EDRV_TX_BUFFER_SIZE    (EDRV_MAX_TX_BUFFERS * EDRV_MAX_BUFFER_SIZE)      // n * (MTU + 14 + 4)
+#define EDRV_TX_BUFFER_SIZE     (EDRV_MAX_TX_BUFFERS * EDRV_MAX_BUFFER_SIZE)    // n * (MTU + 14 + 4)
 
-#define EDRV_MIN_FRAME_SIZE    60
+#define EDRV_MIN_FRAME_SIZE     60
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -135,16 +136,19 @@ static void edrvRxHandler(void* pRxBuffer_p, size_t size_p);
 
 This function initializes the Ethernet driver.
 
-\param  pEdrvInitParam_p    Edrv initialization parameters.
+\param[in]      pEdrvInitParam_p    Edrv initialization parameters
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
+tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError    ret = kErrorOk;
+
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
@@ -168,14 +172,14 @@ tOplkError edrv_init(tEdrvInitParam* pEdrvInitParam_p)
     // Register Tx and Rx callbacks
     ndis_registerTxRxHandler(edrvTxHandler, edrvRxHandler);
 
+    // Save the init data
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
+
     // Retrieve MAC address of the binding NIC
-    ndis_getMacAddress(pEdrvInitParam_p->aMacAddr);
+    ndis_getMacAddress(edrvInstance_l.initParam.aMacAddr);
 
     // Enable the NDIS intermediate driver
     ndis_setBindingState(kNdisBindingRunning);
-
-    // Save the init data
-    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
     return kErrorOk;
 }
@@ -193,7 +197,7 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_exit(void)
 {
-    // Fallback to ready state
+    // Fall-back to ready state
     ndis_setBindingState(kNdisBindingReady);
 
     // Free buffers
@@ -214,7 +218,7 @@ This function returns the MAC address of the Ethernet controller
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-UINT8* edrv_getMacAddr(void)
+const UINT8* edrv_getMacAddr(void)
 {
     return edrvInstance_l.initParam.aMacAddr;
 }
@@ -227,17 +231,17 @@ This function sets a multicast entry into the Ethernet controller.
 
 \note The multicast filters are not supported by this driver.
 
-\param  pMacAddr_p  Multicast address.
+\param[in]      pMacAddr_p          Multicast address.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_setRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     // Check if OID_802_3_DELETE_MULTICAST_ADDRESS along with
-    // OID_GEN_CURRENT_PACKET_FILTER can used to update the filter.
+    // OID_GEN_CURRENT_PACKET_FILTER can be used to update the filter.
     UNUSED_PARAMETER(pMacAddr_p);
 
     return kErrorOk;
@@ -251,18 +255,18 @@ This function removes the multicast entry from the Ethernet controller.
 
 \note The multicast filters are not supported by this driver.
 
-\param  pMacAddr_p  Multicast address.
+\param[in]      pMacAddr_p          Multicast address
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
+tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     UNUSED_PARAMETER(pMacAddr_p);
     // Check if OID_802_3_DELETE_MULTICAST_ADDRESS along with
-    // OID_GEN_CURRENT_PACKET_FILTER can used to update the filter.
+    // OID_GEN_CURRENT_PACKET_FILTER can be used to update the filter.
     return kErrorOk;
 }
 
@@ -270,26 +274,27 @@ tOplkError edrv_clearRxMulticastMacAddr(UINT8* pMacAddr_p)
 /**
 \brief  Change Rx filter setup
 
-This function changes the Rx filter setup. The parameter \p entryChanged_p
+This function changes the Rx filter setup. The parameter entryChanged_p
 selects the Rx filter entry that shall be changed and \p changeFlags_p determines
 the property.
-
 If \p entryChanged_p is equal or larger count_p all Rx filters shall be changed.
 
 \note Rx filters are not supported by this driver!
 
-\param  pFilter_p           Base pointer of Rx filter array.
-\param  count_p             Number of Rx filter array entries.
-\param  entryChanged_p      Index of Rx filter entry that shall be changed.
-\param  changeFlags_p       Bit mask that selects the changing Rx filter property.
+\param[in,out]  pFilter_p           Base pointer of Rx filter array
+\param[in]      count_p             Number of Rx filter array entries
+\param[in]      entryChanged_p      Index of Rx filter entry that shall be changed
+\param[in]      changeFlags_p       Bit mask that selects the changing Rx filter property
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
-                               UINT entryChanged_p, UINT changeFlags_p)
+tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p,
+                               UINT count_p,
+                               UINT entryChanged_p,
+                               UINT changeFlags_p)
 {
     UNUSED_PARAMETER(pFilter_p);
     UNUSED_PARAMETER(count_p);
@@ -305,7 +310,7 @@ tOplkError edrv_changeRxFilter(tEdrvFilter* pFilter_p, UINT count_p,
 
 This function allocates a Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -316,6 +321,9 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tNdisErrorStatus    ndisStatus;
     void*               pTxBuffer = NULL;
+
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
 
     if (pBuffer_p->maxBufferSize > EDRV_MAX_BUFFER_SIZE)
         return kErrorEdrvNoFreeBufEntry;
@@ -348,7 +356,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function releases the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor.
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -371,7 +379,7 @@ tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
 This function sends the Tx buffer.
 
-\param  pBuffer_p           Tx buffer descriptor.
+\param[in,out]  pBuffer_p           Tx buffer descriptor
 
 \return The function returns a tOplkError error code.
 
@@ -380,6 +388,9 @@ This function sends the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
+    // Check parameter validity
+    ASSERT(pBuffer_p != NULL);
+
     if ((pBuffer_p->txFrameSize > EDRV_MAX_BUFFER_SIZE))
     {
         return kErrorEdrvInvalidParam;
@@ -395,87 +406,29 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Set Tx buffer ready
-
-This function sets the Tx buffer ready for transmission.
-
-\param  pBuffer_p   Tx buffer descriptor.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_setTxBufferReady(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Start ready Tx buffer
-
-This function sends the Tx buffer marked as ready.
-
-\param  pBuffer_p   Tx buffer descriptor.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_startTxBuffer(tEdrvTxBuffer* pBuffer_p)
-{
-    UNUSED_PARAMETER(pBuffer_p);
-
-    return kErrorOk;
-}
-
-#if CONFIG_EDRV_USE_DIAGNOSTICS != FALSE
+#if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Get Edrv module diagnostics
 
 This function returns the Edrv diagnostics to a provided buffer.
 
-\param  pBuffer_p   Pointer to buffer filled with diagnostics.
-\param  size_p      Size of buffer
+\param[out]     pBuffer_p           Pointer to buffer filled with diagnostics.
+\param[in]      size_p              Size of buffer
 
-\return The function returns a tOplkError error code.
+\return The function returns the size of the diagnostics information.
 
 \ingroup module_edrv
 */
 //------------------------------------------------------------------------------
-INT edrv_getDiagnostics(char* pBuffer_p, INT size_p)
+int edrv_getDiagnostics(char* pBuffer_p, size_t size_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
     UNUSED_PARAMETER(size_p);
+
     return 0;
 }
-
 #endif
-//------------------------------------------------------------------------------
-/**
-\brief  Release Rx buffer
-
-This function releases a late release Rx buffer.
-
-\param  pRxBuffer_p     Rx buffer to be released.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_edrv
-*/
-//------------------------------------------------------------------------------
-tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
-{
-    UNUSED_PARAMETER(pRxBuffer_p);
-    return kErrorOk;
-}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -490,8 +443,8 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
 Receive handler registered with NDIS intermediate driver. Intermediate driver
 invokes receive from the NetBufferLists Receive handler.
 
-\param  pRxBuffer_p         A pointer to the Receive buffer.
-\param  size_p              Size of the received data.
+\param[in,out]  pRxBuffer_p         A pointer to the Receive buffer.
+\param[in]      size_p              Size of the received data.
 
 */
 //------------------------------------------------------------------------------
@@ -513,13 +466,13 @@ static void edrvRxHandler(void* pRxBuffer_p, size_t size_p)
 
 Transmit complete handler registered with NDIS intermediate driver.
 
-\param  pTxBuff_p         Pointer to Tx buffer.
+\param[in]      pTxBuff_p           Pointer to Tx buffer.
 
 */
 //------------------------------------------------------------------------------
 static void edrvTxHandler(void* pTxBuff_p)
 {
-    tEdrvTxBuffer*   pBuffer = (tEdrvTxBuffer*)pTxBuff_p;
+    tEdrvTxBuffer* const pBuffer = (tEdrvTxBuffer*)pTxBuff_p;
 
     if (pBuffer != NULL)
     {

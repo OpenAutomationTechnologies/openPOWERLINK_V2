@@ -7,7 +7,7 @@
 The file contains definitions for the DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *******************************************************************************/
-
 #ifndef _INC_common_dllcal_H_
 #define _INC_common_dllcal_H_
 
@@ -47,19 +46,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT
-#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT   32767
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_NMT    32767
 #endif
 
 #ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN
-#define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN   32767
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_GEN    32767
 #endif
 
 #ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC
-#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC  8192
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_SYNC   8192
 #endif
 
 #ifndef CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH
-#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH  8192
+#define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH   8192
 #endif
 
 /* setup interface getting function for DLLCAL queue */
@@ -122,12 +121,11 @@ SHB)
 */
 typedef void* tDllCalQueueInstance;
 
-
 typedef struct
 {
     tOplkError (*pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
     tOplkError (*pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
-    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
+    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
     tOplkError (*pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
     tOplkError (*pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
     tOplkError (*pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
@@ -136,7 +134,6 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   dllktgt.h
+\file   kernel/dllktgt.h
 
 \brief  Target specific definitions for DLL kernel module files
 
@@ -10,7 +10,7 @@ implementation files.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_dllktgt_H_
-#define _INC_dllktgt_H_
+#ifndef _INC_kernel_dllktgt_H_
+#define _INC_kernel_dllktgt_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,34 +46,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#if (TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)
-
+#if ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__))
+// Linux kernel requires the critical section within DLL
 #include <linux/spinlock.h>
 
-#define TGT_DLLK_DEFINE_CRITICAL_SECTION \
-        DEFINE_SPINLOCK(tgtDllkCriticalSection_l);
+#define TGT_DLLK_DEFINE_CRITICAL_SECTION    DEFINE_SPINLOCK(tgtDllkCriticalSection_l);
+#define TGT_DLLK_DECLARE_CRITICAL_SECTION   extern spinlock_t tgtDllkCriticalSection_l;
+#define TGT_DLLK_DECLARE_FLAGS              ULONG tgtDllkFlags;
+#define TGT_DLLK_ENTER_CRITICAL_SECTION()   spin_lock_irqsave(&tgtDllkCriticalSection_l, tgtDllkFlags);
+#define TGT_DLLK_LEAVE_CRITICAL_SECTION()   spin_unlock_irqrestore(&tgtDllkCriticalSection_l, tgtDllkFlags);
 
-#define TGT_DLLK_DECLARE_CRITICAL_SECTION \
-        extern spinlock_t tgtDllkCriticalSection_l;
+#else   /* ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)) */
 
-#define TGT_DLLK_DECLARE_FLAGS \
-        ULONG   tgtDllkFlags;
-
-#define TGT_DLLK_ENTER_CRITICAL_SECTION() \
-        spin_lock_irqsave(&tgtDllkCriticalSection_l, tgtDllkFlags);
-
-#define TGT_DLLK_LEAVE_CRITICAL_SECTION() \
-        spin_unlock_irqrestore(&tgtDllkCriticalSection_l, tgtDllkFlags);
-
-#else   // all other targets do not need the critical section within DLL
-
+// all other targets do not need the critical section within DLL
 #define TGT_DLLK_DEFINE_CRITICAL_SECTION
 #define TGT_DLLK_DECLARE_CRITICAL_SECTION
 #define TGT_DLLK_DECLARE_FLAGS
 #define TGT_DLLK_ENTER_CRITICAL_SECTION()
 #define TGT_DLLK_LEAVE_CRITICAL_SECTION()
 
-#endif
+#endif /* ((TARGET_SYSTEM == _LINUX_) && defined(__KERNEL__)) */
 
-#endif  /* #ifndef _INC_dllktgt_H_ */
+#endif  /* #ifndef _INC_kernel_dllktgt_H_ */

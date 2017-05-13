@@ -7,7 +7,7 @@
 The file contains the definitions for the POWERLINK process thread.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,9 +33,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ProcessThread_H_
-#define _INC_ProcessThread_H_
+#ifndef _INC_demo_ProcessThread_H_
+#define _INC_demo_ProcessThread_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -43,10 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 
 #include <QThread>
+#include <QString>
 #include <QMutex>
 #include <QWaitCondition>
-
-#include <EventLog.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -56,8 +54,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // class definitions
 //------------------------------------------------------------------------------
 class QWidget;
-class QString;
 class MainWindow;
+class EventLog;
 
 //------------------------------------------------------------------------------
 /**
@@ -77,9 +75,9 @@ public:
 
     void              run();
     void              sigOplkStatus(int status_p);
-    void              sigNmtState(tNmtState State_p);
+    void              sigNmtState(tNmtState state_p);
     void              sigMnActive(bool fMnActive_p);
-    void              sigPrintLog(QString log_p);
+    void              sigPrintLog(const QString& rLog_p);
     void              sigNodeAppeared(int nodeId_p) { emit nodeAppeared(nodeId_p); };
     void              sigNodeDisappeared(int nodeId_p) { emit nodeDisappeared(nodeId_p); };
     void              sigNodeStatus(int nodeId_p, int status_p) { emit nodeStatusChanged(nodeId_p, status_p); };
@@ -102,21 +100,33 @@ signals:
     void              sdoFinished(tSdoComFinished sdoInfo_p);
 
 private:
-    static tOplkError appCbEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
+    static tOplkError appCbEvent(tOplkApiEventType eventType_p,
+                                 const tOplkApiEventArg* pEventArg_p,
+                                 void* pUserArg_p);
 
-    tOplkError        processEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processStateChangeEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processErrorWarningEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processSdoEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processHistoryEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processNodeEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processPdoChangeEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processCfmProgressEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        processCfmResultEvent(tOplkApiEventType eventType_p, tOplkApiEventArg* pEventArg_p, void* pUserArg_p);
-    tOplkError        setDefaultNodeAssignment(void);
+    tOplkError processEvent(tOplkApiEventType eventType_p,
+                            const tOplkApiEventArg* pEventArg_p,
+                            void* pUserArg_p);
+    tOplkError processStateChangeEvent(const tEventNmtStateChange* pNmtStateChange_p,
+                                       void* pUserArg_p);
+    tOplkError processErrorWarningEvent(const tEventError* pInternalError_p,
+                                        void* pUserArg_p);
+    tOplkError processPdoChangeEvent(const tOplkApiEventPdoChange* pPdoChange_p,
+                                     void* pUserArg_p);
+    tOplkError processHistoryEvent(const tErrHistoryEntry* pHistoryEntry_p,
+                                   void* pUserArg_p);
+    tOplkError processNodeEvent(const tOplkApiEventNode* pNode_p,
+                                void* pUserArg_p);
+    tOplkError processCfmProgressEvent(const tCfmEventCnProgress* pCfmProgress_p,
+                                       void* pUserArg_p);
+    tOplkError processCfmResultEvent(const tOplkApiEventCfmResult* pCfmResult_p,
+                                     void* pUserArg_p);
+    tOplkError processSdoEvent(const tSdoComFinished* pSdo_p,
+                               void* pUserArg_p);
+    tOplkError setDefaultNodeAssignment(void);
 
-    QMutex            Mutex;
-    QWaitCondition    NmtStateOff;
+    QMutex            mutex;
+    QWaitCondition    nmtStateOff;
     MainWindow*       pMainWindow;
     EventLog*         pEventLog;
 
@@ -125,5 +135,4 @@ private:
     bool              fMnActive;
 };
 
-#endif /* _INC_ProcessThread_H_ */
-
+#endif /* _INC_demo_ProcessThread_H_ */

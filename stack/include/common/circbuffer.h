@@ -7,7 +7,7 @@
 This file contains the definitions for the circular buffer library.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_circbuffer_H_
 #define _INC_common_circbuffer_H_
 
@@ -64,11 +63,7 @@ typedef enum
     kCircBufNoReadableData              =  1,
     kCircBufReadsizeTooSmall            =  2,
     kCircBufBufferFull                  =  3,
-    kCircBufOpenMismatch                =  7,
     kCircBufInvalidArg                  =  9,
-    kCircBufOutOfMem                    = 11,
-    kCircBufAlreadySignaling            = 13,
-    kCircBufExceedDataSizeLimit         = 14,
     kCircBufNoResource                  = 20
 } eCircBufError;
 
@@ -116,7 +111,6 @@ typedef struct
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -135,11 +129,11 @@ tCircBufError circbuf_writeMultipleData(tCircBufInstance* pInstance_p, const voi
 tCircBufError circbuf_readData(tCircBufInstance* pInstance_p, void* pData_p,
                                size_t size_p, size_t* pDataBlockSize_p)
                                SECTION_CIRCBUF_READ_DATA;
-UINT32        circbuf_getDataCount(tCircBufInstance* pInstance_p);
+UINT32        circbuf_getDataCount(const tCircBufInstance* pInstance_p);
 tCircBufError circBuf_setSignaling(tCircBufInstance* pInstance_p, VOIDFUNCPTR pfnSigCb_p);
 
 #ifdef DEBUG_CIRCBUF_SIZE_CHECK
-UINT32        circbuf_getMaxSize(tCircBufInstance* pInstance_p);
+UINT32        circbuf_getMaxSize(const tCircBufInstance* pInstance_p);
 #endif
 
 #ifdef __cplusplus

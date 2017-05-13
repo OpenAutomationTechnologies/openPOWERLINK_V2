@@ -36,8 +36,10 @@ set_false_path -from [get_registers *]      -to [get_ports EPCS_DCLK]
 set_false_path -from [get_registers *]      -to [get_ports EPCS_SCE]
 set_false_path -from [get_registers *]      -to [get_ports EPCS_SDO]
 set_false_path -from [get_ports EPCS_DATA0] -to [get_registers *]
-set_false_path -from [get_registers *]      -to [get_ports HOSTIF_IRQ_n]
 
 # ------------------------------------------------------------------------------
 # Other IOs
-set_false_path -from [get_registers *]      -to [get_ports LEDG[*]]
+set_false_path -from *                          -to [get_ports LEDR[*]]
+set_false_path -from *                          -to [get_ports LEDG[*]]
+set_false_path -from *                          -to [get_ports HOSTIF_IRQ_n]
+set_false_path -from [get_ports PHY_LINK_n[*]]  -to *

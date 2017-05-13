@@ -12,7 +12,7 @@ This file contains the implementation of the configuration file manager (CFM).
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,14 +49,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdocom.h>
 #include <user/identu.h>
 #include <user/nmtu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
 #if !defined(CONFIG_INCLUDE_SDOC)
 #error "CFM module needs openPOWERLINK module SDO client!"
 #endif
 
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == FALSE)
-#error "CFM module needs define CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE"
+#error "CFM module needs define(CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE)"
 #endif
 
 //============================================================================//
@@ -67,12 +67,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #ifndef CONFIG_CFM_CONFIGURE_CYCLE_LENGTH
-#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH  FALSE
+#define CONFIG_CFM_CONFIGURE_CYCLE_LENGTH   FALSE
 #endif
 
 // return pointer to node info structure for specified node ID
 // d.k. may be replaced by special (hash) function if node ID array is smaller than 254
-#define CFM_GET_NODEINFO(uiNodeId_p) (cfmInstance_g.apNodeInfo[uiNodeId_p - 1])
+#define CFM_GET_NODEINFO(nodeId_p)  (cfmInstance_g.apNodeInfo[nodeId_p - 1])
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -101,7 +101,7 @@ The following enumeration lists all valid CFM states.
 */
 typedef enum
 {
-    kCfmStateIdle           = 0x00,                         ///< The CFM is idle
+    kCfmStateIdle = 0x00,                                   ///< The CFM is idle
     kCfmStateWaitRestore,                                   ///< The CFM has issued a restore command and is awaiting the acknowledge
     kCfmStateDownload,                                      ///< The CFM is downloading a new configuration
     kCfmStateDownloadNetConf,                               ///< The CFM is downloading a new network configuration in case of RMN support
@@ -155,23 +155,26 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tCfmInstance             cfmInstance_g;
+static tCfmInstance         cfmInstance_g;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 
 static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p);
-static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p);
-static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p, tNmtNodeCommand nmtNodeCommand_p);
-static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
-static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p);
-static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p);
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p);
-static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError    callCbProgress(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError    finishConfig(tCfmNodeInfo* pNodeInfo_p,
+                                  tNmtNodeCommand nmtNodeCommand_p);
+static tOplkError    downloadCycleLength(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError    downloadObject(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError    sdoWriteObject(tCfmNodeInfo* pNodeInfo_p,
+                                    const void* pLeSrcData_p,
+                                    UINT size_p);
+static tOplkError    cbSdoCon(const tSdoComFinished* pSdoComFinished_p);
+static tOplkError    finishDownload(tCfmNodeInfo* pNodeInfo_p);
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p);
+static tOplkError    downloadNetConf(tCfmNodeInfo* pNodeInfo_p);
 #endif
 
 
@@ -185,10 +188,10 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p);
 
 The function initializes the CFM module.
 
-\param  pfnCbEventCnProgress_p      Pointer to callback function for CN progress
-                                    events.
-\param  pfnCbEventCnResult_p        Pointer to callback function for CN result
-                                    events.
+\param[in]      pfnCbEventCnProgress_p  Pointer to callback function for CN progress
+                                        events.
+\param[in]      pfnCbEventCnResult_p    Pointer to callback function for CN result
+                                        events.
 
 \return The function returns a tOplkError error code.
 
@@ -198,9 +201,9 @@ The function initializes the CFM module.
 tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
                      tCfmCbEventCnResult pfnCbEventCnResult_p)
 {
-    tOplkError      ret = kErrorOk;
-    UINT            subindex;
-    tVarParam       varParam;
+    tOplkError  ret = kErrorOk;
+    UINT        subindex;
+    tVarParam   varParam;
 
     OPLK_MEMSET(&cfmInstance_g, 0, sizeof(tCfmInstance));
 
@@ -215,7 +218,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     {
         varParam.subindex = subindex;
         varParam.validFlag = kVarValidAll;
-        ret = obd_defineVar(&varParam);
+        ret = obdu_defineVar(&varParam);
         if ((ret != kErrorOk) &&
             (ret != kErrorObdIndexNotExist) &&
             (ret != kErrorObdSubindexNotExist))
@@ -223,7 +226,8 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
             return ret;
         }
     }
-    return kErrorOk;
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -239,10 +243,10 @@ The function de-initializes the CFM module.
 //------------------------------------------------------------------------------
 tOplkError cfmu_exit(void)
 {
-    UINT                nodeId;
-    tVarParam           varParam;
-    UINT8*              pBuffer;
-    tCfmNodeInfo*       pNodeInfo;
+    UINT            nodeId;
+    tVarParam       varParam;
+    UINT8*          pBuffer;
+    tCfmNodeInfo*   pNodeInfo;
 
     // free domain for object 0x1F22 CFM_ConciseDcfList_ADOM
     varParam.pData = NULL;
@@ -254,16 +258,14 @@ tOplkError cfmu_exit(void)
         if (pNodeInfo != NULL)
         {
             if (pNodeInfo->sdoComConHdl != UINT_MAX)
-            {
                 sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
-            }
 
             pBuffer = pNodeInfo->pObdBufferConciseDcf;
             if (pBuffer != NULL)
             {
                 varParam.subindex = nodeId;
                 varParam.validFlag = kVarValidAll;
-                obd_defineVar(&varParam);
+                obdu_defineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
                 OPLK_FREE(pBuffer);
@@ -284,29 +286,33 @@ tOplkError cfmu_exit(void)
 The function processes a node event. It starts configuring a specified CN if the
 configuration data and time of this CN differ from the expected (local) values.
 
-\param  nodeId_p        Node ID of the node to be configured.
-\param  nodeEvent_p     Node event to process.
-\param  nmtState_p      NMT state of the node.
+\param[in]      nodeId_p            Node ID of the node to be configured.
+\param[in]      nodeEvent_p         Node event to process.
+\param[in]      nmtState_p          NMT state of the node.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk        Configuration is OK -> continue boot process for this CN.
-\retval kErrorReject    Defer further processing until configuration process has finished.
-\retval other           Major error has occurred.
+\retval kErrorOk                    Configuration is OK -> continue boot process
+                                    for this CN.
+\retval kErrorReject                Defer further processing until configuration
+                                    process has finished.
+\retval other                       Major error has occurred.
 
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p)
+tOplkError cfmu_processNodeEvent(UINT nodeId_p,
+                                 tNmtNodeEvent nodeEvent_p,
+                                 tNmtState nmtState_p)
 {
-    tOplkError          ret = kErrorOk;
-    static UINT32       leSignature;
-    tCfmNodeInfo*       pNodeInfo = NULL;
-    tObdSize            obdSize;
-    UINT32              expConfTime = 0;
-    UINT32              expConfDate = 0;
-    tIdentResponse*     pIdentResponse = NULL;
-    BOOL                fDoUpdate = FALSE;
-    BOOL                fDoNetConf = FALSE;
+    tOplkError              ret = kErrorOk;
+    static UINT32           leSignature;
+    tCfmNodeInfo*           pNodeInfo = NULL;
+    tObdSize                obdSize;
+    UINT32                  expConfTime = 0;
+    UINT32                  expConfDate = 0;
+    const tIdentResponse*   pIdentResponse = NULL;
+    BOOL                    fDoUpdate = FALSE;
+    BOOL                    fDoNetConf = FALSE;
 
     if ((nodeEvent_p != kNmtNodeEventCheckConf) &&
         (nodeEvent_p != kNmtNodeEventUpdateConf) &&
@@ -353,11 +359,11 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->pDataConciseDcf = (UINT8*)obd_getObjectDataPtr(0x1F22, nodeId_p);
+    pNodeInfo->pDataConciseDcf = (UINT8*)obdu_getObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
         return kErrorCfmNoConfigData;
 
-    obdSize = obd_getDataSize(0x1F22, nodeId_p);
+    obdSize = obdu_getDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32)obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
@@ -382,14 +388,14 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     }
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-    if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+    if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & NMT_FEATUREFLAGS_CFM)
     {
-        UINT subindex;
+        UINT    subindex;
 
         // add size of network configuration (domains in CFM_ConciseDcfList_ADOM)
         for (subindex = 1; subindex <= NMT_MAX_NODE_ID; subindex++)
         {
-            obdSize = obd_getDataSize(0x1F22, subindex);
+            obdSize = obdu_getDataSize(0x1F22, subindex);
             // Download only cDCFs with at least one entry
             if (obdSize > 4)
                 pNodeInfo->eventCnProgress.totalNumberOfBytes += (UINT32)obdSize;
@@ -416,13 +422,14 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     else
     {
         obdSize = sizeof(expConfDate);
-        ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
+        ret = obdu_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", nodeId_p, ret);
         }
+
         obdSize = sizeof(expConfTime);
-        ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
+        ret = obdu_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", nodeId_p, ret);
@@ -449,7 +456,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
-    ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
+    ret = obdu_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kErrorOk)
     {   // local OD access failed
         DEBUG_LVL_CFM_TRACE("Local OBD read failed %d\n", ret);
@@ -463,13 +470,11 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         pNodeInfo->cfmState = kCfmStateIdle;
 
         // current version is already available on the CN, no need to write new values, we can continue
-        DEBUG_LVL_CFM_TRACE("CN%x - Cfg Upto Date\n", nodeId_p);
+        DEBUG_LVL_CFM_TRACE("CN%x - Configuration up to date\n", nodeId_p);
 
         ret = downloadCycleLength(pNodeInfo);
         if (ret == kErrorReject)
-        {
             pNodeInfo->cfmState = kCfmStateUpToDate;
-        }
     }
     else if (nodeEvent_p == kNmtNodeEventUpdateConf)
     {
@@ -494,8 +499,8 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         {
             DEBUG_LVL_CFM_TRACE("CN%x - Cfg Mismatch | MN Expects: %lx-%lx ", nodeId_p, expConfDate, expConfTime);
             DEBUG_LVL_CFM_TRACE("CN Has: %lx-%lx. Restoring Default...\n",
-                                 ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe),
-                                 ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe));
+                                ami_getUint32Le(&pIdentResponse->verifyConfigurationDateLe),
+                                ami_getUint32Le(&pIdentResponse->verifyConfigurationTimeLe));
         }
 
         //Restore Default Parameters
@@ -515,6 +520,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
             DEBUG_LVL_CFM_TRACE("CfmCbEvent(Node): sdoWriteObject() returned 0x%02X\n", ret);
         }
     }
+
     return ret;
 }
 
@@ -524,7 +530,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
 The function determines if an SDO transfer is running for the specified node.
 
-\param  nodeId_p        Node ID of the node to determine the SDO state.
+\param[in]      nodeId_p            Node ID of the node to determine the SDO state.
 
 \return The function returns TRUE if SDO is running and FALSE otherwise.
 
@@ -533,7 +539,7 @@ The function determines if an SDO transfer is running for the specified node.
 //------------------------------------------------------------------------------
 BOOL cfmu_isSdoRunning(UINT nodeId_p)
 {
-    tCfmNodeInfo*       pNodeInfo = NULL;
+    tCfmNodeInfo*   pNodeInfo;
 
     if ((nodeId_p == 0) || (nodeId_p > NMT_MAX_NODE_ID))
         return FALSE;
@@ -554,19 +560,19 @@ BOOL cfmu_isSdoRunning(UINT nodeId_p)
 
 The function implements the callback function which is called on OD accesses.
 
-\param  pParam_p        OD callback parameter.
+\param[in,out]  pParam_p            OD callback parameter.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_cfmu
 */
 //------------------------------------------------------------------------------
-tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
+tOplkError cfmu_cbObdAccess(tObdCbParam* pParam_p)
 {
-    tOplkError              ret = kErrorOk;
-    tObdVStringDomain*      pMemVStringDomain;
-    tCfmNodeInfo*           pNodeInfo = NULL;
-    UINT8*                  pBuffer;
+    tOplkError          ret = kErrorOk;
+    tObdVStringDomain*  pMemVStringDomain;
+    tCfmNodeInfo*       pNodeInfo = NULL;
+    UINT8*              pBuffer;
 
     pParam_p->abortCode = 0;
 
@@ -576,9 +582,7 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
     // abort any running SDO transfer
     pNodeInfo = CFM_GET_NODEINFO(pParam_p->subIndex);
     if ((pNodeInfo != NULL) && (pNodeInfo->sdoComConHdl != UINT_MAX))
-    {
         ret = sdocom_abortTransfer(pNodeInfo->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_DEVICE_STATE);
-    }
 
     pMemVStringDomain = (tObdVStringDomain*)pParam_p->pArg;
     if ((pMemVStringDomain->objSize != pMemVStringDomain->downloadSize) ||
@@ -597,12 +601,14 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
             OPLK_FREE(pBuffer);
             pNodeInfo->pObdBufferConciseDcf = NULL;
         }
+
         pBuffer = (UINT8*)OPLK_MALLOC(pMemVStringDomain->downloadSize);
         if (pBuffer == NULL)
         {
             pParam_p->abortCode = SDO_AC_OUT_OF_MEMORY;
             return kErrorNoResource;
         }
+
         pNodeInfo->pObdBufferConciseDcf = pBuffer;
         pMemVStringDomain->pData = pBuffer;
         pMemVStringDomain->objSize = pMemVStringDomain->downloadSize;
@@ -623,14 +629,14 @@ tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p)
 
 The function allocates a node info structure for the specified node.
 
-\param  nodeId_p        Node ID for which to allocate the node info structure.
+\param[in]      nodeId_p            Node ID for which to allocate the node info structure.
 
 \return The function returns a pointer to the allocated node info structure.
 */
 //------------------------------------------------------------------------------
 static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
 {
-    tCfmNodeInfo*   pNodeInfo = NULL;
+    tCfmNodeInfo*   pNodeInfo;
 
     if ((nodeId_p == 0) || (nodeId_p > NMT_MAX_NODE_ID))
         return NULL;
@@ -654,22 +660,22 @@ static tCfmNodeInfo* allocNodeInfo(UINT nodeId_p)
 
 The function calls the progress callback function of the specified node.
 
-\param  pNodeInfo_p     Node info of the node to call the progress callback
-                        function.
+\param[in,out]  pNodeInfo_p         Node info of the node to call the progress
+                                    callback function.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (cfmInstance_g.pfnCbEventCnProgress != NULL)
-    {
         ret = cfmInstance_g.pfnCbEventCnProgress(&pNodeInfo_p->eventCnProgress);
-    }
+
     pNodeInfo_p->eventCnProgress.sdoAbortCode = 0;
     pNodeInfo_p->eventCnProgress.error = kErrorOk;
+
     return ret;
 }
 
@@ -679,10 +685,10 @@ static tOplkError callCbProgress(tCfmNodeInfo* pNodeInfo_p)
 
 The function calls the result callback function of the specified node.
 
-\param  pNodeInfo_p         Node info of the node to call the result callback
-                            function.
-\param  nmtNodeCommand_p    NMT node command to execute in the result callback
-                            function.
+\param[in,out]  pNodeInfo_p         Node info of the node to call the result
+                                    callback function.
+\param[in]      nmtNodeCommand_p    NMT node command to execute in the result
+                                    callback function.
 
 \return The function returns a tOplkError error code.
 */
@@ -690,7 +696,7 @@ The function calls the result callback function of the specified node.
 static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p,
                                tNmtNodeCommand nmtNodeCommand_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (pNodeInfo_p->sdoComConHdl != UINT_MAX)
     {
@@ -705,9 +711,8 @@ static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p,
 
     pNodeInfo_p->cfmState = kCfmStateIdle;
     if (cfmInstance_g.pfnCbEventCnResult != NULL)
-    {
         ret = cfmInstance_g.pfnCbEventCnResult(pNodeInfo_p->eventCnProgress.nodeId, nmtNodeCommand_p);
-    }
+
     return ret;
 }
 
@@ -718,16 +723,16 @@ static tOplkError finishConfig(tCfmNodeInfo* pNodeInfo_p,
 The function implements the callback function which is called when the SDO
 transfer is finished.
 
-\param  pSdoComFinished_p   Pointer to SDO COM finished structure.
+\param[in]      pSdoComFinished_p   Pointer to SDO COM finished structure.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
+static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p)
 {
-    tOplkError          ret = kErrorOk;
-    tCfmNodeInfo*       pNodeInfo = (tCfmNodeInfo*)pSdoComFinished_p->pUserArg;
-    tNmtNodeCommand     nmtNodeCommand;
+    tOplkError      ret = kErrorOk;
+    tCfmNodeInfo*   pNodeInfo = (tCfmNodeInfo*)pSdoComFinished_p->pUserArg;
+    tNmtNodeCommand nmtNodeCommand;
 
     if (pNodeInfo == NULL)
         return kErrorInvalidNodeId;
@@ -735,7 +740,8 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
     pNodeInfo->eventCnProgress.sdoAbortCode = pSdoComFinished_p->abortCode;
     pNodeInfo->eventCnProgress.bytesDownloaded += pSdoComFinished_p->transferredBytes;
 
-    if ((ret = callCbProgress(pNodeInfo)) != kErrorOk)
+    ret = callCbProgress(pNodeInfo);
+    if (ret != kErrorOk)
         return ret;
 
     switch (pNodeInfo->cfmState)
@@ -776,7 +782,8 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
         case kCfmStateWaitRestore:
             if (pSdoComFinished_p->sdoComConState == kSdoComTransferFinished)
             {   // configuration successfully restored
-                DEBUG_LVL_CFM_TRACE("\nCN%x - Restore Complete. Resetting Node...\n", pNodeInfo->eventCnProgress.nodeId);
+                DEBUG_LVL_CFM_TRACE("\nCN%x - Restore complete. Resetting node...\n",
+                                    pNodeInfo->eventCnProgress.nodeId);
                 // send NMT command reset node to activate the original configuration
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfRestored);
             }
@@ -789,15 +796,14 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
             break;
 
         case kCfmStateWaitStore:
-            if ((ret = downloadCycleLength(pNodeInfo)) == kErrorReject)
+            ret = downloadCycleLength(pNodeInfo);
+            if (ret == kErrorReject)
             {
                 pNodeInfo->cfmState = kCfmStateUpToDate;
                 ret = kErrorOk;
             }
             else
-            {
                 ret = finishConfig(pNodeInfo, kNmtNodeCommandConfReset);
-            }
             break;
 
         case kCfmStateInternalAbort:
@@ -815,15 +821,15 @@ static tOplkError cbSdoCon(tSdoComFinished* pSdoComFinished_p)
 The function writes the cycle length (object 0x1006) to the specified node.
 It does nothing if CONFIG_CFM_CONFIGURE_CYCLE_LENGTH is FALSE.
 
-\param  pNodeInfo_p     Node info of the node for which to download the cycle
-                        length.
+\param[in,out]  pNodeInfo_p         Node info of the node for which to download
+                                    the cycle length.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     pNodeInfo_p->eventCnProgress.objectIndex = 0x1006;
@@ -836,7 +842,9 @@ static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
     }
     else
     {
-        DEBUG_LVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n", pNodeInfo_p->eventCnProgress.nodeId, ret);
+        DEBUG_LVL_CFM_TRACE("CN%x Writing 0x1006 returns 0x%X\n",
+                            pNodeInfo_p->eventCnProgress.nodeId,
+                            ret);
     }
 #endif
 
@@ -850,15 +858,15 @@ static tOplkError downloadCycleLength(tCfmNodeInfo* pNodeInfo_p)
 The function downloads the next object from the ConciseDCF to the specified
 node.
 
-\param  pNodeInfo_p     Node info of the node for which to download the next
-                        object.
+\param[in,out]  pNodeInfo_p         Node info of the node for which to download the next
+                                    object.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     // forward data pointer for last transfer
     pNodeInfo_p->pDataConciseDcf += pNodeInfo_p->curDataSize;
@@ -870,8 +878,11 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
         {
             // not enough bytes left in ConciseDCF
             pNodeInfo_p->eventCnProgress.error = kErrorCfmInvalidDcf;
-            if ((ret = callCbProgress(pNodeInfo_p)) != kErrorOk)
+
+            ret = callCbProgress(pNodeInfo_p);
+            if (ret != kErrorOk)
                 return ret;
+
             return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
 
@@ -888,8 +899,11 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
         {
             // not enough bytes left in ConciseDCF
             pNodeInfo_p->eventCnProgress.error = kErrorCfmInvalidDcf;
-            if ((ret = callCbProgress(pNodeInfo_p)) != kErrorOk)
+
+            ret = callCbProgress(pNodeInfo_p);
+            if (ret != kErrorOk)
                 return ret;
+
             return finishConfig(pNodeInfo_p, kNmtNodeCommandConfErr);
         }
 
@@ -918,22 +932,22 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
 \brief  Download network configuration
 
 The function downloads the next domain of the network configuration.
-If RMN support is not enabled or the addressed node has no configruation manager,
+If RMN support is not enabled or the addressed node has no configuration manager,
 the function does only finish the ordinary ConciseDCF download.
 
-\param  pNodeInfo_p     Node info of the node for which to download the next
-                        domain.
+\param[in,out]  pNodeInfo_p         Node info of the node for which to download
+                                    the next domain.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError          ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     if (pNodeInfo_p->cfmState == kCfmStateDownload)
     {
-        tIdentResponse* pIdentResponse = NULL;
+        const tIdentResponse* pIdentResponse = NULL;
 
         identu_getIdentResponse(pNodeInfo_p->eventCnProgress.nodeId, &pIdentResponse);
         if (pIdentResponse == NULL)
@@ -942,7 +956,7 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
             return kErrorInvalidNodeId;
         }
 
-        if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & PLK_FEATURE_CFM)
+        if (ami_getUint32Le(&pIdentResponse->featureFlagsLe) & NMT_FEATUREFLAGS_CFM)
         {
             pNodeInfo_p->cfmState = kCfmStateDownloadNetConf;
             pNodeInfo_p->entriesRemaining = NMT_MAX_NODE_ID;
@@ -954,16 +968,16 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
     {
         UINT            subindex = NMT_MAX_NODE_ID - pNodeInfo_p->entriesRemaining + 1;
         tObdSize        obdSize;
-        UINT8*          pData;
+        const UINT8*    pData;
 
-        obdSize = obd_getDataSize(0x1F22, subindex);
+        obdSize = obdu_getDataSize(0x1F22, subindex);
         // Download only cDCFs with at least one entry
         if (obdSize <= 4)
             continue;
 
         // fetch pointer to ConciseDCF from object 0x1F22
         // (this allows the application to link its own memory to this object)
-        pData = (UINT8*)obd_getObjectDataPtr(0x1F22, subindex);
+        pData = (const UINT8*)obdu_getObjectDataPtr(0x1F22, subindex);
         if (pData == NULL)
             return kErrorCfmNoConfigData;
 
@@ -979,6 +993,7 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
         if (ret != kErrorOk)
             return ret;
     }
+
     return ret;
 }
 #endif
@@ -989,16 +1004,16 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
 
 The function finishes a configuration download.
 
-\param  pNodeInfo_p     Node info of the node for which the download should be
-                        finished.
+\param[in,out]  pNodeInfo_p         Node info of the node for which the download
+                                    should be finished.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
 static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p)
 {
-    tOplkError          ret = kErrorOk;
-    static UINT32       leSignature;
+    tOplkError      ret = kErrorOk;
+    static UINT32   leSignature;
 
     {   // download finished
         if (pNodeInfo_p->fDoStore != FALSE)
@@ -1008,6 +1023,7 @@ static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p)
             ami_setUint32Le(&leSignature, 0x65766173);
             pNodeInfo_p->eventCnProgress.objectIndex = 0x1010;
             pNodeInfo_p->eventCnProgress.objectSubIndex = 0x01;
+
             ret = sdoWriteObject(pNodeInfo_p, &leSignature, sizeof(leSignature));
             if (ret != kErrorOk)
                 return ret;
@@ -1026,6 +1042,7 @@ static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p)
             }
         }
     }
+
     return ret;
 }
 
@@ -1035,14 +1052,16 @@ static tOplkError finishDownload(tCfmNodeInfo* pNodeInfo_p)
 
 The function writes the specified entry to the OD of the specified node.
 
-\param  pNodeInfo_p     Node info of the node to write to.
-\param  pLeSrcData_p    Pointer to data in little endian byte order.
-\param  size_p          Size of data.
+\param[in,out]  pNodeInfo_p         Node info of the node to write to.
+\param[in]      pLeSrcData_p        Pointer to data in little endian byte order.
+\param[in]      size_p              Size of data.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, UINT size_p)
+static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p,
+                                 const void* pLeSrcData_p,
+                                 UINT size_p)
 {
     tOplkError                  ret = kErrorOk;
     tSdoComTransParamByIndex    transParamByIndex;
@@ -1060,7 +1079,7 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
             return ret;
     }
 
-    transParamByIndex.pData = pLeSrcData_p;
+    transParamByIndex.pData = (void*)pLeSrcData_p;
     transParamByIndex.sdoAccessType = kSdoAccessTypeWrite;
     transParamByIndex.sdoComConHdl = pNodeInfo_p->sdoComConHdl;
     transParamByIndex.dataSize = size_p;
@@ -1074,9 +1093,7 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     {
         ret = sdocom_abortTransfer(pNodeInfo_p->sdoComConHdl, SDO_AC_DATA_NOT_TRANSF_DUE_LOCAL_CONTROL);
         if (ret == kErrorOk)
-        {
             ret = sdocom_initTransferByIndex(&transParamByIndex);
-        }
     }
     else if (ret == kErrorSdoSeqConnectionBusy)
     {
@@ -1104,4 +1121,4 @@ static tOplkError sdoWriteObject(tCfmNodeInfo* pNodeInfo_p, void* pLeSrcData_p, 
     return ret;
 }
 
-///\}
+/// \}

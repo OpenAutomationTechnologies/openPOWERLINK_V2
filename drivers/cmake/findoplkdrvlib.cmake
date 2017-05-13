@@ -3,6 +3,7 @@
 # CMake script for finding the openPOWERLINK library
 #
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -49,13 +50,17 @@ MACRO(FIND_OPLK_DRV_LIBRARY OPLK_NODE_TYPE)
         SET(OPLKLIB_NAME oplk${OPLK_NODE_TYPE})
         SET(OPLKLIB_ARCH windows)
 
-    ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+    ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblazeise")
 
         IF (CFG_KERNEL_STACK_PCP_HOSTIF_MODULE)
             SET(OPLKLIB_ARCH generic)
             SET(OPLKLIB_NAME oplk${OPLK_NODE_TYPE}drv-hostif)
             SET(OPLKLIB_DEBUG_NAME ${OPLKLIB_NAME}_d)
-        ELSEIF(CFG_KERNEL_DUALPROCSHM)
+        ENDIF()
+
+    ELSEIF (CMAKE_SYSTEM_NAME STREQUAL "Generic" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "Microblaze")
+
+        IF(CFG_KERNEL_DUALPROCSHM)
             SET(OPLKLIB_ARCH generic)
             SET(OPLKLIB_NAME oplk${OPLK_NODE_TYPE}drv-dualprocshm)
             SET(OPLKLIB_DEBUG_NAME ${OPLKLIB_NAME}_d)

@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac-nios2.h
+\file   target/openmac-nios2.h
 
 \brief  Definition for openMAC drivers on Nios II
 
@@ -11,7 +11,7 @@ specific to Nios II targets.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,8 +36,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_openmac_nios2_H_
-#define _INC_openmac_nios2_H_
+#ifndef _INC_target_openmac_nios2_H_
+#define _INC_target_openmac_nios2_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <omethlib.h>
 
 #include <sys/alt_cache.h>
+#include <sys/alt_irq.h>
 #include <io.h>
 #include <unistd.h>
 
@@ -62,6 +63,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)
 #define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)
 #define OPENMAC_GETDMAOBSERVER()                            IORD_16DIRECT(OPENMAC_DOB_BASE, 0)
+
+#if defined(NIOS2_EIC_PRESENT)
+/* Only an External Interruption Controller with a Vectored Interrupt Controller (named vic_0) on PCP processor is supported. */
+#if (defined(__ALTERA_VIC) && !defined(PCP_0_VIC_0_BASE))
+#error "Currently only vic_0 on pcp_0 is supported."
+#endif
+#define OPENMAC_GETPENDINGIRQ()                             IORD_ALTERA_VIC_INT_PENDING(PCP_0_VIC_0_BASE)
+#else /* defined(NIOS2_EIC_PRESENT) */
+#define OPENMAC_GETPENDINGIRQ()                             alt_irq_pending()
+#endif /* defined(NIOS2_EIC_PRESENT) */
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 
@@ -87,7 +98,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -97,4 +107,4 @@ extern "C"
 }
 #endif
 
-#endif /* _INC_openmac_nios2_H_ */
+#endif /* _INC_target_openmac_nios2_H_ */

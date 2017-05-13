@@ -7,7 +7,7 @@ Building openPOWERLINK Demo Applications {#page_build_demos}
 
 The following section describes how the delivered demo applications can be
 built. The demo applications are located in the directory `apps`. The default
-binary installation path is: `<openPOWERLINK_DIR>/bin/<platform>/<ARCH>`
+binary installation path is: `<openPOWERLINK_dir>/bin/<platform>/<ARCH>`
 
 __NOTE:__ In order to be able to build an application, the Debug or the
 Release library versions must be available, depending on your CMAKE_BUILD_TYPE.
@@ -40,7 +40,7 @@ generating Visual Studio solution files.
 
 ## Building for embedded systems (Non-OS targets) {#sect_build_demos_noos}
 
-### Building for target Microblaze {#sect_build_demos_build_microblaze}
+### Building for target Microblaze (ISE) {#sect_build_demos_build_microblaze}
 
 Follow the steps below to cross compile your demo application for Microblaze:
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -52,23 +52,7 @@ Follow the steps below to cross compile your demo application for Microblaze:
 * Create the executable
 
       > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-microblaze
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
-      > make all
-      > make install
-
-### Building for target Xilinx Zynq ARM {#sect_build_demos_build_xilinx_zynqarm}
-
-Follow the steps below to cross compile your demo application for Zynq ARM:
-* Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
-  - On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
-    Prompt`.
-  - On a Linux host platform execute the script `<ISE_ROOT_DIR>/settings[32,64].sh>`
-    to configure your current shell.
-
-* Create the executable
-
-      > cd <openPOWERLINK_dir>/apps/<demo_dir>/build/xilinx-zynqarm
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-zynqarm-eabi-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=[Debug,Release]
       > make all
       > make install
 
@@ -140,11 +124,18 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
   - __Kernel stack on PCIe card__
 
-    The library `liboplkappmn-kernelpcie.a` will be used. It contains the interface
+    The library `liboplkappmn-kernelpcp.a` will be used. It contains the interface
     to a Linux kernel PCIe interface driver.
     The kernel part of the openPOWERLINK stack is located on an external PCIe
     device. The status/control and data exchange between the application and kernel
     stack is handled by the PCIe interface driver.
+
+  - __Kernel stack on Zynq PCP__
+
+    The library `liboplkmnapp-kernelpcp.a` will be used. It contains the interface
+    to a Linux kernel platform interface driver. It is used along with the Linux
+    kernel platform interface driver for status/control and data exchange with the kernel
+    stack. The kernel part of the stack runs on a Microblaze softcore as a bare metal application.
 
 ## Windows Specific Options  {#sect_build_demos_windows_options}
 
@@ -174,12 +165,12 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 
 ## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
 
-### Microblaze Specific Options  {#sect_build_demos_microblaze_options}
+### Microblaze (ISE) Specific Options  {#sect_build_demos_microblaze_options}
 
 - **CFG_HW_LIB_DIR**
 
   Path to the hardware platform install directory your application should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/microblaze/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -191,31 +182,19 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. (Single processor demo)
 
-### Xilinx Zynq ARM Specific Options  {#sect_build_demos_xilinx-zynqarm_options}
+  - __PCP Daemon Host-Interface__
 
-- **CFG_HW_LIB_DIR**
-
-  Path to the hardware platform install directory your application should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/zynqarm/<BOARD_NAME>/<DEMO_NAME>`)
-
-- **CFG_BUILD_KERNEL_STACK**
-
-  Determines how to build the kernel stack. The following option is available and
-  automatically (implicitly) pre-selected:
-
-  - __PCP Daemon using shared memory__
-
-    The library liboplk[mn,cn]app-dualprocshm.a will be used. It contains the interface
-    to the kernel daemon running on a separate processor. It uses the dual processor
-    shared memory library to communicate with the kernel part of the openPOWERLINK
-    running on the second processor.
+    The library liboplk[mn,cn]app-hostif.a will be used. It contains the interface to
+    the kernel daemon running on a separte processor. It uses the host interface to
+    communicate with the kernel part of the openPOWERLINK stack running on the second
+    processor.
 
 ### Altera Cyclone V SoC ARM Specific Options  {#sect_build_demos_altera-arm_options}
 
 - **CFG_HW_LIB_DIR**
 
   Path to the hardware platform install directory that the application should refer to.
-  (e.g: `<openPOWERLINK_DIR>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
+  (e.g: `<openPOWERLINK_dir>/hardware/lib/generic/alterac5arm/<BOARD_NAME>/<DEMO_NAME>`)
 
 - **CFG_BUILD_KERNEL_STACK**
 
@@ -232,7 +211,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
 - **CFG_DRV_BLD_PATH**
 
   Path to the driver daemon build location that the application should refer to.
-   (e.g: `<openPOWERLINK_DIR>/drivers/altera-nios2/drv_daemon/build`)
+   (e.g: `<openPOWERLINK_dir>/drivers/altera-nios2/drv_daemon/build`)
 
 - **CFG_DRV_BIN**
 

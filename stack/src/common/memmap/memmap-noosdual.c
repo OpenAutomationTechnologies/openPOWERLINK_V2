@@ -13,6 +13,7 @@ and shared memory interface.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -115,8 +116,8 @@ The function initializes the memory mapping service.
 //------------------------------------------------------------------------------
 tMemMapReturn memmap_init(void)
 {
-    tDualprocReturn         ret = kDualprocSuccessful;
-    tDualprocDrvInstance*   pDrvInst = NULL;
+    tDualprocReturn         ret;
+    tDualprocDrvInstance*   pDrvInst;
     tDualprocSharedMemInst  sharedMemInst;
 
     OPLK_MEMSET(&memMapInstance_l, 0, sizeof(tMemMapInstance));
@@ -171,6 +172,7 @@ tMemMapReturn memmap_shutdown(void)
 {
     memMapInstance_l.localProcSharedMemBaseAddr = (UINT32)NULL;
     memMapInstance_l.remoteProcSharedMemBaseAddr = (UINT32)NULL;
+
     return kMemMapOk;
 }
 
@@ -180,20 +182,23 @@ tMemMapReturn memmap_shutdown(void)
 
 The function maps a kernel buffer address.
 
-\param  pKernelBuffer_p     The pointer to the kernel buffer.
-\param  bufferSize_p        The size of the kernel buffer.
+\param[in]      pKernelBuffer_p     The pointer to the kernel buffer.
+\param[in]      bufferSize_p        The size of the kernel buffer.
 
 \return The functions returns the pointer to the mapped kernel buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
 {
     void*       pBuffer = NULL;
-    UINT32      tempAddr = 0;
+    UINT32      tempAddr;
     UINT32      kernelBase = (UINT32)memMapInstance_l.remoteProcSharedMemBaseAddr;
     UINT32      userBase = (UINT32)memMapInstance_l.localProcSharedMemBaseAddr;
+
+    // Check parameter validity
+    ASSERT(pKernelBuffer_p != NULL);
 
     tempAddr = (UINT32)pKernelBuffer_p;
 
@@ -219,12 +224,12 @@ void* memmap_mapKernelBuffer(void* pKernelBuffer_p, UINT bufferSize_p)
 
 The function disconnects from a memory mapping.
 
-\param  pBuffer_p           The pointer to the previously mapped buffer.
+\param[in]      pBuffer_p           The pointer to the previously mapped buffer.
 
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void memmap_unmapKernelBuffer(void* pBuffer_p)
+void memmap_unmapKernelBuffer(const void* pBuffer_p)
 {
     UNUSED_PARAMETER(pBuffer_p);
 }

@@ -14,7 +14,7 @@ controller.
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, Kalycito Infotech Private Limited
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,8 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-
-#define TIMER_COUNT             1
+#define TIMER_COUNT             2
 #define TIMER_MIN_VAL_SINGLE    5000             /* min 5us */
 #define TIMER_MIN_VAL_CYCLE     100000           /* min 100us */
 
@@ -72,18 +71,18 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)
 #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
-#define HRT_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
+#define HRT_DBG_POST_TRACE_VALUE(event_p, nodeId_p, errorCode_p) \
             TGT_DBG_POST_TRACE_VALUE((0xE << 28) |                  \
-                                     (Event_p << 24) |              \
-                                     (uiNodeId_p << 16) |           \
-                                     wErrorCode_p)
+                                     (event_p << 24) |              \
+                                     (nodeId_p << 16) |           \
+                                     errorCode_p)
 
 #define TIMERHDL_MASK           0x0FFFFFFF
 #define TIMERHDL_SHIFT          28
-#define HDL_TO_IDX(Hdl)         ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)           ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)            (((Hdl + 1) & TIMERHDL_MASK) |\
-                                 (Hdl & ~TIMERHDL_MASK))
+#define HDL_TO_IDX(hdl)         ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)           ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)            (((hdl + 1) & TIMERHDL_MASK) |\
+                                 (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -92,9 +91,9 @@ void TgtDbgPostTraceValue(UINT32 dwTraceValue_p);
 //------------------------------------------------------------------------------
 // global function prototypes
 //------------------------------------------------------------------------------
-tOplkError edrv_startTimer(tTimerHdl* pTimerHdl_p, UINT32 frequency_p);
-tOplkError edrv_stopTimer(tTimerHdl* pTimerHdl_p);
-tOplkError edrv_restartTimer(tTimerHdl* pTimerHdl_p);
+tOplkError edrv_startTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
+tOplkError edrv_stopTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p);
+tOplkError edrv_restartTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 frequency_p);
 tOplkError edrv_registerHresCallback(tHresCallback pfnHighResCb_p);
 
 //============================================================================//
@@ -185,11 +184,17 @@ tOplkError hrestimer_exit(void)
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         pTimerInfo->pfnCallback = NULL;
 
-        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl.handle);
+        ret = edrv_stopTimer(&pTimerInfo->eventArg.timerHdl.handle,
+                             HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle));
         if (ret != kErrorOk)
             break;
+
         pTimerInfo->eventArg.timerHdl.handle = 0;
     }
+
+    // De-register the default timer callback
+    ret = edrv_registerHresCallback(NULL);
+
     return ret;
 }
 
@@ -198,35 +203,36 @@ tOplkError hrestimer_exit(void)
 \brief    Modify a high-resolution timer
 
 The function modifies the timeout of the timer with the specified handle.
-If the handle the pointer points to is zero, the timer must be created first.
-If it is not possible to stop the old timer, this function always assures that
-the old timer does not trigger the callback function with the same handle as
-the new timer. That means the callback function must check the passed handle
+If the handle to which the pointer points to is zero, the timer must be created
+first. If it is not possible to stop the old timer, this function always assures
+that the old timer does not trigger the callback function with the same handle
+as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when the timer has
-                        expired. (The function is called mutually exclusive with
-                        the Edrv callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument
-\param  fContinue_p     If TRUE, callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
     tOplkError          ret = kErrorOk;
     UINT                index;
     tHresTimerInfo*     pTimerInfo;
-    UINT32              timerFreq;
 
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
@@ -278,12 +284,17 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     pTimerInfo->period = time_p;
     pTimerInfo->fContinuously = fContinue_p;
 
+    // Register the default timer callback
     ret = edrv_registerHresCallback(timerCallback);
     if (ret != kErrorOk)
+    {
+        printk("Failed to register timer callback\n");
         return ret;
+    }
 
-    timerFreq = (UINT32)(time_p);
-    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl.handle, timerFreq);
+    ret = edrv_startTimer(&pTimerInfo->eventArg.timerHdl.handle,
+                          HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle),
+                          time_p);
 
     return ret;
 }
@@ -295,7 +306,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -326,7 +337,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return ret;     // invalid handle
     }
 
-    edrv_stopTimer(pTimerHdl_p);
+    edrv_stopTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p));
 
     *pTimerHdl_p = 0;
     pTimerInfo->eventArg.timerHdl.handle = 0;
@@ -342,7 +353,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -360,7 +371,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -383,7 +394,7 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 The function provides the timer callback function which is called when a timer
 has expired.
 
-\param  pTimerHdl_p     Pointer to hrtimer struct of the expired timer
+\param[in,out]  pTimerHdl_p         Pointer to hrtimer struct of the expired timer
 
 \return Returns a hrtimer_restart value
 */
@@ -401,6 +412,7 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
     pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
 
     orgTimerHdl = *pTimerHdl_p;
+
     if (pTimerInfo->pfnCallback != NULL)
     {
         pTimerInfo->pfnCallback(&pTimerInfo->eventArg);
@@ -411,11 +423,11 @@ static void timerCallback(tTimerHdl* pTimerHdl_p)
 
     if (pTimerInfo->fContinuously)
     {
-        edrv_restartTimer(pTimerHdl_p);
+        edrv_restartTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p), pTimerInfo->period);
     }
     else
     {
-        edrv_stopTimer(pTimerHdl_p);
+        edrv_stopTimer(pTimerHdl_p, HDL_TO_IDX(*pTimerHdl_p));
     }
     return;
 }

@@ -45,16 +45,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#ifndef ALT_TCIMEM_SIZE
-#define ALT_TCIMEM_SIZE                     0
+#ifndef ALT_TCMEM_SIZE
+#define ALT_TCMEM_SIZE                      0
 #endif
 
 #ifdef NDEBUG
-#define ALT_INTERNAL_RAM                    __attribute__((section(".tc_i_mem")))
+#define ALT_INTERNAL_RAM                    __attribute__((section(".tc_mem")))
 #else
 #define ALT_INTERNAL_RAM
 #endif
 
+#define SECTION_AMI_GETUINT16BE             ALT_INTERNAL_RAM
+#define SECTION_AMI_GETUINT16LE             ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_WRITE_DATA          ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_WRITE_MULT_DATA     ALT_INTERNAL_RAM
 #define SECTION_CIRCBUF_READ_DATA           ALT_INTERNAL_RAM
@@ -79,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define SECTION_PDOKLUT_GETCHANNEL          ALT_INTERNAL_RAM
 #define SECTION_EDRVCYC_TIMER_CB            ALT_INTERNAL_RAM
 #define SECTION_HRTIMER_IRQ_HDL             ALT_INTERNAL_RAM
-#define SECTION_HRTIMER_MODTIMER            ALT_INTERNAL_RAM
+#define SECTION_HRTIMER_SETTIMER            ALT_INTERNAL_RAM
 #define SECTION_DLLK_PROCESS                ALT_INTERNAL_RAM
 #define SECTION_DLLK_PROCESS_CYCFIN         ALT_INTERNAL_RAM
 #define SECTION_DLLK_PROCESS_SYNC           ALT_INTERNAL_RAM

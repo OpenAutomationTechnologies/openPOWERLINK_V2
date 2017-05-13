@@ -7,6 +7,7 @@
 The file contains the definitions for the SDO execution dialog
 *******************************************************************************/
 /*------------------------------------------------------------------------------
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -32,16 +33,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_SdoDialog_H_
-#define _INC_SdoDialog_H_
+#ifndef _INC_demo_SdoDialog_H_
+#define _INC_demo_SdoDialog_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <oplk/oplk.h>
+
 #include <QDialog>
 #include <QString>
+#include <QByteArray>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -50,12 +52,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QLabel;
-class QLineEdit;
-class QListWidget;
-class QListWidgetItem;
 class QPushButton;
+class QLineEdit;
 class QComboBox;
+class QLabel;
+
 
 //------------------------------------------------------------------------------
 /**
@@ -66,22 +67,21 @@ The class implements the SDO execution dialog.
 //------------------------------------------------------------------------------
 class SdoDialog : public QDialog
 {
-
-Q_OBJECT
+    Q_OBJECT
 
 public:
     SdoDialog();
 
 signals:
-    void            sigUpdateData(const QString& abortCode_p);
+    void sigUpdateData(const QString& abortCode_p);
 
 private slots:
-    void            startWrite();
-    void            startRead();
-    void            dataTypeChanged(int index);
-    void            userDefEvent(void* pUserArg_p);
-    void            sdoFinished(tSdoComFinished sdoInfo_p);
-    void            updateData(const QString& abortCode_p);
+    void startWrite();
+    void startRead();
+    void dataTypeChanged(int index);
+    void userDefEvent(void* pUserArg_p);
+    void sdoFinished(tSdoComFinished sdoInfo_p);
+    void updateData(const QString& abortCode_p);
 
 private:
     QPushButton*    readButton;
@@ -98,8 +98,8 @@ private:
     UINT            targetSubindex;
     eSdoType        sdoType;
 
-    void            enableFields(bool enable_p);
-    bool            readFields(void);
+    void enableFields(bool enable_p);
+    bool readFields(void);
 };
 
-#endif /* _INC_SdoDialog_H_ */
+#endif /* _INC_demo_SdoDialog_H_ */

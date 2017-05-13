@@ -9,7 +9,7 @@ openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_oplkdefs_H_
 #define _INC_oplk_oplkdefs_H_
 
@@ -70,7 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_KERNEL_MN                                  0x00000001      ///< NMT functionality compiled in
 #define OPLK_KERNEL_ISOCHR                              0x00000002      ///< PDO module for isochronous transfers
 #define OPLK_KERNEL_PRES_CHAINING_CN                    0x00000004      ///< Feature Poll Response Chaining
-#define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual ethernet module
+#define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual Ethernet module
 #define OPLK_KERNEL_PRES_FORWARD                        0x00000010      ///< PRES forwarding module (used for diagnosis)
 #define OPLK_KERNEL_RMN                                 0x00000020      ///< Redundancy MN (RMN)
 #define OPLK_KERNEL_SOC_TIME_FORWARD                    0x00000040      ///< SoC time forwarding capability
@@ -93,6 +92,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data
 #define C_DLL_MAX_ASYNC_MTU                             1500                ///< Maximum asynchronous payload in bytes
 #define C_DLL_MAX_ETH_FRAME                             1514                ///< Maximum Ethernet frame in bytes without checksum
+#define C_DLL_MIN_ETH_FRAME                             60                  ///< Minimum Ethernet frame in bytes without checksum
 #define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload
 #define C_DLL_MAX_RS                                    7                   ///< Maximum number of pending requests
 #define C_DLL_MIN_ASYNC_MTU                             300                 ///< Minimum asynchronous payload in bytes.
@@ -106,7 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_T_BITTIME                                 10                  ///< Transmission time per bit on 100 Mbit/s network [ns]
 #define C_DLL_T_EPL_PDO_HEADER                          10                  ///< Size of PReq and PRes POWERLINK PDO message header [Byte]
 #define C_DLL_T_ETH2_WRAPPER                            18                  ///< Size of Ethernet type II wrapper consisting of header and checksum [Byte]
-#define C_DLL_T_IFG                                     960                 ///< Ethernet Interframe Gap [ns]
+#define C_DLL_T_IFG                                     960                 ///< Ethernet inter frame gap [ns]
 #define C_DLL_T_MIN_FRAME                               5120                ///< Size of minimum Ethernet frame (without preamble) [ns]
 #define C_DLL_T_PREAMBLE                                640                 ///< Size of Ethernet frame preamble [ns]
 
@@ -210,5 +210,29 @@ These constants determine the different queue implementations.
 #define NMT_NODEASSIGN_PRES_CHAINING                    0x00004000L
 #define NMT_NODEASSIGN_VALID                            0x80000000L
 
-#endif /* _INC_oplk_oplkdefs_H_ */
+//------------------------------------------------------------------------------
+// Defines for object 0x1F82 NMT_FeatureFlags_AU32
+#define NMT_FEATUREFLAGS_ISOCHR                         0x00000001
+#define NMT_FEATUREFLAGS_SDO_UDP                        0x00000002
+#define NMT_FEATUREFLAGS_SDO_ASND                       0x00000004
+#define NMT_FEATUREFLAGS_SDO_PDO                        0x00000008
+#define NMT_FEATUREFLAGS_NMT_INFO                       0x00000010
+#define NMT_FEATUREFLAGS_NMT_EXT                        0x00000020
+#define NMT_FEATUREFLAGS_PDO_DYN                        0x00000040
+#define NMT_FEATUREFLAGS_NMT_UDP                        0x00000080
+#define NMT_FEATUREFLAGS_CFM                            0x00000100
+#define NMT_FEATUREFLAGS_MUX_CN                         0x00000200
+#define NMT_FEATUREFLAGS_NODEID_SW                      0x00000400
+#define NMT_FEATUREFLAGS_BASIC_ETH_MN                   0x00000800
+#define NMT_FEATUREFLAGS_RT1                            0x00001000
+#define NMT_FEATUREFLAGS_RT2                            0x00002000
+#define NMT_FEATUREFLAGS_SDO_RW_ALL                     0x00004000
+#define NMT_FEATUREFLAGS_SDO_RW_MULTIPLE                0x00008000
+#define NMT_FEATUREFLAGS_MASND                          0x00010000
+#define NMT_FEATUREFLAGS_RR_MN                          0x00020000
+#define NMT_FEATUREFLAGS_PRC                            0x00040000
+#define NMT_FEATUREFLAGS_MULTI_PREQ_PRES                0x00080000
+#define NMT_FEATUREFLAGS_DNA                            0x00100000
+#define NMT_FEATUREFLAGS_MODULAR_DEVICE                 0x00200000
 
+#endif /* _INC_oplk_oplkdefs_H_ */

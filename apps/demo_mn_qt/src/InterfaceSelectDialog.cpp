@@ -7,7 +7,7 @@
 This file contains the implementation of the interface selection dialog class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -32,18 +32,23 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #if (TARGET_SYSTEM == _WIN32_)
-#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
+#define _WINSOCKAPI_            // prevent windows.h from including winsock.h
 #endif  // (TARGET_SYSTEM == _WIN32_)
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QtGui>
-#include "InterfaceSelectDialog.h"
+#include <InterfaceSelectDialog.h>
+
+#include <QListWidget>
+#include <QListWidgetItem>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+
 #include <pcap.h>
-#include <stdio.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -69,14 +74,14 @@ InterfaceSelectDialog::InterfaceSelectDialog()
     QVBoxLayout* mainLayout = new QVBoxLayout;
 
     /* create labels */
-    QLabel*      label = new QLabel("Select network Interface:");
+    QLabel*      label = new QLabel("Select network interface:");
     QPushButton* okButton = new QPushButton("OK");
     QPushButton* cancelButton = new QPushButton("Cancel");
 
 
     /* create listbox */
-    deviceListWidget = new QListWidget;
-    deviceListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
+    this->deviceListWidget = new QListWidget;
+    this->deviceListWidget->setSelectionMode(QAbstractItemView::SingleSelection);
 
     /* create buttons */
     QHBoxLayout* buttonLayout = new QHBoxLayout();
@@ -84,10 +89,18 @@ InterfaceSelectDialog::InterfaceSelectDialog()
     buttonLayout->addWidget(okButton);
     buttonLayout->addWidget(cancelButton);
 
-    connect(okButton, SIGNAL(clicked()), this, SLOT(accept()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(reject()));
-    connect(deviceListWidget, SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
-            this, SLOT(itemChanged(QListWidgetItem*, QListWidgetItem*)));
+    connect(okButton,
+            SIGNAL(clicked()),
+            this,
+            SLOT(accept()));
+    connect(cancelButton,
+            SIGNAL(clicked()),
+            this,
+            SLOT(reject()));
+    connect(deviceListWidget,
+            SIGNAL(currentItemChanged(QListWidgetItem*, QListWidgetItem*)),
+            this,
+            SLOT(itemChanged(QListWidgetItem*, QListWidgetItem*)));
 
     /* create main layout */
     mainLayout->addWidget(label);
@@ -96,33 +109,32 @@ InterfaceSelectDialog::InterfaceSelectDialog()
     mainLayout->addLayout(buttonLayout);
 
     setLayout(mainLayout);
-    setWindowTitle("Select PCAP Interface");
+    setWindowTitle("Select PCAP interface");
 }
 
 //------------------------------------------------------------------------------
 /**
-\brief  setup the process image
+\brief  Setup the process image
 
 SetupProcessImage() sets up the process image used by the application.
 
-\param  devName_p               Device name which shall be selected by default.
+\param[in]      rDevName_p          Reference to the device name which shall be
+                                    selected by default.
 
-\retval         -1              if interface list couldn't be filled
-\retval         0               if interface list was successfully filled
+\retval -1                          Interface list couldn't be filled
+\retval 0                           Interface list was successfully filled
 */
 //------------------------------------------------------------------------------
-int InterfaceSelectDialog::fillList(QString devName_p)
+int InterfaceSelectDialog::fillList(const QString& rDevName_p)
 {
-    char                        sErr_Msg[PCAP_ERRBUF_SIZE];
-    pcap_if_t*                  alldevs;
-    pcap_if_t*                  seldev;
-    int                         numIntf = 0;
+    char        sErr_Msg[PCAP_ERRBUF_SIZE];
+    pcap_if_t*  alldevs;
+    pcap_if_t*  seldev;
+    int         numIntf = 0;
 
     /* Retrieve the device list on the local machine */
     if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
-    {
         return -1;
-    }
 
     /* Add the list to the listbox */
     for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
@@ -135,21 +147,16 @@ int InterfaceSelectDialog::fillList(QString devName_p)
 
         QString devDesc;
         if (seldev->description)
-        {
-            devDesc = seldev->description;
-        }
+            this->devDesc = seldev->description;
         else
-        {
-            devDesc = seldev->name;
-        }
+            this->devDesc = seldev->name;
+
         newItem->setData(Qt::UserRole, data);
-        newItem->setText(devDesc);
+        newItem->setText(this->devDesc);
         deviceListWidget->addItem(newItem);
 
-        if (devName_p == devName)
-        {
+        if (rDevName_p == devName)
             deviceListWidget->setCurrentItem(newItem);
-        }
     }
     pcap_freealldevs(alldevs);
 
@@ -165,16 +172,16 @@ int InterfaceSelectDialog::fillList(QString devName_p)
 
 Will be called if another list item was selected.
 
-\param  current         current selected list item
-\param  previous        previous selected list item
+\param[in]      current             Current selected list item
+\param[in]      previous            Previous selected list item
 */
 //------------------------------------------------------------------------------
 void InterfaceSelectDialog::itemChanged(QListWidgetItem* current,
                                         QListWidgetItem* previous)
 {
     // set devName to the current Item
-    devDesc = current->text();
-    devName = current->data(Qt::UserRole).toString();
+    this->devDesc = current->text();
+    this->devName = current->data(Qt::UserRole).toString();
 }
 
 //------------------------------------------------------------------------------
@@ -183,11 +190,10 @@ void InterfaceSelectDialog::itemChanged(QListWidgetItem* current,
 
 getDevName() returns the name of the selected interface.
 
-\return name of selected interface
+\return Reference to the name of selected interface
 */
 //------------------------------------------------------------------------------
-QString InterfaceSelectDialog::getDevName(void)
+const QString& InterfaceSelectDialog::getDevName(void) const
 {
-    return devName;
+    return this->devName;
 }
-

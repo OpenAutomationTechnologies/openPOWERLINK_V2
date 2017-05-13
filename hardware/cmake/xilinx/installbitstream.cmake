@@ -1,9 +1,8 @@
 ################################################################################
 #
-# CMake macro for installing the bitstream for Microblaze
+# CMake macro for installing the bitstream for Vivado Microblaze
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,39 +29,23 @@
 ################################################################################
 
 MACRO(INSTALL_BITSTREAM EXAMPLE_ROOT BITS_DESTINATION SKIP_BITSTREAM)
-    SET(SDK_EXPORT ${EXAMPLE_ROOT}/xps/SDK/SDK_Export/hw)
-    SET(DLCMD_SOURCE_DIR ${EXAMPLE_ROOT}/xps/etc)
 
-    # Remove folder prefix from download.cmd script
-    FILE(READ ${DLCMD_SOURCE_DIR}/download.cmd DLCMD_CONTENT)
-    STRING(REGEX REPLACE "implementation/" ""
-        MODIFIED_DLCMD_CONTENT "${DLCMD_CONTENT}")
-    FILE(WRITE ${PROJECT_BINARY_DIR}/download.cmd "${MODIFIED_DLCMD_CONTENT}")
-
-    # Copy hardware platform eclipse project file
-    CONFIGURE_FILE(${ARCH_TOOLS_DIR}/eclipse/hwplatformproject.in ${PROJECT_BINARY_DIR} @ONLY)
+SET(SDK_EXPORT ${EXAMPLE_ROOT}/vivado/system/system.runs/impl_1)
 
     IF(SKIP_BITSTREAM)
-        INSTALL(FILES ${SDK_EXPORT}/system.xml
+        INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/hw_platform/
                 DESTINATION ${BITS_DESTINATION}
+                PATTERN "*.in" EXCLUDE
                )
     ELSE()
-        INSTALL(FILES ${SDK_EXPORT}/system.bit ${SDK_EXPORT}/download.bit ${SDK_EXPORT}/system.xml ${SDK_EXPORT}/system_bd.bmm
+        INSTALL(DIRECTORY ${PROJECT_BINARY_DIR}/hw_platform/
+                DESTINATION ${BITS_DESTINATION}
+                PATTERN "*.in" EXCLUDE
+               )
+
+        INSTALL(FILES ${SDK_EXPORT}/system_wrapper_bd.bmm
                 DESTINATION ${BITS_DESTINATION}
                )
     ENDIF()
 
-    # Additional initialization modules generated for ARM on Zynq
-    IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
-        INSTALL(FILES ${SDK_EXPORT}/ps7_init.tcl ${SDK_EXPORT}/ps7_init.c ${SDK_EXPORT}/ps7_init.h ${SDK_EXPORT}/system.xml
-                DESTINATION ${BITS_DESTINATION}
-               )
-    ENDIF()
-
-    INSTALL(FILES ${PROJECT_BINARY_DIR}/hwplatformproject.in
-            DESTINATION ${BITS_DESTINATION} RENAME .project
-           )
-    INSTALL(FILES ${PROJECT_BINARY_DIR}/download.cmd
-            DESTINATION ${BITS_DESTINATION}
-           )
 ENDMACRO()

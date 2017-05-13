@@ -11,7 +11,7 @@ This file contains functions for handling openMAC timestamps.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -91,18 +91,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 This function calculates the time difference between two timestamps and returns
 the result in nanoseconds.
 
-\param  pTimeStampPrevious_p    Previous timestamp
-\param  pTimeStampCurrent_p     Current timestamp
+\param[in]      pTimeStampPrevious_p    Previous timestamp
+\param[in]      pTimeStampCurrent_p     Current timestamp
 
 \return The function returns the time difference in nanoseconds.
 
 \ingroup module_timestamp
 */
 //------------------------------------------------------------------------------
-UINT32 timestamp_calcTimeDiff(tTimestamp* pTimeStampPrevious_p,
-                              tTimestamp* pTimeStampCurrent_p)
+UINT32 timestamp_calcTimeDiff(const tTimestamp* pTimeStampPrevious_p,
+                              const tTimestamp* pTimeStampCurrent_p)
 {
     UINT32 timeDiffTicks;
+
+    // Check parameter validity
+    ASSERT(pTimeStampPrevious_p != NULL);
+    ASSERT(pTimeStampCurrent_p != NULL);
 
     timeDiffTicks = pTimeStampCurrent_p->timeStamp - pTimeStampPrevious_p->timeStamp;
 

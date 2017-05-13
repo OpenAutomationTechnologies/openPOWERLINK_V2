@@ -68,18 +68,17 @@ The following toolchain files are delivered in the main cmake directory:
 
 | Platform                          | Toolchain file                            |
 | --------------------------------- | ----------------------------------------- |
-| Xilinx Microblaze                 | toolchain-xilinx-microblaze-gnu.cmake     |
+| Xilinx Microblaze (ISE)           | toolchain-xilinx-ise-microblaze-gnu.cmake |
 | Xilinx ARM (Zynq) Linux           | toolchain-xilinx-arm-linux-eabi-gnu.cmake |
-| Xilinx ARM (Zynq) non-OS          | toolchain-xilinx-zynqarm-eabi-gnu.cmake   |
 | Altera ARM (Cyclone V SoC) non-OS | toolchain-altera-c5socarm-eabi-gnu.cmake  |
 
 The toolchain file must be specified with the CMake option __CMAKE_TOOLCHAIN_FILE__.
 
 __For example:__
 
-Configuring cross compilation for the Xilinx Microblaze platform:
+Configuring cross compilation for the Xilinx Microblaze platform with ISE toolchain:
 
-    > cmake -DCMAKE_TOOLCHAIN_FILE=<OPENPOWERLINK_DIR>/cmake/toolchain-xilinx-microblaze-gnu.cmake <SOURCE_DIR>
+    > cmake -DCMAKE_TOOLCHAIN_FILE=<OPENPOWERLINK_DIR>/cmake/toolchain-xilinx-ise-microblaze-gnu.cmake <SOURCE_DIR>
 
 # Build Steps {#sect_build_steps}
 

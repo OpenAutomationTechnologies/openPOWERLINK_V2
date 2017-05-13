@@ -9,7 +9,7 @@ implementation. The Microblaze stdout is redirected to the PS UART component.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-void print(char*str);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //

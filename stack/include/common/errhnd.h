@@ -10,7 +10,7 @@ modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_common_errhnd_H_
 #define _INC_common_errhnd_H_
 
@@ -80,7 +79,7 @@ typedef struct
     tErrorObject        mnCrcErr;                                   ///< MN: CRC error object (0x1C00)
     tErrorObject        mnCycTimeExceed;                            ///< MN: Cycle Time Exceeded error object (0x1C02)
     tErrorObject        aMnCnLossPres[NUM_DLL_MNCN_LOSSPRES_OBJS];  ///< MN: CN Loss of PRes error objects (0x1C07, 0x1C08, 0x1C09)
-#endif
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 } tErrHndObjects;
 
 #endif /* _INC_common_errhnd_H_ */

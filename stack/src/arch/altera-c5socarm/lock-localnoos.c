@@ -11,7 +11,7 @@ ARM system. Note that the functions are empty calls!
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2013, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -42,8 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/target.h>
-
-#include <oplk/oplkinc.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -91,14 +89,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This function initializes the lock instance.
 
-\param  pLock_p                Reference to lock
+\param[in,out]  pLock_p             Reference to lock
 
 \return The function returns 0 when successful.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_initLock(OPLK_LOCK_T* pLock_p)
+int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     UNUSED_PARAMETER(pLock_p);
 
@@ -117,7 +115,7 @@ lock is freed.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_lock(void)
+int target_lock(void)
 {
     target_enableGlobalInterrupt(FALSE);
 
@@ -135,7 +133,7 @@ This function frees the given lock.
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-INT target_unlock(void)
+int target_unlock(void)
 {
     target_enableGlobalInterrupt(TRUE);
 
@@ -145,3 +143,7 @@ INT target_unlock(void)
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

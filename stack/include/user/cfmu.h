@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   cfmu.h
+\file   user/cfmu.h
 
 \brief  Include file for configuration file manager (CFM) module
 
@@ -8,7 +8,7 @@ This file contains the definitions of the CFM module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_cfmu_H_
-#define _INC_cfmu_H_
+#ifndef _INC_user_cfmu_H_
+#define _INC_user_cfmu_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -53,26 +52,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef tOplkError (*tCfmCbEventCnProgress)(tCfmEventCnProgress* pEventCnProgress_p);
+typedef tOplkError (*tCfmCbEventCnProgress)(const tCfmEventCnProgress* pEventCnProgress_p);
 typedef tOplkError (*tCfmCbEventCnResult)(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p, tCfmCbEventCnResult pfnCbEventCnResult_p);
+tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
+                     tCfmCbEventCnResult pfnCbEventCnResult_p);
 tOplkError cfmu_exit(void);
-tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtState nmtState_p);
+tOplkError cfmu_processNodeEvent(UINT nodeId_p,
+                                 tNmtNodeEvent nodeEvent_p,
+                                 tNmtState nmtState_p);
 BOOL       cfmu_isSdoRunning(UINT nodeId_p);
-tOplkError cfmu_cbObdAccess(tObdCbParam MEM* pParam_p);
+tOplkError cfmu_cbObdAccess(tObdCbParam* pParam_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_cfmu_H_ */
+#endif /* _INC_user_cfmu_H_ */

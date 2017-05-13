@@ -57,10 +57,15 @@ version V2.8.4 or higher is required.
 For a detailed description of CMake look at the
 [cmake section](\ref sect_build_cmake).
 
-### QT4 Development Tools
+### QT5 Development Tools
 
-If you want to build the QT demo application the QT4 development tools must
-be installed on the system (<http://qt.digia.com/>).
+If you want to build the QT demo application the QT5 development tools must
+be installed on the system (<http://www.qt.io/>).
+
+__NOTE:__ In order to automatically deploy the QT dependencies in Windows,
+          the CMake install target contains a hard-coded list of dll files.
+          This list is only verified with QT 5.5.1 and might need adaptation
+          for other QT 5 versions.
 
 ### openCONFIGURATOR
 
@@ -124,7 +129,7 @@ The openPOWERLINK kernel layer may be executed on an external PCIe
 device which handles the time critical sections of the openPOWERLINK
 stack. This solution allows a Windows user space application to run a POWERLINK
 network with cycle times as low as 250us which is otherwise not possible due to
-the non-realtime behaviour of Windows.
+the non-realtime behavior of Windows.
 
 An NDIS PCIe miniport driver is used as a communication interface
 between the openPOWERLINK application library and the openPOWERLINK kernel
@@ -248,7 +253,7 @@ Some of the key components required for driver signing are:
 - Software Publisher Certificate (SPC) issued by a commercial certificate authority (CA).
 - Catalog file with digital signature.
 
-For detailed steps to aquire a certificate, create a catalog and sign the driver, users can
+For detailed steps to acquire a certificate, create a catalog and sign the driver, users can
 refer the driver signing steps at
 <https://msdn.microsoft.com/en-us/library/windows/hardware/ff544865%28v=vs.85%29.aspx>
 

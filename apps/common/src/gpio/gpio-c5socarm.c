@@ -12,6 +12,7 @@ openPOWERLINK demo applications.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -71,59 +72,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define LED_OUTPUT_DELAY_US                         500000      // 500ms
+#define LED_OUTPUT_DELAY_US         500000          // 500ms
 
-#define HPS_LED_ALL_BIT_MASK                        0x0000F000
-#define HPS_LED_ALL_TURN_ON                         0x00000000
-#define HPS_LED_ALL_TURN_OFF                        0x0000F000
-#define HPS_LED_0_TURN_ON                           0x00007000  // GPIO[44] (HPS_LED_0) --> Error Led
-#define HPS_LED_1_TURN_ON                           0x0000B000  // GPIO[43] (HPS_LED_1) --> Status Led
-#define HPS_LED_2_TURN_ON                           0x0000D000  // GPIO[42] (HPS_LED_2)
-#define HPS_LED_3_TURN_ON                           0x0000E000  // GPIO[41] (HPS_LED_3)
+#define HPS_LED_ALL_BIT_MASK        0x0000F000
+#define HPS_LED_ALL_TURN_ON         0x00000000
+#define HPS_LED_ALL_TURN_OFF        0x0000F000
+#define HPS_LED_0_TURN_ON           0x00007000      // GPIO[44] (HPS_LED_0) --> Error Led
+#define HPS_LED_1_TURN_ON           0x0000B000      // GPIO[43] (HPS_LED_1) --> Status Led
+#define HPS_LED_2_TURN_ON           0x0000D000      // GPIO[42] (HPS_LED_2)
+#define HPS_LED_3_TURN_ON           0x0000E000      // GPIO[41] (HPS_LED_3)
 
-#define HPS_LED_0_TURN_OFF                          0x00008000
-#define HPS_LED_1_TURN_OFF                          0x00004000
-#define HPS_LED_2_TURN_OFF                          0x00002000
-#define HPS_LED_3_TURN_OFF                          0x00001000
+#define HPS_LED_0_TURN_OFF          0x00008000
+#define HPS_LED_1_TURN_OFF          0x00004000
+#define HPS_LED_2_TURN_OFF          0x00002000
+#define HPS_LED_3_TURN_OFF          0x00001000
 
-#define HPS_PB_INT_ALL_BIT_MASK                     0x01E00000  // Interrupt bits for GPIO2
+#define HPS_PB_INT_ALL_BIT_MASK     0x01E00000      // Interrupt bits for GPIO2
 
-#define HPS_PB_0_ASSERT                             0x01C00000  // GPIO[8] (HPS_PB_0)
-#define HPS_PB_1_ASSERT                             0x01A00000  // GPIO[9] (HPS_PB_1)
-#define HPS_PB_2_ASSERT                             0x01600000  // GPIO[10](HPS_PB_2)
-#define HPS_PB_3_ASSERT                             0x00E00000  // GPIO[11](HPS_PB_3)
+#define HPS_PB_0_ASSERT             0x01C00000      // GPIO[8] (HPS_PB_0)
+#define HPS_PB_1_ASSERT             0x01A00000      // GPIO[9] (HPS_PB_1)
+#define HPS_PB_2_ASSERT             0x01600000      // GPIO[10](HPS_PB_2)
+#define HPS_PB_3_ASSERT             0x00E00000      // GPIO[11](HPS_PB_3)
 
-#define HPS_PB_ALL_BIT_MASK                         0x01E00000
+#define HPS_PB_ALL_BIT_MASK         0x01E00000
 
-#define HPS_PB_0_BIT_MASK                           0x01000000  // GPIO[8] (HPS_PB_0)
-#define HPS_PB_1_BIT_MASK                           0x00800000  // GPIO[9] (HPS_PB_1)
-#define HPS_PB_2_BIT_MASK                           0x00400000  // GPIO[10](HPS_PB_2)
-#define HPS_PB_3_BIT_MASK                           0x00200000  // GPIO[11](HPS_PB_3)
+#define HPS_PB_0_BIT_MASK           0x01000000      // GPIO[8] (HPS_PB_0)
+#define HPS_PB_1_BIT_MASK           0x00800000      // GPIO[9] (HPS_PB_1)
+#define HPS_PB_2_BIT_MASK           0x00400000      // GPIO[10](HPS_PB_2)
+#define HPS_PB_3_BIT_MASK           0x00200000      // GPIO[11](HPS_PB_3)
 
-#define HPS_DIPSW_ALL_BIT_MASK                      0x001E0000
-#define HPS_DIPSW_NET_VAL(portVal)    ((portVal >> 17) & 0xF)
+#define HPS_DIPSW_ALL_BIT_MASK      0x001E0000
+#define HPS_DIPSW_NET_VAL(portVal)  ((portVal >> 17) & 0xF)
 
-#define HPS_DIPSW_0_BIT_MASK                        0x00100000  // GPIO[4] (HPS_DIPSW_0)
-#define HPS_DIPSW_1_BIT_MASK                        0x00080000  // GPIO[5] (HPS_DIPSW_1)
-#define HPS_DIPSW_2_BIT_MASK                        0x00040000  // GPIO[6](HPS_DIPSW_2)
-#define HPS_DIPSW_3_BIT_MASK                        0x00020000  // GPIO[7](HPS_DIPSW_3)
+#define HPS_DIPSW_0_BIT_MASK        0x00100000      // GPIO[4] (HPS_DIPSW_0)
+#define HPS_DIPSW_1_BIT_MASK        0x00080000      // GPIO[5] (HPS_DIPSW_1)
+#define HPS_DIPSW_2_BIT_MASK        0x00040000      // GPIO[6](HPS_DIPSW_2)
+#define HPS_DIPSW_3_BIT_MASK        0x00020000      // GPIO[7](HPS_DIPSW_3)
 
-#define FPGA_PB_ALL_BIT_MASK                        0x00000003
+#define FPGA_PB_ALL_BIT_MASK        0x00000003
 
-#define FPGA_PB_0_BIT_MASK                          0x00000001
-#define FPGA_PB_1_BIT_MASK                          0x00000002
+#define FPGA_PB_1_BIT_MASK          0x00000002
+#define FPGA_PB_0_BIT_MASK          0x00000001
 
-#define FPGA_DIPSW_ALL_BIT_MASK                     0x0000000F
+#define FPGA_DIPSW_ALL_BIT_MASK     0x0000000F
 
-#define FPGA_DIPSW_0_BIT_MASK                       0x00000001
-#define FPGA_DIPSW_1_BIT_MASK                       0x00000002
-#define FPGA_DIPSW_3_BIT_MASK                       0x00000001
-#define FPGA_DIPSW_4_BIT_MASK                       0x00000002
+#define FPGA_DIPSW_0_BIT_MASK       0x00000001
+#define FPGA_DIPSW_1_BIT_MASK       0x00000002
+#define FPGA_DIPSW_3_BIT_MASK       0x00000001
+#define FPGA_DIPSW_4_BIT_MASK       0x00000002
 
-#define FPGA_DIPSW_NET_VAL(portVal)     (portVal & FPGA_DIPSW_ALL_BIT_MASK)
+#define FPGA_DIPSW_NET_VAL(portVal) (portVal & FPGA_DIPSW_ALL_BIT_MASK)
 
 // Determine size of an array
-#define ARRAY_COUNT(array)              (sizeof(array) / sizeof(array[0]))
+#define ARRAY_COUNT(array)          (sizeof(array) / sizeof(array[0]))
 
 
 //------------------------------------------------------------------------------
@@ -133,17 +134,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
 ALT_GPIO_CONFIG_RECORD_t    cfgHpsGPI[] =
 {
-    { ALT_HLGPI_4, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_DIPSW_0
-    { ALT_HLGPI_5, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_DIPSW_1
-    { ALT_HLGPI_6, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_DIPSW_2
-    { ALT_HLGPI_7, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_DIPSW_3
-    { ALT_HLGPI_8, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_PB_0
-    { ALT_HLGPI_9, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },                            // HPS_PB_1
-    { ALT_HLGPI_10, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 }, // HPS_PB_2
-    { ALT_HLGPI_11, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 } // HPS_PB_3
+    { ALT_HLGPI_4, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_DIPSW_0
+    { ALT_HLGPI_5, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_DIPSW_1
+    { ALT_HLGPI_6, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_DIPSW_2
+    { ALT_HLGPI_7, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_DIPSW_3
+    { ALT_HLGPI_8, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_PB_0
+    { ALT_HLGPI_9, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },    // HPS_PB_1
+    { ALT_HLGPI_10, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 },   // HPS_PB_2
+    { ALT_HLGPI_11, ALT_GPIO_PIN_INPUT, 0, 0, 0, 0 }    // HPS_PB_3
 };
 
 ALT_GPIO_CONFIG_RECORD_t    cfgHpsGPO[] =
@@ -173,53 +173,44 @@ The function initializes the GPIO module before being used.
 //------------------------------------------------------------------------------
 void gpio_init(void)
 {
-    ALT_STATUS_CODE    halRet = ALT_E_SUCCESS;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     /* Initialize HPS GPIO */
 
     // Initialize GPIO module
     halRet = alt_gpio_init();
     if (halRet != ALT_E_SUCCESS)
-    {
         goto Exit;
-    }
 
     halRet = alt_gpio_group_config(cfgHpsGPO, ARRAY_COUNT(cfgHpsGPO));  // Setup GPIO LED
     if (halRet != ALT_E_SUCCESS)
-    {
         goto Exit;
-    }
 
-    halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK,
-                                      HPS_LED_ALL_TURN_OFF);    // clear the Leds
+    halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB,
+                                      HPS_LED_ALL_BIT_MASK,
+                                      HPS_LED_ALL_TURN_OFF);            // clear the Leds
     if (halRet != ALT_E_SUCCESS)
-    {
         goto Exit;
-    }
 
     halRet = alt_gpio_group_config(cfgHpsGPI, ARRAY_COUNT(cfgHpsGPI));  // Setup GPIO PUSHBUTTON
     if (halRet != ALT_E_SUCCESS)
-    {
         goto Exit;
-    }
 
     halRet = alt_gpio_port_int_disable(ALT_GPIO_PORTC, HPS_PB_INT_ALL_BIT_MASK);    // Enable GPIO interrupts
     if (halRet != ALT_E_SUCCESS)
-    {
         goto Exit;
-    }
 
     /* Initialize FPGA GPIO */
 
-    // will be initialized in target intialization
+    // will be initialized in target initialization
 
     // Clear the dip switch and push button interrupt status registers
-#ifdef HOST_0_BUTTON_PIO_BASE
+#if defined(HOST_0_BUTTON_PIO_BASE)
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_BUTTON_PIO_BASE, 0x0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE, FPGA_PB_ALL_BIT_MASK);
 #endif
 
-#ifdef HOST_0_DIPSW_PIO_BASE
+#if defined(HOST_0_DIPSW_PIO_BASE)
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_DIPSW_PIO_BASE, 0x0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_DIPSW_PIO_BASE, FPGA_DIPSW_ALL_BIT_MASK);
 #endif
@@ -245,11 +236,11 @@ void gpio_exit(void)
     /* Uninitialize FPGA GPIO */
 
     // will be handled by target module
-#ifdef HOST_0_BUTTON_PIO_BASE
+#if defined(HOST_0_BUTTON_PIO_BASE)
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_BUTTON_PIO_BASE, 0x0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE, FPGA_PB_ALL_BIT_MASK);
 #endif
-#ifdef HOST_0_DIPSW_PIO_BASE
+#if defined(HOST_0_DIPSW_PIO_BASE)
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_DIPSW_PIO_BASE, 0x0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_DIPSW_PIO_BASE, FPGA_DIPSW_ALL_BIT_MASK);
 #endif
@@ -268,13 +259,13 @@ The function returns the node ID set by the node switches.
 //------------------------------------------------------------------------------
 UINT8 gpio_getNodeid(void)
 {
-    UINT8       nodeId;
-    UINT32      hpsSwStatus = 0x0;
-    UINT32      fpgaSwStatus = 0x0;
+    UINT8   nodeId;
+    UINT32  hpsSwStatus = 0;
+    UINT32  fpgaSwStatus = 0;
 
     hpsSwStatus = alt_gpio_port_data_read(ALT_GPIO_PORTC, HPS_DIPSW_ALL_BIT_MASK);
 
-#ifdef HOST_0_DIPSW_PIO_BASE
+#if defined(HOST_0_DIPSW_PIO_BASE)
     fpgaSwStatus = IORD_ALTERA_AVALON_PIO_DATA(HOST_0_DIPSW_PIO_BASE);
 #endif
 
@@ -294,18 +285,18 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8    key;
+    UINT32  input;
 
-#ifdef HOST_0_BUTTON_PIO_BASE
-    key = (UINT8)IORD_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE);
+#if defined(HOST_0_BUTTON_PIO_BASE)
+    input = (UINT32)IORD_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE, FPGA_PB_ALL_BIT_MASK);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
@@ -314,14 +305,14 @@ UINT8 gpio_getAppInput(void)
 
 The function sets the application outputs.
 
-\param  val_p               Determines the value to be set to the output
+\param[in]      val_p               Determines the value to be set to the output
 
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
 void gpio_setAppOutputs(UINT32 val_p)
 {
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+    ALT_STATUS_CODE halRet = ALT_E_SUCCESS;
 
     halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ~val_p);
 }
@@ -332,4 +323,4 @@ void gpio_setAppOutputs(UINT32 val_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

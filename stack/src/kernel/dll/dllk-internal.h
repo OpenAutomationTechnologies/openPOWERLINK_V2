@@ -11,7 +11,7 @@ files.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_dllk_internal_H_
 #define _INC_dllk_internal_H_
 
@@ -57,35 +56,35 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // check for correct compilation options
 //------------------------------------------------------------------------------
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) && (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
+#if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) && (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
 #error "DLLK: select only one of CONFIG_DLL_PRES_READY_AFTER_SOA and CONFIG_DLL_PRES_READY_AFTER_SOC."
 #endif
 
-#if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)) &&  defined(CONFIG_INCLUDE_NMT_MN)
+#if (((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)) && defined(CONFIG_INCLUDE_NMT_MN))
 #error "DLLK: currently, CONFIG_DLL_PRES_READY_AFTER_* is not supported if CONFIG_INCLUDE_NMT_MN is enabled."
 #endif
 
-#if (CONFIG_EDRV_FAST_TXFRAMES == FALSE) && ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
+#if ((CONFIG_EDRV_FAST_TXFRAMES == FALSE) && ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)))
 #error "DLLK: CONFIG_DLL_PRES_READY_AFTER_* is enabled, but not CONFIG_EDRV_FAST_TXFRAMES."
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_FILTER_COUNT == 0)
+#if (defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_FILTER_COUNT == 0))
 #error "MN support needs CONFIG_DLL_PRES_FILTER_COUNT != 0"
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_EDRV_AUTO_RESPONSE_DELAY == FALSE)
+#if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_EDRV_AUTO_RESPONSE_DELAY == FALSE))
 #error "Ethernet driver support for auto-response delay is required for PRes Chaining."
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_DLL_PROCESS_SYNC != DLL_PROCESS_SYNC_ON_TIMER)
+#if ((CONFIG_DLL_PRES_CHAINING_CN != FALSE) && (CONFIG_DLL_PROCESS_SYNC != DLL_PROCESS_SYNC_ON_TIMER))
 #error "PRes Chaining CN support requires CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER."
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_RMN) && CONFIG_TIMER_USE_HIGHRES == FALSE
+#if (defined(CONFIG_INCLUDE_NMT_RMN) && CONFIG_TIMER_USE_HIGHRES == FALSE)
 #error "RMN support needs CONFIG_TIMER_USE_HIGHRES == TRUE"
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_RMN) && !defined(CONFIG_INCLUDE_NMT_MN)
+#if (defined(CONFIG_INCLUDE_NMT_RMN) && !defined(CONFIG_INCLUDE_NMT_MN))
 #error "RMN support needs CONFIG_INCLUDE_NMT_MN"
 #endif
 
@@ -95,8 +94,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
-void  TgtDbgSignalTracePoint (BYTE bTracePointNumber_p);
-void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
+void TgtDbgSignalTracePoint(BYTE bTracePointNumber_p);
+void TgtDbgPostTraceValue(DWORD dwTraceValue_p);
 #define TGT_DBG_SIGNAL_TRACE_POINT(p)   TgtDbgSignalTracePoint(p)
 #define TGT_DBG_POST_TRACE_VALUE(v)     TgtDbgPostTraceValue(v)
 #else
@@ -104,49 +103,49 @@ void  TgtDbgPostTraceValue (DWORD dwTraceValue_p);
 #define TGT_DBG_POST_TRACE_VALUE(v)
 #endif
 
-#define DLLK_DBG_POST_TRACE_VALUE(Event_p, uiNodeId_p, wErrorCode_p) \
-    TGT_DBG_POST_TRACE_VALUE((kEventSinkDllk << 28) | (Event_p << 24) | \
-                             (uiNodeId_p << 16) | wErrorCode_p)
+#define DLLK_DBG_POST_TRACE_VALUE(event_p, nodeId_p, errorCode_p) \
+    TGT_DBG_POST_TRACE_VALUE((kEventSinkDllk << 28) | (event_p << 24) | \
+                             (nodeId_p << 16) | errorCode_p)
 
 // defines for indexes of tDllkInstance.pTxBuffer
 #define DLLK_TXFRAME_IDENTRES       0   // IdentResponse on CN / MN
 #define DLLK_TXFRAME_STATUSRES      2   // StatusResponse on CN / MN
 #define DLLK_TXFRAME_NMTREQ         4   // NMT Request from FIFO on CN / MN
 
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
-#define DLLK_TXFRAME_SYNCRES      6   // SyncResponse on CN
-#define DLLK_TXFRAME_NONPLK       8   // non-POWERLINK frame from FIFO on CN / MN
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
+#define DLLK_TXFRAME_SYNCRES        6   // SyncResponse on CN
+#define DLLK_TXFRAME_NONPLK         8   // non-POWERLINK frame from FIFO on CN / MN
 #else
-#define DLLK_TXFRAME_NONPLK       6   // non-POWERLINK frame from FIFO on CN / MN
+#define DLLK_TXFRAME_NONPLK         6   // non-POWERLINK frame from FIFO on CN / MN
 #endif
 
 #define DLLK_TXFRAME_PRES           (DLLK_TXFRAME_NONPLK + 2) // PRes on CN / MN
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-  #define DLLK_TXFRAME_SOC          (DLLK_TXFRAME_PRES + 2)   // SoC on MN
-  #define DLLK_TXFRAME_SOA          (DLLK_TXFRAME_SOC + 2)    // SoA on MN
-  #define DLLK_TXFRAME_PREQ         (DLLK_TXFRAME_SOA + 2)    // PReq on MN
+#define DLLK_TXFRAME_SOC            (DLLK_TXFRAME_PRES + 2)   // SoC on MN
+#define DLLK_TXFRAME_SOA            (DLLK_TXFRAME_SOC + 2)    // SoA on MN
+#define DLLK_TXFRAME_PREQ           (DLLK_TXFRAME_SOA + 2)    // PReq on MN
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-  #define DLLK_TXFRAME_AMNI         (DLLK_TXFRAME_PREQ + 2)   // AMNI on MN
-  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_AMNI + (2 * (NMT_MAX_NODE_ID + 2)))
+#define DLLK_TXFRAME_AMNI           (DLLK_TXFRAME_PREQ + 2)   // AMNI on MN
+#define DLLK_TXFRAME_COUNT          (DLLK_TXFRAME_AMNI + (2 * (NMT_MAX_NODE_ID + 2)))
                                     // on MN: 7 + MaxPReq of regular CNs + 1 Diag + 1 Router
 #else
-#define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PREQ + (2 * (D_NMT_MaxCNNumber_U8 + 2)))
+#define DLLK_TXFRAME_COUNT          (DLLK_TXFRAME_PREQ + (2 * (D_NMT_MaxCNNumber_U8 + 2)))
 #endif
 #else
-  #define DLLK_TXFRAME_COUNT        (DLLK_TXFRAME_PRES + 2)
+#define DLLK_TXFRAME_COUNT          (DLLK_TXFRAME_PRES + 2)
 #endif
 
-#define DLLK_SOAREQ_COUNT               3
+#define DLLK_SOAREQ_COUNT           3
 
 // defines for tDllkInstance.updateTxFrame
-#define DLLK_UPDATE_NONE                0   // no update necessary
-#define DLLK_UPDATE_STATUS              1   // StatusRes needs update
-#define DLLK_UPDATE_BOTH                2   // IdentRes and StatusRes need update
+#define DLLK_UPDATE_NONE            0       // no update necessary
+#define DLLK_UPDATE_STATUS          1       // StatusRes needs update
+#define DLLK_UPDATE_BOTH            2       // IdentRes and StatusRes need update
 
 // defines for tDllkNodeInfo.presFilterFlags
-#define DLLK_FILTER_FLAG_PDO            0x01    // PRes needed for RPDO
-#define DLLK_FILTER_FLAG_HB             0x02    // PRes needed for Heartbeat Consumer
+#define DLLK_FILTER_FLAG_PDO        0x01    // PRes needed for RPDO
+#define DLLK_FILTER_FLAG_HB         0x02    // PRes needed for Heartbeat Consumer
 
 //------------------------------------------------------------------------------
 // typedef
@@ -211,7 +210,7 @@ typedef struct
     tSyncCb                 pfnCbSync;                              ///< Pointer to the synchronous callback function
     tDllAsndFilter          aAsndFilter[DLL_MAX_ASND_SERVICE_ID];   ///< Array of ASnd filters
     tEdrvFilter             aFilter[DLLK_FILTER_COUNT];             ///< Array of Ethernet driver filters
-#if NMT_MAX_NODE_ID > 0
+#if (NMT_MAX_NODE_ID > 0)
     tDllkNodeInfo           aNodeInfo[NMT_MAX_NODE_ID];             ///< Array of node information structures
 #endif
     UINT8                   curTxBufferOffsetIdentRes;              ///< Current TX buffer offset for IdentResponse frames
@@ -219,7 +218,7 @@ typedef struct
     UINT8                   curTxBufferOffsetNmtReq;                ///< Current TX buffer offset for NMT-priority frames
     UINT8                   curTxBufferOffsetNonPlk;                ///< Current TX buffer offset for non-POWERLINK frames
     UINT8                   curTxBufferOffsetCycle;                 ///< Current TX buffer offset for PRes, SoC, SoA, PReq
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     UINT8                   curTxBufferOffsetSyncRes;               ///< Current TX buffer offset for SyncResponse frames
 #endif
     tDllkTxBufState         aTxBufferStateNmtReq[2];
@@ -238,7 +237,7 @@ typedef struct
     tDllkNodeInfo*          pFirstPrcNodeInfo;                      ///< Pointer to the first PRC node information structure
 #endif
 
-#if CONFIG_TIMER_USE_HIGHRES != FALSE
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
     tTimerHdl               timerHdlCycle;                          ///< Timer handle used for POWERLINK cycle monitoring on CN and generation on MN
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     tTimerHdl               timerHdlSwitchOver;                     ///< Timer used for monitoring of missing SoC/SoA/AMNI (Redundancy)
@@ -254,7 +253,7 @@ typedef struct
 
     tDllLossSocStatus       lossSocStatus;                          ///< Loss of SoC status
 
-#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     UINT                    syncReqPrevNodeId;                      ///< Node ID of the previous SyncRequest
     tTimestamp              syncReqPrevTimeStamp;                   ///< Timestamp of the previous SyncRequest
     BOOL                    fPrcEnabled;                            ///< PRC is enabled
@@ -262,7 +261,7 @@ typedef struct
     UINT32                  prcPResFallBackTimeout;                 ///< Timeout to fall back to PReq/PRes mode on the first communication path
 #endif
 
-#if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD))
     tDllkPresFw             aPresForward[NMT_MAX_NODE_ID];
 #endif
 #if defined(CONFIG_INCLUDE_NMT_RMN)
@@ -291,7 +290,7 @@ extern "C"
 tOplkError dllk_postEvent(tEventType eventType_p);
 
 #if defined(CONFIG_INCLUDE_NMT_RMN)
-tOplkError dllk_cbTimerSwitchOver(tTimerEventArg* pEventArg_p);
+tOplkError dllk_cbTimerSwitchOver(const tTimerEventArg* pEventArg_p);
 #endif
 
 #ifdef __cplusplus

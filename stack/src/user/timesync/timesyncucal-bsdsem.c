@@ -11,7 +11,7 @@ uses BSD semaphores for synchronisation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -98,7 +98,7 @@ static sem_t*           syncSem_l;
 
 The function initializes the user CAL timesync module
 
-\param  pfnSyncCb_p             Function that is called in case of sync event
+\param[in]      pfnSyncCb_p         Function that is called in case of sync event
 
 \return The function returns a tOplkError error code.
 
@@ -109,11 +109,13 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     UNUSED_PARAMETER(pfnSyncCb_p);
 
-    if ((syncSem_l = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1)) == SEM_FAILED)
+    syncSem_l = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1);
+    if (syncSem_l == SEM_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
+
     return kErrorOk;
 }
 
@@ -137,12 +139,12 @@ void timesyncucal_exit(void)
 
 The function waits for a sync event.
 
-\param  timeout_p       Specifies a timeout in microseconds. If 0 it waits
-                        forever.
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
 
 \return The function returns a tOplkError error code.
-\retval kErrorOk              Successfully received sync event
-\retval kErrorGeneralError    Error while waiting on sync event
+\retval kErrorOk                    Successfully received sync event
+\retval kErrorGeneralError          Error while waiting on sync event
 
 \ingroup module_timesyncucal
 */
@@ -186,4 +188,4 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 /// \name Private Functions
 /// \{
 
-///\}
+/// \}

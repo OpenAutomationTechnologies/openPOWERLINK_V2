@@ -5,6 +5,246 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.5.2 {#sect_revision_v2_5_2}
+
+This is the latest release of the V2.5 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.5.2. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix access to aTimerInfo in hrestimer for Linux Kernel
+- Fix wrong size information provided by SDO callback
+- Use error handler posix memory sources in driver daemon
+- Fix contributor url
+- Avoid integer overflow in searchIndex
+- Resolve compilation issue in Zynq hybrid design
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.5.1 {#sect_revision_v2_5_1}
+
+This is the latest release of the V2.5 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.5.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Update documentation for Xilinx Zynq designs
+- Solve data freshness issue on Zynq Hybrid design
+- Fix wrong assertion in eventu_postError
+- Improve Nios II CN documentation
+- Fix SKIP_BITSTREAM enable in Zynq Hybrid design
+- Fix Microblaze BSP build in Zynq Hybrid design
+- Document update for Altera C5 SoC design
+- Fix build documentation for Vivado under Windows
+- Resolve xilinx-z702 PCP compiler warnings in Zynq hybrid
+- Resolve kernel panic for RMN
+- Remove unimportant targetsection assignments
+- Fix typo in known issues documentation
+- Reduce timeout steps in ctrlucal_executeCmd for dualprocshm CAL
+- Add support for VEth in Zynq hybrid design
+- Fix interface driver probe functions for Zynq hybrid design
+- Fix warnings in CMake version 3.3.x
+- Fix SDO server for non-numeric expedited WriteByIndex
+- Fix missing kObdEvPostWrite event for non-numeric objects
+- Fix NULL pointer used in edrv-i210 probe
+- Increase Tx buffer to handle higher PDO size in Zynq emacps
+- Fix driver probe functions for Zynq emacps
+- Update cmake configuration in edrv module
+- Fix NULL pointer used in edrvcyclic and sdotest-com
+- Remove unreachable break
+- Correct local variables
+- Add missing "_p" for parameters in obdconf
+- Add missing includes
+- Remove \return for functions that return nothing
+- Veth: Fix compilation on Linux kernels >= 4.7
+
+### Changes:
+- Consistency cleanup in build documentation
+- Update required Doxygen
+- Update Xilinx Zynq documentation
+- Improve readability of the directories documentation
+- Clean up kernel interface driver for Zynq hybrid design
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.5.0 {#sect_revision_v2_5_0}
+
+This is the first release of the V2.5 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.4 series (\ref sect_revision_v2_4_1)
+
+Following is a summary of changes in V2.5.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Port Zynq PCAP design to Vivado 2016.2
+- Port Zynq emacps design to Vivado 2016.2
+- Port Zynq + Microblaze (Hybrid) design to Vivado 2016.2
+- Add Linux Kernel driver for Zynq Hybrid design
+- Add MinGW support
+- Replace OBD callbacks with flags for calling generic callback
+- Add an example image and icon to CN xdd
+- Add function to SDO/UDP and socketwrapper for ARP query
+- Add simulation stub and simulation interface
+- Add porting guide
+- Add API functions for process data exchange
+
+### Fixes:
+- Several fixes to silence static code analyzer
+- Avoid deadlock with asynchronous auto-response frames
+- Fix 'occurred' typos
+- Increase the i210 link up timeout
+- Fix NULL pointer dereference during edrv_exit
+- Fix wrong NMT state check in processFillTx()
+- Solve NMT command truncation
+- Add NMT_MAX_NODE_ID check for dllkframe PRes handling
+- Solve dereferencing of a null pointer
+
+### Changes:
+- Remove Zynq ISE design
+- Remove Zynq ARM no-OS support
+- Move Object Dictionary from the stack to the application
+- Move process image setup for CiA302-4 to the application
+- Use a locally administered MAC address in embedded demos
+- Allow to build several oplk kernel modules at once
+- Split FeatureFlags definition from actual value calculation
+- Implement buffer allocation lib to edrv-8255x
+- openmac-nios2: use alt_irq_pending() only with IIC
+- Update documentation to Doxygen version 1.8.11
+- Simplify assert function
+- Add a general definition for assertions
+- Reduce default debug level for all stack libraries
+- Pass user timer arguments by reference
+- Add pcap immediate mode support
+- Add openMAC IP core Vivado port
+- Remove the now unused oplk_cbGenericObdAccess() function
+- Remove redundancies in errhndkcal implementations
+- Cleanup error handler kernel include paths in drivers
+- Add an update guide for users of previous stack versions
+- Improve code quality in stack, contrib, driver and app modules
+- Several code cleanups
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.4.1 {#sect_revision_v2_4_1}
+
+This is the latest release of the V2.4 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.4.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix several compiler warnings
+- Increase isochrRxMaxPayload limit
+- Remove Veth code from edrv if Veth support is disabled
+- Add findDebugfs() prototype
+- Fix openCONFORMANCE warnings in testcase 3-2-9-T2
+- Remove sync interrupt registration for Nios II in dualprocshm
+- Use Xil_L1DCache*() macros for Microblaze cache handling
+- Fix the build when no PIO are used
+- daemon PCP nios2: remove unused header
+- Add missing comment for object event forwarding
+- Fix relict in padding area of asynchronous frames
+- Fix cirbuffer return values
+- Connect atomic ipcore directly to shared memory
+- Fix circbuf locking issues with host interface CAL
+- Fix segmented read access to user specific OD
+- Fix various typos in ctrlu files
+- Enable storage attribute for PDO comm and mapp param objects
+- Force 0x1F8D/F0 object in Demo_3CN openCONFIGURATOR project
+- veth: avoid kernel header issue with musl
+- SDO read fails for VString objects
+- apps: include stdarg.h in eventlogstring.h
+- PCIe Driver: Disable Werror=date-time for kernel >= 3.14
+- Fix name of sched_priority element
+- oplkcfg.h: Remove option CONFIG_OBD_USE_LOAD_CONCISEDCF
+
+### Additions:
+- Add XDD for CiA401 slave with configuration store/restore
+- Improve user OD access comment
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.4.0 {#sect_revision_v2_4_0}
+
+This is the first release of the V2.4 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.3 series (\ref sect_revision_v2_3_2)
+
+Following is a summary of changes in V2.4.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add redundancy support for edrv-i210
+- Add dev_name command line parameter to console demos
+- Handle NMT commands in kernel layer
+- Add buffer allocation lib for edrv (8111, 8139, i210 and 82573)
+- Add support for driver firmware update in Linux PCIe design
+- Enhance openMAC Tx and Rx descriptor count
+- Add dynamic sync interrupt adjustment in openMAC edrvcyclic
+- Add hrestimer function to set timer with absolute time
+- Enable exception stack for Nios II MN driver
+- Add tightly-coupled data master to MN PCP
+- Add tightly-coupled memory size parameter to subsystems
+- Add RMN openCONFIGURATOR demo project
+
+### Fixes:
+- Fix typos in documentation
+- Fix doubled synchronization timer IRQ
+- Prevent multiple call to string object callback
+- Correct OD callbacks for restore objects
+- Improve SDO sequence layer initialization
+- Adapt sequence layer timeout to EPSG DSP 301 V1.2.0
+- Prevent overtaking SDO history frames
+- Improve transmission time for segmented SDO transfer
+- Fix C5 SoC host boot
+
+### Changes:
+- Add support for VEth interface in Windows PCIe solution
+- MN Objdict: add new dynamic channel for REAL PDO objects
+- Remove staging directory
+- Rework DE2-115 board designs
+- Replace clock crossing by pipeline bridge
+- Implement second TX queue in edrv-i210
+- Add generic time triggered flag to TX buffer structure
+- Change image of devboard terasic-de2-115
+- Add OD init parameters to stack API init parameters
+- Export the stack-internal OD callback function via the API
+- Rename OD user module to obdu
+- Split OD header into API and user part
+- Handle PDO mapping object access in the generic OD callback
+- Handle error handler object access in the generic OD callback
+- Handle CFM object access in the generic OD callback
+- Refactor OD callback in ctrlu module
+- Separation of SDO and OD
+- Add interface for user specific OD for non-existing objects handling
+- Refactor SDO sequence layer
+- Add documentation for parallel interface ipcore
+- Introduce board specific configuration header
+- Introduce Rx buffer configuration parameter
+- Enable coexistence of openMAC TTTX and auto response
+- Remove openMAC "no filter match" IRQ
+- Rename tightly-coupled memory
+- Reduce FPGA MN event queue sizes
+- Add AMI getter to target section header
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.3.2 {#sect_revision_v2_3_2}
 
 This is the latest release of the V2.3 release series. This release is a stable

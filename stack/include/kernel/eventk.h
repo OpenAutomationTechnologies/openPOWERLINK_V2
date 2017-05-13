@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   eventk.h
+\file   kernel/eventk.h
 
 \brief  Definitions of the kernel event CAL module
 
@@ -10,7 +10,7 @@ This file contains definitions for the kernel CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,9 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_eventk_H_
-#define _INC_eventk_H_
+#ifndef _INC_kernel_eventk_H_
+#define _INC_kernel_eventk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -56,7 +55,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -64,13 +62,15 @@ extern "C"
 
 tOplkError eventk_init(void);
 tOplkError eventk_exit(void);
-tOplkError eventk_process(tEvent* pEvent_p) SECTION_EVENTK_PROCESS;
-tOplkError eventk_postEvent(tEvent* pEvent_p) SECTION_EVENTK_POST;
-tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
-                            UINT argSize_p, void* pArg_p);
+tOplkError eventk_process(const tEvent* pEvent_p) SECTION_EVENTK_PROCESS;
+tOplkError eventk_postEvent(const tEvent* pEvent_p) SECTION_EVENTK_POST;
+tOplkError eventk_postError(tEventSource eventSource_p,
+                            tOplkError oplkError_p,
+                            UINT argSize_p,
+                            const void* pArg_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_eventk_H_ */
+#endif /* _INC_kernel_eventk_H_ */

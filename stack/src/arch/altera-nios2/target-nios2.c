@@ -11,7 +11,7 @@ systems without shared buffer and any OS.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,7 +46,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/target.h>
 #include <system.h>
-#include <altera_avalon_pio_regs.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -55,13 +54,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define TGTCONIO_MS_IN_US(x)    (x * 1000U)
+#define TGTCONIO_MS_IN_US(x)        (x * 1000U)
 
-#define GPIO_STATUS_LED_BIT     1
-#define GPIO_ERROR_LED_BIT      2
+#define GPIO_STATUS_LED_BIT         1
+#define GPIO_ERROR_LED_BIT          2
 
-#ifdef PCP_0_POWERLINK_LED_BASE
-#define TARGET_POWERLINK_LED_BASE PCP_0_POWERLINK_LED_BASE
+#if defined(PCP_0_POWERLINK_LED_BASE)
+#include <altera_avalon_pio_regs.h>
+#define TARGET_POWERLINK_LED_BASE   PCP_0_POWERLINK_LED_BASE
 #endif
 
 //------------------------------------------------------------------------------
@@ -112,7 +112,7 @@ This function returns the current system tick determined by the system timer.
 //------------------------------------------------------------------------------
 UINT32 target_getTickCount(void)
 {
-    UINT32 ticks;
+    UINT32  ticks;
 
     ticks = alt_nticks();
 
@@ -121,17 +121,32 @@ UINT32 target_getTickCount(void)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Get current timestamp
+
+The function returns the current timestamp in nanoseconds.
+
+\return The function returns the timestamp in nanoseconds
+*/
+//------------------------------------------------------------------------------
+ULONGLONG target_getCurrentTimestamp(void)
+{
+    // Not implemented for this target
+    return 0ULL;
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief    Enable global interrupt
 
 This function enabels/disables global interrupts.
 
-\param  fEnable_p               TRUE = enable interrupts
-                                FALSE = disable interrupts
+\param[in]      fEnable_p           TRUE = enable interrupts
+                                    FALSE = disable interrupts
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_enableGlobalInterrupt(BYTE fEnable_p)
+void target_enableGlobalInterrupt(BOOL fEnable_p)
 {
 static alt_irq_context  irq_context = 0;
 static int              iLockCount = 0;
@@ -139,16 +154,13 @@ static int              iLockCount = 0;
     if (fEnable_p != FALSE)
     {   // restore interrupts
         if (--iLockCount == 0)
-        {
             alt_irq_enable_all(irq_context);
-        }
     }
     else
     {   // disable interrupts
         if (iLockCount == 0)
-        {
             irq_context = alt_irq_disable_all();
-        }
+
         iLockCount++;
     }
 }
@@ -161,8 +173,8 @@ This function enables/disables the interrupt context flag. The flag has to be
 set when the CPU enters the interrupt context. The flag has to be cleared when
 the interrupt context is left.
 
-\param  fEnable_p               TRUE = enable interrupt context flag
-                                FALSE = disable interrupt context flag
+\param[in]      fEnable_p           TRUE = enable interrupt context flag
+                                    FALSE = disable interrupt context flag
 
 \ingroup module_target
 */
@@ -201,6 +213,7 @@ openPOWERLINK stack.
 tOplkError target_init(void)
 {
     fInterruptContextFlag_l = FALSE;
+
     return kErrorOk;
 }
 
@@ -216,6 +229,7 @@ The function cleans up target specific stuff.
 tOplkError target_cleanup(void)
 {
     fInterruptContextFlag_l = FALSE;
+
     return kErrorOk;
 }
 
@@ -226,14 +240,14 @@ tOplkError target_cleanup(void)
 The function makes the calling thread sleep, until the number of specified
 milliseconds has elapsed.
 
-\param  milliSecond_p       Number of milliseconds to sleep
+\param[in]      milliSeconds_p      Number of milliseconds to sleep
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-void target_msleep(unsigned int milliSecond_p)
+void target_msleep(UINT32 milliSeconds_p)
 {
-    usleep(TGTCONIO_MS_IN_US(milliSecond_p));
+    usleep(TGTCONIO_MS_IN_US(milliSeconds_p));
 }
 
 //------------------------------------------------------------------------------
@@ -243,17 +257,19 @@ void target_msleep(unsigned int milliSecond_p)
 The function sets the IP address, subnetMask and MTU of an Ethernet
 interface.
 
-\param  ifName_p                Name of Ethernet interface.
-\param  ipAddress_p             IP address to set for interface.
-\param  subnetMask_p            Subnet mask to set for interface.
-\param  mtu_p                   MTU to set for interface.
+\param[in]      ifName_p            Name of Ethernet interface.
+\param[in]      ipAddress_p         IP address to set for interface.
+\param[in]      subnetMask_p        Subnet mask to set for interface.
+\param[in]      mtu_p               MTU to set for interface.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_target
 */
 //------------------------------------------------------------------------------
-tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMask_p,
+tOplkError target_setIpAdrs(const char* ifName_p,
+                            UINT32 ipAddress_p,
+                            UINT32 subnetMask_p,
                             UINT16 mtu_p)
 {
     UNUSED_PARAMETER(ifName_p);
@@ -273,7 +289,7 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
 
 The function sets the default gateway of an Ethernet interface.
 
-\param  defaultGateway_p            Default gateway to set.
+\param[in]      defaultGateway_p    Default gateway to set.
 
 \return The function returns a tOplkError error code.
 
@@ -296,8 +312,8 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
 The function sets the POWERLINK status/error LED.
 
-\param  ledType_p       Determines which LED shall be set/reset.
-\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+\param[in]      ledType_p           Determines which LED shall be set/reset.
+\param[in]      fLedOn_p            Set the addressed LED on (TRUE) or off (FALSE).
 
 \return The function returns a tOplkError error code.
 
@@ -306,7 +322,7 @@ The function sets the POWERLINK status/error LED.
 //------------------------------------------------------------------------------
 tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
 
     switch (ledType_p)
      {
@@ -319,7 +335,8 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
             break;
 
          default:
-            return kErrorIllegalInstance;
+            ret = kErrorIllegalInstance;
+            break;
      }
 
     return ret;
@@ -337,14 +354,14 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 
 The function sets the POWERLINK status LED.
 
-\param  fOn_p               Determines the LED state.
+\param[in]      fOn_p               Determines the LED state.
 
 \ingroup module_drv_common
 */
 //------------------------------------------------------------------------------
 static void setStatusLed(BOOL fOn_p)
 {
-#ifdef TARGET_POWERLINK_LED_BASE
+#if defined(TARGET_POWERLINK_LED_BASE)
     if (fOn_p)
         IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_STATUS_LED_BIT);
     else
@@ -360,14 +377,14 @@ static void setStatusLed(BOOL fOn_p)
 
 The function sets the POWERLINK error LED.
 
-\param  fOn_p               Determines the LED state.
+\param[in]      fOn_p               Determines the LED state.
 
 \ingroup module_drv_common
 */
 //------------------------------------------------------------------------------
 static void setErrorLed(BOOL fOn_p)
 {
-#ifdef TARGET_POWERLINK_LED_BASE
+#if defined(TARGET_POWERLINK_LED_BASE)
     if (fOn_p)
         IOWR_ALTERA_AVALON_PIO_SET_BITS(TARGET_POWERLINK_LED_BASE, GPIO_ERROR_LED_BIT);
     else

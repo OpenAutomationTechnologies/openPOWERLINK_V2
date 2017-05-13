@@ -7,7 +7,7 @@
 This file contains the definitions of the main window class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,32 +33,34 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_MainWindow_H_
-#define _INC_MainWindow_H_
+#ifndef _INC_demo_MainWindow_H_
+#define _INC_demo_MainWindow_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <QWidget>
-#include <QTextEdit>
+#include <QString>
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "CnState.h"
-#include "Output.h"
-#include "SdoDialog.h"
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
+class QHBoxLayout;
+class QPixmap;
+class QLabel;
 class QLineEdit;
 class QPushButton;
-class QToolButton;
-class QLabel;
 class QFrame;
 class QTextEdit;
+
+class State;
+class Output;
+class Input;
+class CnState;
+class Api;
+class SdoDialog;
 
 //------------------------------------------------------------------------------
 /**
@@ -74,17 +76,17 @@ class MainWindow : public QWidget
 public:
     MainWindow(QWidget* parent = 0);
 
-    State*       getStateWidget() {return pState;}
-    Output*      getOutputWidget() {return pOutput;}
-    Input*       getInputWidget() {return pInput;}
-    CnState*     getCnStateWidget() {return pCnState;}
+    State*       getStateWidget() const {return this->pState;}
+    Output*      getOutputWidget() const {return this->pOutput;}
+    Input*       getInputWidget() const {return this->pInput;}
+    CnState*     getCnStateWidget() const {return this->pCnState;}
 
 private slots:
     void         toggleWindowState();
     void         startPowerlink();
     void         stopPowerlink();
     void         showSdoDialog();
-    void         printlog(QString str);
+    void         printlog(const QString& str);
     void         execNmtCmd();
 
 private:
@@ -122,5 +124,4 @@ private:
     tNmtEvent    nmtEvent;
 };
 
-#endif /* _INC_MainWindow_H_ */
-
+#endif /* _INC_demo_MainWindow_H_ */

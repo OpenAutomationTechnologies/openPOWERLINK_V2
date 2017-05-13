@@ -9,7 +9,7 @@ This is the internal driver header.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_hostiflibint_H_
 #define _INC_hostiflibint_H_
 
@@ -122,9 +121,9 @@ extern "C" {
 
 tHostifReturn hostif_createInt(tHostif* pHostif_p);
 tHostifReturn hostif_deleteInt(tHostif* pHostif_p);
-tHostifReturn hostif_checkVersion(UINT8* pBase_p, tHostifVersion* pSwVersion_p);
+tHostifReturn hostif_checkVersion(const UINT8* pBase_p, const tHostifVersion* pSwVersion_p);
 
-#if CONFIG_HOSTIF_PCP == FALSE
+#if (CONFIG_HOSTIF_PCP == FALSE)
 // Host processor target specific functions
 tHostifReturn hostif_sysIrqRegHandler(tHostifIrqCb pfnIrqCb_p, void* pArg_p);
 tHostifReturn hostif_sysIrqEnable(BOOL fEnable_p);
@@ -135,4 +134,3 @@ tHostifReturn hostif_sysIrqEnable(BOOL fEnable_p);
 #endif
 
 #endif /* _INC_hostiflibint_H_ */
-

@@ -11,7 +11,7 @@ This file contains the implementation of the ident module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -82,12 +82,12 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tIdentuInstance   instance_g;
+static tIdentuInstance  instance_g;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError   identu_cbIdentResponse(tFrameInfo* pFrameInfo_p);
+static tOplkError       cbIdentResponse(const tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -106,13 +106,15 @@ The function initializes an instance of the ident module
 //------------------------------------------------------------------------------
 tOplkError identu_init(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret;
 
     OPLK_MEMSET(&instance_g, 0, sizeof(instance_g));
 
     // register IdentResponse callback function
-    ret = dllucal_regAsndService(kDllAsndIdentResponse, identu_cbIdentResponse,
+    ret = dllucal_regAsndService(kDllAsndIdentResponse,
+                                 cbIdentResponse,
                                  kDllAsndFilterAny);
+
     return ret;
 }
 
@@ -129,7 +131,7 @@ The function shuts down the ident module instance
 //------------------------------------------------------------------------------
 tOplkError identu_exit(void)
 {
-    tOplkError  ret = kErrorOk;
+    tOplkError  ret;
 
     // deregister IdentResponse callback function
     dllucal_regAsndService(kDllAsndIdentResponse, NULL, kDllAsndFilterNone);
@@ -152,20 +154,17 @@ The function resets an ident module instance
 //------------------------------------------------------------------------------
 tOplkError identu_reset(void)
 {
-    tOplkError  ret;
-    UINT        index;
+    size_t  index;
 
-    ret = kErrorOk;
     for (index = 0; index < tabentries(instance_g.apIdentResponse); index++)
     {
         if (instance_g.apIdentResponse[index] != NULL)
-        {
             OPLK_FREE(instance_g.apIdentResponse[index]);
-        }
     }
+
     OPLK_MEMSET(&instance_g, 0, sizeof(tIdentuInstance));
 
-    return ret;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -174,25 +173,29 @@ tOplkError identu_reset(void)
 
 The function gets the IdentResponse for a specified node.
 
-\param  nodeId_p            The Node ID to get the IdentResponse for.
-\param  ppIdentResponse_p   Pointer to store IdentResponse. NULL, if no IdentResponse
-                            is available
+\param[in]      nodeId_p            The Node ID to get the IdentResponse for.
+\param[out]     ppIdentResponse_p   Pointer to store IdentResponse. NULL, if no IdentResponse
+                                    is available
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p)
+tOplkError identu_getIdentResponse(UINT nodeId_p,
+                                   const tIdentResponse** ppIdentResponse_p)
 {
-    tOplkError          ret = kErrorOk;
-    tIdentResponse*     pIdentResponse;
+    tOplkError      ret = kErrorOk;
+    tIdentResponse* pIdentResponse;
+
+    // Check parameter validity
+    ASSERT(ppIdentResponse_p != NULL);
 
     // decrement node ID, because array is zero based
     nodeId_p--;
     if (nodeId_p < tabentries(instance_g.apIdentResponse))
     {
-        pIdentResponse     = instance_g.apIdentResponse[nodeId_p];
+        pIdentResponse = instance_g.apIdentResponse[nodeId_p];
         *ppIdentResponse_p = pIdentResponse;
 
         // Check if ident response is valid, adjust return value otherwise
@@ -204,8 +207,8 @@ tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentRespon
         *ppIdentResponse_p = NULL;
         ret = kErrorInvalidNodeId;
     }
-    return ret;
 
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -214,16 +217,17 @@ tOplkError identu_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentRespon
 
 The function requests the IdentResponse for a specified node.
 
-\param  nodeId_p            The Node ID to reqzest the IdentResponse for.
-\param  pfnCbResponse_p     Function pointer to callback function which will
-                            be called if IdentResponse is received
+\param[in]      nodeId_p            The Node ID to request the IdentResponse for.
+\param[in]      pfnCbResponse_p     Function pointer to callback function which will
+                                    be called if IdentResponse is received
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbResponse_p)
+tOplkError identu_requestIdentResponse(UINT nodeId_p,
+                                       tIdentuCbResponse pfnCbResponse_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -258,39 +262,9 @@ tOplkError identu_requestIdentResponse(UINT nodeId_p, tIdentuCbResponse pfnCbRes
 #endif
     }
     else
-    {
         ret = kErrorInvalidNodeId;
-    }
+
     return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Get running requests
-
-The function returns a bitfield with the running requests for debugging
-purpose.
-
-\return The function returns a bitfield which includes the running requests for
-        node 1-32.
-
-\todo   Function is no longer exported! API must be enhanced to provide access
-        to this function! Should also be enhanced to support all CNs!
-
-\ingroup module_identu
-*/
-//------------------------------------------------------------------------------
-UINT32 identu_getRunningRequests(void)
-{
-    UINT32      reqs = 0;
-    UINT        index;
-
-    for (index = 0; index < 32; index++)
-    {
-        if (instance_g.apfnCbResponse[index] != NULL)
-            reqs |= (1 << index);
-    }
-    return reqs;
 }
 
 //============================================================================//
@@ -306,20 +280,20 @@ UINT32 identu_getRunningRequests(void)
 The function implements the callback function which will be called when a
 IdentResponse is received.
 
-\param  pFrameInfo_p            Pointer to frame information structure describing
-                                the received IdentResponse frame.
+\param[in]      pFrameInfo_p        Pointer to frame information structure describing
+                                    the received IdentResponse frame.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_identu
 */
 //------------------------------------------------------------------------------
-static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
+static tOplkError cbIdentResponse(const tFrameInfo* pFrameInfo_p)
 {
-    tOplkError              ret = kErrorOk;
-    UINT                    nodeId;
-    UINT                    index;
-    tIdentuCbResponse       pfnCbResponse;
+    tOplkError          ret = kErrorOk;
+    UINT                nodeId;
+    UINT                index;
+    tIdentuCbResponse   pfnCbResponse;
 
     nodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
     index = nodeId - 1;
@@ -363,4 +337,4 @@ Exit:
     return ret;
 }
 
-///\}
+/// \}

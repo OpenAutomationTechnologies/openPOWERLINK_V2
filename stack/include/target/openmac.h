@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   openmac.h
+\file   target/openmac.h
 
 \brief  Definition for openMAC drivers
 
@@ -10,7 +10,7 @@ This file contains definitions used by openMAC Ethernet and timer drivers.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,8 +35,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_openmac_H_
-#define _INC_openmac_H_
+#ifndef _INC_target_openmac_H_
+#define _INC_target_openmac_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -59,7 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //TODO: Check here OPENMAC_PKTLOCTX and OPENMAC_PKTLOCRX configuration
 //      (OPENMAC_PKTBUF_LOCAL and OPENMAC_PKTBUF_EXTERN)
 
-#if (OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL && OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_EXTERN)
+#if ((OPENMAC_PKTLOCRX == OPENMAC_PKTBUF_LOCAL) && (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_EXTERN))
 #error "This Packet Buffer configuration is not supported!"
 #endif
 
@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_PHY_RST_READY_MS       5       ///< Phy ready after reset [ms]
 
 #define EDRV_MAX_BUFFER_SIZE        1518    ///< MTU
-#define EDRV_MAX_RX_BUFFERS         16      ///< Number of supported Rx buffers
+#define EDRV_MAX_RX_BUFFERS         32      ///< Number of supported Rx buffers
 #define EDRV_MAX_FILTERS            16      ///< Number of supported Rx Filters
 #define EDRV_MAX_AUTO_RESPONSES     14      ///< Number of supported auto-response
 
@@ -83,20 +83,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // borrowed from omethlibint.h
 #define GET_TYPE_BASE(typ, element, ptr)    \
-    ((typ*)( ((size_t)ptr) - (size_t)&((typ*)0)->element ))
+    ((typ*)(((size_t)ptr) - (size_t)&((typ*)0)->element ))
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-typedef void (*tOpenmacIrqCb) (void* pArg_p);
+typedef void (*tOpenmacIrqCb)(void* pArg_p);
 
 /**
 \brief openMAC IRQ sources
+
+This enumeration defines the available IRQ sources of openMAC.
 */
 typedef enum
 {
-    kOpenmacIrqSync     = 0,    ///< Sync timer Irq
-    kOpenmacIrqTxRx     = 1,    ///< Mac Irq (Tx and Rx)
+    kOpenmacIrqSync     = 0,    ///< Sync timer IRQ
+    kOpenmacIrqTxRx     = 1,    ///< MAC IRQ (Tx and Rx)
     kOpenmacIrqLast             ///< Dummy, count of valid interrupt sources
 } eOpenmacIrqSource;
 
@@ -114,7 +116,6 @@ typedef UINT32 tOpenmacIrqSource;
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -122,11 +123,11 @@ extern "C"
 
 tOplkError openmac_isrReg(tOpenmacIrqSource irqSource_p, tOpenmacIrqCb pfnIsrCb_p, void* pArg_p);
 
-UINT8* openmac_uncachedMalloc(UINT size_p);
-void openmac_uncachedFree(UINT8* pMem_p);
+void*      openmac_uncachedMalloc(size_t size_p);
+void       openmac_uncachedFree(void* pMem_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_openmac_H_ */
+#endif /* _INC_target_openmac_H_ */

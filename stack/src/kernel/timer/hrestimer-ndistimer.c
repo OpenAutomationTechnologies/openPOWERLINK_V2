@@ -13,6 +13,7 @@ minimum resolution achievable by NDIS timer is 1ms.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,9 +42,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplkinc.h>
+#include <common/oplkinc.h>
 #include <kernel/hrestimer.h>
-#include <oplk/benchmark.h>
 
 #include <ndisintermediate/ndis-im.h>
 #include <ndis.h>
@@ -64,10 +64,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define TIMERHDL_MASK           0x0FFFFFFF
 #define TIMERHDL_SHIFT          28
-#define HDL_TO_IDX(Hdl)        ((Hdl >> TIMERHDL_SHIFT) - 1)
-#define HDL_INIT(Idx)          ((Idx + 1) << TIMERHDL_SHIFT)
-#define HDL_INC(Hdl)           (((Hdl + 1) & TIMERHDL_MASK) |\
-                               (Hdl & ~TIMERHDL_MASK))
+#define HDL_TO_IDX(hdl)         ((hdl >> TIMERHDL_SHIFT) - 1)
+#define HDL_INIT(idx)           ((idx + 1) << TIMERHDL_SHIFT)
+#define HDL_INC(hdl)            (((hdl + 1) & TIMERHDL_MASK) |\
+                                 (hdl & ~TIMERHDL_MASK))
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -95,11 +95,11 @@ The structure contains all necessary information for a high-resolution timer.
 */
 typedef struct
 {
-    tTimerEventArg     eventArg;                ///< Timer event Argument.
-    tTimerkCallback    pfnCallback;             ///< Timer callback.
-    NDIS_HANDLE        timerObjHandle;          ///< Ndis Timer object handle.
-    LARGE_INTEGER      dueTime;                 ///< Time to expire in 100ns resolution.
-    BOOL               fContinuously;           ///< Determines if it is a continuous or one-shot timer.
+    tTimerEventArg      eventArg;                   ///< Timer event Argument.
+    tTimerkCallback     pfnCallback;                ///< Timer callback.
+    NDIS_HANDLE         timerObjHandle;             ///< NDIS Timer object handle.
+    LARGE_INTEGER       dueTime;                    ///< Time to expire in 100ns resolution.
+    BOOL                fContinuously;              ///< Determines if it is a continuous or one-shot timer.
 } tHresTimerInfo;
 
 /**
@@ -109,18 +109,18 @@ The structure defines a high-resolution timer module instance.
 */
 typedef struct
 {
-    tHresTimerInfo    aTimerInfo[TIMER_COUNT];      ///< Array of timer info structure.
-    BOOLEAN           fInitialized;                 ///< Flag to identify if module is initialized.
+    tHresTimerInfo      aTimerInfo[TIMER_COUNT];    ///< Array of timer info structure.
+    BOOLEAN             fInitialized;               ///< Flag to identify if module is initialized.
 } tHresTimerInstance;
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHresTimerInstance    hresTimerInstance_l;
+static tHresTimerInstance   hresTimerInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-NDIS_TIMER_FUNCTION          timerDpc;
+static NDIS_TIMER_FUNCTION  timerDpc;
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -222,22 +222,24 @@ as the new timer. That means the callback function must check the passed handle
 with the one returned by this function. If these are unequal, the call can be
 discarded.
 
-\param  pTimerHdl_p     Pointer to timer handle.
-\param  time_p          Relative timeout in [ns].
-\param  pfnCallback_p   Callback function, which is called when timer expires.
-                        (The function is called mutually exclusive with the Edrv
-                        callback functions (Rx and Tx)).
-\param  argument_p      User-specific argument.
-\param  fContinue_p     If TRUE, callback function will be called continuously.
-                        Otherwise, it is a one-shot timer.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
+\param[in]      time_p              Relative timeout in [ns].
+\param[in]      pfnCallback_p       Callback function, which is called when timer expires.
+                                    (The function is called mutually exclusive with
+                                    the Edrv callback functions (Rx and Tx)).
+\param[in]      argument_p          User-specific argument.
+\param[in]      fContinue_p         If TRUE, the callback function will be called continuously.
+                                    Otherwise, it is a one-shot timer.
 
 \return Returns a tOplkError error code.
 
 \ingroup module_hrestimer
 */
 //------------------------------------------------------------------------------
-tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
-                                 tTimerkCallback pfnCallback_p, ULONG argument_p,
+tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p,
+                                 ULONGLONG time_p,
+                                 tTimerkCallback pfnCallback_p,
+                                 ULONG argument_p,
                                  BOOL fContinue_p)
 {
     UINT              index;
@@ -313,7 +315,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 The function deletes a created high-resolution timer. The timer is specified
 by its timer handle. After deleting, the handle is reset to zero.
 
-\param  pTimerHdl_p     Pointer to timer handle.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle.
 
 \return Returns a tOplkError error code.
 
@@ -365,7 +367,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
 This function enables/disables the external synchronization interrupt. If the
 external synchronization interrupt is not supported, the call is ignored.
 
-\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+\param[in]      fEnable_p           Flag determines if sync should be enabled or disabled.
 
 \ingroup module_hrestimer
 */
@@ -383,7 +385,7 @@ This function sets the time when the external synchronization interrupt shall
 be triggered to synchronize the host processor. If the external synchronization
 interrupt is not supported, the call is ignored.
 
-\param  time_p          Time when the sync shall be triggered
+\param[in]      time_p              Time when the sync shall be triggered
 
 \ingroup module_hrestimer
 */
@@ -406,15 +408,17 @@ void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
 This is the common callback routine for the timers. The NDIS framework will
 call this routine once the timer dueTime has expired.
 
-\param  pSystemParameter1_p     System parameter 1.
-\param  pFunctionContext_p      Pointer to context memory for the timer.
-\param  pSystemParameter2_p     System parameter 2.
-\param  pSystemParameter3_p     System parameter 3.
+\param[in]      pSystemParameter1_p System parameter 1.
+\param[in]      pFunctionContext_p  Pointer to context memory for the timer.
+\param[in]      pSystemParameter2_p System parameter 2.
+\param[in]      pSystemParameter3_p System parameter 3.
 
 */
 //------------------------------------------------------------------------------
-void timerDpc(PVOID pSystemParameter1_p, PVOID pFunctionContext_p, PVOID pSystemParameter2_p,
-              PVOID pSystemParameter3_p)
+static void timerDpc(PVOID pSystemParameter1_p,
+                     PVOID pFunctionContext_p,
+                     PVOID pSystemParameter2_p,
+                     PVOID pSystemParameter3_p)
 {
     tHresTimerInfo*   pTimerInfo = (tHresTimerInfo*)pFunctionContext_p;
     tTimerHdl         orgTimerHdl;

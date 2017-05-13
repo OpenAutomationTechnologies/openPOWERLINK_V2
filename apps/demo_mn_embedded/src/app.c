@@ -12,7 +12,7 @@ the running light is controlled by the read digital inputs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -43,8 +43,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include "app.h"
+
+#include <oplk/oplk.h>
+#include <obdpi.h>
+
 #include "xap.h"
 
 //============================================================================//
@@ -80,27 +83,27 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    UINT            leds;
-    UINT            ledsOld;
-    UINT            input;
-    UINT            inputOld;
-    UINT            period;
-    int             toggle;
+    UINT                leds;
+    UINT                ledsOld;
+    UINT                input;
+    UINT                inputOld;
+    UINT                period;
+    int                 toggle;
 } APP_NODE_VAR_T;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int                  usedNodeIds_l[] = {1, 32, 110, 0};
-static UINT                 cnt_l;
-static APP_NODE_VAR_T       nodeVar_l[MAX_NODES];
-static PI_IN*               pProcessImageIn_l;
-static PI_OUT*              pProcessImageOut_l;
+static int              aUsedNodeIds_l[] = {1, 32, 110, 0};
+static UINT             cnt_l;
+static APP_NODE_VAR_T   aNodeVar_l[MAX_NODES];
+static PI_IN*           pProcessImageIn_l;
+static const PI_OUT*    pProcessImageOut_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError initProcessImage(void);
+static tOplkError       initProcessImage(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -119,19 +122,19 @@ The function initializes the synchronous data application
 //------------------------------------------------------------------------------
 tOplkError initApp(void)
 {
-    tOplkError ret = kErrorOk;
-    int        i;
+    tOplkError  ret = kErrorOk;
+    int         i;
 
     cnt_l = 0;
 
-    for (i = 0; (i < MAX_NODES) && (usedNodeIds_l[i] != 0); i++)
+    for (i = 0; (i < MAX_NODES) && (aUsedNodeIds_l[i] != 0); i++)
     {
-        nodeVar_l[i].leds = 0;
-        nodeVar_l[i].ledsOld = 0;
-        nodeVar_l[i].input = 0;
-        nodeVar_l[i].inputOld = 0;
-        nodeVar_l[i].toggle = 0;
-        nodeVar_l[i].period = 0;
+        aNodeVar_l[i].leds = 0;
+        aNodeVar_l[i].ledsOld = 0;
+        aNodeVar_l[i].input = 0;
+        aNodeVar_l[i].inputOld = 0;
+        aNodeVar_l[i].toggle = 0;
+        aNodeVar_l[i].period = 0;
     }
 
     ret = initProcessImage();
@@ -168,8 +171,8 @@ The function implements the synchronous data handler.
 //------------------------------------------------------------------------------
 tOplkError processSync(void)
 {
-    tOplkError          ret = kErrorOk;
-    int                 i;
+    tOplkError  ret;
+    int         i;
 
     ret = oplk_exchangeProcessImageOut();
     if (ret != kErrorOk)
@@ -177,57 +180,49 @@ tOplkError processSync(void)
 
     cnt_l++;
 
-    nodeVar_l[0].input = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
-    nodeVar_l[1].input = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
-    nodeVar_l[2].input = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[0].input = pProcessImageOut_l->CN1_M00_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[1].input = pProcessImageOut_l->CN32_M00_DigitalInput_00h_AU8_DigitalInput;
+    aNodeVar_l[2].input = pProcessImageOut_l->CN110_M00_DigitalInput_00h_AU8_DigitalInput;
 
-    for (i = 0; (i < MAX_NODES) && (usedNodeIds_l[i] != 0); i++)
+    for (i = 0; (i < MAX_NODES) && (aUsedNodeIds_l[i] != 0); i++)
     {
-        /* Running Leds */
+        /* Running LEDs */
         /* period for LED flashing determined by inputs */
-        nodeVar_l[i].period = (nodeVar_l[i].input == 0) ? 1 : (nodeVar_l[i].input * 20);
-        if (cnt_l % nodeVar_l[i].period == 0)
+        aNodeVar_l[i].period = (aNodeVar_l[i].input == 0) ? 1 : (aNodeVar_l[i].input * 20);
+        if (cnt_l % aNodeVar_l[i].period == 0)
         {
-            if (nodeVar_l[i].leds == 0x00)
+            if (aNodeVar_l[i].leds == 0x00)
             {
-                nodeVar_l[i].leds = 0x1;
-                nodeVar_l[i].toggle = 1;
+                aNodeVar_l[i].leds = 0x1;
+                aNodeVar_l[i].toggle = 1;
             }
             else
             {
-                if (nodeVar_l[i].toggle)
+                if (aNodeVar_l[i].toggle)
                 {
-                    nodeVar_l[i].leds <<= 1;
-                    if (nodeVar_l[i].leds == APP_LED_MASK_1)
-                    {
-                        nodeVar_l[i].toggle = 0;
-                    }
+                    aNodeVar_l[i].leds <<= 1;
+                    if (aNodeVar_l[i].leds == APP_LED_MASK_1)
+                        aNodeVar_l[i].toggle = 0;
                 }
                 else
                 {
-                    nodeVar_l[i].leds >>= 1;
-                    if (nodeVar_l[i].leds == 0x01)
-                    {
-                        nodeVar_l[i].toggle = 1;
-                    }
+                    aNodeVar_l[i].leds >>= 1;
+                    if (aNodeVar_l[i].leds == 0x01)
+                        aNodeVar_l[i].toggle = 1;
                 }
             }
         }
 
-        if (nodeVar_l[i].input != nodeVar_l[i].inputOld)
-        {
-            nodeVar_l[i].inputOld = nodeVar_l[i].input;
-        }
+        if (aNodeVar_l[i].input != aNodeVar_l[i].inputOld)
+            aNodeVar_l[i].inputOld = aNodeVar_l[i].input;
 
-        if (nodeVar_l[i].leds != nodeVar_l[i].ledsOld)
-        {
-            nodeVar_l[i].ledsOld = nodeVar_l[i].leds;
-        }
+        if (aNodeVar_l[i].leds != aNodeVar_l[i].ledsOld)
+            aNodeVar_l[i].ledsOld = aNodeVar_l[i].leds;
     }
 
-    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[0].leds;
-    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[1].leds;
-    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = nodeVar_l[2].leds;
+    pProcessImageIn_l->CN1_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[0].leds;
+    pProcessImageIn_l->CN32_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[1].leds;
+    pProcessImageIn_l->CN110_M00_DigitalOutput_00h_AU8_DigitalOutput = aNodeVar_l[2].leds;
 
     ret = oplk_exchangeProcessImageIn();
 
@@ -251,24 +246,28 @@ The function initializes the process image of the application.
 //------------------------------------------------------------------------------
 static tOplkError initProcessImage(void)
 {
-    tOplkError      ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+    UINT        errorIndex = 0;
 
     PRINTF("Initializing process image...\n");
-    PRINTF("Size of input process image: %d\n", (UINT32)sizeof(PI_IN));
-    PRINTF("Size of output process image: %d\n", (UINT32)sizeof(PI_OUT));
+    PRINTF("Size of process image: Input = %lu Output = %lu\n",
+           (ULONG)sizeof(PI_IN),
+           (ULONG)sizeof(PI_OUT));
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
-    {
         return ret;
+
+    pProcessImageIn_l = (PI_IN*)oplk_getProcessImageIn();
+    pProcessImageOut_l = (const PI_OUT*)oplk_getProcessImageOut();
+
+    errorIndex = obdpi_setupProcessImage();
+    if (errorIndex != 0)
+    {
+        PRINTF("Setup process image failed at index 0x%04x\n", errorIndex);
+        ret = kErrorApiPINotAllocated;
     }
-
-    pProcessImageIn_l = oplk_getProcessImageIn();
-    pProcessImageOut_l = oplk_getProcessImageOut();
-
-    ret = oplk_setupProcessImage();
 
     return ret;
 }
 
-///\}
-
+/// \}

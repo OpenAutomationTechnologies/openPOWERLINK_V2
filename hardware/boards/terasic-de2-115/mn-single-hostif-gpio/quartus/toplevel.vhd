@@ -67,7 +67,10 @@ entity toplevel is
         SDRAM_BA        : out   std_logic_vector(1 downto 0);
         SDRAM_DQM       : out   std_logic_vector(3 downto 0);
         SDRAM_DQ        : inout std_logic_vector(31 downto 0);
-        -- Low active KEY
+        -- LED
+        LEDG                : out   std_logic_vector(7 downto 0);
+        LEDR                : out   std_logic_vector(15 downto 0);
+        -- KEY
         KEY_n           : in    std_logic_vector(3 downto 0);
         -- LCD
         LCD_ON          : out   std_logic;
@@ -98,7 +101,6 @@ architecture rtl of toplevel is
             reset_reset_n                       : in    std_logic                     := 'X';
 
             host_0_benchmark_pio_export         : out   std_logic_vector(7 downto 0);
-            key_pio_export                      : in    std_logic_vector(3 downto 0);
             epcs_flash_dclk                     : out   std_logic;
             epcs_flash_sce                      : out   std_logic;
             epcs_flash_sdo                      : out   std_logic;
@@ -125,7 +127,10 @@ architecture rtl of toplevel is
             prl0_oPrlMst_ale                    : out   std_logic;
             prl0_oPrlMst_wr                     : out   std_logic;
             prl0_oPrlMst_rd                     : out   std_logic;
-            prl0_iPrlMst_ack                    : in    std_logic                     := 'X'
+            prl0_iPrlMst_ack                    : in    std_logic                     := 'X';
+            -- Application ports
+            app_pio_in_port                     : in    std_logic_vector(31 downto 0) := (others => 'X');
+            app_pio_out_port                    : out   std_logic_vector(31 downto 0)
         );
     end component mnSingleHostifGpio;
 
@@ -158,7 +163,7 @@ architecture rtl of toplevel is
 
     signal hostifIrq    : std_logic;
 
-    signal key          : std_logic_vector(KEY_n'range);
+    signal app_input        : std_logic_vector(31 downto 0);
 begin
 
     LCD_ON      <= '1';
@@ -178,7 +183,22 @@ begin
 
     hostifIrq       <= not HOSTIF_IRQ_n;
 
-    key             <= not KEY_n;
+    ---------------------------------------------------------------------------
+    -- Green LED assignments
+    LEDG        <= (others => '0'); -- Reserved
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Red LED assignments
+    LEDR        <= (others => '0'); -- Reserved
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Application Input and Output assignments
+
+    -- Input: Map KEY nibble to Application Input
+    app_input   <= x"0000000" & not KEY_n;
+    ---------------------------------------------------------------------------
 
     inst : component mnSingleHostifGpio
         port map (
@@ -186,8 +206,6 @@ begin
             clk50_clk                       => clk50,
             clk100_clk                      => clk100,
             reset_reset_n                   => pllLocked,
-
-            key_pio_export                  => key,
 
             host_0_benchmark_pio_export     => open,
 
@@ -221,7 +239,10 @@ begin
             lcd_data                        => LCD_DQ,
             lcd_E                           => LCD_E,
             lcd_RS                          => LCD_RS,
-            lcd_RW                          => LCD_RW
+            lcd_RW                          => LCD_RW,
+
+            app_pio_in_port                 => app_input,
+            app_pio_out_port                => open
         );
 
     -- Pll Instance

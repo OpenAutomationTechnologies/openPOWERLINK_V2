@@ -12,7 +12,7 @@ of openPOWERLINK enumerations and error codes into descriptive strings.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2010, E. Dumas
 All rights reserved.
 
@@ -43,8 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
-#include <oplk/oplk.h>
-#include <oplk/nmt.h>
 #include <oplk/debugstr.h>
 
 //============================================================================//
@@ -77,37 +75,37 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 typedef struct
 {
     tNmtState           nmtState;
-    char*               sNmtState;
+    const char*         sNmtState;
 } tNmtStateInfo;
 
 typedef struct
 {
-    tOplkApiEventType    apiEvent;
-    char*                sApiEvent;
+    tOplkApiEventType   apiEvent;
+    const char*         sApiEvent;
 } tApiEventInfo;
 
 typedef struct
 {
     tOplkError          key;
-    char*               sName;
+    const char*         sName;
 } tRetValInfo;
 
 typedef struct
 {
     UINT16              key;
-    char*               sName;
+    const char*         sName;
 } tEmergErrCodeInfo;
 
 typedef struct
 {
     UINT32              abortCode;
-    char*               sAbortCode;
+    const char*         sAbortCode;
 } tAbortCodeInfo;
 
 typedef struct
 {
     tNmtNodeCommand     nodeCommand;
-    char*               sNodeCommand;
+    const char*         sNodeCommand;
 } tNmtNodeCommandInfo;
 
 //------------------------------------------------------------------------------
@@ -117,101 +115,104 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
-static char* invalidStr_l = "INVALID";
+static const char* const invalidStr_l = "INVALID";
 
 // text strings for POWERLINK events
-static char* nmtEventStr_l[] =
+static const char* const nmtEventStr_l[] =
 {
-    "NmtEventNoEvent",              //
-    "NmtEventDllMePres",            //
-    "NmtEventDllMePresTimeout",     //
-    "NmtEventDllMeAsndTimeout",     //
-    "NmtEventDllMeSoaSent",         //
-    "NmtEventDllMeSocTrig",         //
-    "NmtEventDllMeSoaTrig",         //
-    "NmtEventDllCeSoc",             //
-    "NmtEventDllCePreq",            //
-    "NmtEventDllCePres",            //
-    "NmtEventDllCeSoa",             //
-    "NmtEventDllCeAInv",            //
-    "NmtEventDllCeAsnd",            //
-    "NmtEventDllCeFrameTimeout",    //
-    "NmtEventDllReAmni",            //
-    "NmtEventDllReSwitchOverTimeout", // reserved
-    "NmtEventSwReset",              // NMT_GT1, NMT_GT2, NMT_GT8
-    "NmtEventResetNode",            //
-    "NmtEventResetCom",             //
-    "NmtEventResetConfig",          //
-    "NmtEventEnterPreOperational2", //
-    "NmtEventEnableReadyToOperate", //
-    "NmtEventStartNode",            // NMT_CT7
-    "NmtEventStopNode",             //
-    "NmtEventGoToStandby",          //
-    "NmtEventGoToStandbyDelayed",   //
-    "0x1A",                         // reserved
-    "0x1B",                         // reserved
-    "0x1C",                         // reserved
-    "0x1D",                         // reserved
-    "0x1E",                         // reserved
-    "0x1F",                         // reserved
-    "NmtEventEnterResetApp",        //
-    "NmtEventEnterResetCom",        //
-    "NmtEventInternComError",       // NMT_GT6, internal communication error -> enter ResetCommunication
-    "NmtEventEnterResetConfig",     //
-    "NmtEventEnterCsNotActive",     //
-    "NmtEventEnterMsNotActive",     //
-    "NmtEventTimerBasicEthernet",   // NMT_CT3; timer triggered state change (NotActive -> BasicEth)
-    "NmtEventTimerMsPreOp1",        // enter PreOp1 on MN (NotActive -> MsPreOp1)
-    "NmtEventNmtCycleError",        // NMT_CT11, NMT_MT6; error during cycle -> enter PreOp1
-    "NmtEventTimerMsPreOp2",        // enter PreOp2 on MN (MsPreOp1 -> MsPreOp2 if NmtEventAllMandatoryCNIdent)
-    "NmtEventAllMandatoryCNIdent",  // enter PreOp2 on MN if NmtEventTimerMsPreOp2
-    "NmtEventEnterReadyToOperate",  // application ready for the state ReadyToOp
-    "NmtEventEnterMsOperational",   // enter Operational on MN
-    "NmtEventSwitchOff",            // enter state Off
-    "NmtEventCriticalError",        // enter state Off because of critical error
-    "NmtEventEnterRmsNotActive",    //
+    "NmtEventNoEvent",                      //
+    "NmtEventDllMePres",                    //
+    "NmtEventDllMePresTimeout",             //
+    "NmtEventDllMeAsndTimeout",             //
+    "NmtEventDllMeSoaSent",                 //
+    "NmtEventDllMeSocTrig",                 //
+    "NmtEventDllMeSoaTrig",                 //
+    "NmtEventDllCeSoc",                     //
+    "NmtEventDllCePreq",                    //
+    "NmtEventDllCePres",                    //
+    "NmtEventDllCeSoa",                     //
+    "NmtEventDllCeAInv",                    //
+    "NmtEventDllCeAsnd",                    //
+    "NmtEventDllCeFrameTimeout",            //
+    "NmtEventDllReAmni",                    //
+    "NmtEventDllReSwitchOverTimeout",       // reserved
+    "NmtEventSwReset",                      // NMT_GT1, NMT_GT2, NMT_GT8
+    "NmtEventResetNode",                    //
+    "NmtEventResetCom",                     //
+    "NmtEventResetConfig",                  //
+    "NmtEventEnterPreOperational2",         //
+    "NmtEventEnableReadyToOperate",         //
+    "NmtEventStartNode",                    // NMT_CT7
+    "NmtEventStopNode",                     //
+    "NmtEventGoToStandby",                  //
+    "NmtEventGoToStandbyDelayed",           //
+    "0x1A",                                 // reserved
+    "0x1B",                                 // reserved
+    "0x1C",                                 // reserved
+    "0x1D",                                 // reserved
+    "0x1E",                                 // reserved
+    "0x1F",                                 // reserved
+    "NmtEventEnterResetApp",                //
+    "NmtEventEnterResetCom",                //
+    "NmtEventInternComError",               // NMT_GT6, internal communication error -> enter ResetCommunication
+    "NmtEventEnterResetConfig",             //
+    "NmtEventEnterCsNotActive",             //
+    "NmtEventEnterMsNotActive",             //
+    "NmtEventTimerBasicEthernet",           // NMT_CT3; timer triggered state change (NotActive -> BasicEth)
+    "NmtEventTimerMsPreOp1",                // enter PreOp1 on MN (NotActive -> MsPreOp1)
+    "NmtEventNmtCycleError",                // NMT_CT11, NMT_MT6; error during cycle -> enter PreOp1
+    "NmtEventTimerMsPreOp2",                // enter PreOp2 on MN (MsPreOp1 -> MsPreOp2 if NmtEventAllMandatoryCNIdent)
+    "NmtEventAllMandatoryCNIdent",          // enter PreOp2 on MN if NmtEventTimerMsPreOp2
+    "NmtEventEnterReadyToOperate",          // application ready for the state ReadyToOp
+    "NmtEventEnterMsOperational",           // enter Operational on MN
+    "NmtEventSwitchOff",                    // enter state Off
+    "NmtEventCriticalError",                // enter state Off because of critical error
+    "NmtEventEnterRmsNotActive",            //
 };
 
 // text strings for POWERLINK event sources
-static char* eventSourceStr_l[] =
+static const char* const eventSourceStr_l[] =
 {
-    "0",                        // reserved
+    "0",                                    // reserved
 
     // openPOWERLINK kernel modules
-    "EventSourceDllk",          // Dllk module
-    "EventSourceNmtk",          // Nmtk module
-    "EventSourceObdk",          // Obdk module
-    "EventSourcePdok",          // Pdok module
-    "EventSourceTimerk",        // Timerk module
-    "EventSourceEventk",        // Eventk module
-    "EventSourceSyncCb",        // sync-Cb
-    "EventSourceErrk",          // Error handler module
-    "0x09", "0x0a", "0x0b",     // reserved
-    "0x0c", "0x0d", "0x0e",     // reserved
-    "0x0f",                     // reserved
+    "EventSourceDllk",                      // Dllk module
+    "EventSourceNmtk",                      // Nmtk module
+    "EventSourceObdk",                      // Obdk module
+    "EventSourcePdok",                      // Pdok module
+    "EventSourceTimerk",                    // Timerk module
+    "EventSourceEventk",                    // Eventk module
+    "EventSourceSyncCb",                    // sync-Cb
+    "EventSourceErrk",                      // Error handler module
+    "0x09",                                 // reserved
+    "0x0a",                                 // reserved
+    "0x0b",                                 // reserved
+    "0x0c",                                 // reserved
+    "0x0d",                                 // reserved
+    "0x0e",                                 // reserved
+    "0x0f",                                 // reserved
 
     // openPOWERLINK user modules
-    "EventSourceDllu",          // Dllu module
-    "EventSourceNmtu",          // Nmtu module
-    "EventSourceNmtCnu",        // NmtCnu module
-    "EventSourceNmtMnu",        // NmtMnu module
-    "EventSourceObdu",          // Obdu module
-    "EventSourceSdoUdp",        // Sdo/Udp module
-    "EventSourceSdoAsnd",       // Sdo/Asnd module
-    "EventSourceSdoAsySeq",     // Sdo asynchronous Sequence Layer module
-    "EventSourceSdoCom",        // Sdo command layer module
-    "EventSourceTimeru",        // Timeru module
-    "EventSourceCfgMau",        // CfgMau module
-    "EventSourceEventu",        // Eventu module
-    "EventSourceOplkApi",       // Api module
-    "0x1d",                     // reserved
-    "EventSourceGw309Ascii",    // GW309ASCII module
-    "EventSourceErru"           // User error module
+    "EventSourceDllu",                      // Dllu module
+    "EventSourceNmtu",                      // Nmtu module
+    "EventSourceNmtCnu",                    // NmtCnu module
+    "EventSourceNmtMnu",                    // NmtMnu module
+    "EventSourceObdu",                      // Obdu module
+    "EventSourceSdoUdp",                    // Sdo/Udp module
+    "EventSourceSdoAsnd",                   // Sdo/Asnd module
+    "EventSourceSdoAsySeq",                 // Sdo asynchronous Sequence Layer module
+    "EventSourceSdoCom",                    // Sdo command layer module
+    "EventSourceTimeru",                    // Timeru module
+    "EventSourceCfgMau",                    // CfgMau module
+    "EventSourceEventu",                    // Eventu module
+    "EventSourceOplkApi",                   // Api module
+    "0x1d",                                 // reserved
+    "EventSourceGw309Ascii",                // GW309ASCII module
+    "EventSourceErru"                       // User error module
 };
 
 // text strings for POWERLINK event sinks
-static char* eventSinkStr_l[] =
+static const char* const eventSinkStr_l[] =
 {
     "EventSinkSync",
     "EventSinkNmtk",
@@ -224,60 +225,60 @@ static char* eventSinkStr_l[] =
     "EventSinkErru",
     "EventSinkSdoAsySeq",
     "EventSinkNmtMnu",
-    "0x0b",                     // reserved
+    "0x0b",                                 // reserved
     "EventSinkPdokCal",
     "EventSinkGw309Ascii",
     "EventSinkApi"
 };
 
 // text strings for POWERLINK event types
-static char* eventTypeStr_l[] =
+static const char* const eventTypeStr_l[] =
 {
-    "0",                                // reserved
-    "EventTypeNmtEvent",                // NMT event
-    "EventTypePdoRx",                   // PDO frame received event (PRes/PReq)
-    "EventTypePdoTx",                   // PDO frame transmitted event (PRes/PReq)
-    "EventTypePdoSoa",                  // SoA frame received event (isochronous phase completed)
-    "EventTypeSync",                    // Sync event (e.g. SoC or anticipated SoC)
-    "EventTypeTimer",                   // Timer event
-    "EventTypeHeartbeat",               // Heartbeat event
-    "EventTypeHistoryEntry",            // Error history entry event
-    "EventTypeDllkFlag1",               // DLL kernel Flag 1 changed event
-    "EventTypeDllkFillTx",              // DLL kernel fill TxBuffer event
-    "EventTypeDllkPresReady",           // DLL kernel PRes ready event
-    "EventTypeError",                   // Error event for API layer
-    "EventTypeNmtStateChange",          // indicate change of NMT-State
-    "EventTypeDllError",                // DLL error event for Error handler
-    "EventTypeAsndRx",                  // received ASnd frame for DLL user module
-    "EventTypeDllkServFilter",          // configure ServiceIdFilter
-    "EventTypeDllkIdentity",            // configure Identity
-    "EventTypeDllkConfig",              // configure ConfigParam
-    "EventTypeDllkIssueReq",            // issue Ident/Status request
-    "EventTypeDllkAddNode",             // add node to isochronous phase
-    "EventTypeDllkDelNode",             // remove node from isochronous phase
-    "EventTypeDllkConfigNode",          // configures parameters of node
-    "EventTypeDllkStartReducedCycle",   // start reduced POWERLINK cycle on MN
-    "EventTypeNmtMnuNmtCmdSent",        // NMT command was actually sent
-    "EventTypeApiUserDef",              // user-defined event
-    "EventTypeDllkCycleFinish",         // SoA sent, cycle finished
-    "0x1B",                             // reserved
-    "0x1C",                             // reserved
-    "0x1D",                             // reserved
-    "0x1E",                             // reserved
-    "0x1F",                             // reserved
-    "EventTypePdokAlloc",               // alloc PDOs
-    "EventTypePdokConfig",              // configure PDO channel
-    "EventTypeNmtMnuNodeCmd",           // trigger NMT node command
-    "EventTypeGw309AsciiReq",           // GW309ASCII request
-    "EventTypeNmtMnuNodeAdded",         // node was added to isochronous phase by DLL
-    "EventTypePdokSetupPdoBuf",         // dealloc PDOs
-    "EventTypePdokControlSync",         // enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
-    "EventTypeReleaseRxFrame",          // Free receive buffer
-    "EventTypeASndNotRx"                // Didn't receive ASnd frame for DLL user module
+    "0",                                    // reserved
+    "EventTypeNmtEvent",                    // NMT event
+    "EventTypePdoRx",                       // PDO frame received event (PRes/PReq)
+    "EventTypePdoTx",                       // PDO frame transmitted event (PRes/PReq)
+    "EventTypePdoSoa",                      // SoA frame received event (isochronous phase completed)
+    "EventTypeSync",                        // Sync event (e.g. SoC or anticipated SoC)
+    "EventTypeTimer",                       // Timer event
+    "EventTypeHeartbeat",                   // Heartbeat event
+    "EventTypeHistoryEntry",                // Error history entry event
+    "EventTypeDllkFlag1",                   // DLL kernel Flag 1 changed event
+    "EventTypeDllkFillTx",                  // DLL kernel fill TxBuffer event
+    "EventTypeDllkPresReady",               // DLL kernel PRes ready event
+    "EventTypeError",                       // Error event for API layer
+    "EventTypeNmtStateChange",              // indicate change of NMT-State
+    "EventTypeDllError",                    // DLL error event for Error handler
+    "EventTypeAsndRx",                      // received ASnd frame for DLL user module
+    "EventTypeDllkServFilter",              // configure ServiceIdFilter
+    "EventTypeDllkIdentity",                // configure Identity
+    "EventTypeDllkConfig",                  // configure ConfigParam
+    "EventTypeDllkIssueReq",                // issue Ident/Status request
+    "EventTypeDllkAddNode",                 // add node to isochronous phase
+    "EventTypeDllkDelNode",                 // remove node from isochronous phase
+    "EventTypeDllkConfigNode",              // configures parameters of node
+    "EventTypeDllkStartReducedCycle",       // start reduced POWERLINK cycle on MN
+    "EventTypeNmtMnuNmtCmdSent",            // NMT command was actually sent
+    "EventTypeApiUserDef",                  // user-defined event
+    "EventTypeDllkCycleFinish",             // SoA sent, cycle finished
+    "0x1B",                                 // reserved
+    "0x1C",                                 // reserved
+    "0x1D",                                 // reserved
+    "0x1E",                                 // reserved
+    "0x1F",                                 // reserved
+    "EventTypePdokAlloc",                   // alloc PDOs
+    "EventTypePdokConfig",                  // configure PDO channel
+    "EventTypeNmtMnuNodeCmd",               // trigger NMT node command
+    "EventTypeGw309AsciiReq",               // GW309ASCII request
+    "EventTypeNmtMnuNodeAdded",             // node was added to isochronous phase by DLL
+    "EventTypePdokSetupPdoBuf",             // dealloc PDOs
+    "EventTypePdokControlSync",             // enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    "EventTypeReleaseRxFrame",              // Free receive buffer
+    "EventTypeASndNotRx"                    // Didn't receive ASnd frame for DLL user module
 };
 
 // text strings for POWERLINK states
-static tNmtStateInfo nmtStateInfo_l[] =
+static const tNmtStateInfo nmtStateInfo_l[] =
 {
     { kNmtGsOff,                 "NmtGsOff"                  },
     { kNmtGsInitialising,        "NmtGsInitializing"         },
@@ -302,7 +303,7 @@ static tNmtStateInfo nmtStateInfo_l[] =
 };
 
 // text strings for API events
-static tApiEventInfo apiEventInfo_l[] =
+static const tApiEventInfo apiEventInfo_l[] =
 {
     { kOplkApiEventUserDef,          "User defined"                      },
     { kOplkApiEventNmtStateChange,   "NMT state change"                  },
@@ -320,7 +321,7 @@ static tApiEventInfo apiEventInfo_l[] =
 };
 
 // text strings for values of type tOplkError
-static tRetValInfo retValInfo_l[] =
+static const tRetValInfo retValInfo_l[] =
 {
     /* area for generic errors 0x0000 - 0x000F */
     { kErrorOk,                       "No error / function call successful"},
@@ -341,7 +342,7 @@ static tRetValInfo retValInfo_l[] =
     /* area for EDRV module 0x0010 - 0x001F */
     { kErrorEdrvNoFreeTxDesc,         "No free Tx descriptor available"},
     { kErrorEdrvInvalidCycleLen,      "Invalid cycle length (e.g. 0)"},
-    { kErrorEdrvInit,                 "Initialisation error"},
+    { kErrorEdrvInit,                 "Initialization error"},
     { kErrorEdrvNoFreeBufEntry,       "No free entry in internal buffer table for Tx frames"},
     { kErrorEdrvBufNotExisting,       "Specified Tx buffer does not exist"},
     { kErrorEdrvInvalidRxBuf,         "Specified Rx buffer is invalid"},
@@ -442,7 +443,7 @@ static tRetValInfo retValInfo_l[] =
     { kErrorPdoNotExist,              "Selected PDO does not exist"},
     { kErrorPdoLengthExceeded,        "Length of PDO mapping exceeds the current payload limit"},
     { kErrorPdoGranularityMismatch,   "Configured PDO granularity is not equal to supported granularity"},
-    { kErrorPdoInitError,             "Error during initialisation of PDO module"},
+    { kErrorPdoInitError,             "Error during initialization of PDO module"},
     { kErrorPdoConfWhileEnabled,      "PDO configuration cannot be changed while it is enabled"},
     { kErrorPdoErrorMapp,             "Invalid PDO mapping"},
     { kErrorPdoVarNotFound,           "The referenced object in a PDO mapping does not exist"},
@@ -548,7 +549,7 @@ static const tEmergErrCodeInfo emergErrCodeInfo_l[] =
 };
 
 // text strings for NMT node events
-static char* OplkNmtNodeEvtTypeStr_g[] =
+static const char* nmtNodeEventTypeStr_l[] =
 {
     "Found",                    // 0x00
     "Update software",          // 0x01
@@ -561,7 +562,7 @@ static char* OplkNmtNodeEvtTypeStr_g[] =
 };
 
 // text strings for NMT boot events
-static char* OplkNmtBootEvtTypeStr_g[] =
+static const char* nmtBootEventTypeStr_l[] =
 {
     "Boot step 1 finished",     // 0x00     PreOp2 is possible
     "Boot step 2 finished",     // 0x01     ReadyToOp is possible for MN
@@ -572,7 +573,7 @@ static char* OplkNmtBootEvtTypeStr_g[] =
 };
 
 // text strings for SDO command layer connection states
-static char* OplkSdoComConStateStr_g[] =
+static const char* sdoComConStateStr_l[] =
 {
     "NotActive",                // 0x00
     "Running",                  // 0x01
@@ -583,7 +584,7 @@ static char* OplkSdoComConStateStr_g[] =
 };
 
 // text strings for abort codes
-static tAbortCodeInfo abortCodeInfo_g[] =
+static const tAbortCodeInfo sdoAbortCodeInfo_l[] =
 {
     { SDO_AC_TIME_OUT,                          "SDO_AC_TIME_OUT" },
     { SDO_AC_UNKNOWN_COMMAND_SPECIFIER,         "SDO_AC_UNKNOWN_COMMAND_SPECIFIER" },
@@ -617,7 +618,7 @@ static tAbortCodeInfo abortCodeInfo_g[] =
     { 0,                                        "SDO_AC_OK" }
 };
 
-static tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
+static const tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
 {
     { kNmtNodeCommandBoot,         "NmtNodeCommandBoot" },
     { kNmtNodeCommandSwOk,         "NmtNodeCommandSwOk" },
@@ -639,23 +640,19 @@ static tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
 
 The function returns the string describing the specified event.
 
-\param  nmtEvent_p          Event to print
+\param[in]      nmtEvent_p          Event to print
 
 \return The function returns a string describing the specified event.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p)
+const char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p)
 {
     if (nmtEvent_p >= tabentries(nmtEventStr_l))
-    {
         return invalidStr_l;
-    }
     else
-    {
         return nmtEventStr_l[nmtEvent_p];
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -664,23 +661,19 @@ char* debugstr_getNmtEventStr(tNmtEvent nmtEvent_p)
 
 The function returns the string describing the specified event source.
 
-\param  eventSrc_p          Event source to print
+\param[in]      eventSrc_p          Event source to print
 
 \return The function returns a string describing the specified event source.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventSourceStr(tEventSource eventSrc_p)
+const char* debugstr_getEventSourceStr(tEventSource eventSrc_p)
 {
     if (eventSrc_p >= tabentries(eventSourceStr_l))
-    {
         return invalidStr_l;
-    }
     else
-    {
         return eventSourceStr_l[eventSrc_p];
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -689,23 +682,19 @@ char* debugstr_getEventSourceStr(tEventSource eventSrc_p)
 
 The function returns the string describing the specified event sink.
 
-\param  eventSink_p         Event sink to print
+\param[in]      eventSink_p         Event sink to print
 
 \return The function returns a string describing the specified event sink.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventSinkStr(tEventSink eventSink_p)
+const char* debugstr_getEventSinkStr(tEventSink eventSink_p)
 {
     if (eventSink_p >= tabentries(eventSinkStr_l))
-    {
         return invalidStr_l;
-    }
     else
-    {
         return eventSinkStr_l[eventSink_p];
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -714,23 +703,19 @@ char* debugstr_getEventSinkStr(tEventSink eventSink_p)
 
 The function returns the string describing the specified event type.
 
-\param  eventType_p         Event type to print
+\param[in]      eventType_p         Event type to print
 
 \return The function returns a string describing the specified event type.
 
 \ingroup module_debug
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEventTypeStr(tEventType eventType_p)
+const char* debugstr_getEventTypeStr(tEventType eventType_p)
 {
     if (eventType_p >= tabentries(eventTypeStr_l))
-    {
         return invalidStr_l;
-    }
     else
-    {
         return eventTypeStr_l[eventType_p];
-    }
 }
 
 //------------------------------------------------------------------------------
@@ -739,22 +724,23 @@ char* debugstr_getEventTypeStr(tEventType eventType_p)
 
 The function returns the string describing the specified NMT state.
 
-\param  nmtState_p         NMT state to print
+\param[in]      nmtState_p          NMT state to print
 
 \return The function returns a string describing the specified NMT state.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtStateStr(tNmtState nmtState_p)
+const char* debugstr_getNmtStateStr(tNmtState nmtState_p)
 {
-    unsigned int         i;
+    unsigned int    i;
 
     for (i = 0; i < tabentries(nmtStateInfo_l); i++)
     {
         if (nmtStateInfo_l[i].nmtState == nmtState_p)
-            return (nmtStateInfo_l[i].sNmtState);
+            return nmtStateInfo_l[i].sNmtState;
     }
+
     return invalidStr_l;
 }
 
@@ -764,22 +750,23 @@ char* debugstr_getNmtStateStr(tNmtState nmtState_p)
 
 The function returns the string describing the specified API event.
 
-\param  ApiEvent_p         API event to print
+\param[in]      apiEvent_p          API event to print
 
 \return The function returns a string describing the specified API event.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p)
+const char* debugstr_getApiEventStr(tOplkApiEventType apiEvent_p)
 {
-    UINT        i;
+    unsigned int    i;
 
     for (i = 0; i < tabentries(apiEventInfo_l); i++)
     {
-        if (apiEventInfo_l[i].apiEvent == ApiEvent_p)
-            return (apiEventInfo_l[i].sApiEvent);
+        if (apiEventInfo_l[i].apiEvent == apiEvent_p)
+            return apiEventInfo_l[i].sApiEvent;
     }
+
     return invalidStr_l;
 }
 
@@ -789,23 +776,19 @@ char* debugstr_getApiEventStr(tOplkApiEventType ApiEvent_p)
 
 The function returns the string describing the specified NMT node event.
 
-\param  NodeEventType_p         NMT node event to print
+\param[in]      nodeEventType_p     NMT node event to print
 
 \return The function returns a string describing the specified NMT node event.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p)
+const char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent nodeEventType_p)
 {
-    if (NodeEventType_p >= tabentries(OplkNmtNodeEvtTypeStr_g))
-    {
+    if (nodeEventType_p >= tabentries(nmtNodeEventTypeStr_l))
         return invalidStr_l;
-    }
     else
-    {
-        return OplkNmtNodeEvtTypeStr_g[NodeEventType_p];
-    }
+        return nmtNodeEventTypeStr_l[nodeEventType_p];
 }
 
 //------------------------------------------------------------------------------
@@ -814,23 +797,19 @@ char* debugstr_getNmtNodeEventTypeStr(tNmtNodeEvent NodeEventType_p)
 
 The function returns the string describing the specified NMT boot event.
 
-\param  BootEventType_p         NMT boot event to print
+\param[in]      bootEventType_p     NMT boot event to print
 
 \return The function returns a string describing the specified NMT boot event.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p)
+const char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent bootEventType_p)
 {
-    if (BootEventType_p >= tabentries(OplkNmtBootEvtTypeStr_g))
-    {
+    if (bootEventType_p >= tabentries(nmtBootEventTypeStr_l))
         return invalidStr_l;
-    }
     else
-    {
-        return OplkNmtBootEvtTypeStr_g[BootEventType_p];
-    }
+        return nmtBootEventTypeStr_l[bootEventType_p];
 }
 
 //------------------------------------------------------------------------------
@@ -839,22 +818,23 @@ char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p)
 
 The function returns the string describing the specified NMT node command.
 
-\param  nodeCommand_p         NMT node command to print
+\param[in]      nodeCommand_p       NMT node command to print
 
 \return The function returns a string describing the specified NMT node command.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p)
+const char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p)
 {
-    UINT         i;
+    unsigned int    i;
 
     for (i = 0; i < tabentries(nmtNodeCommandInfo_l); i++)
     {
         if (nmtNodeCommandInfo_l[i].nodeCommand == nodeCommand_p)
-            return (nmtNodeCommandInfo_l[i].sNodeCommand);
+            return nmtNodeCommandInfo_l[i].sNodeCommand;
     }
+
     return invalidStr_l;
 }
 
@@ -865,7 +845,7 @@ char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p)
 The function returns the string describing the specified SDO command connection
 state.
 
-\param  SdoComConState_p         SDO command connection state to print
+\param[in]      sdoComConState_p    SDO command connection state to print
 
 \return The function returns a string describing the specified SDO command
 connection state.
@@ -873,16 +853,12 @@ connection state.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
+const char* debugstr_getSdoComConStateStr(tSdoComConState sdoComConState_p)
 {
-    if (SdoComConState_p >= tabentries(OplkSdoComConStateStr_g))
-    {
+    if (sdoComConState_p >= tabentries(sdoComConStateStr_l))
         return invalidStr_l;
-    }
     else
-    {
-        return OplkSdoComConStateStr_g[SdoComConState_p];
-    }
+        return sdoComConStateStr_l[sdoComConState_p];
 }
 
 //------------------------------------------------------------------------------
@@ -891,22 +867,23 @@ char* debugstr_getSdoComConStateStr(tSdoComConState SdoComConState_p)
 
 The function returns the string describing the given entry of type tOplkError.
 
-\param  OplkError_p         tOplkError value to print
+\param[in]      oplkError_p         tOplkError value to print
 
 \return The function returns a string describing the specified tOplkError type.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getRetValStr(tOplkError OplkError_p)
+const char* debugstr_getRetValStr(tOplkError oplkError_p)
 {
-    UINT        i;
+    unsigned int    i;
 
     for (i = 0; i < tabentries(retValInfo_l); i++)
     {
-        if (retValInfo_l[i].key == OplkError_p)
-            return (retValInfo_l[i].sName);
+        if (retValInfo_l[i].key == oplkError_p)
+            return retValInfo_l[i].sName;
     }
+
     return invalidStr_l;
 }
 
@@ -916,7 +893,7 @@ char* debugstr_getRetValStr(tOplkError OplkError_p)
 
 The function returns the string describing the specified emergency error code.
 
-\param  emergErrCode_p       Emergency error code value to print
+\param[in]      emergErrCode_p      Emergency error code value to print
 
 \return The function returns a string describing the specified emergency error
 code.
@@ -924,16 +901,17 @@ code.
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p)
+const char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p)
 {
 
-    UINT        i;
+    unsigned int    i;
 
     for (i = 0; i < tabentries(emergErrCodeInfo_l); i++)
     {
         if (emergErrCodeInfo_l[i].key == emergErrCode_p)
-            return (emergErrCodeInfo_l[i].sName);
+            return emergErrCodeInfo_l[i].sName;
     }
+
     return invalidStr_l;
 }
 
@@ -943,26 +921,34 @@ char* debugstr_getEmergErrCodeStr(UINT16 emergErrCode_p)
 
 The function returns the string describing the specified abort code.
 
-\param  abortCode_p       Abort code value to print
+\param[in]      abortCode_p         Abort code value to print
 
 \return The function returns a string describing the specified abort code.
 
 \ingroup module_debugstr
 */
 //------------------------------------------------------------------------------
-char* debugstr_getAbortCodeStr(UINT32 abortCode_p)
+const char* debugstr_getAbortCodeStr(UINT32 abortCode_p)
 {
-    tAbortCodeInfo*         pEntry;
-    UINT                    i;
+    const tAbortCodeInfo*   pEntry;
+    unsigned int            i;
 
-    pEntry = abortCodeInfo_g;
-    for (i = 0; i < tabentries(abortCodeInfo_g); i++)
+    pEntry = sdoAbortCodeInfo_l;
+    for (i = 0; i < tabentries(sdoAbortCodeInfo_l); i++)
     {
         if (pEntry->abortCode == abortCode_p)
-        {
             return pEntry->sAbortCode;
-        }
+
         pEntry++;
     }
+
     return invalidStr_l;
 }
+
+//============================================================================//
+//            P R I V A T E   F U N C T I O N S                               //
+//============================================================================//
+/// \name Private Functions
+/// \{
+
+/// \}

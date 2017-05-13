@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlkcal.h
+\file   kernel/ctrlkcal.h
 
 \brief  Definitions for kernel ctrl CAL module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlkcal_H_
-#define _INC_ctrlkcal_H_
+#ifndef _INC_kernel_ctrlkcal_H_
+#define _INC_kernel_ctrlkcal_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -55,28 +54,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-tOplkError          ctrlkcal_init(void);
-void                ctrlkcal_exit(void);
-tOplkError          ctrlkcal_process(void);
-tOplkError          ctrlkcal_getCmd(tCtrlCmdType* pCmd_p);
-void                ctrlkcal_sendReturn(UINT16 retval_p);
-void                ctrlkcal_setStatus(tCtrlKernelStatus status_p);
-tCtrlKernelStatus   ctrlkcal_getStatus(void);
-void                ctrlkcal_updateHeartbeat(UINT16 heartbeat_p);
-tOplkError          ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
-void                ctrlkcal_storeInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError          ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                                           size_t bufferSize_p, UINT8* pBuffer_p);
-size_t              ctrlkcal_getMaxFileChunkSize(void);
+tOplkError        ctrlkcal_init(void);
+void              ctrlkcal_exit(void);
+tOplkError        ctrlkcal_process(void);
+tOplkError        ctrlkcal_getCmd(tCtrlCmdType* pCmd_p);
+void              ctrlkcal_sendReturn(UINT16 retval_p);
+void              ctrlkcal_setStatus(tCtrlKernelStatus status_p);
+tCtrlKernelStatus ctrlkcal_getStatus(void);
+void              ctrlkcal_updateHeartbeat(UINT16 heartbeat_p);
+tOplkError        ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
+void              ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p);
+tOplkError        ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                                         size_t bufferSize_p,
+                                         UINT8* pBuffer_p);
+size_t            ctrlkcal_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ctrlkcal_H_ */
+#endif /* _INC_kernel_ctrlkcal_H_ */

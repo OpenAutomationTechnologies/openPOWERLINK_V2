@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlk.h
+\file   kernel/ctrlk.h
 
 \brief  Definitions for kernel ctrl module
 
@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_ctrlk_H_
-#define _INC_ctrlk_H_
+#ifndef _INC_kernel_ctrlk_H_
+#define _INC_kernel_ctrlk_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -59,21 +58,20 @@ This type defines a function pointer to the kernel layer driver which is called
 if a command is received from the user layer control module.
 The callback is invoked before the ctrlk module executes the command.
 
-\param  cmd_p               The command to be executed.
-\param  pRet_p              Pointer to store the return value.
-\param  pStatus_p           Pointer to store the kernel stack status. (if not NULL)
-\param  pfExit_p            Pointer to store the exit flag. (if not NULL)
+\param[in]      cmd_p               The command to be executed.
+\param[out]     pRet_p              Pointer to store the return value.
+\param[out]     pStatus_p           Pointer to store the kernel stack status. (if not NULL)
+\param[out]     pfExit_p            Pointer to store the exit flag. (if not NULL)
 
 \return The function returns a BOOL.
-\retval TRUE                Execution completed in callback.
-\retval FALSE               Execution needed in ctrlk module.
+\retval TRUE                        Execution completed in callback.
+\retval FALSE                       Execution needed in ctrlk module.
 */
 typedef BOOL (*tCtrlkExecuteCmdCb)(tCtrlCmdType cmd_p, UINT16* pRet_p, UINT16* pStatus_p, BOOL* pfExit_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
-
 #ifdef __cplusplus
 extern "C"
 {
@@ -82,16 +80,19 @@ extern "C"
 tOplkError ctrlk_init(tCtrlkExecuteCmdCb pfnExecuteCmdCb_p);
 void       ctrlk_exit(void);
 BOOL       ctrlk_process(void);
-tOplkError ctrlk_executeCmd(tCtrlCmdType cmd, UINT16* pRet_p, UINT16* pStatus_p,
+tOplkError ctrlk_executeCmd(tCtrlCmdType cmd,
+                            UINT16* pRet_p,
+                            UINT16* pStatus_p,
                             BOOL* pfExit_p);
 void       ctrlk_updateHeartbeat(void);
 UINT16     ctrlk_getHeartbeat(void);
 tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
-                               size_t size_p, UINT8* pBuffer_p);
+                               size_t size_p,
+                               UINT8* pBuffer_p);
 size_t     ctrlk_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_ctrlk_H_ */
+#endif /* _INC_kernel_ctrlk_H_ */

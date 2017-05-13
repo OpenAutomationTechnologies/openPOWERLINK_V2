@@ -7,7 +7,7 @@
 This file contains the definitions for the Input Widget
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -34,28 +34,24 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#ifndef _INC_Input_H_
-#define _INC_Input_H_
+#ifndef _INC_demo_Input_H_
+#define _INC_demo_Input_H_
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
 #include <QWidget>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define LED_NUM        8
-#define NODE_ID_MAX    255
+#define LED_NUM         8
+#define NODE_ID_MAX     255
 
 //------------------------------------------------------------------------------
 // class definitions
 //------------------------------------------------------------------------------
-class QToolButton;
 class QVBoxLayout;
-class QLabel;
 class Leds;
 
 //------------------------------------------------------------------------------
@@ -83,5 +79,4 @@ private:
     Leds**       ppLeds;
 };
 
-#endif // _INC_Input_H_
-
+#endif // _INC_demo_Input_H_

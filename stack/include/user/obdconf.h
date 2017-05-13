@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   obdconf.h
+\file   user/obdconf.h
 
 \brief  Target specific functions for OD store/restore
 
@@ -11,6 +11,7 @@ This file contains the target specific functions and definitions for OD store/re
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH, D-08468 Heinsdorfergrund, Am Windrad 2
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,20 +36,18 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
+#ifndef _INC_user_obdconf_H_
+#define _INC_user_obdconf_H_
 
-#ifndef _INC_oplk_obdconf_H_
-#define _INC_oplk_obdconf_H_
-
-#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 //---------------------------------------------------------------------------
 // const defines
 //---------------------------------------------------------------------------
-
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 // Storage read access parameters for objects 0x1010 and 0x1011 (see EPSG 301)
 #define OBD_STORE_UNSUPPORTED   0x00000000L
 #define OBD_STORE_ON_COMMAND    0x00000001L
 #define OBD_STORE_AUTONOMOUSLY  0x00000002L
-
+#endif
 
 //---------------------------------------------------------------------------
 // typedef
@@ -63,24 +62,33 @@ extern "C"
 {
 #endif
 
+#if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 tOplkError obdconf_init(void);
 tOplkError obdconf_exit(void);
 tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p);
 tOplkError obdconf_deletePart(tObdPart odPart_p);
 tOplkError obdconf_openReadPart(tObdPart odPart_p);
 tOplkError obdconf_closePart(tObdPart odPart_p);
-tOplkError obdconf_storePart(tObdPart odPart_p, UINT8 *pData, UINT32 size_p);
-tOplkError obdconf_loadPart(tObdPart odPart_p, UINT8 *pData, UINT32 size_p);
-tOplkError obdconf_getTargetCapabilities(UINT index_p, UINT subIndex_p,
-                                         tObdPart* pOdPart_p, UINT32* pDevCap_p);
+tOplkError obdconf_storePart(tObdPart odPart_p,
+                             const void* pData,
+                             size_t size_p);
+tOplkError obdconf_loadPart(tObdPart odPart_p,
+                            void* pData,
+                            size_t size_p);
+tOplkError obdconf_getTargetCapabilities(UINT index_p,
+                                         UINT subIndex_p,
+                                         tObdPart* pOdPart_p,
+                                         UINT32* pDevCap_p);
 tOplkError obdconf_getPartArchiveState(tObdPart odPart_p,
                                        UINT32 odPartSignature_p);
 tOplkError obdconf_setBackupArchivePath(const char* pBackupPath_p);
-UINT16     obdconf_calculateCrc16(UINT16 crc_p, UINT8* pData_p, UINT32 size_p);
+UINT16     obdconf_calculateCrc16(UINT16 crc_p,
+                                  const void* pData_p,
+                                  size_t size_p);
+#endif
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
-#endif  // #ifndef _INC_oplk_obdconf_H_
+#endif /* _INC_user_obdconf_H_ */

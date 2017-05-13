@@ -7,7 +7,7 @@
 This file implements the openPOWERLINK API class.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -33,33 +33,37 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
-#define _WINSOCKAPI_ // prevent windows.h from including winsock.h
+#define _WINSOCKAPI_        // prevent windows.h from including winsock.h
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <QWidget>
-#include <QThread>
-#include <QString>
-#include <QMessageBox>
-#include <oplk/debugstr.h>
+#include <Api.h>
 
-#include "Api.h"
-#include "State.h"
-#include "Input.h"
-#include "Output.h"
-#include "MainWindow.h"
+#include <QMetaType>
+#include <QWidget>
+#include <QMessageBox>
+
+#include <MainWindow.h>
+#include <ProcessThread.h>
+#include <DataInOutThread.h>
+#include <State.h>
+#include <Output.h>
+#include <Input.h>
+#include <CnState.h>
+
+#include <oplk/debugstr.h>
+#include <obdcreate/obdcreate.h>
 
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
 
 #if (TARGET_SYSTEM == _LINUX_)
-    #include <netinet/in.h>
-    #include <net/if.h>
-    #include <sys/socket.h>
-    #include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
 #endif
 
 
@@ -86,13 +90,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define NODEID            0xF0                // MN
-#define IP_ADDR           0xc0a86401          // 192.168.100.1
-#define SUBNET_MASK       0xFFFFFF00          // 255.255.255.0
-#define DEFAULT_GATEWAY   0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
-#define IF_ETH            PLK_VETH_NAME
+#define NODEID              0xF0                // MN
+#define IP_ADDR             0xc0a86401          // 192.168.100.1
+#define SUBNET_MASK         0xFFFFFF00          // 255.255.255.0
+#define DEFAULT_GATEWAY     0xC0A864FE          // 192.168.100.C_ADR_RT1_DEF_NODE_ID
+#define IF_ETH              PLK_VETH_NAME
 
-#define CYCLE_LEN   5000                /* org val 5000 */
+#define CYCLE_LEN           5000
 
 Q_DECLARE_METATYPE(tSdoComFinished)
 
@@ -103,9 +107,8 @@ Q_DECLARE_METATYPE(tSdoComFinished)
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-CONST BYTE abMacAddr[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-static char*    pszCdcFilename_g = (char*)"mnobd.cdc";
-static char     devName_g[256];
+static const UINT8  aMacAddr_l[] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+static char         devName_l[256];
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -121,18 +124,21 @@ static char     devName_g[256];
 
 Constructs a POWERLINK Api object.
 
-\param      pMainWindow_p           Pointer to main window
-\param      nodeId_p                Node ID of the POWERLINK node
-\param      devName_p               Device name of the network interface
+\param[in,out]  pMainWindow_p       Pointer to main window
+\param[in]      nodeId_p            Node ID of the POWERLINK node
+\param[in]      rDevName_p          Reference to the device name of the network interface
 */
 //------------------------------------------------------------------------------
-Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
+Api::Api(MainWindow* pMainWindow_p,
+         UINT nodeId_p,
+         const QString& rDevName_p)
+    : pCdcFilename("mnobd.cdc")
 {
-    tOplkError          ret;
-    State*              pState;
-    Output*             pOutput;
-    Input*              pInput;
-    CnState*            pCnState;
+    tOplkError  ret;
+    State*      pState;
+    Output*     pOutput;
+    Input*      pInput;
+    CnState*    pCnState;
 
     pState = pMainWindow_p->getStateWidget();
     pOutput = pMainWindow_p->getOutputWidget();
@@ -140,53 +146,91 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     pCnState = pMainWindow_p->getCnStateWidget();
 
     pProcessThread = new ProcessThread(pMainWindow_p);
-    QObject::connect(pProcessThread, SIGNAL(oplkStatusChanged(int)),
-                     pState, SLOT(setStatusLed(int)));
-    QObject::connect(pProcessThread, SIGNAL(nmtStateChanged(const QString&)),
-                     pState, SLOT(setNmtStateText(const QString &)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(oplkStatusChanged(int)),
+                     pState,
+                     SLOT(setStatusLed(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nmtStateChanged(const QString&)),
+                     pState,
+                     SLOT(setNmtStateText(const QString&)));
 
-    QObject::connect(pProcessThread, SIGNAL(nodeAppeared(int)),
-                     pInput, SLOT(addNode(int)));
-    QObject::connect(pProcessThread, SIGNAL(allNodesRemoved()),
-                     pInput, SLOT(removeAllNodes()));
-    QObject::connect(pProcessThread, SIGNAL(nodeDisappeared(int)),
-                     pInput, SLOT(removeNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeAppeared(int)),
+                     pInput,
+                     SLOT(addNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(allNodesRemoved()),
+                     pInput,
+                     SLOT(removeAllNodes()));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeDisappeared(int)),
+                     pInput,
+                     SLOT(removeNode(int)));
 
-    QObject::connect(pProcessThread, SIGNAL(nodeAppeared(int)),
-                     pOutput, SLOT(addNode(int)));
-    QObject::connect(pProcessThread, SIGNAL(nodeDisappeared(int)),
-                     pOutput, SLOT(removeNode(int)));
-    QObject::connect(pProcessThread, SIGNAL(allNodesRemoved()),
-                     pOutput, SLOT(removeAllNodes()));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeAppeared(int)),
+                     pOutput,
+                     SLOT(addNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeDisappeared(int)),
+                     pOutput,
+                     SLOT(removeNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(allNodesRemoved()),
+                     pOutput,
+                     SLOT(removeAllNodes()));
 
-    QObject::connect(pProcessThread, SIGNAL(nodeAppeared(int)),
-                     pCnState, SLOT(addNode(int)));
-    QObject::connect(pProcessThread, SIGNAL(nodeDisappeared(int)),
-                     pCnState, SLOT(removeNode(int)));
-    QObject::connect(pProcessThread, SIGNAL(allNodesRemoved()),
-                     pCnState, SLOT(removeAllNodes()));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeAppeared(int)),
+                     pCnState,
+                     SLOT(addNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeDisappeared(int)),
+                     pCnState,
+                     SLOT(removeNode(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(allNodesRemoved()),
+                     pCnState,
+                     SLOT(removeAllNodes()));
 
-    QObject::connect(pProcessThread, SIGNAL(nodeStatusChanged(int, int)),
-                     pCnState, SLOT(setState(int, int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(nodeStatusChanged(int, int)),
+                     pCnState,
+                     SLOT(setState(int, int)));
 
-    QObject::connect(pProcessThread, SIGNAL(printLog(const QString&)),
-                     pMainWindow_p, SLOT(printlog(const QString&)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(printLog(const QString&)),
+                     pMainWindow_p,
+                     SLOT(printlog(const QString&)));
 
-    QObject::connect(pProcessThread, SIGNAL(userDefEvent(void*)),
-                     this, SIGNAL(userDefEvent(void*)),
+    QObject::connect(pProcessThread,
+                     SIGNAL(userDefEvent(void*)),
+                     this,
+                     SIGNAL(userDefEvent(void*)),
                      Qt::DirectConnection);
-    QObject::connect(pProcessThread, SIGNAL(sdoFinished(tSdoComFinished)),
-                     this, SIGNAL(sdoFinished(tSdoComFinished)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(sdoFinished(tSdoComFinished)),
+                     this,
+                     SIGNAL(sdoFinished(tSdoComFinished)));
 
     pDataInOutThread = new DataInOutThread;
-    QObject::connect(pDataInOutThread, SIGNAL(processImageOutChanged(int, int)),
-                     pOutput, SLOT(setValue(int, int)));
-    QObject::connect(pDataInOutThread, SIGNAL(processImageInChanged(int, int)),
-                     pInput, SLOT(setLeds(int, int)));
-    QObject::connect(pDataInOutThread, SIGNAL(disableOutputs(int)),
-                     pOutput, SLOT(disable(int)));
-    QObject::connect(pProcessThread, SIGNAL(isMnActive(bool)),
-                     pDataInOutThread, SLOT(setMnActiveFlag(bool)));
+    QObject::connect(pDataInOutThread,
+                     SIGNAL(processImageOutChanged(int, int)),
+                     pOutput,
+                     SLOT(setValue(int, int)));
+    QObject::connect(pDataInOutThread,
+                     SIGNAL(processImageInChanged(int, int)),
+                     pInput,
+                     SLOT(setLeds(int, int)));
+    QObject::connect(pDataInOutThread,
+                     SIGNAL(disableOutputs(int)),
+                     pOutput,
+                     SLOT(disable(int)));
+    QObject::connect(pProcessThread,
+                     SIGNAL(isMnActive(bool)),
+                     pDataInOutThread,
+                     SLOT(setMnActiveFlag(bool)));
 
     memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
@@ -198,10 +242,10 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.featureFlags = UINT_MAX;
     initParam.cycleLen = CYCLE_LEN;           // required for error detection
     initParam.isochrTxMaxPayload = 256;       // const
-    initParam.isochrRxMaxPayload = 256;       // const
+    initParam.isochrRxMaxPayload = 1490;      // const
     initParam.presMaxLatency = 50000;         // const; only required for IdentRes
-    initParam.preqActPayloadLimit = 36;       // required for initialisation (+28 bytes)
-    initParam.presActPayloadLimit = 36;       // required for initialisation of Pres frame (+28 bytes)
+    initParam.preqActPayloadLimit = 36;       // required for initialization (+28 bytes)
+    initParam.presActPayloadLimit = 36;       // required for initialization of Pres frame (+28 bytes)
     initParam.asndMaxLatency = 150000;        // const; only required for IdentRes
     initParam.multiplCylceCnt = 0;            // required for error detection
     initParam.asyncMtu = 1500;                // required to set up max frame size
@@ -225,59 +269,76 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     initParam.pfnCbEvent = pProcessThread->getEventCbFunc();
 
     /* write 00:00:00:00:00:00 to MAC address, so that the driver uses the real hardware address */
-    memcpy(initParam.aMacAddress, abMacAddr, sizeof(initParam.aMacAddress));
+    memcpy(initParam.aMacAddress, aMacAddr_l, sizeof(initParam.aMacAddress));
 
     // Copy the selected interface string to a local variable
-    strcpy(devName_g, devName_p.toStdString().c_str());
-    initParam.hwParam.pDevName = devName_g;
+    strcpy(devName_l, rDevName_p.toStdString().c_str());
+    initParam.hwParam.pDevName = devName_l;
 
 #if defined(CONFIG_KERNELSTACK_DIRECTLINK)
     initParam.pfnCbSync = pDataInOutThread->getSyncCbFunc();
 #else
-    initParam.pfnCbSync  =    NULL;
+    initParam.pfnCbSync = NULL;
 #endif
+
+    // Initialize object dictionary
+    ret = obdcreate_initObd(&initParam.obdInitParam);
+    if (ret != kErrorOk)
+    {
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("Initialization of openPOWERLINK stack failed.\n") +
+                               "Error code: 0x" + QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"\n" +
+                               "For further information please consult the manual.");
+        goto Exit;
+    }
 
     // init POWERLINK
     ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        QMessageBox::critical(0, "POWERLINK demo",
-                              QString("Initialization of openPOWERLINK Stack failed.\n") +
-                                      "Error code: 0x"+ QString::number(ret, 16) +
-                                      "\n\"" + debugstr_getRetValStr(ret) + "\""
-                                      "\nFor further information please consult the manual.");
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("Initialization of openPOWERLINK stack failed.\n") +
+                               "Error code: 0x"+ QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"\n" +
+                               "For further information please consult the manual.");
         goto Exit;
     }
 
     ret = oplk_create(&initParam);
     if (ret != kErrorOk)
     {
-        QMessageBox::critical(0, "POWERLINK demo",
-                              QString("Creation of openPOWERLINK Stack failed.\n") +
-                                      "Error code: 0x"+ QString::number(ret, 16) +
-                                      "\n\"" + debugstr_getRetValStr(ret) + "\""
-                                      "\nThe most common error source are an unsupported Ethernet controller or the kernel module is not loaded."
-                                      "\nFor further information please consult the manual.");
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("Creation of openPOWERLINK stack failed.\n") +
+                               "Error code: 0x"+ QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"\n" +
+                               "The most common error source are an unsupported Ethernet controller or the kernel module is not loaded.\n" +
+                               "For further information please consult the manual.");
         goto Exit;
     }
 
-    ret = oplk_setCdcFilename(pszCdcFilename_g);
+    ret = oplk_setCdcFilename(Api::pCdcFilename);
     if (ret != kErrorOk)
     {
-        QMessageBox::critical(0, "POWERLINK demo",
-                                      QString("oplk_setCdcFilename() failed.\n") +
-                                              "Error code: 0x"+ QString::number(ret, 16) +
-                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("oplk_setCdcFilename() failed.\n") +
+                               "Error code: 0x"+ QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"");
         goto Exit;
     }
 
     ret = pDataInOutThread->setupProcessImage();
     if (ret != kErrorOk)
     {
-        QMessageBox::critical(0, "POWERLINK demo",
-                                      QString("setupProcessImage() failed.\n") +
-                                              "Error code: 0x"+ QString::number(ret, 16) +
-                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("setupProcessImage() failed.\n") +
+                               "Error code: 0x"+ QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"");
         goto Exit;
     }
 
@@ -285,10 +346,11 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
     ret = oplk_execNmtCommand(kNmtEventSwReset);
     if (ret != kErrorOk)
     {
-        QMessageBox::critical(0, "POWERLINK demo",
-                                      QString("oplk_execNmtCommand() failed.\n") +
-                                              "Error code: 0x"+ QString::number(ret, 16) +
-                                              "\n\"" + debugstr_getRetValStr(ret) + "\"");
+        QMessageBox::critical(0,
+                              "POWERLINK demo",
+                              QString("oplk_execNmtCommand() failed.\n") +
+                               "Error code: 0x"+ QString::number(ret, 16) + "\n" +
+                               "\"" + debugstr_getRetValStr(ret) + "\"");
         goto Exit;
     }
 
@@ -302,7 +364,6 @@ Api::Api(MainWindow* pMainWindow_p, UINT nodeId_p, QString devName_p)
 
 Exit:
     return;
-
 }
 
 /**
@@ -313,12 +374,14 @@ Destructs a POWERLINK object.
 *******************************************************************************/
 Api::~Api()
 {
-    tOplkError          ret;
+    tOplkError  ret;
 
     pDataInOutThread->stop();
-    pDataInOutThread->wait(100);  // wait until thread terminates (max 100ms)
+    pDataInOutThread->wait(100);            // wait until thread terminates (max 100ms)
+
     ret = oplk_execNmtCommand(kNmtEventSwitchOff);
     pProcessThread->waitForNmtStateOff();
+
     ret = oplk_freeProcessImage();
     ret = oplk_destroy();
     oplk_exit();
@@ -330,10 +393,9 @@ Api::~Api()
 
 Returns the default Node ID.
 
-\return         Default node ID
+\return Default node ID
 *******************************************************************************/
 UINT Api::defaultNodeId()
 {
     return NODEID;
 }
-

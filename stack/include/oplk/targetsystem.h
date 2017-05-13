@@ -9,8 +9,9 @@ and including the suitable target specific definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +36,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_targetsystem_H_
 #define _INC_oplk_targetsystem_H_
 
@@ -45,7 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // development system
 
 // endianness
-#define _DEV_BIGEND_            0x80000000L     // big endian (motorola format)
+#define _DEV_BIGEND_            0x80000000L     // big endian (Motorola format)
 
 // alignment
 #define _DEV_ALIGNMENT_4_       0x00400000L     // the CPU needs alignment of 4 bytes
@@ -60,8 +60,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DEV_BIT32_             0x00000300L     // 32 bit
 
 // compilers
+#define _DEV_GNUC_MINGW_        0x00000025L     // MinGW GCC
 #define _DEV_GNUC_ARM_ALTERA_   0x00000024L     // Altera toolchain mentor ARM EABI GCC
-#define _DEV_GNUC_ARM_XILINX_   0x00000023L     // Xilinx ARM EABI GCC
 #define _DEV_GNUC_MICROBLAZE_   0x00000020L     // Xilinx Microblaze GCC
 #define _DEV_GNUC_NIOS2_        0x0000001FL     // Altera Nios II GCC
 #define _DEV_GNUC_X86_          0x00000017L     // GNU for I386
@@ -82,6 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define _DEV_WIN32_             (_DEV_BIT32_ | _DEV_MSVC32_                         | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_WIN_CE_            (_DEV_BIT32_ | _DEV_MSEVC_                          | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
+#define _DEV_WIN32_MINGW_       (_DEV_BIT32_ | _DEV_GNUC_MINGW_                     | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_LINUX_             (_DEV_BIT32_ | _DEV_LINUX_GCC_                      | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_CF548X_        (_DEV_BIT32_ | _DEV_GNUC_CF_        | _DEV_BIGEND_  | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_GNU_I386_          (_DEV_BIT32_ | _DEV_GNUC_X86_                       | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
@@ -89,12 +90,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _DEV_VXWORKS_           (_DEV_BIT32_ | _DEV_LINUX_GCC_                      | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_)
 #define _DEV_MICROBLAZE_BIG_    (_DEV_BIT32_ | _DEV_GNUC_MICROBLAZE_ | _DEV_BIGEND_ | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
 #define _DEV_MICROBLAZE_LITTLE_ (_DEV_BIT32_ | _DEV_GNUC_MICROBLAZE_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_ | _DEV_ALIGNMENT_4_ )
-#define _DEV_ARM_XILINX_EABI_   (_DEV_BIT32_ | _DEV_GNUC_ARM_XILINX_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 #define _DEV_ARM_ALTERA_EABI_   (_DEV_BIT32_ | _DEV_GNUC_ARM_ALTERA_                | _DEV_64BIT_SUPPORT_ | _DEV_COMMA_EXT_ | _DEV_ONLY_INT_MAIN_)
 //------------------------------------------------------------------------------
 //  useful macros
 
-#define CHECK_MEMORY_ALIGNMENT()     ((DEV_SYSTEM & _DEV_MASK_ALIGNMENT) != 0)
+#define CHECK_MEMORY_ALIGNMENT()    ((DEV_SYSTEM & _DEV_MASK_ALIGNMENT) != 0)
 #define CHECK_IF_BIG_ENDIAN()       ((DEV_SYSTEM & _DEV_BIGEND_) != 0)
 
 //------------------------------------------------------------------------------
@@ -108,91 +108,66 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _WIN32_             32
 #define _WINCE_             (32 + 0x20000)
 
-//------------------------------------------------------------------------------
-//  To determine the system, first check for used compiler
-
 #if defined (__GNUC__)
 
 //------------------------------------------------------------------------------
-// define target system
-
-#if defined (LINUX) || defined (__linux__)
-
+// GNU C compiler
+//------------------------------------------------------------------------------
+#if (defined(LINUX) || defined(__linux__))                  // x86 / Linux
 #define TARGET_SYSTEM   _LINUX_
 #define DEV_SYSTEM      _DEV_LINUX_
-
-#elif defined (__NIOS2__)
-
+#elif defined(__NIOS2__)                                    // NIOS II / no-os
 #define TARGET_SYSTEM   _NO_OS_
 #define DEV_SYSTEM      _DEV_NIOS2_
-
-#elif defined (__MICROBLAZE__)
-
+#elif defined(__MICROBLAZE__)                               // Microblaze / no-os
 #define TARGET_SYSTEM   _NO_OS_
-
 // Microblaze could be either big or little endian
 #if (__BIG_ENDIAN__ == 1)
 #define DEV_SYSTEM      _DEV_MICROBLAZE_BIG_
-#else
+#else /* (__BIG_ENDIAN__ == 1) */
 #define DEV_SYSTEM      _DEV_MICROBLAZE_LITTLE_
-#endif
-
-#elif defined (__VXWORKS__)
-
+#endif /* (__BIG_ENDIAN__ == 1) */
+#elif defined(__VXWORKS__)                                  // x86 / VxWorks
 #define TARGET_SYSTEM   _VXWORKS_
 #define DEV_SYSTEM      _DEV_VXWORKS_
-
-#elif defined (__ALTERA_ARM__)
-
+#elif defined(__ALTERA_ARM__)                               // Altera ARM / no-os
 #define TARGET_SYSTEM   _NO_OS_
 #define DEV_SYSTEM      _DEV_ARM_ALTERA_EABI_
-
-#elif defined (__XILINX_ARM__)
-
-#define TARGET_SYSTEM   _NO_OS_
-#define DEV_SYSTEM      _DEV_ARM_XILINX_EABI_
-
-#else
-
+#elif (defined (_WIN32) || defined (__MINGW32__))
+#define TARGET_SYSTEM   _WIN32_                             // WIN32 definition
+#define DEV_SYSTEM      _DEV_WIN32_MINGW_
+#else /* (defined (_WIN32) || defined (__MINGW32__)) */     // unsupported
 #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
-
 #endif
 
 #define OPLK_DEPRECATED      __attribute__((deprecated))
 
 #elif defined(_MSC_VER)
-
-#if _MSC_VER < 1400         // requires visual studio 2005 or higher
+//------------------------------------------------------------------------------
+// MS C compiler
+//------------------------------------------------------------------------------
+#if (_MSC_VER < 1400)         // requires visual studio 2005 or higher
 #error 'ERROR: Microsoft Visual Studio 2005 or higher is needed!'
 #endif
 
-//------------------------------------------------------------------------------
-// define target system
-
 #if defined(_WIN32)
-
-#define TARGET_SYSTEM   _WIN32_     // WIN32 definition
+#define TARGET_SYSTEM   _WIN32_                             // x86 / Win32
 #define DEV_SYSTEM      _DEV_WIN32_
-
-#elif defined (_WIN32_WCE)
-
+#elif defined (_WIN32_WCE)                                  // x86 / Win CE
 #define TARGET_SYSTEM   _WINCE_
 #define DEV_SYSTEM      _DEV_WIN_CE_
-
-#else
-
+#else /* defined (_WIN32_WCE) */                            // unsupported
 #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
-
 #endif
 
-#define __func__        __FUNCTION__
-#define OPLK_DEPRECATED      __declspec(deprecated)
+#define __func__            __FUNCTION__
+#define OPLK_DEPRECATED     __declspec(deprecated)
 
-#endif /*#elif defined (_MSC_VER) */
+#endif /* defined(_MSC_VER) */
 
 //------------------------------------------------------------------------------
 //  TARGET_SYSTEM specific definitions
-
+//------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
 
 #include <oplk/targetdefs/linux.h>
@@ -205,34 +180,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (DEV_SYSTEM == _DEV_NIOS2_)
 #include <oplk/targetdefs/nios2.h>
-
-#elif (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_ || DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_)
+#elif ((DEV_SYSTEM == _DEV_MICROBLAZE_BIG_) || (DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_))
 #include <oplk/targetdefs/microblaze.h>
-
 #elif (DEV_SYSTEM == _DEV_ARM_ALTERA_EABI_)
 #include <oplk/targetdefs/c5socarm.h>
-
-#elif (DEV_SYSTEM == _DEV_ARM_XILINX_EABI_)
-#include <oplk/targetdefs/zynqarm.h>
-
 #else
 #error "ERROR Target no OS System is not supported"
-
 #endif
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
+#if (DEV_SYSTEM == _DEV_WIN32_)
 #ifdef _KERNEL_MODE
 #include <oplk/targetdefs/winkernel.h>
-#else
+#else /* _KERNEL_MODE */
 #include <oplk/targetdefs/windows.h>
+#endif /* _KERNEL_MODE */
+#elif (DEV_SYSTEM == _DEV_WIN32_MINGW_)
+#include <oplk/targetdefs/windows-mingw.h>
+#else
+#error "ERROR Development platform is not supported for this target"
 #endif
 
 #elif (TARGET_SYSTEM == _WINCE_)
 
 #include <oplk/targetdefs/wince.h>
 
-#else
+#else /* (TARGET_SYSTEM == _WINCE_) */
+
 #error "ERROR Target platform is not supported"
 
 #endif

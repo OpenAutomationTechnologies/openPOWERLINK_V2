@@ -19,6 +19,7 @@ module using the offset acquired from the kernel driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,9 +51,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplkinc.h>
 
 #include <common/pdo.h>
+#include <common/driver.h>
 #include <user/ctrlucal.h>
 
-#include <common/driver.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -110,6 +111,7 @@ start/initialization of the stack.
 tOplkError pdoucal_openMem(void)
 {
     hFileHandle_l = ctrlucal_getFd();
+
     return kErrorOk;
 }
 
@@ -128,6 +130,7 @@ shutdown.
 tOplkError pdoucal_closeMem(void)
 {
     hFileHandle_l = NULL;
+
     return kErrorOk;
 }
 
@@ -137,8 +140,8 @@ tOplkError pdoucal_closeMem(void)
 
 The function allocates shared memory for the user needed to transfer the PDOs.
 
-\param  memSize_p               Size of PDO memory.
-\param  ppPdoMem_p              Pointer to store the PDO memory pointer.
+\param[in]      memSize_p           Size of PDO memory.
+\param[out]     ppPdoMem_p          Pointer to store the PDO memory pointer.
 
 \return The function returns a tOplkError error code.
 
@@ -147,31 +150,40 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 {
-    ULONG           bytesReturned;
-    tPdoMem         inPdoMem;
-    tPdoMem         outPdoMem;
-    tOplkError      ret;
-    UINT8*          pPdoMem = NULL;
-    BOOL            fIoctlRet;
+    ULONG       bytesReturned;
+    tPdoMem     inPdoMem;
+    tPdoMem     outPdoMem;
+    tOplkError  ret;
+    UINT8*      pPdoMem = NULL;
+    BOOL        fIoctlRet;
+
+    // Check parameter validity
+    ASSERT(ppPdoMem_p != NULL);
 
     if (hFileHandle_l == NULL)
         return kErrorNoResource;
 
     inPdoMem.memSize = (UINT)memSize_p;
 
-    fIoctlRet = DeviceIoControl(hFileHandle_l, PLK_CMD_PDO_GET_MEM,
-                                &inPdoMem, sizeof(tPdoMem), &outPdoMem, sizeof(tPdoMem),
-                                &bytesReturned, NULL);
+    fIoctlRet = DeviceIoControl(hFileHandle_l,
+                                PLK_CMD_PDO_GET_MEM,
+                                &inPdoMem,
+                                sizeof(tPdoMem),
+                                &outPdoMem,
+                                sizeof(tPdoMem),
+                                &bytesReturned,
+                                NULL);
     if (!fIoctlRet || (bytesReturned == 0))
     {
         *ppPdoMem_p = NULL;
         return kErrorNoResource;
     }
 
-    ret = ctrlucal_getMappedMem(outPdoMem.pdoMemOffset, outPdoMem.memSize,
+    ret = ctrlucal_getMappedMem(outPdoMem.pdoMemOffset,
+                                outPdoMem.memSize,
                                 &pPdoMem);
 
-    if (ret != kErrorOk || pPdoMem == NULL)
+    if ((ret != kErrorOk) || (pPdoMem == NULL))
         return kErrorNoResource;
 
     *ppPdoMem_p = pPdoMem;
@@ -186,8 +198,8 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
 The function frees shared memory which was allocated in the user layer for
 transferring the PDOs.
 
-\param  pMem_p                  Pointer to the shared memory segment.
-\param  memSize_p               Size of PDO memory.
+\param[in,out]  pMem_p              Pointer to the shared memory segment.
+\param[in]      memSize_p           Size of PDO memory.
 
 \return The function returns a tOplkError error code.
 
@@ -196,12 +208,11 @@ transferring the PDOs.
 //------------------------------------------------------------------------------
 tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
 {
+    UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
 
     if (hFileHandle_l == NULL)
         return kErrorNoResource;
-
-    pMem_p = NULL;
 
     return kErrorOk;
 }

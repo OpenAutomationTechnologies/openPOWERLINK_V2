@@ -130,6 +130,12 @@ typedef struct
 #define MAC_HW_TYP_01_NB_RXDESC        16
 #define MAC_HW_TYP_01_NB_TXDESC        16
 
+//-------------------- hardware type 02 --------------------
+// Typ 02 has 16 filters, 32 rx descriptors and 32 tx descriptors
+#define MAC_HW_TYP_02_NB_FILTER        16
+#define MAC_HW_TYP_02_NB_RXDESC        32
+#define MAC_HW_TYP_02_NB_TXDESC        32
+
 //-------------------- register flags ------------------------
 #define OMETH_REG_IE              0x8000        // irq enable
 #define OMETH_REG_SOFTIRQ         0x4000        // software IRQ
@@ -145,8 +151,7 @@ typedef struct
 #define OMETH_REG_IQUIT          0x0100        // quit interrupt (only valid on clear port)
 #define OMETH_REG_RUN            0x0080        // run bit
 #define OMETH_REG_TX_BEG         0x0040        // quit tx beg irq
-#define OMETH_REG_RX_NOMATCH     0x0040        // quit interrupt -> nomatch
-#define OMETH_REG_LOST           0x0010        // lost flag (rx-control)
+#define OMETH_REG_LOST           0x0040        // lost flag (rx-control)
 #define OMETH_REG_RXIDLE         0x0020        // rx-idle flag
 #define OMETH_REG_SET_RES_IPG    0x4000        // flag to set response inter package gap
 
@@ -245,6 +250,8 @@ struct OMETH_TYP
     unsigned short       rxLen;            // data length of rx buffers
     unsigned char        nbFilter;        // number of filters
     unsigned char        nbFilterX;        // number of filters for x-node functionality
+    unsigned char        nbTxDesc;
+    unsigned char        nbRxDesc;
     unsigned char        txQueueEnable;    // will be set to 0 if upper layer switches queue sending off
 
     unsigned char        cntTxQueueIn,cntTxQueueOut;        // counter to evaluate the number of pending tx descriptors

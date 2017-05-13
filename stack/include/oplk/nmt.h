@@ -9,7 +9,7 @@ This file is the global include file for all NMT modules
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -34,7 +34,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-
 #ifndef _INC_oplk_nmt_H_
 #define _INC_oplk_nmt_H_
 
@@ -73,17 +72,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define NMT_STATE_XX_OPERATIONAL            0x00FD
 #define NMT_STATE_XX_STOPPED                0x004D
 #define NMT_STATE_XX_BASIC_ETHERNET         0x001E
+#define NMT_STATE_XX_MASK                   0x00FF
 
-#define NMT_IF_CN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_CS)
-#define NMT_IF_CN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_CS)
-#define NMT_IF_ACTIVE_CN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
-                                    == (NMT_TYPE_CS | NMT_CS_PLKMODE))
-#define NMT_IF_MN(NmtState)         (((NmtState) & NMT_TYPE_MASK) == NMT_TYPE_MS)
-#define NMT_IF_MN_OR_RMN(NmtState)  ((NmtState) & NMT_TYPE_MS)
-#define NMT_IF_ACTIVE_MN(NmtState)  (((NmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
-                                    == (NMT_TYPE_MS | NMT_MS_PLKMODE))
-#define NMT_IF_ACTIVE(NmtState)     (((NmtState) & NMT_SUPERSTATE_MASK) \
-                                    == NMT_CS_PLKMODE)
+#define NMT_IF_CN_OR_RMN(nmtState)  ((nmtState) & NMT_TYPE_CS)
+#define NMT_IF_CN(nmtState)         (((nmtState) & NMT_TYPE_MASK) == NMT_TYPE_CS)
+#define NMT_IF_ACTIVE_CN(nmtState)  (((nmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                     == (NMT_TYPE_CS | NMT_CS_PLKMODE))
+#define NMT_IF_MN(nmtState)         (((nmtState) & NMT_TYPE_MASK) == NMT_TYPE_MS)
+#define NMT_IF_MN_OR_RMN(nmtState)  ((nmtState) & NMT_TYPE_MS)
+#define NMT_IF_ACTIVE_MN(nmtState)  (((nmtState) & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) \
+                                     == (NMT_TYPE_MS | NMT_MS_PLKMODE))
+#define NMT_IF_ACTIVE(nmtState)     (((nmtState) & NMT_SUPERSTATE_MASK) \
+                                     == NMT_CS_PLKMODE)
 
 //------------------------------------------------------------------------------
 // typedef
@@ -146,45 +146,45 @@ typedef enum
 {
     // Events from DLL
     // Events defined by the POWERLINK specification
-    kNmtEventNoEvent                =   0x00,   ///< No event has occured
+    kNmtEventNoEvent                =   0x00,   ///< No event has occurred
     // kNmtEventDllMePres           =   0x01,
-    kNmtEventDllMePresTimeout       =   0x02,   ///< A PRes timeout event has occured on the MN
+    kNmtEventDllMePresTimeout       =   0x02,   ///< A PRes timeout event has occurred on the MN
     // kNmtEventDllMeAsnd           =   0x03,
-    kNmtEventDllMeAsndTimeout       =   0x03,   ///< An ASnd timeout event has occured on the MN
+    kNmtEventDllMeAsndTimeout       =   0x03,   ///< An ASnd timeout event has occurred on the MN
     // kNmtEventDllMeSoaSent        =   0x04,
-    kNmtEventDllMeSocTrig           =   0x05,   ///< An SoC trigger event has occured on the MN
-    kNmtEventDllMeSoaTrig           =   0x06,   ///< An SoA trigger event has occured on the MN
-    kNmtEventDllCeSoc               =   0x07,   ///< An SoC event has occured on the CN
-    kNmtEventDllCePreq              =   0x08,   ///< A PReq event has occured on the CN
-    kNmtEventDllCePres              =   0x09,   ///< A PRes event has occured on the CN
-    kNmtEventDllCeSoa               =   0x0A,   ///< An SoA event has occured on the CN
-    kNmtEventDllCeAInv              =   0x0B,   ///< An AInv event has occured on the CN
-    kNmtEventDllCeAsnd              =   0x0C,   ///< An ASnd event has occured on the CN
-    kNmtEventDllCeFrameTimeout      =   0x0D,   ///< A frame timeout has occured on the CN
+    kNmtEventDllMeSocTrig           =   0x05,   ///< An SoC trigger event has occurred on the MN
+    kNmtEventDllMeSoaTrig           =   0x06,   ///< An SoA trigger event has occurred on the MN
+    kNmtEventDllCeSoc               =   0x07,   ///< An SoC event has occurred on the CN
+    kNmtEventDllCePreq              =   0x08,   ///< A PReq event has occurred on the CN
+    kNmtEventDllCePres              =   0x09,   ///< A PRes event has occurred on the CN
+    kNmtEventDllCeSoa               =   0x0A,   ///< An SoA event has occurred on the CN
+    kNmtEventDllCeAInv              =   0x0B,   ///< An AInv event has occurred on the CN
+    kNmtEventDllCeAsnd              =   0x0C,   ///< An ASnd event has occurred on the CN
+    kNmtEventDllCeFrameTimeout      =   0x0D,   ///< A frame timeout has occurred on the CN
     kNmtEventDllReAmni              =   0x0E,   ///< NMT_RMT5, NMT_RMT7
     kNmtEventDllReSwitchOverTimeout =   0x0F,   ///< NMT_RMT4, NMT_RMT6
 
     // Events triggered by NMT-Commands
-    kNmtEventSwReset                =   0x10,   ///< A SwReset event has occured (NMT_GT1, NMT_GT2, NMT_GT8)
-    kNmtEventResetNode              =   0x11,   ///< A ResetNode event has occured
-    kNmtEventResetCom               =   0x12,   ///< A ResetCommunication event has occured
-    kNmtEventResetConfig            =   0x13,   ///< A ResetConfiguration event has occured
-    kNmtEventEnterPreOperational2   =   0x14,   ///< An EnterPreOperational2 event has occured
-    kNmtEventEnableReadyToOperate   =   0x15,   ///< An EnableReadyToOperate event has occured
-    kNmtEventStartNode              =   0x16,   ///< A StartNode event has occured (NMT_CT7)
-    kNmtEventStopNode               =   0x17,   ///< A StopNode event has occured
+    kNmtEventSwReset                =   0x10,   ///< A SwReset event has occurred (NMT_GT1, NMT_GT2, NMT_GT8)
+    kNmtEventResetNode              =   0x11,   ///< A ResetNode event has occurred
+    kNmtEventResetCom               =   0x12,   ///< A ResetCommunication event has occurred
+    kNmtEventResetConfig            =   0x13,   ///< A ResetConfiguration event has occurred
+    kNmtEventEnterPreOperational2   =   0x14,   ///< An EnterPreOperational2 event has occurred
+    kNmtEventEnableReadyToOperate   =   0x15,   ///< An EnableReadyToOperate event has occurred
+    kNmtEventStartNode              =   0x16,   ///< A StartNode event has occurred (NMT_CT7)
+    kNmtEventStopNode               =   0x17,   ///< A StopNode event has occurred
 
     // Events triggered by NMT-Requests or application
     kNmtEventGoToStandby            =   0x18,   ///< GoToStandby request received (NMT_RMT5, NMT_RMT7)
     kNmtEventGoToStandbyDelayed     =   0x19,   ///< GoToStandby request (with DF flag) received (NMT_RMT5, NMT_RMT7)
 
     // Events triggered by higher layer
-    kNmtEventEnterResetApp          =   0x20,   ///< An EnterResetApplication event has occured
-    kNmtEventEnterResetCom          =   0x21,   ///< An EnterResetCommunication event has occured
-    kNmtEventInternComError         =   0x22,   ///< An internal communication error has occured (NMT_GT6 -> enter ResetCommunication)
-    kNmtEventEnterResetConfig       =   0x23,   ///< An EnterResetConfiguration event has occured
-    kNmtEventEnterCsNotActive       =   0x24,   ///< An EnterCsNotActive event has occured
-    kNmtEventEnterMsNotActive       =   0x25,   ///< An EnterMsNotActive event has occured
+    kNmtEventEnterResetApp          =   0x20,   ///< An EnterResetApplication event has occurred
+    kNmtEventEnterResetCom          =   0x21,   ///< An EnterResetCommunication event has occurred
+    kNmtEventInternComError         =   0x22,   ///< An internal communication error has occurred (NMT_GT6 -> enter ResetCommunication)
+    kNmtEventEnterResetConfig       =   0x23,   ///< An EnterResetConfiguration event has occurred
+    kNmtEventEnterCsNotActive       =   0x24,   ///< An EnterCsNotActive event has occurred
+    kNmtEventEnterMsNotActive       =   0x25,   ///< An EnterMsNotActive event has occurred
     kNmtEventTimerBasicEthernet     =   0x26,   ///< NMT_CT3; timer triggered state change (NotActive -> BasicEth)
     kNmtEventTimerMsPreOp1          =   0x27,   ///< enter PreOp1 on MN (NotActive -> MsPreOp1)
     kNmtEventNmtCycleError          =   0x28,   ///< NMT_CT11, NMT_MT6; error during cycle -> enter PreOp1
@@ -214,7 +214,7 @@ typedef struct
     tNmtState               newNmtState;        ///< New NMT state
     tNmtState               oldNmtState;        ///< Old NMT state
     tNmtEvent               nmtEvent;           ///< NMT event
-    UINT8                   aPadding[3];        ///< Padding for 32bit-aligned
+    UINT8                   aPadding[3];        ///< Padding for 32 bit-alignment
 } tEventNmtStateChange;
 
 /**
@@ -301,4 +301,4 @@ Data type for the enumerator \ref eNmtBootEvent.
 */
 typedef UINT32 tNmtBootEvent;
 
-#endif  // #ifndef _INC_oplk_nmt_H_
+#endif  /* _INC_oplk_nmt_H_ */

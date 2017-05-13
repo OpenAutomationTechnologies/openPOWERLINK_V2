@@ -11,7 +11,7 @@ userspace. This implementation uses the posix timer interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -52,7 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 
 // Needed for debugging to extract thread ID on Linux
-//#include <sys/syscall.h>
+#include <sys/syscall.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -108,11 +108,11 @@ static tTimeruInstance timeruInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void cbTimer(ULONG parameter_p);
-static void* processThread(void* pArgument_p);
-static void addTimer(tTimeruData* pData_p);
-static void removeTimer(tTimeruData* pData_p);
-static void resetTimerList(void);
+static void         cbTimer(const tTimeruData* pData_p);
+static void*        processThread(void* pArgument_p);
+static void         addTimer(tTimeruData* pData_p);
+static void         removeTimer(tTimeruData* pData_p);
+static void         resetTimerList(void);
 static tTimeruData* getNextTimer(void);
 
 //============================================================================//
@@ -132,8 +132,8 @@ The function initializes the user timer module.
 //------------------------------------------------------------------------------
 tOplkError timeru_init(void)
 {
-    struct sched_param          schedParam;
-    INT                         retVal;
+    struct sched_param  schedParam;
+    int                 retVal;
 
     // reset instance structure
     timeruInstance_g.processThread = 0;
@@ -146,24 +146,29 @@ tOplkError timeru_init(void)
         return kErrorNoResource;
     }
 
-    if ((retVal = pthread_create(&timeruInstance_g.processThread, NULL,
-                                 processThread,  &timeruInstance_g)) != 0)
+    retVal = pthread_create(&timeruInstance_g.processThread,
+                            NULL,
+                            processThread,
+                            &timeruInstance_g);
+    if (retVal != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't create timer thread! (%d)\n",
-                                __func__, retVal);
+                              __func__,
+                              retVal);
         pthread_mutex_destroy(&timeruInstance_g.mutex);
         return kErrorNoResource;
     }
 
     schedParam.sched_priority = CONFIG_THREAD_PRIORITY_LOW;
-    if (pthread_setschedparam(timeruInstance_g.processThread, SCHED_RR,
+    if (pthread_setschedparam(timeruInstance_g.processThread,
+                              SCHED_RR,
                               &schedParam) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n",
-                                __func__);
+                              __func__);
     }
 
-#if (defined(__GLIBC__) && __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 12)
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
     pthread_setname_np(timeruInstance_g.processThread, "oplk-timeru");
 #endif
 
@@ -183,7 +188,7 @@ The function shuts down the user timer instance.
 //------------------------------------------------------------------------------
 tOplkError timeru_exit(void)
 {
-    tTimeruData*     pTimer;
+    tTimeruData*    pTimer;
 
     /* Check if the processThread exist */
     if (timeruInstance_g.processThread != 0)
@@ -239,16 +244,18 @@ tOplkError timeru_process(void)
 This function creates a timer, sets up the timeout and saves the
 corresponding timer handle.
 
-\param  pTimerHdl_p     Pointer to store the timer handle.
-\param  timeInMs_p      Timeout in milliseconds.
-\param  argument_p      User definable argument for timer.
+\param[out]     pTimerHdl_p         Pointer to store the timer handle.
+\param[in]      timeInMs_p          Timeout in milliseconds.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
+                           ULONG timeInMs_p,
+                           const tTimerArg* pArgument_p)
 {
     tTimeruData*        pData;
     struct itimerspec   relTime;
@@ -262,7 +269,7 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
     if (pData == NULL)
         return kErrorNoResource;
 
-    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, pArgument_p, sizeof(tTimerArg));
 
     addTimer(pData);
 
@@ -287,8 +294,10 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
         relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /*DEBUG_LVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
-                             __func__, (void *)pData, timeInMs_p); */
+    DEBUG_LVL_TIMERU_TRACE("%s() Set timer: %p, timeInMs_p=%ld\n",
+                           __func__,
+                           (void*)pData,
+                           timeInMs_p);
 
     relTime.it_interval.tv_sec = 0;
     relTime.it_interval.tv_nsec = 0;
@@ -310,16 +319,18 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg a
 This function modifies an existing timer. If the timer was not yet created
 it creates the timer and stores the new timer handle at \p pTimerHdl_p.
 
-\param  pTimerHdl_p     Pointer to store the timer handle.
-\param  timeInMs_p      Timeout in milliseconds.
-\param  argument_p      User definable argument for timer.
+\param[in,out]  pTimerHdl_p         Pointer to store the timer handle.
+\param[in]      timeInMs_p          Timeout in milliseconds.
+\param[in]      pArgument_p         Pointer to user definable argument for timer.
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
-tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerArg argument_p)
+tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p,
+                              ULONG timeInMs_p,
+                              const tTimerArg* pArgument_p)
 {
     tTimeruData*        pData;
     struct itimerspec   relTime, curTime;
@@ -329,9 +340,8 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-    {
-        return timeru_setTimer(pTimerHdl_p, timeInMs_p, argument_p);
-    }
+        return timeru_setTimer(pTimerHdl_p, timeInMs_p, pArgument_p);
+
     pData = (tTimeruData*)*pTimerHdl_p;
 
     if (timeInMs_p >= 1000)
@@ -345,8 +355,10 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
         relTime.it_value.tv_nsec = timeInMs_p * 1000000;
     }
 
-    /* DEBUG_LVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
-                             __func__, *pTimerHdl_p, timeInMs_p); */
+    DEBUG_LVL_TIMERU_TRACE("%s() Modify timer:%08x timeInMs_p=%ld\n",
+                           __func__,
+                           *pTimerHdl_p,
+                           timeInMs_p);
 
     relTime.it_interval.tv_sec = 0;
     relTime.it_interval.tv_nsec = 0;
@@ -361,7 +373,7 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
     // won't use the new timerArg and
     // therefore the old timer cannot be distinguished from the new one.
     // But if the new timer is too fast, it may get lost.
-    OPLK_MEMCPY(&pData->timerArgument, &argument_p, sizeof(tTimerArg));
+    OPLK_MEMCPY(&pData->timerArgument, pArgument_p, sizeof(tTimerArg));
 
     return kErrorOk;
 }
@@ -372,27 +384,26 @@ tOplkError timeru_modifyTimer(tTimerHdl* pTimerHdl_p, ULONG timeInMs_p, tTimerAr
 
 This function deletes an existing timer.
 
-\param  pTimerHdl_p     Pointer to timer handle of timer to delete.
+\param[in,out]  pTimerHdl_p         Pointer to timer handle of timer to delete.
 
 \return The function returns a tOplkError error code.
-\retval kErrorTimerInvalidHandle  An invalid timer handle was specified.
-\retval kErrorOk                  The timer is deleted.
+\retval kErrorTimerInvalidHandle    An invalid timer handle was specified.
+\retval kErrorOk                    The timer is deleted.
 
 \ingroup module_timeru
 */
 //------------------------------------------------------------------------------
 tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 {
-    tTimeruData*        pData;
+    tTimeruData*    pData;
 
     if (pTimerHdl_p == NULL)
         return kErrorTimerInvalidHandle;
 
     // check handle itself, i.e. was the handle initialized before
     if (*pTimerHdl_p == 0)
-    {
         return kErrorOk;
-    }
+
     pData = (tTimeruData*)*pTimerHdl_p;
 
     timer_delete(pData->timer);
@@ -401,6 +412,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
     // uninitialize handle
     *pTimerHdl_p = 0;
+
     return kErrorOk;
 }
 
@@ -410,7 +422,7 @@ tOplkError timeru_deleteTimer(tTimerHdl* pTimerHdl_p)
 
 This function checks if a timer is active (is running).
 
-\param  timerHdl_p     Handle of timer to check.
+\param[in]      timerHdl_p          Handle of timer to check.
 
 \return The function returns TRUE if the timer is active, otherwise FALSE.
 
@@ -419,7 +431,7 @@ This function checks if a timer is active (is running).
 //------------------------------------------------------------------------------
 BOOL timeru_isActive(tTimerHdl timerHdl_p)
 {
-    tTimeruData*        pData;
+    const tTimeruData*  pData;
     struct itimerspec   remaining;
 
     // check handle itself, i.e. was the handle initialized before
@@ -427,19 +439,15 @@ BOOL timeru_isActive(tTimerHdl timerHdl_p)
     {   // timer was not created yet, so it is not active
         return FALSE;
     }
-    pData = (tTimeruData*)timerHdl_p;
+    pData = (const tTimeruData*)timerHdl_p;
 
     // check if timer is running
     timer_gettime(pData->timer, &remaining);
 
     if ((remaining.it_value.tv_sec == 0) && (remaining.it_value.tv_nsec == 0))
-    {
         return FALSE;
-    }
     else
-    {
         return TRUE;
-    }
 }
 
 //============================================================================//
@@ -455,7 +463,7 @@ BOOL timeru_isActive(tTimerHdl timerHdl_p)
 This function implements the timer thread function which will be started as
 thread and is responsible for processing expired timers.
 
-\param  pArgument_p     Thread argument. Not used!
+\param[in,out]  pArgument_p         Thread argument. Not used!
 
 \return The function returns a thread exit value (always NULL)
 */
@@ -468,8 +476,7 @@ static void* processThread(void* pArgument_p)
 
     UNUSED_PARAMETER(pArgument_p);
 
-    // Uncomment to show the thread ID on Linux (include must also be uncommented)!
-    // DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
+    DEBUG_LVL_TIMERU_TRACE("%s() ThreadId:%d\n", __func__, syscall(SYS_gettid));
 
     sigemptyset(&awaitedSignal);
     sigaddset(&awaitedSignal, SIGRTMIN);
@@ -483,10 +490,11 @@ static void* processThread(void* pArgument_p)
             pTimer = (tTimeruData*)signalInfo.si_value.sival_ptr;
             if (pTimer != NULL)
                 /* call callback function of timer */
-                cbTimer((ULONG)pTimer);
+                cbTimer(pTimer);
             else
             {
-                DEBUG_LVL_ERROR_TRACE("%s() sival_ptr==NULL code=%d\n", __func__,
+                DEBUG_LVL_ERROR_TRACE("%s() sival_ptr==NULL code=%d\n",
+                                      __func__,
                                       signalInfo.si_code);
             }
         }
@@ -503,24 +511,22 @@ static void* processThread(void* pArgument_p)
 This function is registered if a timer is started and therefore will be called
 by the timer when it expires.
 
-\param  parameter_p     The user defined parameter supplied when starting the
-                        timer.
+\param[in]      pData_p             The user defined parameter supplied when starting
+                                    the timer.
 */
 //------------------------------------------------------------------------------
-static void cbTimer(ULONG parameter_p)
+static void cbTimer(const tTimeruData* pData_p)
 {
-    tTimeruData*        pData;
-    tEvent              event;
-    tTimerEventArg      timerEventArg;
-
-    pData = (tTimeruData*)parameter_p;
+    tEvent          event;
+    tTimerEventArg  timerEventArg;
 
     // call event function
-    timerEventArg.timerHdl.handle = (tTimerHdl)pData;
-    OPLK_MEMCPY(&timerEventArg.argument, &pData->timerArgument.argument,
+    timerEventArg.timerHdl.handle = (tTimerHdl)pData_p;
+    OPLK_MEMCPY(&timerEventArg.argument,
+                &pData_p->timerArgument.argument,
                 sizeof(timerEventArg.argument));
 
-    event.eventSink = pData->timerArgument.eventSink;
+    event.eventSink = pData_p->timerArgument.eventSink;
     event.eventType = kEventTypeTimer;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(tNetTime));
     event.eventArg.pEventArg = &timerEventArg;
@@ -535,12 +541,12 @@ static void cbTimer(ULONG parameter_p)
 
 This function adds a new timer to the timer list.
 
-\param  pData_p         Pointer to the timer structure.
+\param[in,out]  pData_p             Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
 static void addTimer(tTimeruData* pData_p)
 {
-    tTimeruData*          pTimerData;
+    tTimeruData*    pTimerData;
 
     pthread_mutex_lock(&timeruInstance_g.mutex);
 
@@ -548,7 +554,6 @@ static void addTimer(tTimeruData* pData_p)
     {
         timeruInstance_g.pFirstTimer = pData_p;
         timeruInstance_g.pLastTimer = pData_p;
-
         pData_p->pPrevTimer = NULL;
         pData_p->pNextTimer = NULL;
     }
@@ -570,12 +575,12 @@ static void addTimer(tTimeruData* pData_p)
 
 This function removes a new timer from the timer list.
 
-\param  pData_p         Pointer to the timer structure.
+\param[in,out]  pData_p             Pointer to the timer structure.
 */
 //------------------------------------------------------------------------------
 static void removeTimer(tTimeruData* pData_p)
 {
-    tTimeruData*          pTimerData;
+    tTimeruData*    pTimerData;
 
     pthread_mutex_lock(&timeruInstance_g.mutex);
 
@@ -584,9 +589,7 @@ static void removeTimer(tTimeruData* pData_p)
         timeruInstance_g.pFirstTimer = pData_p->pNextTimer;
         pTimerData = pData_p->pNextTimer;
         if (pTimerData != NULL)
-        {
             pTimerData->pPrevTimer = NULL;
-        }
     }
     else if (pData_p->pNextTimer == NULL)     // last one
     {
@@ -630,9 +633,8 @@ static tTimeruData* getNextTimer(void)
 
     pTimer = timeruInstance_g.pCurrentTimer;
     if (pTimer != NULL)
-    {
         timeruInstance_g.pCurrentTimer = pTimer->pNextTimer;
-    }
+
     return pTimer;
 }
 
