@@ -854,7 +854,8 @@ static tOplkError finishInitReadByIndex(tSdoComCon* pSdoComCon_p,
     ret = sendResponseFrame(pSdoComCon_p,
                             pPlkFrame_p,
                             sdoCmdDataSize_p);
-    if (ret != kErrorOk)
+    if ((ret != kErrorOk) &&
+        (ret != kErrorSdoSeqConnectionBusy))
     {
         ret = abortTransfer(pSdoComCon_p, SDO_AC_GENERAL_ERROR);
         goto Exit;
