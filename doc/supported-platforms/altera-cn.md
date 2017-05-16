@@ -45,7 +45,8 @@ The software project for the host can be found in `apps`:
 - Minimum cycle length: 400 us
 - PReq-PRes Latency: 1 us
 - Process data: 4 bytes input and 4 bytes output.
-- There is 1 RPDO and 1 TPDO available. Cross-traffic is disabled.
+- There are 1 TPDO and 3 RPDO frames available. The number of RPDO frames depend on the number of
+  PDO_RxCommParam_XXh_REC and PDO_RxMappParam_XXh_AU64 indices in the `apps/common/objdicts/CiA401_CN/objdict.h` file
 
 # Requirements and tools {#sect_altera-cn_requirements}
 
