@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   memmap/memmap-linuxpcie.c
+\file   memmap/memmap-linuxdpshm.c
 
 \brief  Memory mapping implementation for openPOWERLINK PCIe driver on Linux
 
@@ -11,7 +11,7 @@ for Linux systems using openPOWERLINK PCIe driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2017, Kalycito Infotech Private Limited.
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 

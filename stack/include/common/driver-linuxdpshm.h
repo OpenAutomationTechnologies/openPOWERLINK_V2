@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/driver-linuxpcie.h
+\file   common/driver-linuxdpshm.h
 
 \brief  Header file for openPOWERLINK PCIe driver interface for Linux kernel
 
@@ -10,7 +10,7 @@ PCIe driver interface for Linux kernel.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
