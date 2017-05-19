@@ -12,6 +12,7 @@ uses BSD semaphores for synchronisation.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/timesync.h>
 #include <user/timesyncucal.h>
+#include <user/timesyncu.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -83,6 +85,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static sem_t*           syncSem_l;
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static BOOL             fFirstSyncEvent = FALSE;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -177,7 +182,17 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
     }
 
     if (semRet == 0)
+    {
+#if defined(CONFIG_INCLUDE_NMT_MN)
+        if (fFirstSyncEvent != TRUE)
+        {   // Set MN net time at first sync event
+            timesyncu_setNetTime();
+            fFirstSyncEvent = TRUE;
+        }
+#endif
+
         return kErrorOk;
+    }
     else
         return kErrorGeneralError;
 }

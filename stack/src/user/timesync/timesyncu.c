@@ -11,6 +11,7 @@ This file contains the main implementation of the user timesync module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -43,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/target.h>
 #include <user/timesyncu.h>
 #include <user/timesyncucal.h>
+#include <time.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -178,6 +180,42 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
 
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Set SoC net time
+
+The function sets the network time in UserToKernelSocTime shared buffer through atomic
+exchange.
+
+\ingroup module_timesyncu
+*/
+//------------------------------------------------------------------------------
+void timesyncu_setNetTime(void)
+{
+    OPLK_ATOMIC_T   writeBuf;
+#if (TARGET_SYSTEM == _LINUX_)
+    struct timespec currentTime;
+
+    // Get system clock time
+    clock_gettime(CLOCK_REALTIME, &currentTime);
+
+    pSharedMemory_l->userToKernelSocTime.aTripleBuf[0].netTime.nsec = currentTime.tv_nsec;
+    pSharedMemory_l->userToKernelSocTime.aTripleBuf[0].netTime.sec = currentTime.tv_sec;
+
+    writeBuf = pSharedMemory_l->userToKernelSocTime.write;
+    OPLK_ATOMIC_EXCHANGE(&pSharedMemory_l->userToKernelSocTime.clean,
+                         writeBuf,
+                         pSharedMemory_l->userToKernelSocTime.write);
+    pSharedMemory_l->userToKernelSocTime.newData = 1;
+
+    // Flush data cache for variables changed in this function
+    OPLK_DCACHE_FLUSH(&(pSharedMemory_l->userToKernelSocTime.write), sizeof(OPLK_ATOMIC_T));
+    OPLK_DCACHE_FLUSH(&(pSharedMemory_l->userToKernelSocTime.newData), sizeof(UINT8));
+}
+#endif
+
 #endif
 
 //============================================================================//
@@ -186,7 +224,6 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
 /// \name Private Functions
 /// \{
 
-#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 //------------------------------------------------------------------------------
 /**
 \brief  Obtain SoC time from triple buffer
@@ -202,7 +239,7 @@ static tTimesyncSocTime* getSocTime(void)
     tTimesyncSocTimeTripleBuf*  pTripleBuf;
     OPLK_ATOMIC_T               readBuf;
 
-    pTripleBuf = &pSharedMemory_l->socTime;
+    pTripleBuf = &pSharedMemory_l->kernelToUserSocTime;
 
     OPLK_DCACHE_INVALIDATE(pTripleBuf, sizeof(*pTripleBuf));
 

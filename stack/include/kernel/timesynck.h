@@ -8,6 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,6 +68,7 @@ tOplkError timesynck_process(const tEvent* pEvent_p);
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 tOplkError timesynck_setSocTime(const tTimesyncSocTime* pSocTime_p);
 #endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
+tOplkError timesynck_getNetTime(tNetTime* netTime, BOOL* pNewData_p);
 
 #ifdef __cplusplus
 }
