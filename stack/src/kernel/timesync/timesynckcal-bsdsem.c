@@ -5,7 +5,8 @@
 \brief  CAL kernel timesync module using BSD semaphores
 
 This file contains an implementation for the kernel CAL timesync module which
-uses BSD semaphores for synchronization.
+uses BSD semaphores for synchronization and a shared memory (shm) to transfer
+time stamps.
 
 The sync module is responsible to synchronize the user layer.
 
@@ -14,6 +15,7 @@ The sync module is responsible to synchronize the user layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,6 +52,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/stat.h>
 #include <semaphore.h>
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#include <sys/mman.h>
+#include <unistd.h>
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -66,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -78,15 +84,34 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Memory instance for kernel timesync module
+
+This structure contains all necessary information needed by the timesync CAL
+module for BSD semaphores.
+*/
+typedef struct
+{
+    sem_t*                    syncSem;                   ///< Semaphore for synchronization between kernel and user tiemsync modules.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    OPLK_FILE_HANDLE          fd;                        ///< File descriptor for POWERLINK device.
+    size_t                    memSize;                   ///< Memory size of SoC timestamp shared memory.
+    tTimesyncSharedMemory*    pSharedMemory;             ///< Pointer to SoC timestamp shared memory.
+#endif
+}tTimesynckcalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static sem_t*           syncSem_l;
+static tTimesynckcalInstance instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tOplkError createTimestampShm(void);
+static tOplkError destroyTimestampShm(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -105,14 +130,24 @@ The function initializes the kernel CAL timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_init(void)
 {
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tOplkError  ret;
+#endif
+
     sem_unlink(TIMESYNC_SYNC_BSDSEM);
 
-    syncSem_l = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1);
-    if (syncSem_l == SEM_FAILED)
+    instance_l.syncSem = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1);
+    if (instance_l.syncSem == SEM_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() creating sem failed!\n", __func__);
         return kErrorNoResource;
     }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    ret = createTimestampShm();
+    if (ret != kErrorOk)
+        return ret;
+#endif
 
     return kErrorOk;
 }
@@ -128,7 +163,17 @@ The function cleans up the CAL timesync module
 //------------------------------------------------------------------------------
 void timesynckcal_exit(void)
 {
-    sem_close(syncSem_l);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tOplkError ret;
+
+    ret = destroyTimestampShm();
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() timesync shared memory exit failed", __func__); // TODO:Handle ret value in upper layers
+    }
+#endif
+
+    sem_close(instance_l.syncSem);
     sem_unlink(TIMESYNC_SYNC_BSDSEM);
 }
 
@@ -145,7 +190,7 @@ The function sends a sync event.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_sendSyncEvent(void)
 {
-    sem_post(syncSem_l);
+    sem_post(instance_l.syncSem);
 
     return kErrorOk;
 }
@@ -184,15 +229,113 @@ The function returns the reference to the timesync shared memory.
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 {
-    // Not implemented yet
-    return NULL;
+    return instance_l.pSharedMemory;
 }
-#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Create timesync shared memory
+
+This function initializes and allocates the shared memory for SoC timestamp.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError createTimestampShm(void)
+{
+    instance_l.memSize = sizeof(tTimesyncSharedMemory);
+
+    // Initialize shared memory for SoC timestamp
+    instance_l.fd = shm_open(TIMESYNC_TIMESTAMP_SHM, O_CREAT | O_RDWR, 0);
+
+    if (instance_l.fd < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Initialization of shared memory failed!\n",
+                              __func__);
+        // Close the semaphore
+        sem_close(instance_l.syncSem);
+        // Unlink the semaphore
+        sem_unlink(TIMESYNC_SYNC_BSDSEM);
+
+        return kErrorNoResource;
+    }
+
+    // Allocate shared memory for SoC timestamp
+    if (ftruncate(instance_l.fd, instance_l.memSize) < 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Allocation of shared memory failed!\n",
+                              __func__);
+        // Close the semaphore
+        sem_close(instance_l.syncSem);
+        // Unlink the semaphore and timesync shared memory
+        sem_unlink(TIMESYNC_SYNC_BSDSEM);
+        shm_unlink(TIMESYNC_TIMESTAMP_SHM);
+
+        return kErrorNoResource;
+    }
+
+    instance_l.pSharedMemory = (void*)mmap(NULL,
+                                           instance_l.memSize,     // Memory size
+                                           PROT_READ | PROT_WRITE, // Map as read and write memory
+                                           MAP_SHARED,             // Map as shared memory
+                                           instance_l.fd,          // File descriptor for POWERLINK device
+                                           0);
+
+    // Check for valid memory mapping
+    if (instance_l.pSharedMemory == MAP_FAILED)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() timesync shared memory mmap failed!\n",
+                              __func__);
+        instance_l.pSharedMemory = NULL;
+        //Close the semaphore
+        sem_close(instance_l.syncSem);
+        //Unlink the semaphore and timesync shared memory
+        sem_unlink(TIMESYNC_SYNC_BSDSEM);
+        shm_unlink(TIMESYNC_TIMESTAMP_SHM);
+
+        return kErrorNoResource;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Destroy timesync shared memory
+
+This function unmaps and unlinks the SoC timestamp shared memory.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError destroyTimestampShm(void)
+{
+    if (instance_l.pSharedMemory != NULL)
+    {
+        // Unmap timesync shared memory
+        if (munmap(instance_l.pSharedMemory, instance_l.memSize) != 0)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() timesync shared memory munmap failed!\n",
+                                  __func__);
+
+            return kErrorNoResource;
+        }
+
+        instance_l.pSharedMemory = NULL;
+        instance_l.memSize = 0;
+    }
+
+    // Unlink timesync shared memory
+    shm_unlink(TIMESYNC_TIMESTAMP_SHM);
+
+    return kErrorOk;
+}
+#endif
 
 /// \}
