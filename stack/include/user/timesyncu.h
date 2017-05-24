@@ -8,6 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -60,6 +61,9 @@ extern "C"
 tOplkError timesyncu_init(tSyncCb pfnSyncCb_p);
 void       timesyncu_exit(void);
 tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p);
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+void       timesyncu_setNetTime(void);
+#endif
 
 #ifdef __cplusplus
 }

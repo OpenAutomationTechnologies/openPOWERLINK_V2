@@ -10,6 +10,7 @@ This file contains the event handling functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
@@ -119,6 +120,11 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
 #if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD))
 // Request forwarding of Pres frames (for conformance test)
 static tOplkError requestPresForward(UINT node_p);
+#endif
+
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+static void calculateNextSocNetTime(tNetTime* pNetTimestamp_p,
+                                    tNetTime cycleLength_p);
 #endif
 
 //============================================================================//
@@ -288,6 +294,9 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
         case kNmtGsOff:
         case kNmtGsInitialising:
             dllkInstance_g.socTime.relTime = 0;
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+            dllkInstance_g.fIncrementNetTime = FALSE;  // Reset increment net time flag
+#endif
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
@@ -1026,6 +1035,10 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     UINT            index = 0;
     UINT32          nextTimeOffsetNs = 0;
     UINT            nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetCycle ^ 1;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tNetTime*       pTempNetTime;          // Pointer to net time value
+    BOOL            fNewData = FALSE;      // Flag to indicate if new net time data is received from user layer
+#endif
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOC + nextTxBufferOffset];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
@@ -1037,6 +1050,27 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     ret = timesynck_setSocTime(&dllkInstance_g.socTime);
     if (ret != kErrorOk)
         return ret;
+
+    pTempNetTime = &dllkInstance_g.socTime.netTime;
+
+    // Get the net time information from userToKernel shared buffer
+    ret = timesynck_getNetTime(pTempNetTime, &fNewData);
+    if (ret != kErrorOk)
+        return ret;
+
+    if (fNewData)
+    {
+        // Set the flag to increment the net time value
+        dllkInstance_g.fIncrementNetTime = TRUE;
+    }
+
+    // Increment net time if dllkInstance_g.fIncrementNetTime is TRUE
+    if (dllkInstance_g.fIncrementNetTime)
+        calculateNextSocNetTime(pTempNetTime, dllkInstance_g.cycleLength);
+
+    // Set SoC net time
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.nsec, dllkInstance_g.socTime.netTime.nsec);
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.sec, dllkInstance_g.socTime.netTime.sec);
 #endif
 
     // Set SoC relative time
@@ -1211,6 +1245,33 @@ static tOplkError requestPresForward(UINT node_p)
 }
 #endif
 
+#endif
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Increment net time value
+
+This function increments the net time value with respect to cycle length and
+returns the updated net time value.
+
+\param[out]      pNetTimestamp      Pointer to net time structure.
+\param[out]      cycleLength        Cycle length in tNetTime format.
+*/
+//------------------------------------------------------------------------------
+static void calculateNextSocNetTime(tNetTime* pNetTimestamp_p,
+                                    tNetTime cycleLength_p)
+{
+    UINT64 netTimeNsec = 0;
+
+    netTimeNsec = (pNetTimestamp_p->nsec + cycleLength_p.nsec);
+    pNetTimestamp_p->sec += cycleLength_p.sec;
+
+    // Update the seconds value
+    pNetTimestamp_p->sec += (netTimeNsec / 1000000000);
+    // Update the nanoseconds value
+    pNetTimestamp_p->nsec = (netTimeNsec % 1000000000);
+}
 #endif
 
 /// \}

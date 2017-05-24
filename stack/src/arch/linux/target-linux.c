@@ -11,6 +11,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -417,6 +418,35 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 
     return kErrorOk;
 }
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Get system time
+
+The function returns the current system time.
+
+\param[out]      pNsec_p    Pointer to nanoseconds component of current timestamp.
+\param[out]      pSec_p     Pointer to seconds component of current timestamp.
+
+\return The function returns a tOplkError code
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_getSystemTime(UINT32* pNsec_p, UINT32* pSec_p)
+{
+    struct timespec currentTime;
+
+    if (clock_gettime(CLOCK_REALTIME, &currentTime) < 0)
+        return kErrorGeneralError;
+
+    *pNsec_p = currentTime.tv_nsec;
+    *pSec_p = currentTime.tv_sec;
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
