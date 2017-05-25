@@ -12,94 +12,385 @@ build and run openPOWERLINK on Zynq SoC.
 
 Currently, openPOWERLINK can run under the following environments on a Zynq SoC:
 
-- __Linux on Zynq ARM__
-  openPOWERLINK runs on Linux which is running on the ARM processing system (PS)
-  of the SoC processor.
-
-- __Zynq Hybrid Design__
+- \ref sect_zynq_hybrid
   The time-critical kernel part of the stack is running on a Microblaze softcore
   processor as a bare metal application in the programming logic (PL) of the Zynq SoC.
   The application part of the stack runs on Linux which is running on the ARM processing
   system (PS) of the SoC processor.
 
+- \ref sect_linux_zynq_ARM
+  openPOWERLINK runs on Linux which is running on the ARM processing system (PS)
+  of the SoC processor.
+
+
+# openPOWERLINK MN on Zynq Hybrid Design {#sect_zynq_hybrid}
+
+This document serves as a quick start guide to setup the environment for compiling and executing the openPOWERLINK Linux MN demo for the Zynq Hybrid design using Vivado 2016.2 tool chain.
+
 # Requirements {#sect_zynq_requirements}
 
-## Development Boards {#sect_zynq_requirements_boards}
+This section describes the hardware and software requirements to execute the openPOWERLINK Linux MN for the Zynq Hybrid design.
 
-- Xilinx ZC702 Development Kit
-- Any other board with Zynq 7000 series SoC (porting required for *Zynq Hybrid Design*)
+## Hardware Requirements
 
-## POWERLINK network {#sect_zynq_requirements_network}
+- Zynq ZC702 board to act as the openPOWERLINK MN
+- AVNET expander board (AES-FMC-ISMNET-G)
+- Linux PC
+- Micro SD card reader
+- Micro SD card
+- Ethernet cables
+- 1 Mini USB serial cable
 
-- POWERLINK network with a controlled nodes (CN)
-  * openPOWERLINK controlled nodes, e.g. Linux
-  * B&R POWERLINK controlled nodes
+## Software Requirements
 
-- POWERLINK network with a managing node (MN)
-  * openPOWERLINK managing node, e.g. Linux
-  * B&R POWERLINK managing node
+Following are the list of software packages and their dependencies to run the openPOWERLINK Linux MN
+demo for the Zynq Hybrid design on Zynq ZC702.
 
-## Tools {#sect_zynq_requirements_tools}
+- Ubuntu 14.04 or later version
+- Vivado-2016.2
+- Cmake v2.8.7 or later version
+- Xilinx Linux (https://github.com/Xilinx/linux-xlnx)
+  (Note: After cloning, use the following command to checkout the branch required for
+  Vivado 2016.2 toolchain)
+  > git checkout -b zynq-build xilinx-2016.2
+- Install the libncurses5 library using the below command (Note: Used with menuconfig)
+  > sudo apt-get install libncurses5-dev
+- Install the u-boot-tools package to create uImage
+  > sudo apt-get install u-boot-tools
+- Download Preempt RT version 4.4.rt2 for the Xilinx-linux from the below link:
+  * https://www.kernel.org/pub/linux/kernel/projects/rt/4.4/older/patch-4.4-rt2.patch.gz
+- Download the openPOWERLINK stack from the below link:
+  * https://sourceforge.net/projects/openpowerlink/
+  * Change directory to the downloaded stack.
+  * Checkout the 2.5.0 branch or later using the following command:
+  > git checkout <branch_name>
 
-### Xilinx Vivado
-The following tool is necessary to evaluate a Xilinx Zynq based openPOWERLINK
-solution:
+# Steps to apply pre-empt RT patch to the Linux kernel source {#sect_zynq_pre_empt_patch}
 
-* `Xilinx Vivado - HLx Edition` which is called `Vivado Design Suite - 2016.2 Full
-  Product Installation` or `Vivado Design Suite - 2016.2 HLx Edition` and can be
-  downloaded from: http://www.xilinx.com/support/download/index.html
+This section describes the steps to be carried out on the Linux PC to apply the pre-empt RT patch to
+the Xilinx Linux kernel sources and compile the kernel
 
-### CMake
+- Open terminal and move to the Xilinx Linux directory
+  > cd <Xilinx_Linux_directory>
+- Apply the patch using the following command:
+  > patch -p1 < <(gunzip -c <path_where_the_pre-empt_is_stored>)
 
-For building the openPOWERLINK stack and demo applications, the Open Source
-cross-platform build tool CMake is used (<http://www.cmake.org>). CMake
-version V2.8.7 or higher is required.
+![](\ref zynq/apply_preempt_RT_patch.png)
 
-For a detailed description of CMake look at the [cmake section](\ref sect_build_cmake).
+## Steps to compile the Linux kernel source for Zynq-Zc702 {#sect_pre_empt_patch}
 
-### libpcap Library
+This section describes the steps to be carried out on the Linux PC to compile the Linux kernel source and
+create the kernel image file for Zynq ZC702.
 
-In order to use the user-space POWERLINK stack under Linux, the libpcap library is needed
-to access the Ethernet interface.
+- Export the cross compilation environment variables using the following command:
+  > export CROSS_COMPILE=arm-linux-gnueabihf
+- Configure the Linux kernel parameters using the default Zynq configuration file:
+  > make ARCH=arm xilinx_zynq_defconfig
 
-__NOTE:__ The libpcap library has to be cross-compiled for the ARM target in order to use
-it with the Zynq SoC demo.
+![](\ref zynq/compile_Linux_kernel.png)
 
-### Terminal software
+- Compile the kernel using the following command:
+  > make ARCH=arm CROSS_COMPILE=/opt/Xilinx/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf-
+- To create uImage file:
+  > make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage CROSS_COMPILE=/opt/Xilinx/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf-
+- Compile and install the modules for the Linux kernel using following commands:
+  * Compile module:
+  > make ARCH=arm CROSS_COMPILE=/opt/Xilinx/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules
+  * Install modules:
+  > make ARCH=arm CROSS_COMPILE=/opt/Xilinx/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules_install
 
-A terminal software is required to interact with the device via a serial interface.
-It will provide console access (keyboard input, text output) to the system.
+![](\ref zynq/compile_install.png)
 
-Minicom is an Open Source terminal software. It is available for Debian and Ubuntu users
-via apt-get:
+# Steps to build the Hardware for the Zynq Hybrid design {#sect_zynq_build_hardware}
 
-    > sudo apt-get install minicom
+- Change the path to Xilinx Vivado directory:
+  > cd /opt/Xilinx/Vivado/2016.2/bin
+- Open Vivado TCL console 2016.2:
+  > ./vivado -mode tcl
 
-TeraTerm is a program for printing out text which is transmitted over a serial
-interface. It is open source and can be downloaded from: http://ttssh2.sourceforge.jp/
+![](\ref zynq/vivado_tcl_console.png)
 
-### Linux Kernel
+- Execute the below commands:
 
-A Linux kernel for the Zynq platform is required in order to run openPOWERLINK
-on Linux. The Linux port for the Zynq platform is available at Github
-and can be downloaded or cloned from: https://github.com/Xilinx/linux-xlnx
+      > xsct
+      > vivado -mode tcl
+      > vivado -mode batch
 
-Linux kernel version 4.4.0 tagged as xilinx-v2016.2 at Github was used for testing at
-the time of writing this document.
+![](\ref zynq/SDK_environment_path.png)
 
-The steps to cross-compile Linux for Zynq and information about availability of other
-libraries for Zynq can be found here: http://www.wiki.xilinx.com/Zynq+Linux.
+- Change directory:
+  > cd <openPOWERLINK_Dir>/hardware/build/xilinx-microblaze
 
-### RT Preempt patch
+- Execute the command:
+  > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../..
 
-Download Preempt RT version 4.4.rt2 for the Xilinx-linux from
-https://www.kernel.org/pub/linux/kernel/projects/rt/4.4/older/patch-4.4-rt2.patch.gz
+- Execute the command:
+  > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
 
-Apply the patch using the following command:
+![](\ref zynq/configure_cmake.png)
 
-    > patch -p1 < <(gunzip -c /path/to/patch-4.4-rt2.patch.gz)
+- Execute the command:
+  > make install
 
-# Linux on Zynq ARM {#sect_zynq_linux}
+![](\ref zynq/hardware_build.png)
+
+- Repeat the above steps to build in **Release** mode
+
+![](\ref zynq/hardware_build_release.png)
+
+- Execute the command:
+  > make install
+
+![](\ref zynq/hardware_build_release_install.png)
+
+# Steps to build the PCP {#sect_zynq_build_pcp}
+
+This section describes the steps to be carried out on the Linux PC to compile and build the PCP for the Zynq Hybrid design.
+
+## Steps to build the driver library for Microblaze {#sect_build_driver_lib_for_MB}
+- Change directory:
+  > cd <openPOWERLINK_Dir>/stack/build/xilinx-microblaze
+- Execute the command:
+  > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_MNDRV_DUALPROCSHM=ON
+
+![](\ref zynq/configure_mb_debug.png)
+
+- Execute the command:
+  > make install
+
+![](\ref zynq/configure_mb_debug_install.png)
+
+- Repeat the above steps to build in **Release** mode
+
+![](\ref zynq/configure_mb_release.png)
+
+- Execute the command:
+  > make install
+
+![](\ref zynq/configure_mb_release_install.png)
+
+## Steps to the build driver application for Microblaze {#sect_build_driver_app_for_MB}
+
+- Change directory:
+  > cd <openPOWERLINK_Dir>/drivers/xilinx-microblaze/drv_daemon/build
+- Execute the command:
+  > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK=PCP\ Daemon\ Dual-Proc -DCFG_HW_LIB=xilinx-z702/mn-dual-shmem-gpio ..
+
+![](\ref zynq/config_driver_app.png)
+
+- Execute the command:
+  > make install
+
+![](\ref zynq/build_driver_app.png)
+
+- Exit from Vivado TCL console.
+
+# Generate FSBL {#sect_zynq_generate_FSBL}
+
+- Change directory:
+  > cd /opt/Xilinx/SDK/2016.2/bin
+- Execute the command:
+  > sudo ./xsdk
+
+![](\ref zynq/create_workspace_in_sdk.png)
+
+- Select an existing workspace or create a new workspace.
+- Click File->New->Application project.
+- Create new application project and give a project name.
+- Click on **New** under target Hardware.
+
+![](\ref zynq/new_application_project.png)
+
+- Browse the hardware file path <openPOWERLINK_Dir>/hardware/lib/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio/hw_platform/system.hdf.
+
+- Click **Finish** to proceed.
+
+![](\ref zynq/select_hardware_platform.png)
+
+- Ensure that the OS platform is **standalone** and the processor is **ps7_cortexa9** in the application project window.
+- Clik **Next** to proceed.
+
+![](\ref zynq/select_processor_target_hw_platform.png)
+
+- Select **Zynq FSBL** and click **Finish**.
+
+![](\ref zynq/generate_Zynq_FSBL.png)
+
+- **fsbl.elf** is generated in the debug folder of the Xilinx SDK workspace.
+- Exit from SDK workspace.
+
+# Generate BOOT.bin {#sect_zynq_generate_boot_bin}
+
+- Open terminal and change directory:
+  > cd <openPOWERLINK_Dir>/tools/xilinx-zynqvivado
+- Copy all the required binaries to the <openPOWERLINK_Dir>/tools/xilinx-zynqvivado folder.
+- Files required for creating boot.bin:
+  * fsbl.elf  (from <Xilinx_SDK_workspace>/<project_name>/Debug/)
+  * download.bit (from <openPOWERLINK_Dir>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio)
+  * u-boot.elf (from Zynq-z702 package http://www.wiki.xilinx.com/Zynq+2016.2+Release)
+  * oplkdrv-daemon_o.elf (from <openPOWERLINK_Dir>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio)
+- Execute the command:
+  > /opt/Xilinx/SDK/2016.2/bin/bootgen -image bootimage.bif -o i boot.bin
+
+![](\ref zynq/generate_boot_dot_bin.png)
+
+# Generate device tree blob {#sect_generate_device_tree_blob}
+
+- In terminal, change directory to the device tree source path using the following command.
+  > cd <openPOWERLINK_Dir>/hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/handoff/
+
+- DTC is part of the Linux source directory. linux-xlnx/scripts/dtc/ contains the source code for DTC and needs to be compiled in order to be used.
+- Build the DTS using the following command
+  > <Xilinx_Linux_directory>/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb system.dts
+
+![](\ref zynq/generate_device_tree_blob.png)
+
+# Steps for cross-compiling the openPOWERLINK Linux MN for the Zynq Hybrid design {#sect_zynq_cross_compile}
+
+This section describes the set of steps to cross compile the openPOWERLINK Linux MN Zynq-Zc702 for the Zynq Hybrid design.
+
+- Set the Xilinx Vivado environment by executing the following command:
+  > source /opt/Xilinx/Vivado/2016.2/settings64.sh
+
+- Open cmake-gui
+
+![](\ref zynq/set_Xilinx_Vivado_environment.png)
+
+## To compile the stack libraries:
+- Point the **Where is the source code** to the stack source folder
+  <openPOWERLINK_Dir>/stack.
+- Point the **Where to build the binaries** to the stack build folder
+  <openPOWERLINK_Dir>/stack/build/linux.
+- Click the **Configure** button
+- In **Specify the Generator for this project** dialog box, select **Unix Makefiles** generator and select **Specify toolchain file for cross-compiling** and click **Next**.
+
+![](\ref zynq/specify_generator_for_the_project.png)
+
+- Provide the path for **Specify the Toolchain file** as below, <openPOWERLINK_Dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake.
+
+![](\ref zynq/toolchain_file_for_cross_compilation.png)
+
+- Select the CFG_COMPILE_LIB_MNAPP_ZYNQINTF to build MN library.
+
+![](\ref zynq/specify_compiler_lib_Zynq_MN.png)
+
+- Click **Configure** to apply the settings and click **Generate** to create makefile with the modified configuration.
+- Change directory to the stack build path
+  > cd <openPOWERLINK_Dir>/stack/build/linux
+- Use following command to compile the stack
+  > make install
+
+![](\ref zynq/build_stack_lib_for_Zynq_ARM.png)
+
+- Repeat the above steps to build in Release mode.
+
+![](\ref zynq/config_stack_lib_release_mode.png)
+
+- Execute the command:
+  > make install
+
+![](\ref zynq/build_stack_lib_for_Zynq_ARM_release.png)
+
+## To compile the driver libraries:
+- Provide the **Where is the source code** to the driver source folder
+  - <openPOWERLINK_Dir>/drivers/linux/drv_kernelmod_zynq>
+- Provide the **Where to build the binaries** to the driver build folder
+  - <openPOWERLINK_Dir>/drivers/linux/drv_kernelmod_zynq/build>
+- In **Specify the Generator for this project** dialog box, select **Unix Makefiles** generator and **Specify toolchain file for cross-compiling** as shown in the above *compile stack library* section.
+- Provide the path for **Specify the Toolchain file** as below,
+  - <openPOWERLINK_Dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake
+
+![](\ref zynq/toolchain_file_for_driver_build.png)
+
+- Set CFG_KERNEL_DIR to path where xilinx-linux package is placed.
+
+![](\ref zynq/kernerl_directory_for_driver_build.png)
+
+- Select **Configure** to apply the settings and click **Generate** to create makefile with the modified configuration.
+- Change directory to application build path,
+  > cd <openPOWERLINK_Dir>/drivers/linux/derv_kernelmod_zynq/build
+- Use following command to compile the stack
+  > make install
+
+![](\ref zynq/build_driver_zynq_arm.png)
+
+## To compile the application libraries:
+- Provide  the **Where to build the binaries** to the application build folder
+  - <openPOWERLINK_Dir>/apps/demo_mn_console/
+- Provide the **Where to build the binaries** to the application build folder
+  - <openPOWERLINK_Dir>/apps/demo_mn_console/ build/linux
+- In **Specify the Generator for this project** dialog box, select **Unix Makefiles** generator and **Specify toolchain file for cross-compiling** as shown in the *compile stack library* section.
+
+![](\ref zynq/specify_toolchain_for_demo_application.png)
+
+- Provide the path for **Specify the Toolchain file** as below,
+  - <openPOWERLINK_Dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake.
+- Set CFG_BUILD_KERNEL_STACK to **Kernel stack on Zynq PCP**.
+
+![](\ref zynq/config_kernel_stack_as_Zynq_PCP.png)
+
+- Select **Configure** to apply the settings and click **Generate** to create makefile with changed configuration.
+- Change directory to the application build path,
+  > cd <openPOWERLINK_Dir>/apps/demo_mn_console/build/linux
+- Use following command to compile the application.
+  > make install
+
+![](\ref zynq/build_demo_app.png)
+
+# Steps to execute the openPOWERLINK Linux MN demo application on Zynq-Zc702 {#sect_zynq_execute_demo}
+
+This section describes the steps to run the openPOWERLINK Linux MN demo on Zynq ZC702 development board.
+
+- Refer the below link to convert the SD card as bootable medium for Zynq,
+  * http://www.wiki.xilinx.com/Prepare+Boot+Medium
+- Refer the below link to download the Zynq-Zc702 2016.2 pre built Linux binaries (Assuming cross compilation for the Linux is done using Xilinx Vivado 2016.2 toolchain).
+  * http://www.wiki.xilinx.com/Zynq+2016.2+Release
+- Extract and copy the following content from the downloaded folder to the boot partition of SD card.
+  * uramdisk.image.gz
+  * devicetree.dtb
+  * BOOT.bin
+  * openPOWERLINK driver and application binaries from
+    - <openPOWERLINK_Dir>/bin/oplkdrv_kernelmodule_zynq
+    - <openPOWERLINK_Dir>/bin/demo_mn_console
+  * Replace the existing uImage with the cross compiled uImage from
+    - <Xilinx_Linux_directory>/arch/arm/boot
+- Hardware setup
+  * Connect the Avnet expander board to J3fmc1 connector of the Zynq - ZC702 board.
+  * Now connect the Ethernet cable to any of the Ethernet ports J6/J2 of the Avnet extension board and to the slave of the network.
+- To run the openPOWERLINK
+  * Insert the SD card into the Zynq702 board.
+  * Connect USB UART port in the Zynq-Zc702 board with the Linux PC.
+  * From the terminal, run minicom
+  > sudo minicom -s
+
+![](\ref zynq/open_minicom_terminal.png)
+
+  * Go to serial port setup
+
+![](\ref zynq/select_serial_port.png)
+
+  * Change the serial device as per the USB name (/dev/ttyUSB0)
+  * Keep the hardware flow control settings as **NO**
+
+![](\ref zynq/config_serial_port.png)
+
+  * Save setup as dfl and exit.
+
+![](\ref zynq/save_serial_port_config.png)
+
+ * Once the autoboot finishes, enter the user-name as **root**
+ * Mount the sd card using the following command
+ > mount /dev/mmcblk0p1 /mnt/
+ * Change directory
+ > cd /mnt/oplkdrv_kernelmodule_zynq/
+ * Insert the driver module using the below command:
+ > insmod oplkmnzynqintf.ko
+ * Change the directory
+ > cd /mnt/demo_mn_console
+ * Run the openOWERLINK MN demo using the below command:
+ > ./demo_mn_console
+
+# Linux on Zynq ARM {#sect_linux_zynq_ARM}
 
 On the Zynq SoC, openPOWERLINK runs on a Linux OS which is running on the
 ARM Cortex A9 processing system (PS) of the SoC. The following section contains
@@ -147,163 +438,3 @@ steps for this section. The following build steps are valid for Linux on Zynq AR
 * [Build Linux PCAP User Space Daemon](\ref sect_build_drivers_build_linux_pcap)
 * [BUild Linux Edrv Kernel Driver](\ref sect_build_drivers_build_linux_edrv)
 * [Build your application (or a delivered demo application)](\ref sect_build_demos_build_linux)
-
-# Zynq Hybrid Design {#sect_zynq_hybrid}
-
-openPOWERLINK can also run on a Zynq SoC with Linux operating system. In this case
-the time-critical kernel part of the stack is running on a Microblaze softcore
-processor in the programming logic (PL) of the Zynq SoC. The application part of the
-stack is running on Linux on both ARM cores of the processing system (PS) of the SoC. The
-communication between the ARM and Microblaze is using a Linux kernel driver
-implementation that employs DDR3 shared memory along with interrupts. The following
-section contains additional information about the Zynq hybrid design implementation
-of openPOWERLINK.
-
-## Contents {#sect_zynq_hybrid_contents}
-
-This section lists the components which are included to support Zynq hybrid systems on the Zynq SoC:
-
-* FPGA design with Microblaze CPU and openMAC IP-Core
-* Dual processor shared memory library
-* Zynq first stage bootloader (FSBL)
-
-## openPOWERLINK Stack Componenets {#sect_zynq_hybrid_components}
-
-The following section contains the description of the [openPOWERLINK components](\ref page_components)
-available on a Zynq SoC Hybrid Design.
-
-### Stack libraries {#sect_zynq_hybrid_components_libs}
-
-The openPOWERLINK stack is divided into a user and a kernel part. The application,
-running on Zynq ARM, is linked to an application library which uses a dual processor shared
-memory library to communicate with the kernel driver. This driver is linked with the driver
-library which uses openMAC to interface to the network. It uses the dual processor shared memory
-library to communicate with the user application library via the DDR3 shared memory.
-
-The following libraries are available for the FPGA based Zynq hybrid Design:
-
-- `stack/proj/generic/liboplkmnapp-kernelpcp` (liboplkmnapp-kernelpcp.a)
-- `stack/proj/generic/liboplkmndrv-dualprocshm` (liboplkmndrv-dualprocshm.a)
-
-### Demo Applications {#sect_zynq_hybrid_components_apps}
-
-The following demos are supported for the FPGA based Hybrid system on the Zynq SoC:
-
-* [demo_mn_console](\ref sect_components_demo_mn_console)
-
-### Drivers {#sect_zynq_hybrid_components_drivers}
-
-The following drivers are supported for FPGA based Hybrid system on Zynq SoC:
-
-* **PCP Daemon on Microblaze**
-
-The openPOWERLINK kernel part is compiled as a library which is linked to a
-daemon. This daemon is running on a Microblaze softcore processor working as the
-POWERLINK Communication Processor (PCP). Shared memory is used as the communication
-interface between the PCP and the host processor. The PCP is responsible for
-carrying out time critical processing to achieve higher performance by reducing
-the jitter.
-
-The driver is located in: `drivers/xilinx-microblaze/drv_daemon`
-
-## Building {#sect_zynq_hybrid_build}
-
-For building openPOWERLINK for FPGA based Hybrid Design on Zynq SoC, refer to the generic build instructions
-and execute all required build steps from this section.
-
-__NOTE__: For building the Zynq Hybrid demo the pre-built Linux image for the ZC702 is required.
-          Download it from: http://www.wiki.xilinx.com/Zynq+2016.2+Release
-
-The following build steps can be carried out:
-
-* [Build the hardware platform](\ref page_build_hardware)
-* [Build the openPOWERLINK stack libraries](\ref page_build_stack)
-* [Build the driver](\ref page_build_drivers)
-* [Build your application](\ref page_build_demos)
-* [Build boot loader](\ref sect_zynq_hybrid_build_fsbl)
-* [Generate device tree](\ref sect_generate_device_tree_blob)
-* [Generate boot.bin](\ref sect_zynq_hybrid_generate_boot_bin)
-* [Generate uImage](\ref sect_generate_uimage)
-
-### Build FSBL {#sect_zynq_hybrid_build_fsbl}
-
-To generate the fsbl from SDK for the Vivado hardware the following steps need to be done:
-
-* Create new application project and set the name to fsbl
-* Ask for hardware path and get file from `<OPLK>/hardware/lib/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio/hw_platform/system.hdf`
-* Generate fsbl application and copy the fsbl.elf into bin for generating BOOT.bin
-
-__NOTE__: Alternatively, the fsbl.elf file supplied with the pre-built Linux ZC702 image from the prior step can be used.
-
-### Generate BOOT.bin {#sect_zynq_hybrid_generate_boot_bin}
-
-In order to generate the BOOT.bin file the following files are required:
-
-- fsbl.elf (First stage bootloader)
-- u-boot.elf (For booting Linux Kernel on ARM, obtain from pre-built Linux image for the ZC702)
-- download.bit (Bitstream to configure PL)
-- oplkdrv-daemon_o.elf (ELF for Microblaze softcore processor in PL)
-
-Run the following steps to generate the BOOT.bin. Note that the driver daemon for Microblaze
-should be compiled and installed into `<OPLK>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio`!
-
-    > cd <OPLK>/bin/generic/microblaze/xilinx-z702/mn-dual-shmem-gpio
-    > cp <OPLK>/tools/xilinx-zynqvivado/bootimage.bif .
-    > cp /path/to/fsbl.elf .
-    > cp /path/to/u-boot.elf .
-    > bootgen -image bootimage.big -o BOOT.bin
-
-### Generate device tree blob {#sect_generate_device_tree_blob}
-
-The device tree blob is generated by using DTC, which is part of the Linux kernel sources. The required
-handoff files are provided in the hardware design path: `<OPLK>/hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/handoff`
-
-Run the following steps to generate the device tree blob:
-
-    > cd <OPLK>/hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/handoff
-    > <XILINX_LINUX_DIR>/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb system.dts
-
-
-### Generate an uncompressed kernel image {#sect_generate_uimage}
-
-To create the uImage file needed for booting the Zynq board execute the following commands:
-
-    > cd <XILINX_LINUX_DIR>
-    > make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage CROSS_COMPILE=<XILINX_VIVADO_DIR>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linuxgnueabihf-
-
-## Running openPOWERLINK  {#sect_zynq_hybrid_running}
-
-### MN console demo
-
-The MN console demo can be started on the Zynq board using the SD card boot mode.
-Follow the steps below to start the MN demo on the board:
-
-- Copy the following contents to the SD card to run the demo:
-
-   - uramdisk.image.gz (from pre-built Linux image for the ZC702)
-   - devicetree.dtb (generated in \ref sect_generate_device_tree_blob)
-   - BOOT.bin (generated in \ref sect_zynq_hybrid_generate_boot_bin)
-   - uImage (from `<XILINX_LINUX_DIR>/arch/arm/boot`)
-   - openPOWERLINK driver and application binaries from
-     - `<OPLK>/bin/linux/arm/oplkdrv_kernelmodule_zynq`
-     - `<OPLK>/bin/linux/arm/demo_mn_console`
-
-- Insert the SD card in the Zynq702 board
-- Connect USB UART port of the ZC702 board with Linux PC
-- Start minicom from the shell (sudo minicom -s)
-- Go to the serial port setup
-- Change the serial device to the USB device (/dev/ttyUSB0)
-- Set the hardware flow control settings to *NO*
-- Save setup as dfl and exit
-- Once autoboot finishes enter the user-name as *root*
-- Mount the SD card using the following command:
-
-    > mount /dev/mmcblk0p1 /mnt
-
-- Change directory to /mnt/oplkdrv_kernelmodule_zynq
-
-    > insmod oplkmnzynqintf.ko
-
-- Change directory to /mnt/demo_mn_console
-
-    > ./demo_mn_console
