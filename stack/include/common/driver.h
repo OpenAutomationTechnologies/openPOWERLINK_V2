@@ -121,6 +121,20 @@ typedef struct
     UINT32                  size;           ///< Size of the shared memory
 } tMemStruc;
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+/**
+\brief SoC memory structure
+
+The structure is used to retrieve the SoC memory allocated by openPOWERLINK
+kernel stack and mapped into user virtual address space.
+*/
+typedef struct
+{
+    size_t                  socMemSize;     ///< Size of SoC memory to be allocated and mapped
+    size_t                  socMemOffset;   ///< Offset of SoC memory returned by the kernel
+} tSocMem;
+#endif
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
