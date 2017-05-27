@@ -68,7 +68,6 @@ SET(DEMO_SOURCES
     ${COMMON_SOURCE_DIR}/eventlog/eventlog.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
-    ${CONTRIB_SOURCE_DIR}/getopt/getopt.c
     ${FIRMWARE_MANAGER_SOURCES}
     )
 

@@ -41,6 +41,7 @@ SET (DEMO_ARCH_SOURCES
      ${COMMON_SOURCE_DIR}/system/system-windows.c
      ${CONTRIB_SOURCE_DIR}/console/console-windows.c
      ${CONTRIB_SOURCE_DIR}/trace/trace-windows.c
+     ${CONTRIB_SOURCE_DIR}/getopt/getopt.c
      )
 
 INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
