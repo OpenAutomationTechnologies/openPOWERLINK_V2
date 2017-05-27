@@ -50,7 +50,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <system/system.h>
 #include <obdcreate/obdcreate.h>
+
+#if (TARGET_SYSTEM == _WIN32_)
 #include <getopt/getopt.h>
+#else
+#include <unistd.h>
+#endif
+
 #include <console/console.h>
 #include <eventlog/eventlog.h>
 #include <firmwaremanager/firmwaremanager.h>

@@ -61,7 +61,6 @@ SET(DEMO_SOURCES
     ${COMMON_SOURCE_DIR}/eventlog/eventlog.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
-    ${CONTRIB_SOURCE_DIR}/getopt/getopt.c
     )
 
 INCLUDE_DIRECTORIES(
@@ -114,6 +113,7 @@ ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
 IF(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     include(linux.cmake)
 ELSEIF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    SET(DEMO_SOURCES ${DEMO_SOURCES} ${CONTRIB_SOURCE_DIR}/getopt/getopt.c)
     include (windows.cmake)
 ELSE()
     MESSAGE(FATAL_ERROR "System ${CMAKE_SYSTEM_NAME} is not supported!")

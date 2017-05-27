@@ -46,8 +46,28 @@ SET (DEMO_ARCH_SOURCES
 ################################################################################
 # Set architecture specific libraries
 
+IF (NOT CFG_COMPILE_SHARED_LIBRARY)
+    SET(PCAP_CONFIG_OPTS --static)
+ENDIF()
+
 IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
+
+find_program(PCAP_CONFIG  NAMES pcap-config PATHS)
+
+if (PCAP_CONFIG)
+    message (STATUS "Looking for pcap-config... ${PCAP_CONFIG}")
+
+    execute_process (COMMAND ${PCAP_CONFIG} --libs ${PCAP_CONFIG_OPTS}
+        OUTPUT_VARIABLE PCAP_LDFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process (COMMAND ${PCAP_CONFIG} --cflags ${PCAP_CONFIG_OPTS}
+        OUTPUT_VARIABLE PCAP_CFLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+   SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} ${PCAP_LDFLAGS})
+else (PCAP_CONFIG)
+    message (STATUS "pcap-config not found, using defaults...")
     SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pcap)
+endif (PCAP_CONFIG)
+
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 SET (ARCH_LIBRARIES ${ARCH_LIBRARIES} pthread rt)
 
