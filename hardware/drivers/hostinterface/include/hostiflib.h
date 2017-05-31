@@ -11,7 +11,7 @@ The hostiflib provides several features like queues and linear memory modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -146,6 +146,7 @@ typedef enum eHostifInstanceId
     kHostifInstIdK2UQueue,                          ///< K2U Queue
     kHostifInstIdU2KQueue,                          ///< U2K Queue
     kHostifInstIdPdo,                               ///< Pdo
+    kHostifInstIdTimesync,                          ///< Timesync
     kHostifInstIdLast,                              ///< last instance id
     kHostifInstIdInvalid = -1                       ///< Invalid instance id
 } tHostifInstanceId;
