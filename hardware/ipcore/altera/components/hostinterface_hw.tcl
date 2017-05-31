@@ -223,6 +223,15 @@ set_parameter_property  gBasePdo            AFFECTS_ELABORATION FALSE
 set_parameter_property  gBasePdo            VISIBLE             FALSE
 set_parameter_property  gBasePdo            DISPLAY_HINT        "HEXADECIMAL"
 
+add_parameter           gBaseTimeSync       NATURAL             1024
+set_parameter_property  gBaseTimeSync       DEFAULT_VALUE       1024
+set_parameter_property  gBaseTimeSync       TYPE                NATURAL
+set_parameter_property  gBaseTimeSync       DERIVED             TRUE
+set_parameter_property  gBaseTimeSync       HDL_PARAMETER       TRUE
+set_parameter_property  gBaseTimeSync       AFFECTS_ELABORATION FALSE
+set_parameter_property  gBaseTimeSync       VISIBLE             FALSE
+set_parameter_property  gBaseTimeSync       DISPLAY_HINT        "HEXADECIMAL"
+
 add_parameter           gBaseRes            NATURAL             81920
 set_parameter_property  gBaseRes            DEFAULT_VALUE       81920
 set_parameter_property  gBaseRes            TYPE                NATURAL
@@ -356,6 +365,13 @@ set_parameter_property  gui_sizePdo         UNITS               "Bytes"
 set_parameter_property  gui_sizePdo         DESCRIPTION         "The PDO buffer is used to exchange input and
                                                                 output process data."
 
+add_parameter           gui_sizeTimesync    NATURAL             1024
+set_parameter_property  gui_sizeTimesync    DEFAULT_VALUE       1024
+set_parameter_property  gui_sizeTimesync    TYPE                NATURAL
+set_parameter_property  gui_sizeTimesync    DISPLAY_NAME        "Time synchronization buffer (Timesync)"
+set_parameter_property  gui_sizeTimesync    UNITS               "Bytes"
+set_parameter_property  gui_sizeTimesync    DESCRIPTION         "The Timesync buffer is used to exchange timing information."
+
 add_parameter           gui_sizeTotal       NATURAL             49152
 set_parameter_property  gui_sizeTotal       DEFAULT_VALUE       49152
 set_parameter_property  gui_sizeTotal       TYPE                NATURAL
@@ -383,6 +399,7 @@ add_display_item        "Buffer Configuration" "Others"         GROUP
 add_display_item        "Others"            gui_sizeDynBuf0     PARAMETER
 add_display_item        "Others"            gui_sizeDynBuf1     PARAMETER
 add_display_item        "Others"            gui_sizeErrorCnter  PARAMETER
+add_display_item        "Others"            gui_sizeTimesync    PARAMETER
 add_display_item        "Queues"            gui_sizeTxNmtQ      PARAMETER
 add_display_item        "Queues"            gui_sizeTxGenQ      PARAMETER
 add_display_item        "Queues"            gui_sizeTxSyncQ     PARAMETER
@@ -435,12 +452,12 @@ proc generate_version {} {
 }
 
 proc generate_memory_mapping {} {
-    set listSizeGuiParam [list "gui_sizeDynBuf0" "gui_sizeDynBuf1" "gui_sizeErrorCnter" "gui_sizeTxNmtQ" "gui_sizeTxGenQ" "gui_sizeTxSyncQ" "gui_sizeTxVethQ" "gui_sizeRxVethQ" "gui_sizeK2UQ" "gui_sizeU2KQ" "gui_sizePdo"]
+    set listSizeGuiParam [list "gui_sizeDynBuf0" "gui_sizeDynBuf1" "gui_sizeErrorCnter" "gui_sizeTxNmtQ" "gui_sizeTxGenQ" "gui_sizeTxSyncQ" "gui_sizeTxVethQ" "gui_sizeRxVethQ" "gui_sizeK2UQ" "gui_sizeU2KQ" "gui_sizePdo" "gui_sizeTimesync"]
     set queueHeaderSize 16
-    set listSizeGuiHeaders [list 0 0 0 $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize 0]
-    set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE_TXNMTQ" "SIZE_TXGENQ" "SIZE_TXSYNCQ" "SIZE_TXVETHQ" "SIZE_RXVETHQ" "SIZE_K2UQ" "SIZE_U2KQ" "SIZE_PDO"]
-    set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_PDO"]
-    set listBaseParam [list "gBaseDynBuf0" "gBaseDynBuf1" "gBaseErrCntr" "gBaseTxNmtQ" "gBaseTxGenQ" "gBaseTxSynQ" "gBaseTxVetQ" "gBaseRxVetQ" "gBaseK2UQ" "gBaseU2KQ" "gBasePdo" "gBaseRes"]
+    set listSizeGuiHeaders [list 0 0 0 $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize $queueHeaderSize 0 0]
+    set listSizeCmacro [list "SIZE_DYNBUF0" "SIZE_DYNBUF1" "SIZE_ERRORCOUNTER" "SIZE_TXNMTQ" "SIZE_TXGENQ" "SIZE_TXSYNCQ" "SIZE_TXVETHQ" "SIZE_RXVETHQ" "SIZE_K2UQ" "SIZE_U2KQ" "SIZE_PDO" "SIZE_TIMESYNC"]
+    set listBaseCmacro [list "BASE_DYNBUF0" "BASE_DYNBUF1" "BASE_ERRORCOUNTER" "BASE_TXNMTQ" "BASE_TXGENQ" "BASE_TXSYNCQ" "BASE_TXVETHQ" "BASE_RXVETHQ" "BASE_K2UQ" "BASE_U2KQ" "BASE_PDO" "BASE_TIMESYNC"]
+    set listBaseParam [list "gBaseDynBuf0" "gBaseDynBuf1" "gBaseErrCntr" "gBaseTxNmtQ" "gBaseTxGenQ" "gBaseTxSynQ" "gBaseTxVetQ" "gBaseRxVetQ" "gBaseK2UQ" "gBaseU2KQ" "gBasePdo" "gBaseTimeSync" "gBaseRes"]
     set statusControlBase 0
     set statusControlSize 2048
     set memorySpanKb 128

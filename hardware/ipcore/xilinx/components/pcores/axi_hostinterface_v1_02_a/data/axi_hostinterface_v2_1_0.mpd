@@ -111,7 +111,8 @@ PARAMETER gBaseRxVetQ   = 0x06800,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = ca
 PARAMETER gBaseK2UQ     = 0x07000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_K2UQ
 PARAMETER gBaseU2KQ     = 0x09000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_U2KQ
 PARAMETER gBasePdo      = 0x0B000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Pdo
-PARAMETER gBaseRes      = 0x0E000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Res
+PARAMETER gBaseTimeSync = 0x0E000,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Timesync
+PARAMETER gBaseRes      = 0x0E400,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_baseadr_Res
 
 ###############################################################################
 ## Other Parameters that Used In GUI
@@ -129,6 +130,7 @@ PARAMETER Size_KB_RxVetQ        = 1,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64
 PARAMETER Size_KB_K2UQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
 PARAMETER Size_KB_U2KQ          = 8,     DT = INTEGER, RANGE = (1,2,4,8,16,32,64), TYPE = NON_HDL
 PARAMETER Size_B_Pdo            = 12288, DT = INTEGER, TYPE = NON_HDL
+PARAMETER Size_B_Timesync       = 1024,  DT = INTEGER, RANGE = (1024), TYPE = NON_HDL
 ###############################################################################
 PARAMETER Conv_Size_KB_DynBuf0      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0, TYPE = NON_HDL
 PARAMETER Conv_Size_KB_DynBuf1      = 2,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_dbuf0, TYPE = NON_HDL
@@ -141,6 +143,7 @@ PARAMETER Conv_Size_KB_RxVetQ       = 1,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_
 PARAMETER Conv_Size_KB_K2UQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_K2UQ, TYPE = NON_HDL
 PARAMETER Conv_Size_KB_U2KQ         = 8,     DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_U2KQ, TYPE = NON_HDL
 PARAMETER Conv_Size_B_Pdo           = 12288, DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Pdo, TYPE = NON_HDL
+PARAMETER Conv_Size_B_Timesync      = 1024,  DT = INTEGER, IPLEVEL_UPDATE_VALUE_PROC = calc_size_Timesync, TYPE = NON_HDL
 ###############################################################################
 ## Ports
 ## Host Interface IP PCP Ports

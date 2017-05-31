@@ -82,8 +82,10 @@ entity alteraHostInterface is
         gBaseU2KQ           : natural := 16#09000#;
         --! Base address Tpdo
         gBasePdo            : natural := 16#0B000#;
-        --! Base address Reserved (-1 = high address of Pdo)
-        gBaseRes            : natural := 16#0E000#;
+        --! Base address Timesync
+        gBaseTimeSync       : natural := 16#0E000#;
+        --! Base address Reserved (-1 = high address of Timesync)
+        gBaseRes            : natural := 16#0E400#;
         --! Host address width
         gHostAddrWidth      : natural := 16
     );
@@ -170,6 +172,7 @@ begin
         gBaseK2UQ              => gBaseK2UQ,
         gBaseU2KQ              => gBaseU2KQ,
         gBasePdo               => gBasePdo,
+        gBaseTimeSync          => gBaseTimeSync,
         gBaseRes               => gBaseRes,
         gHostAddrWidth         => gHostAddrWidth
     )

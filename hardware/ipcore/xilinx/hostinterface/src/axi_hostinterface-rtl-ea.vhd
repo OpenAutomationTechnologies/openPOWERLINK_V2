@@ -113,8 +113,10 @@ entity axi_hostinterface is
         gBaseU2KQ                   : natural               := 16#09000#;
         --! Host Interface Base address Pdo
         gBasePdo                    : natural               := 16#0B000#;
-        --! Host Interface Base address Reserved (-1 = high address of Rpdo)
-        gBaseRes                    : natural               := 16#0E000#;
+        --! Base address Timesync
+        gBaseTimeSync               : natural               := 16#0E000#;
+        --! Host Interface Base address Reserved (-1 = high address of Timesync)
+        gBaseRes                    : natural               := 16#0E400#;
         --! Select Host Interface Type (0 = Avalon, 1 = Parallel)
         gHostIfType                 : natural               := 0;
         --! Data width of parallel interface (16/32)
@@ -431,6 +433,7 @@ begin
         gBaseK2UQ               => gBaseK2UQ,
         gBaseU2KQ               => gBaseU2KQ,
         gBasePdo                => gBasePdo,
+        gBaseTimeSync           => gBaseTimeSync,
         gBaseRes                => gBaseRes,
         --FIXME: Assign address width depending on memory span!
         gHostAddrWidth          => host_address'left+1
