@@ -10,6 +10,7 @@ This file contains the definitions for the target modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,6 +89,11 @@ int        target_unlock(void);
 /* function for LED */
 tOplkError target_setLed(tLedType ledType_p,
                          BOOL fLedOn_p);
+
+/* function to get current system time */
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+tOplkError target_getSystemTime(UINT32* pNsec_p, UINT32* pSec_p);
+#endif
 
 #ifdef __cplusplus
 }
