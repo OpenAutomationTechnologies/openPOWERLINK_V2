@@ -44,7 +44,6 @@
 # Insert local packages.
 source "../../common/util/tcl/ipcoreUtil.tcl"
 source "../../altera/components/tcl/qsysUtil.tcl"
-source "../../common/openmac/tcl/openmac.tcl"
 
 # Use QSYS version 12.0
 package require -exact qsys 12.0
