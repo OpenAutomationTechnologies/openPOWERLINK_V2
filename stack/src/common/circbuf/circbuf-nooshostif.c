@@ -18,7 +18,7 @@ implementation is applied.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -252,7 +252,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
             return kCircBufNoResource;
         }
 
-        pInstance_p->pCircBuf = ((BYTE*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
+        pInstance_p->pCircBuf = (UINT8*)pInstance_p->pCircBufHeader + sizeof(tCircBufHeader);
 
         // Return buffer size: pSize_p already holds the right value!
     }
@@ -445,8 +445,8 @@ void circbuf_unlock(tCircBufInstance* pInstance_p)
     if (pInstance_p->pCircBufArchInstance != NULL)
     {
         tCircBufHostiBuffer* pHostifBuf = GET_QUEUE_BUF_BASE(pInstance_p->pCircBufHeader);
-        tCircBufHostifLock*     pLock = &pHostifBuf->lock;
-        UINT8                   local = CIRCBUF_HOSTIF_LOCK_LOCAL;
+        tCircBufHostifLock*  pLock = &pHostifBuf->lock;
+        UINT8                local = CIRCBUF_HOSTIF_LOCK_LOCAL;
 
         OPLK_IO_WR8(&pLock->afFlag[local], 0);
         OPLK_DCACHE_FLUSH(&pLock->afFlag[local], sizeof(pLock->afFlag[local]));

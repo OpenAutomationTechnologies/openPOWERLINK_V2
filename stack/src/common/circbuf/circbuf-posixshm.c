@@ -11,7 +11,7 @@ using posix shared memory and BSD semaphores for locking.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -131,7 +131,7 @@ tCircBufInstance* circbuf_createInstance(UINT8 id_p, BOOL fNew_p)
     }
 
     OPLK_MEMSET(pInstance, 0, sizeof(tCircBufInstance) + sizeof(tCircBufArchInstance));
-    pInstance->pCircBufArchInstance = (BYTE*)pInstance + sizeof(tCircBufInstance);
+    pInstance->pCircBufArchInstance = (UINT8*)pInstance + sizeof(tCircBufInstance);
     pInstance->bufferId = id_p;
 
     pArch = (tCircBufArchInstance*)pInstance->pCircBufArchInstance;
@@ -205,7 +205,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
     sprintf(shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
-    pageSize = (sizeof(tCircBufHeader) + sysconf(_SC_PAGE_SIZE) - 1) & (~(sysconf(_SC_PAGE_SIZE) - 1));
+    pageSize = (sizeof(tCircBufHeader) + (size_t)sysconf(_SC_PAGE_SIZE) - 1) & (~((size_t)sysconf(_SC_PAGE_SIZE) - 1));
     size = *pSize_p + pageSize;
 
     if ((pArch->fd = shm_open(shmName, O_RDWR | O_CREAT, 0)) < 0)
@@ -297,7 +297,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     // Check parameter validity
     ASSERT(pInstance_p != NULL);
 
-    pageSize = sysconf(_SC_PAGE_SIZE);
+    pageSize = (size_t)sysconf(_SC_PAGE_SIZE);
     pArch = (tCircBufArchInstance*)pInstance_p->pCircBufArchInstance;
 
     sprintf(shmName, "/shmCircbuf-%d", pInstance_p->bufferId);
@@ -314,7 +314,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
         return kCircBufNoResource;
     }
 
-    size = pInstance_p->pCircBufHeader->bufferSize;
+    size = (size_t)pInstance_p->pCircBufHeader->bufferSize;
     pInstance_p->pCircBuf = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED,
                                  pArch->fd, pageSize);
     if (pInstance_p->pCircBuf == MAP_FAILED)

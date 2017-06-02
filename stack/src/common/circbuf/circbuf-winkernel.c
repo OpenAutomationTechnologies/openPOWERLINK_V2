@@ -16,7 +16,7 @@ The locking is performed by spinlocks.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -187,7 +187,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     if (pInstance_p->pCircBufHeader == NULL)
         return kCircBufNoResource;
 
-    pInstance_p->pCircBuf = (BYTE*)OPLK_MALLOC(*pSize_p);
+    pInstance_p->pCircBuf = OPLK_MALLOC(*pSize_p);
     if (pInstance_p->pCircBuf == NULL)
     {
         OPLK_FREE(pInstance_p->pCircBufHeader);

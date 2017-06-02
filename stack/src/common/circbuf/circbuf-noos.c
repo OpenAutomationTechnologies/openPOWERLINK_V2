@@ -16,7 +16,7 @@ by switching off interrupts.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -169,7 +169,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
         return kCircBufNoResource;
     }
 
-    pInstance_p->pCircBuf = ((BYTE*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
+    pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
 
     return kCircBufOk;
 }
