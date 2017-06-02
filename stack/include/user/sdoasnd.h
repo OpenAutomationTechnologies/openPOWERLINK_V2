@@ -8,7 +8,7 @@ The file contains definitions for the SDO over ASnd protocol abstraction layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -67,7 +67,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p,
                            UINT targetNodeId_p);
 tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p,
                             tPlkFrame* pSrcData_p,
-                            UINT32 dataSize_p);
+                            size_t dataSize_p);
 tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p);
 #endif /* defined(CONFIG_INCLUDE_SDO_ASND) */
 

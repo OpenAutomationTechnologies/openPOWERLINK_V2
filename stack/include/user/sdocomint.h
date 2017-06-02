@@ -220,17 +220,17 @@ typedef struct
     tSdoServiceType     sdoServiceType;      ///< Service Type: WriteByIndex, ReadByIndex, WriteMultParam, ReadMultParam
     tSdoType            sdoProtocolType;     ///< Protocol Type: Auto, Udp, ASnd
     void*               pData;               ///< Pointer to data
-    UINT8*              pDataStart;          ///< Pointer start of data for segmented transfer
-    UINT                transferSize;        ///< Number of bytes to transfer
-    UINT                transferredBytes;    ///< Number of bytes already transferred
-    UINT                pendingTxBytes;      ///< Due bytes waiting for transmission
-    UINT                reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request for server or max. buffer size for client
-    UINT                respSegmSize;        ///< Segment size of WriteMultParam or ReadMultParam response
+    void*               pDataStart;          ///< Pointer start of data for segmented transfer
+    size_t              transferSize;        ///< Number of bytes to transfer
+    size_t              transferredBytes;    ///< Number of bytes already transferred
+    size_t              pendingTxBytes;      ///< Due bytes waiting for transmission
+    size_t              reqSegmSize;         ///< Segment size of WriteMultParam or ReadMultParam request for server or max. buffer size for client
+    size_t              respSegmSize;        ///< Segment size of WriteMultParam or ReadMultParam response
     tSdoMultiAccEntry*  paMultiAcc;          ///< Pointer to multi access array provided by user
     UINT                multiAccCnt;         ///< Count of processed multi access array elements
 #if defined(CONFIG_INCLUDE_SDOS)
     tSdoComConHdl       sdoObdConHdl;        ///< OD connection handle (only valid if not 0)
-    UINT                pendingTransferSize; ///< Due bytes waiting for confirmation from pending OD access
+    size_t              pendingTransferSize; ///< Due bytes waiting for confirmation from pending OD access
                                              /**< WriteByIndex: Due bytes waiting for confirmation from pending
                                                                 OD write access
                                                   ReadByIndex: Max. Tx buffer size for initial OD read access */
@@ -239,8 +239,8 @@ typedef struct
     tSdoFinishedCb      pfnTransferFinished; ///< Callback function to be called in the end of the SDO transfer
     void*               pUserArg;            ///< User definable argument pointer
     UINT32              lastAbortCode;       ///< Last abort code
-    UINT                targetIndex;         ///< Object index to access
-    UINT                targetSubIndex;      ///< Object subindex to access
+    UINT16              targetIndex;         ///< Object index to access
+    UINT8               targetSubIndex;      ///< Object subindex to access
 } tSdoComCon;
 
 /**
@@ -272,7 +272,7 @@ extern tSdoComInstance sdoComInstance_g;
 //------------------------------------------------------------------------------
 tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
                                const tAsySdoCom* pSdoCom_p,
-                               UINT dataSize_p);
+                               size_t dataSize_p);
 tOplkError sdocomint_conStateChangeCb(tSdoSeqConHdl sdoSeqConHdl_p,
                                       tAsySdoConState sdoConnectionState_p);
 tOplkError sdocomint_processCmdLayerConnection(tSdoSeqConHdl sdoSeqConHdl_p,
@@ -282,7 +282,7 @@ tOplkError sdocomint_processState(tSdoComConHdl sdoComConHdl_p,
                                   tSdoComConEvent sdoComConEvent_p,
                                   const tAsySdoCom* pSdoCom_p);
 void       sdocomint_initCmdFrameGeneric(tPlkFrame* pPlkFrame_p,
-                                         UINT plkFrameSize_p,
+                                         size_t plkFrameSize_p,
                                          const tSdoComCon* pSdoComCon_p,
                                          tAsySdoCom** pCommandFrame_p);
 void       sdocomint_setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p,
@@ -290,11 +290,11 @@ void       sdocomint_setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p,
 void       sdocomint_overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p,
                                                UINT8 flag_p);
 void       sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p,
-                                            UINT size_p);
+                                            size_t size_p);
 void       sdocomint_fillCmdFrameDataSegm(tAsySdoCom* pCommandFrame_p,
                                           const void* pSrcData_p,
                                           size_t size_p);
 void       sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
-                                         UINT tranferredBytes_p,
+                                         size_t tranferredBytes_p,
                                          BOOL fTransferComplete);
 #endif /* _INC_user_sdocomint_H_ */

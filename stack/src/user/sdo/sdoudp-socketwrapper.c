@@ -11,7 +11,7 @@ the socket wrapper.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,8 @@ static tSdoUdpSocketInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void receiveFromSocket(const UINT8* pData_p,
-                              UINT dataSize_p,
+static void receiveFromSocket(const void* pData_p,
+                              size_t dataSize_p,
                               const tSocketWrapperAddress* pRemote_p);
 
 //============================================================================//
@@ -213,7 +213,7 @@ The function sends an SDO frame to the given UDP connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
                                const tPlkFrame* pSrcData_p,
-                               UINT32 dataSize_p)
+                               size_t dataSize_p)
 {
     tOplkError              ret;
     tSocketWrapperAddress   remote;
@@ -294,12 +294,12 @@ The function receives data from the UDP socket.
 
 */
 //------------------------------------------------------------------------------
-static void receiveFromSocket(const UINT8* pData_p,
-                              UINT dataSize_p,
+static void receiveFromSocket(const void* pData_p,
+                              size_t dataSize_p,
                               const tSocketWrapperAddress* pRemote_p)
 {
-    const tAsySdoSeq*   pSdoSeqData = (const tAsySdoSeq*)&pData_p[ASND_HEADER_SIZE];
-    UINT                size = dataSize_p - ASND_HEADER_SIZE;
+    const tAsySdoSeq*   pSdoSeqData = (const tAsySdoSeq*)((const UINT8*)pData_p + ASND_HEADER_SIZE);
+    size_t              size = dataSize_p - ASND_HEADER_SIZE;
     tSdoUdpCon          sdoUdpCon;
 
     sdoUdpCon.ipAddr = pRemote_p->ipAddress;

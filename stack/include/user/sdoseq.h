@@ -8,7 +8,7 @@ The file contains definitions for the SDO sequence layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -94,7 +94,7 @@ typedef tOplkError (*tSdoComConCb)(tSdoSeqConHdl sdoSeqConHdl_p,
 /// Callback function pointer for asynchronous SDO Sequence Layer to call SDO Command Layer for received data
 typedef tOplkError (*tSdoComReceiveCb)(tSdoSeqConHdl sdoSeqConHdl_p,
                                        const tAsySdoCom* pAsySdoCom_p,
-                                       UINT dataSize_p);
+                                       size_t dataSize_p);
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -111,7 +111,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
                           UINT nodeId_p,
                           tSdoType sdoType_p);
 tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p,
-                           UINT dataSize_p,
+                           size_t dataSize_p,
                            tPlkFrame* pData_p);
 tOplkError sdoseq_processEvent(const tEvent* pEvent_p);
 tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p);

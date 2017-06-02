@@ -2027,8 +2027,8 @@ static tOplkError performSdo(tSdoComConHdl* pSdoComConHdl_p,
     transParamByIndex.sdoComConHdl = *pSdoComConHdl_p;
     transParamByIndex.pData = paSubAcc_p->pData_le;
     transParamByIndex.dataSize = paSubAcc_p->dataSize;
-    transParamByIndex.index = paSubAcc_p->index;
-    transParamByIndex.subindex = paSubAcc_p->subIndex;
+    transParamByIndex.index = (UINT16)paSubAcc_p->index;
+    transParamByIndex.subindex = (UINT8)paSubAcc_p->subIndex;
     transParamByIndex.pfnSdoFinishedCb = cbSdoCon;
     transParamByIndex.pUserArg = pUserArg_p;
 

@@ -10,7 +10,7 @@ This file contains the implementation of the SDO over UDP protocol for Linux.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -159,7 +159,7 @@ The function creates a socket for the SDO over UDP connection.
 tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
 {
     struct sockaddr_in  addr;
-    INT                 error;
+    int                 error;
 
     // Check parameter validity
     ASSERT(pSdoUdpCon_p != NULL);
@@ -176,7 +176,7 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
 
     // bind socket
     addr.sin_family = AF_INET;
-    addr.sin_port = htons((USHORT)pSdoUdpCon_p->port);
+    addr.sin_port = htons(pSdoUdpCon_p->port);
     addr.sin_addr.s_addr = htonl(pSdoUdpCon_p->ipAddr);
     error = bind(instance_l.udpSocket, (struct sockaddr*)&addr, sizeof(addr));
     if (error < 0)
@@ -188,7 +188,7 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
     // create Listen-Thread
     instance_l.fStopThread = FALSE;
 
-    if (pthread_create(&instance_l.threadHandle, NULL, sdoUdpThread, (void*)&instance_l) != 0)
+    if (pthread_create(&instance_l.threadHandle, NULL, sdoUdpThread, &instance_l) != 0)
         return kErrorSdoUdpThreadError;
 
 #if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
@@ -211,7 +211,7 @@ The function closes the created socket for the SDO over UDP connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_closeSocket(void)
 {
-    INT error;
+    int error;
 
     if (instance_l.threadHandle != 0)
     {   // listen thread was started -> close old thread
@@ -251,17 +251,17 @@ The function sends an SDO frame to the given UDP connection.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
                                const tPlkFrame* pSrcData_p,
-                               UINT32 dataSize_p)
+                               size_t dataSize_p)
 {
-    INT                 error;
     struct sockaddr_in  addr;
+    int                 error;
 
     // Check parameter validity
     ASSERT(pSdoUdpCon_p != NULL);
     ASSERT(pSrcData_p != NULL);
 
     addr.sin_family = AF_INET;
-    addr.sin_port = (USHORT)pSdoUdpCon_p->port;
+    addr.sin_port = pSdoUdpCon_p->port;
     addr.sin_addr.s_addr = pSdoUdpCon_p->ipAddr;
 
     error = sendto(instance_l.udpSocket,
@@ -344,9 +344,9 @@ The function receives data from the UDP socket.
 static void receiveFromSocket(const tSdoUdpSocketInstance* pInstance_p)
 {
     struct sockaddr_in  remoteAddr;
-    INT                 error;
+    int                 error;
     UINT8               aBuffer[SDO_MAX_RX_FRAME_SIZE_UDP];
-    UINT                size;
+    size_t              size;
     tSdoUdpCon          sdoUdpCon;
 
     OPLK_MEMSET(&remoteAddr, 0, sizeof(remoteAddr));
@@ -362,7 +362,7 @@ static void receiveFromSocket(const tSdoUdpSocketInstance* pInstance_p)
     if (error > 0)
     {
         const tAsySdoSeq*   pSdoSeqData;
-        UINT                dataSize = error - ASND_HEADER_SIZE;
+        size_t              dataSize = (size_t)error - ASND_HEADER_SIZE;
 
         pSdoSeqData = (const tAsySdoSeq*)&aBuffer[ASND_HEADER_SIZE];
         sdoUdpCon.ipAddr = remoteAddr.sin_addr.s_addr;

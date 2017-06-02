@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Command Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -98,7 +98,7 @@ typedef struct
     tSdoTestComState         tState;            ///< Current state of sequence layer
     tSdoSeqConHdl            tSeqHdl;           ///< Sequence layer handle
     tCircBufInstance*        pCbBufInst;        ///< Circular buffer used to avoid race conditions
-}tSdoTestComCon;
+} tSdoTestComCon;
 
 /**
 \brief  SDO command layer instance structure
@@ -109,7 +109,7 @@ typedef struct
 {
     tSdoTestComCon           tCmdCon;           ///< SDO command layer test connection
     sdoApiCbComTest          tApiCb;            ///< API callback
-}tSdoTestCom;
+} tSdoTestCom;
 
 
 //------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ static tSdoTestCom sdoTestComInst_l;
 /// Callback function for receiving and forwarding SDO test command layer frames
 static tOplkError receiveCb(tSdoComConHdl sdoSeqConHdl_p,
                             const tAsySdoCom* pAsySdoCom_p,
-                            UINT dataSize_p);
+                            size_t dataSize_p);
 /// Callback function for handling SDO test events
 static tOplkError conCb(tSdoSeqConHdl sdoSeqConHdl_p,
                         tAsySdoConState sdoConState_p);
@@ -355,8 +355,8 @@ tOplkError sdotestcom_cbEvent(const tEvent* pEvent_p)
     tSdoTestComCon* pCmdCon;
     tPlkFrame*      pFrame = NULL;
     tCircBufError   cbret;
-    ULONG           dataSize = 0x00;
-    size_t          size_p = 0x00;
+    size_t          dataSize = 0;
+    size_t          size = 0;
     size_t          frameSize = C_DLL_MAX_ASYNC_MTU;
 
     switch (pEvent_p->eventType)
@@ -382,7 +382,7 @@ tOplkError sdotestcom_cbEvent(const tEvent* pEvent_p)
             do
             {
                 OPLK_MEMSET(pFrame, 0, frameSize);
-                cbret = circbuf_readData(pCmdCon->pCbBufInst, pFrame, size_p, &frameSize);
+                cbret = circbuf_readData(pCmdCon->pCbBufInst, pFrame, size, &frameSize);
                 if ((cbret == kCircBufOk) &&
                     (dataSize > PLK_FRAME_OFFSET_SDO_COMU))
                 {
@@ -436,7 +436,7 @@ Receives and forwards SDO command layer frames
 //------------------------------------------------------------------------------
 static tOplkError receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
                             const tAsySdoCom* pAsySdoCom_p,
-                            UINT dataSize_p)
+                            size_t dataSize_p)
 {
     // Ignore unused parameter
     UNUSED_PARAMETER(sdoSeqConHdl_p);

@@ -9,7 +9,7 @@ modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -67,6 +67,6 @@ typedef UINT tSdoConHdl;
 /// Callback function pointer for the protocol abstraction layer to call the asynchronous SDO Sequence Layer
 typedef tOplkError (*tSequLayerReceiveCb)(tSdoConHdl conHdl_p,
                                           const tAsySdoSeq* pSdoSeqData_p,
-                                          UINT dataSize_p);
+                                          size_t dataSize_p);
 
 #endif /* _INC_user_sdoal_H_ */
