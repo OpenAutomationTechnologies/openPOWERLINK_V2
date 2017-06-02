@@ -10,7 +10,7 @@ This source file contains the implementation of the process image functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -119,12 +119,12 @@ The function allocates memory for the input and output process images.
 \ingroup module_api
 */
 //------------------------------------------------------------------------------
-tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p,
-                                  UINT sizeProcessImageOut_p)
+tOplkError oplk_allocProcessImage(size_t sizeProcessImageIn_p,
+                                  size_t sizeProcessImageOut_p)
 {
     tOplkError  ret = kErrorOk;
 
-    DEBUG_LVL_ALWAYS_TRACE("%s(): Alloc(%u, %u)\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s(): Alloc(%zu, %zu)\n",
                            __func__,
                            sizeProcessImageIn_p,
                            sizeProcessImageOut_p);
@@ -160,7 +160,7 @@ tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p,
         OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
     }
 
-    DEBUG_LVL_ALWAYS_TRACE("%s: Alloc(%p, %u, %p, %u)\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s: Alloc(%p, %zu, %p, %zu)\n",
                            __func__,
                            instance_l.inputImage.pImage,
                            instance_l.inputImage.imageSize,
@@ -219,7 +219,7 @@ The function links an object in the OD into a location in the process image.
 \param[in]      offsetPI_p          The offset of the first process variable in the
                                     process image.
 \param[in]      fOutputPI_p         Determines if input image or output image should
-                                    be used: TRUE = output image, FALSE = imput image
+                                    be used: TRUE = output image, FALSE = input image
 \param[in]      entrySize_p         The size of one process variable.
 \param[in,out]  pVarEntries_p       The number of process variables, which shall be
                                     linked to the object dictionary. It returns the
@@ -237,7 +237,7 @@ The function links an object in the OD into a location in the process image.
 //------------------------------------------------------------------------------
 tOplkError oplk_linkProcessImageObject(UINT objIndex_p,
                                        UINT firstSubindex_p,
-                                       UINT offsetPI_p,
+                                       size_t offsetPI_p,
                                        BOOL fOutputPI_p,
                                        tObdSize entrySize_p,
                                        UINT* pVarEntries_p)
@@ -265,7 +265,7 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p,
 
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.outputImage.imageSize)
         {   // limit the number of entries
-            *pVarEntries_p = (instance_l.outputImage.imageSize - offsetPI_p) / entrySize_p;
+            *pVarEntries_p = (UINT)((instance_l.outputImage.imageSize - offsetPI_p) / entrySize_p);
         }
     }
     else
@@ -282,7 +282,7 @@ tOplkError oplk_linkProcessImageObject(UINT objIndex_p,
 
         if ((offsetPI_p + (*pVarEntries_p * entrySize_p)) > instance_l.inputImage.imageSize)
         {   // limit the number of entries
-            *pVarEntries_p = (instance_l.inputImage.imageSize - offsetPI_p) / entrySize_p;
+            *pVarEntries_p = (UINT)((instance_l.inputImage.imageSize - offsetPI_p) / entrySize_p);
         }
     }
 

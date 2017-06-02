@@ -282,7 +282,7 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
 
     if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
-        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %u - %zu\n",
+        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %zu - %zu\n",
                   pSdoComFinished_p->nodeId, pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
 
         fSucceeded = FALSE;

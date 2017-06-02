@@ -10,7 +10,7 @@ for the CiA profile 302-4.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -86,7 +86,7 @@ typedef struct
 {
     UINT            objIndexStart;          ///< Start index of a range
     UINT            objIndexEnd;            ///< End index of a range
-    UINT            offsetPI;               ///< Starting offset within the process image
+    size_t          offsetPI;               ///< Starting offset within the process image
     BOOL            fOutputPI;              ///< Describes whether the objects are linked into an output process image
     tObdSize        entrySize;              ///< Size in Bytes of a single entry in the process image
     UINT            subindexCountPerIndex;  ///< Number of subindexes for each index
@@ -123,7 +123,7 @@ tProcessImageLink processImageLink_l[] =
 // local function prototypes
 //------------------------------------------------------------------------------
 static UINT linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
-                                  UINT offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
+                                  size_t offsetPI_p, BOOL fOutputPI_p, tObdSize entrySize_p,
                                   UINT subindexCountPerIndex_p);
 
 //============================================================================//
@@ -184,9 +184,9 @@ The function links a range of variables to the object dictionary.
         if no error occurred.
 */
 //------------------------------------------------------------------------------
-static tOplkError linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
-                                        UINT offsetPI_p, BOOL fOutputPI_p,
-                                        tObdSize entrySize_p, UINT subindexCountPerIndex_p)
+static UINT linkProcessImageRange(UINT objIndexStart_p, UINT objIndexEnd_p,
+                                  size_t offsetPI_p, BOOL fOutputPI_p,
+                                  tObdSize entrySize_p, UINT subindexCountPerIndex_p)
 {
     tOplkError      ret = kErrorOk;
     UINT            errorIndex = 0;

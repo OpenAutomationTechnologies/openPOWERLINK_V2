@@ -127,18 +127,18 @@ static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p);
 static tOplkError readLocalObject(UINT index_p,
                                   UINT subindex_p,
                                   void* pDstData_p,
-                                  UINT* pSize_p);
+                                  size_t* pSize_p);
 static tOplkError writeLocalObject(UINT index_p,
                                    UINT subindex_p,
                                    const void* pSrcData_p,
-                                   UINT size_p);
+                                   size_t size_p);
 static tOplkError performSdo(tSdoComConHdl* pSdoComConHdl_p,
                              UINT nodeId_p,
                              tSdoMultiAccEntry* paSubAcc_p,
                              UINT subAccCnt_p,
                              tSdoType sdoType_p,
                              void* pBuffer_p,
-                             UINT bufSize_p,
+                             size_t bufSize_p,
                              void* pUserArg_p,
                              tSdoAccessType sdoAccessType_p);
 
@@ -570,7 +570,7 @@ tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p,
                            UINT index_p,
                            UINT subindex_p,
                            void* pDstData_le_p,
-                           UINT* pSize_p,
+                           size_t* pSize_p,
                            tSdoType sdoType_p,
                            void* pUserArg_p)
 {
@@ -653,7 +653,7 @@ tOplkError oplk_readMultipleObjects(tSdoComConHdl* pSdoComConHdl_p,
                                     UINT subAccCnt_p,
                                     tSdoType sdoType_p,
                                     void* pBuffer_p,
-                                    UINT bufSize_p,
+                                    size_t bufSize_p,
                                     void* pUserArg_p)
 {
     tOplkError          ret = kErrorOk;
@@ -731,7 +731,7 @@ tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p,
                             UINT index_p,
                             UINT subindex_p,
                             const void* pSrcData_le_p,
-                            UINT size_p,
+                            size_t size_p,
                             tSdoType sdoType_p,
                             void* pUserArg_p)
 {
@@ -812,7 +812,7 @@ tOplkError oplk_writeMultipleObjects(tSdoComConHdl* pSdoComConHdl_p,
                                      UINT subAccCnt_p,
                                      tSdoType sdoType_p,
                                      void* pBuffer_p,
-                                     UINT bufSize_p,
+                                     size_t bufSize_p,
                                      void* pUserArg_p)
 {
     tOplkError              ret = kErrorOk;
@@ -1036,7 +1036,7 @@ The function reads the specified entry from the local object dictionary.
 tOplkError oplk_readLocalObject(UINT index_p,
                                 UINT subindex_p,
                                 void* pDstData_p,
-                                UINT* pSize_p)
+                                size_t* pSize_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
@@ -1053,7 +1053,7 @@ tOplkError oplk_readLocalObject(UINT index_p,
 
     obdSize = (tObdSize)*pSize_p;
     ret = obdu_readEntry(index_p, subindex_p, pDstData_p, &obdSize);
-    *pSize_p = (UINT)obdSize;
+    *pSize_p = (size_t)obdSize;
 
     return ret;
 }
@@ -1080,7 +1080,7 @@ The function writes the specified entry to the local object dictionary.
 tOplkError oplk_writeLocalObject(UINT index_p,
                                  UINT subindex_p,
                                  const void* pSrcData_p,
-                                 UINT size_p)
+                                 size_t size_p)
 {
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -1957,7 +1957,7 @@ The function reads the specified entry from the local object dictionary.
 static tOplkError readLocalObject(UINT index_p,
                                   UINT subindex_p,
                                   void* pDstData_p,
-                                  UINT* pSize_p)
+                                  size_t* pSize_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
@@ -1974,7 +1974,7 @@ static tOplkError readLocalObject(UINT index_p,
 
     obdSize = (tObdSize)*pSize_p;
     ret = obdu_readEntryToLe(index_p, subindex_p, pDstData_p, &obdSize);
-    *pSize_p = (UINT)obdSize;
+    *pSize_p = (size_t)obdSize;
 
 Exit:
     return ret;
@@ -1998,7 +1998,7 @@ The function writes the specified entry to the local object dictionary.
 static tOplkError writeLocalObject(UINT index_p,
                                    UINT subindex_p,
                                    const void* pSrcData_p,
-                                   UINT size_p)
+                                   size_t size_p)
 {
     if ((index_p == 0) ||
         (subindex_p > 255) ||
@@ -2038,7 +2038,7 @@ static tOplkError performSdo(tSdoComConHdl* pSdoComConHdl_p,
                              UINT subAccCnt_p,
                              tSdoType sdoType_p,
                              void* pBuffer_p,
-                             UINT bufSize_p,
+                             size_t bufSize_p,
                              void* pUserArg_p,
                              tSdoAccessType sdoAccessType_p)
 {

@@ -15,7 +15,7 @@ kEventlogFormatReadable is intended to be read by humans.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -400,7 +400,7 @@ void eventlog_createCfmProgressEventString(const tCfmEventCnProgress* pProgress_
                             pProgress_p->objectSubIndex);
             len += snprintf(message_p + len,
                             messageSize_p - len,
-                            "SIZE:%05d DOWNLOADED:%04d ",
+                            "SIZE:%05zu DOWNLOADED:%04zu ",
                             pProgress_p->totalNumberOfBytes,
                             pProgress_p->bytesDownloaded);
             len += snprintf(message_p + len,
@@ -420,7 +420,7 @@ void eventlog_createCfmProgressEventString(const tCfmEventCnProgress* pProgress_
 
             len += snprintf(message_p + len,
                             messageSize_p - len,
-                            "%4u/%4u Bytes",
+                            "%4zu/%4zu Bytes",
                             pProgress_p->bytesDownloaded,
                             pProgress_p->totalNumberOfBytes);
 

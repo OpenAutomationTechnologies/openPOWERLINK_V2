@@ -10,7 +10,7 @@ This file contains the implementation of the object dictionary (OD) module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -111,7 +111,7 @@ static tOplkError   initNonNumWrite(UINT index_p,
                                     UINT subIndex_p,
                                     void** ppDstData_p,
                                     tObdSize size_p,
-                                    UINT segmOffset_p);
+                                    size_t segmOffset_p);
 static tOplkError   finishNonNumWrite(UINT index_p,
                                       UINT subIndex_p);
 
@@ -1334,7 +1334,7 @@ static tOplkError initNonNumWrite(UINT index_p,
                                   UINT subIndex_p,
                                   void** ppDstData_p,
                                   tObdSize size_p,
-                                  UINT segmOffset_p)
+                                  size_t segmOffset_p)
 {
     tOplkError          ret;
     const tObdEntry*    pObdEntry;

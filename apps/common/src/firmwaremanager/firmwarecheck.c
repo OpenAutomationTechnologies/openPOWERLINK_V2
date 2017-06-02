@@ -162,7 +162,7 @@ typedef struct
     tSdoComConHdl   handle;     ///< SDO command handle
     UINT            index;      ///< SDO transfer OD index of remote
     UINT            subindex;   ///< SDO transfer OD subindex of remotes
-    UINT            size;       ///< Size of SDO transfer
+    size_t          size;       ///< Size of SDO transfer
     void*           pData;      ///< Pointer for result data storage
 } tFirmwareCheckNodeSdo;
 
@@ -1022,7 +1022,7 @@ static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p
 
     if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
     {
-        FWM_ERROR("Unexpected transferred bytes %u instead of %u for node %u index 0x%X subindex 0x%X\n",
+        FWM_ERROR("Unexpected transferred bytes %zu instead of %zu for node %u index 0x%X subindex 0x%X\n",
                   pSdoComFinished_p->transferredBytes,
                   pNodeInfo_p->sdo.size,
                   pNodeInfo_p->nodeId,
