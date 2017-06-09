@@ -155,6 +155,8 @@ tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
             goto EXIT;
         }
 
+        memset(pEntry, 0, sizeof(tFirmwareInfoEntry));
+
         ret = parseLine(pStore_p, pLine, &pEntry->fwInfo);
         if (ret == kFwReturnOk)
         {
