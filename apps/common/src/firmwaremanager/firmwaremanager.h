@@ -75,6 +75,7 @@ typedef enum
     kFwReturnInvalidNodeInfo,       ///< An invalid node info was passed
     kFwReturnResetNodeFailed,       ///< Failed to send reset node
     kFwReturnInvalidCheckState,     ///< Invalid state in firmware check module
+    kFwReturnIgnoreInfoFileLine,    ///< Ignore the current info file line
 } tFirmwareRet;
 
 //------------------------------------------------------------------------------
