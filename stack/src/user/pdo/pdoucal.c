@@ -203,8 +203,8 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p,
     tEvent      event;
     tPdoMemSize pdoMemSize;
 
-    pdoMemSize.rxPdoMemSize = rxPdoMemSize_p;
-    pdoMemSize.txPdoMemSize = txPdoMemSize_p;
+    pdoMemSize.rxPdoMemSize = (UINT32)rxPdoMemSize_p;
+    pdoMemSize.txPdoMemSize = (UINT32)txPdoMemSize_p;
     event.eventSink = kEventSinkPdokCal;
     event.eventType = kEventTypePdokSetupPdoBuf;
     event.eventArg.pEventArg = &pdoMemSize;
