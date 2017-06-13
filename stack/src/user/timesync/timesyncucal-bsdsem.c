@@ -45,6 +45,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/timesync.h>
 #include <user/timesyncucal.h>
+#include <user/timesyncu.h>
 
 #include <errno.h>
 #include <fcntl.h>
@@ -96,6 +97,9 @@ typedef struct
     OPLK_FILE_HANDLE          fd;                        ///< File descriptor for POWERLINK device
     size_t                    memSize;                   ///< Memory size of SoC timestamp shared memory
     tTimesyncSharedMemory*    pSharedMemory;             ///< Pointer to SoC timestamp shared memory
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    BOOL                      fFirstSyncEventDone;       ///< Flag for first sync event
+#endif
 #endif
 }tTimesyncucalInstance;
 
@@ -137,6 +141,10 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 
     UNUSED_PARAMETER(pfnSyncCb_p);
     OPLK_MEMSET(&instance_l, 0, sizeof(tTimesyncucalInstance));
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+    instance_l.fFirstSyncEventDone = FALSE;
+#endif
 
     instance_l.syncSem = sem_open(TIMESYNC_SYNC_BSDSEM, O_CREAT, S_IRWXG, 1);
     if (instance_l.syncSem == SEM_FAILED)
@@ -229,7 +237,17 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
     }
 
     if (semRet == 0)
+    {
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+        if (!instance_l.fFirstSyncEventDone)
+        {   // Set MN net time at first sync event
+            timesyncu_setNetTime();
+            instance_l.fFirstSyncEventDone = TRUE;
+        }
+#endif
+
         return kErrorOk;
+    }
     else
         return kErrorGeneralError;
 }

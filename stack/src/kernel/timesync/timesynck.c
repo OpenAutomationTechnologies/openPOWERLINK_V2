@@ -11,6 +11,7 @@ This file contains the main implementation of the kernel timesync module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -129,9 +130,9 @@ tOplkError timesynck_init(void)
     OPLK_MEMSET(timesynckInstance_l.pSharedMemory, 0, sizeof(*timesynckInstance_l.pSharedMemory));
 
     // Initialize triple buffer
-    timesynckInstance_l.pSharedMemory->socTime.clean = 0;
-    timesynckInstance_l.pSharedMemory->socTime.read = 1;
-    timesynckInstance_l.pSharedMemory->socTime.write = 2;
+    timesynckInstance_l.pSharedMemory->kernelToUserSocTime.clean = 0;
+    timesynckInstance_l.pSharedMemory->kernelToUserSocTime.read = 1;
+    timesynckInstance_l.pSharedMemory->kernelToUserSocTime.write = 2;
 
     OPLK_DCACHE_FLUSH(timesynckInstance_l.pSharedMemory, sizeof(*timesynckInstance_l.pSharedMemory));
 #endif
@@ -285,7 +286,7 @@ tOplkError timesynck_setSocTime(const tTimesyncSocTime* pSocTime_p)
         return kErrorNoResource;
     }
 
-    pTripleBuf = &timesynckInstance_l.pSharedMemory->socTime;
+    pTripleBuf = &timesynckInstance_l.pSharedMemory->kernelToUserSocTime;
 
     OPLK_DCACHE_INVALIDATE(pTripleBuf, sizeof(*pTripleBuf));
 
@@ -304,6 +305,63 @@ tOplkError timesynck_setSocTime(const tTimesyncSocTime* pSocTime_p)
 
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Get net time from user layer
+
+The function returns the net time set by the timesyncu module.
+
+\param[out]      pNetTime_p         Pointer to NETTIME time information structure.
+\param[out]      pNewData_p         Pointer to flag which is set to indicate new
+                                    net time from user layer.
+
+\return The function returns a tOplkError error code.
+\retval kErrorNoResource   Pointer to shared memory is invalid.
+\retval kErrorOk           The net time value was successfully returned.
+
+\ingroup module_timesynck
+*/
+//------------------------------------------------------------------------------
+tOplkError timesynck_getNetTime(tNetTime* pNetTime_p, BOOL* pNewData_p)
+{
+    OPLK_ATOMIC_T readBuf;
+
+    if ((timesynckInstance_l.pSharedMemory == NULL) || (pNetTime_p == NULL) ||
+        (pNewData_p == NULL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s Pointer to memory is invalid!\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+
+    if (timesynckInstance_l.pSharedMemory->userToKernelSocTime.newData)
+    {
+        *pNewData_p = TRUE;
+        readBuf = timesynckInstance_l.pSharedMemory->userToKernelSocTime.read;
+
+        OPLK_ATOMIC_EXCHANGE(&timesynckInstance_l.pSharedMemory->userToKernelSocTime.clean,
+                             readBuf,
+                             timesynckInstance_l.pSharedMemory->userToKernelSocTime.read);
+        timesynckInstance_l.pSharedMemory->userToKernelSocTime.newData = 0;
+
+        // Flush data cache for variables changed in this function
+        OPLK_DCACHE_FLUSH(&timesynckInstance_l.pSharedMemory->userToKernelSocTime.read,
+                          sizeof(OPLK_ATOMIC_T));
+        OPLK_DCACHE_FLUSH(&timesynckInstance_l.pSharedMemory->userToKernelSocTime.newData,
+                          sizeof(UINT8));
+
+        pNetTime_p->nsec = timesynckInstance_l.pSharedMemory->userToKernelSocTime.aTripleBuf[0].netTime.nsec;
+        pNetTime_p->sec = timesynckInstance_l.pSharedMemory->userToKernelSocTime.aTripleBuf[0].netTime.sec;
+    }
+    else
+        *pNewData_p = FALSE;
+
+    return kErrorOk;
+}
+#endif
+
 #endif
 
 //============================================================================//
