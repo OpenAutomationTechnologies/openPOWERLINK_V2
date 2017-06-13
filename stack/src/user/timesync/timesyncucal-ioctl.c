@@ -47,6 +47,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/timesyncucal.h>
 #include <user/ctrlucal.h>
 #include <common/driver.h>
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+#include <user/timesyncu.h>
+#endif
 
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -93,10 +96,13 @@ CAL module for Linux ioctl design.
 */
 typedef struct
 {
-    OPLK_FILE_HANDLE        fd;               ///< File descriptor
+    OPLK_FILE_HANDLE        fd;                  ///< File descriptor
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    tTimesyncSharedMemory*  pSharedMemory;    ///< Shared timesync structure
-    size_t                  memSize;          ///< Size of the timesync shared memory
+    tTimesyncSharedMemory*  pSharedMemory;       ///< Shared timesync structure
+    size_t                  memSize;             ///< Size of the timesync shared memory
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    BOOL                    fFirstSyncEventDone; ///< Flag for first sync event
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 #endif
 }tTimesynckcalInstance;
 
@@ -133,6 +139,10 @@ The function initializes the user CAL timesync module
 tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
 {
     UNUSED_PARAMETER(pfnSyncCb_p);
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+    instance_l.fFirstSyncEventDone = FALSE;
+#endif
 
     instance_l.fd = ctrlucal_getFd();
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
@@ -192,7 +202,17 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
 
     ret = ioctl(instance_l.fd, PLK_CMD_TIMESYNC_SYNC, timeout_p);
     if (ret == 0)
+    {
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+        if (!instance_l.fFirstSyncEventDone)
+        {   // Set MN net time at first sync event
+            timesyncu_setNetTime();
+            instance_l.fFirstSyncEventDone = TRUE;
+        }
+#endif
+
         return kErrorOk;
+    }
 
     return kErrorGeneralError;
 }
