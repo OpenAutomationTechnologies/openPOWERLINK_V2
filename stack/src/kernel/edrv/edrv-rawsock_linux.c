@@ -10,6 +10,7 @@ This file contains the implementation of the Linux raw socket Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, BE.services GmbH
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, Kalycito Infotech Private Limited
 All rights reserved.
@@ -84,8 +85,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 #define EDRV_MAX_FRAME_SIZE     0x0600
-#define PROTO_PLK 		0x88AB
-#define PACKET_QDISC_BYPASS             20 //TODO: take this define from linux kernel headers
+#define PROTO_PLK               0x88AB
+#ifndef PACKET_QDISC_BYPASS
+#define PACKET_QDISC_BYPASS     20
+#endif
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -101,10 +104,10 @@ typedef struct
     tEdrvTxBuffer*      pTransmittedTxBufferFirstEntry;  ///< Pointer to the first entry of the transmitted Tx buffer
     pthread_mutex_t     mutex;                           ///< Mutex for locking of critical sections
     sem_t               syncSem;                         ///< Semaphore for signaling the start of the worker thread
-    int             	sock;                               ///< Raw socket handle
+    int                 sock;                            ///< Raw socket handle
     pthread_t           hThread;                         ///< Handle of the worker thread
-    char           	bStart;                             ///< Set to false on exit
-    char 		bThreadIsExited;		    						///< It is set by thread if it is already exited
+    BOOL                StartCommunication;              ///< Flag to indicate, that communication is started. Set to false on exit
+    BOOL                ThreadIsExited;                  ///< It is set by thread if it is already exited
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -143,132 +146,135 @@ This function initializes the Ethernet driver.
 
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
-	struct sched_param  schedParam;
+    struct sched_param  schedParam;
+    INT result = 0;
+    int sock_qdisc_bypass = 1;
+    struct sockaddr_ll sock_addr;
+    struct ifreq ifr;
+    int BlockingMode=0;
+  
 
-	// Check parameter validity
-	ASSERT(pEdrvInitParam_p != NULL);
+    // Check parameter validity
+    ASSERT(pEdrvInitParam_p != NULL);
 
-	// clear instance structure
-	OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
+    // clear instance structure
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    	if (pEdrvInitParam_p->hwParam.pDevName == NULL)
-        	return kErrorEdrvInit;
+    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
+        return kErrorEdrvInit;
 
-	// save the init data
-	edrvInstance_l.initParam = *pEdrvInitParam_p;
+    // save the init data
+    edrvInstance_l.initParam = *pEdrvInitParam_p;
 
-	edrvInstance_l.bStart = 1;
-	edrvInstance_l.bThreadIsExited = 0;
+    edrvInstance_l.StartCommunication = 1;
+    edrvInstance_l.ThreadIsExited = 0;
 
-	/* if no MAC address was specified read MAC address of used
-	* Ethernet interface
-	*/
-	if ((edrvInstance_l.initParam.aMacAddr[0] == 0) &&
-	(edrvInstance_l.initParam.aMacAddr[1] == 0) &&
-	(edrvInstance_l.initParam.aMacAddr[2] == 0) &&
-	(edrvInstance_l.initParam.aMacAddr[3] == 0) &&
-	(edrvInstance_l.initParam.aMacAddr[4] == 0) &&
-	(edrvInstance_l.initParam.aMacAddr[5] == 0))
-	{   // read MAC address from controller
-	getMacAdrs(edrvInstance_l.initParam.hwParam.pDevName,
-		   edrvInstance_l.initParam.aMacAddr);
-	}
-	if (pthread_mutex_init(&edrvInstance_l.mutex, NULL) != 0)
-	{
-		DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
-		return kErrorEdrvInit;
-	}
+    /* if no MAC address was specified read MAC address of used
+    * Ethernet interface
+    */
+    if ((edrvInstance_l.initParam.aMacAddr[0] == 0) &&
+    (edrvInstance_l.initParam.aMacAddr[1] == 0) &&
+    (edrvInstance_l.initParam.aMacAddr[2] == 0) &&
+    (edrvInstance_l.initParam.aMacAddr[3] == 0) &&
+    (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
+    (edrvInstance_l.initParam.aMacAddr[5] == 0))
+    {   // read MAC address from controller
+    getMacAdrs(edrvInstance_l.initParam.hwParam.pDevName,
+        edrvInstance_l.initParam.aMacAddr);
+    }
+    if (pthread_mutex_init(&edrvInstance_l.mutex, NULL) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init mutex\n", __func__);
+        return kErrorEdrvInit;
+    }
 
-	edrvInstance_l.sock = socket(PF_PACKET,SOCK_RAW,htons(PROTO_PLK));
-	if(edrvInstance_l.sock < 0) 
-	{
-		DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__,strerror(errno));
-		return kErrorEdrvInit;
-	}
-	
-	int result = 0;
-	int val = 1;
-	struct sockaddr_ll sock_addr;
-	struct ifreq ifr;
-   	int iBlocking=0;
-	if(ioctl(edrvInstance_l.sock, FIONBIO, &iBlocking) != 0)
-	{
-		result = -1;
-		DEBUG_LVL_ERROR_TRACE("%s() ioctl(FIONBIO) fails. Error = %s\n", __func__,strerror(errno));        		
-	}
-	
-	// Set option PACKET_QDISC_BYPASS. It allows to transmit a frame faster through TCP/IP stack. Available since linux 3.14
-    	if (setsockopt(edrvInstance_l.sock, SOL_PACKET, PACKET_QDISC_BYPASS, &val, sizeof(val)) != 0)	
-        	DEBUG_LVL_ERROR_TRACE("Couldn't set PACKET_QDISC_BYPASS socket option. Error = %s\n", __func__,strerror(errno));        	        
-    	else 
-		printf("Kernel qdisc bypass is enabled\n");
-		
-	
-	memset (&ifr, 0, sizeof (struct ifreq));
-	strcpy(ifr.ifr_name, edrvInstance_l.initParam.hwParam.pDevName); //TODO:eth0 was used for test
+    edrvInstance_l.sock = socket(PF_PACKET,SOCK_RAW,htons(PROTO_PLK));
+    if(edrvInstance_l.sock < 0) 
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__,strerror(errno));
+        return kErrorEdrvInit;
+    }
+    
+    if(ioctl(edrvInstance_l.sock, FIONBIO, &BlockingMode) != 0)
+    {
+        result = -1;
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl(FIONBIO) fails. Error = %s\n", __func__,strerror(errno)); 
+    }
+    
+    // Set option PACKET_QDISC_BYPASS. It allows to transmit a frame faster through TCP/IP stack. Available since linux 3.14
+    if (setsockopt(edrvInstance_l.sock, SOL_PACKET, PACKET_QDISC_BYPASS, &sock_qdisc_bypass, sizeof(sock_qdisc_bypass)) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("Couldn't set PACKET_QDISC_BYPASS socket option. Error = %s\n", __func__,strerror(errno));
+    }
+    else 
+    {
+        DEBUG_LVL_EDRV_TRACE("Kernel qdisc bypass is enabled\n");
+    }
+    OPLK_MEMSET(&ifr, 0, sizeof (struct ifreq));
+    strncpy(ifr.ifr_name, edrvInstance_l.initParam.hwParam.pDevName, IFNAMSIZ - 1);
 
-	if(ioctl(edrvInstance_l.sock,SIOCGIFFLAGS, &ifr)<0)
-	{
-		result = -1;
-		DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFFLAGS) fails. Error = %s\n", __func__, strerror(errno));
-	}
-		
-	ifr.ifr_flags = ifr.ifr_flags | IFF_PROMISC;
-	if(ioctl(edrvInstance_l.sock,SIOCSIFFLAGS, &ifr))
-	{
-		result = -1;
-		DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCSIFFLAGS) with IFF_PROMISC fails. Error = %s\n", __func__, strerror(errno));
-	}
+    if(ioctl(edrvInstance_l.sock,SIOCGIFFLAGS, &ifr)<0)
+    {
+        result = -1;
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFFLAGS) fails. Error = %s\n", __func__, strerror(errno));
+    }
+        
+    ifr.ifr_flags = ifr.ifr_flags | IFF_PROMISC;
+    if(ioctl(edrvInstance_l.sock,SIOCSIFFLAGS, &ifr))
+    {
+        result = -1;
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCSIFFLAGS) with IFF_PROMISC fails. Error = %s\n", __func__, strerror(errno));
+    }
 
-	if(ioctl(edrvInstance_l.sock,SIOCGIFINDEX, &ifr) != 0)
-	{
-		result = -1;
-		DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFINDEX) fails. Error = %s\n", __func__, strerror(errno));
-	}
-	sock_addr.sll_ifindex = ifr.ifr_ifindex;
+    if(ioctl(edrvInstance_l.sock,SIOCGIFINDEX, &ifr) != 0)
+    {
+        result = -1;
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFINDEX) fails. Error = %s\n", __func__, strerror(errno));
+    }
+    sock_addr.sll_ifindex = ifr.ifr_ifindex;
 
-	
-	sock_addr.sll_family = AF_PACKET;
-	sock_addr.sll_protocol = htons(PROTO_PLK);
-	if(bind(edrvInstance_l.sock, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) !=0)
-	{
-		result = -1;
-		DEBUG_LVL_ERROR_TRACE("%s() bind fails. Error = %s\n", __func__, strerror(errno));
-	}
-	if(result < 0)
-	{
-		close(edrvInstance_l.sock);			
-		DEBUG_LVL_ERROR_TRACE("%s() Couldn't init ethernet adapter:%s", __func__, ifr.ifr_name);
-		return kErrorEdrvInit;	
-	}
+    
+    sock_addr.sll_family = AF_PACKET;
+    sock_addr.sll_protocol = htons(PROTO_PLK);
+    if(bind(edrvInstance_l.sock, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) !=0)
+    {
+        result = -1;
+        DEBUG_LVL_ERROR_TRACE("%s() bind fails. Error = %s\n", __func__, strerror(errno));
+    }
+    if(result < 0)
+    {
+        close(edrvInstance_l.sock);
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't init ethernet adapter:%s", __func__, ifr.ifr_name);
+        return kErrorEdrvInit;	
+    }
       
-	if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
-	{
-		DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
-		return kErrorEdrvInit;
-	}
+    if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
+        return kErrorEdrvInit;
+    }
 
-	if (pthread_create(&edrvInstance_l.hThread, NULL,
-		       workerThread,  &edrvInstance_l) != 0)
-	{
-		DEBUG_LVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
-		return kErrorEdrvInit;
-	}
+    if (pthread_create(&edrvInstance_l.hThread, NULL,
+        workerThread,  &edrvInstance_l) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't create worker thread!\n", __func__);
+        return kErrorEdrvInit;
+    }
 
-	schedParam.sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
-	if (pthread_setschedparam(edrvInstance_l.hThread, SCHED_FIFO, &schedParam) != 0)
-	{
-		DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n", __func__);
-	}
+    schedParam.sched_priority = CONFIG_THREAD_PRIORITY_MEDIUM;
+    if (pthread_setschedparam(edrvInstance_l.hThread, SCHED_FIFO, &schedParam) != 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() couldn't set thread scheduling parameters!\n", __func__);
+    }
 
-	#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
-	pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvrawsock");
-	#endif
+#if (defined(__GLIBC__) && (__GLIBC__ >= 2) && (__GLIBC_MINOR__ >= 12))
+    pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvrawsock");
+#endif
 
-	/* wait until thread is started */
-	sem_wait(&edrvInstance_l.syncSem);
+    // wait until thread is started 
+    sem_wait(&edrvInstance_l.syncSem);
 
-	return kErrorOk;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -285,19 +291,19 @@ This function shuts down the Ethernet driver.
 tOplkError edrv_exit(void)
 {
    
-	edrvInstance_l.bStart = 0;
-	usleep(100000); //wait 100ms to terminate thread safely
-	// Destroy the thread	
-	if(edrvInstance_l.bThreadIsExited)
-		pthread_cancel(edrvInstance_l.hThread);
-	// Destroy the mutex
-	pthread_mutex_destroy(&edrvInstance_l.mutex);
-	// Close the socket
-	close(edrvInstance_l.sock);
-	// Clear instance structure
-	OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
+    edrvInstance_l.StartCommunication = 0;
+    usleep(100000); //wait 100ms to terminate thread safely
+    // Destroy the thread	
+    if(edrvInstance_l.ThreadIsExited)
+        pthread_cancel(edrvInstance_l.hThread);
+    // Destroy the mutex
+    pthread_mutex_destroy(&edrvInstance_l.mutex);
+    // Close the socket
+    close(edrvInstance_l.sock);
+    // Clear instance structure
+    OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-	return kErrorOk;
+    return kErrorOk;
 }
 
 //------------------------------------------------------------------------------
@@ -313,7 +319,7 @@ This function returns the MAC address of the Ethernet controller
 //------------------------------------------------------------------------------
 const UINT8* edrv_getMacAddr(void)
 {
-	return edrvInstance_l.initParam.aMacAddr;
+    return edrvInstance_l.initParam.aMacAddr;
 }
 
 //------------------------------------------------------------------------------
@@ -366,17 +372,17 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
         iSockRet = send(edrvInstance_l.sock, (unsigned char *)pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize,0);
-		  if(iSockRet < 0)         
-	     {
-				   DEBUG_LVL_EDRV_TRACE("%s() send() returned %d (%s)\n",
-				                        __func__, iSockRet, );
-				   return kErrorInvalidOperation;
-		  }
-		  else
-		  {
-					packetHandler((u_char*)&edrvInstance_l,iSockRet,(unsigned char *)pBuffer_p->pBuffer);
-		  }
-	 }
+        if(iSockRet < 0)         
+        {
+            DEBUG_LVL_EDRV_TRACE("%s() send() returned %d (%s)\n",
+                                        __func__, iSockRet, );
+            return kErrorInvalidOperation;
+        }
+        else
+        {
+            packetHandler((u_char*)&edrvInstance_l,iSockRet,(u_char *)pBuffer_p->pBuffer);
+        }
+    }
 
     return kErrorOk;
 }
@@ -628,22 +634,22 @@ This function implements the edrv worker thread. It is responsible to receive fr
 static void* workerThread(void* pArgument_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
-    int             iSoctRet;
-    char buffer[ EDRV_MAX_FRAME_SIZE];
+    INT  iSoctRet;
+    u_char buffer[ EDRV_MAX_FRAME_SIZE];
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
 
    // signal that thread is successfully started
    sem_post(&pInstance->syncSem);
    
-   while(edrvInstance_l.bStart)
+   while(edrvInstance_l.StartCommunication)
    {
-	   iSoctRet = recvfrom(edrvInstance_l.sock, buffer,  EDRV_MAX_FRAME_SIZE,0,0,0);
-	   if(iSoctRet > 0)
-	   {
-		packetHandler((u_char*)pInstance,iSoctRet,buffer);
-	   }
+    iSoctRet = recvfrom(edrvInstance_l.sock, buffer,  EDRV_MAX_FRAME_SIZE,0,0,0);
+    if(iSoctRet > 0)
+    {
+        packetHandler((u_char*)pInstance,iSoctRet,buffer);
+    }
    }
-	edrvInstance_l.bThreadIsExited = 1;
+    edrvInstance_l.ThreadIsExited = 1;
    return NULL;
 }
 
