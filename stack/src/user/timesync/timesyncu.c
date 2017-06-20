@@ -11,6 +11,7 @@ This file contains the main implementation of the user timesync module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -72,20 +73,38 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Memory instance for user timesync module
+
+This structure contains all necessary information needed by the user timesync
+module.
+*/
+typedef struct
+{
+    tSyncCb                pfnSyncCb;           ///< Synchronization callback.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory* pSharedMemory;       ///< Pointer to SoC timestamp shared memory.
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    BOOL                   fFirstSyncEventDone; ///< Flag to indicate first sync event.
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
+#endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
+}tTimesyncuInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-static tTimesyncSharedMemory*   pSharedMemory_l = NULL;
-#endif
+static tTimesyncuInstance instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 static tTimesyncSocTime* getSocTime(void);
-#endif
+#if defined(CONFIG_INCLUDE_NMT_MN)
+static tOplkError setNetTime(void);
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
+#endif /* defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) */
+static void syncCb(void);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -108,19 +127,67 @@ tOplkError timesyncu_init(tSyncCb pfnSyncCb_p)
 {
     tOplkError  ret;
 
-    ret = timesyncucal_init(pfnSyncCb_p);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    OPLK_MEMSET(&instance_l, 0, sizeof(tTimesyncuInstance));
+    instance_l.pSharedMemory = NULL;
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    instance_l.fFirstSyncEventDone = FALSE;
+#endif
+#endif
+    // Store the pointer function locally for synchronization callback
+    instance_l.pfnSyncCb = pfnSyncCb_p;
+
+    ret = timesyncucal_init((tSyncCb)syncCb);
     if (ret != kErrorOk)
         return ret;
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    pSharedMemory_l = timesyncucal_getSharedMemory();
-    if (pSharedMemory_l == NULL)
+    instance_l.pSharedMemory = timesyncucal_getSharedMemory();
+    if (instance_l.pSharedMemory == NULL)
         return kErrorNoResource;
 #endif
 
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Initialize wait sync CAL
+
+The function initializes the user timesync module.
+
+\param[in]      timeout_p           Specifies a timeout in microseconds. If 0 it waits
+                                    forever.
+
+\return The function returns a tOplkError error code.
+\retval kErrorOk                    Successfully received sync event.
+\retval Other                       An error occured.
+
+\ingroup module_timesyncu
+*/
+//------------------------------------------------------------------------------
+tOplkError timesyncu_waitSyncEvent(ULONG timeout_p)
+{
+    tOplkError  ret;
+
+    ret = timesyncucal_waitSyncEvent(timeout_p);
+
+    if (ret != kErrorOk)
+        return ret;
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+        if (!instance_l.fFirstSyncEventDone)
+        {   // Set MN net time at first sync event
+            ret = setNetTime();
+            if (ret != kErrorOk)
+                return ret;
+
+            instance_l.fFirstSyncEventDone = TRUE;
+        }
+#endif
+
+    return kErrorOk;
+}
 //------------------------------------------------------------------------------
 /**
 \brief  Cleanup timesync module
@@ -134,7 +201,7 @@ void timesyncu_exit(void)
 {
     timesyncucal_exit();
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    pSharedMemory_l = NULL;
+    instance_l.pSharedMemory = NULL;
 #endif
 }
 
@@ -160,7 +227,7 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
         return kErrorNoResource;
 
     // Check if the shared memory is available
-    if (pSharedMemory_l == NULL)
+    if (instance_l.pSharedMemory == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s Pointer to shared memory is invalid!\n",
                               __func__);
@@ -178,7 +245,6 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
 
     return kErrorOk;
 }
-#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -186,7 +252,6 @@ tOplkError timesyncu_getSocTime(tOplkApiSocTimeInfo* pSocTime_p)
 /// \name Private Functions
 /// \{
 
-#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
 //------------------------------------------------------------------------------
 /**
 \brief  Obtain SoC time from triple buffer
@@ -202,7 +267,7 @@ static tTimesyncSocTime* getSocTime(void)
     tTimesyncSocTimeTripleBuf*  pTripleBuf;
     OPLK_ATOMIC_T               readBuf;
 
-    pTripleBuf = &pSharedMemory_l->socTime;
+    pTripleBuf = &instance_l.pSharedMemory->kernelToUserSocTime;
 
     OPLK_DCACHE_INVALIDATE(pTripleBuf, sizeof(*pTripleBuf));
 
@@ -224,6 +289,88 @@ static tTimesyncSocTime* getSocTime(void)
     // Return reference to read buffer
     return &pTripleBuf->aTripleBuf[readBuf];
 }
+
+#if defined(CONFIG_INCLUDE_NMT_MN)
+//------------------------------------------------------------------------------
+/**
+\brief  Set SoC net time to kernel
+
+The function sets the network time to kernel using the UserToKernelSocTime shared
+buffer.
+
+\return The function returns a tOplkError code.
+\retval kErrorOk    Net time is set successfully.
+\retval Other       An error occured.
+*/
+//------------------------------------------------------------------------------
+static tOplkError setNetTime(void)
+{
+    OPLK_ATOMIC_T  writeBuf;
+    tNetTime       currentNetTime;
+    tOplkError     ret;
+    BOOL           fValidSystemTime = FALSE;
+
+    // Get system clock time
+    ret = target_getSystemTime(&currentNetTime, &fValidSystemTime);
+
+    if (ret != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s Failed to get current system time!\n",
+                              __func__);
+
+        return ret;
+    }
+
+    if (fValidSystemTime)
+    {
+        instance_l.pSharedMemory->userToKernelSocTime.aTripleBuf[0].netTime.nsec = currentNetTime.nsec;
+        instance_l.pSharedMemory->userToKernelSocTime.aTripleBuf[0].netTime.sec = currentNetTime.sec;
+
+        writeBuf = instance_l.pSharedMemory->userToKernelSocTime.write;
+        OPLK_ATOMIC_EXCHANGE(&instance_l.pSharedMemory->userToKernelSocTime.clean,
+                             writeBuf,
+                             instance_l.pSharedMemory->userToKernelSocTime.write);
+        // Set the newData flag to indicate that a new data is available in the shared buffer
+        instance_l.pSharedMemory->userToKernelSocTime.newData = 1;
+
+        // Flush data cache for variables changed in this function
+        OPLK_DCACHE_FLUSH(&instance_l.pSharedMemory->userToKernelSocTime.write, sizeof(OPLK_ATOMIC_T));
+        OPLK_DCACHE_FLUSH(&instance_l.pSharedMemory->userToKernelSocTime.newData, sizeof(UINT8));
+    }
+
+    return kErrorOk;
+}
 #endif
+#endif
+
+//------------------------------------------------------------------------------
+/**
+\brief  Synchronization callback
+
+This function is called for synchronization by the user CAL module and sets
+the net time at first synchronization event.
+
+*/
+//------------------------------------------------------------------------------
+static void syncCb(void)
+{
+    if (instance_l.pfnSyncCb != NULL)
+    {
+        instance_l.pfnSyncCb();
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+        if (!instance_l.fFirstSyncEventDone)
+        {
+            // Set MN net time at first sync event
+            if (setNetTime() != kErrorOk)
+            {
+                DEBUG_LVL_ERROR_TRACE("%s Failed to set network time!\n",
+                                      __func__);
+            }
+
+            instance_l.fFirstSyncEventDone = TRUE;
+        }
+#endif
+    }
+}
 
 /// \}
