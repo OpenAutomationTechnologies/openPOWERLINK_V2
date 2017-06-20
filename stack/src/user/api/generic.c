@@ -11,6 +11,7 @@ This file contains the implementation of the generic API functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -1736,7 +1737,7 @@ tOplkError oplk_waitSyncEvent(ULONG timeout_p)
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
 
-    return timesyncucal_waitSyncEvent(timeout_p);
+    return timesyncu_waitSyncEvent(timeout_p);
 }
 
 //------------------------------------------------------------------------------
