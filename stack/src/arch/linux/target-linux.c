@@ -11,6 +11,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -417,6 +418,58 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 
     return kErrorOk;
 }
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Get system time
+
+The function returns the current system timestamp.
+
+\param[out]      pNetTime_p         Pointer to current system timestamp.
+\param[out]      pValidSystemTime_p Pointer to flag which is set to indicate the
+                                    system time is valid or not.
+
+\return The function returns a tOplkError code.
+\retval kErrorNoResource        Pointer to current system timestamp is invalid.
+\retval kErrorGeneralError      Get system time function failed.
+\retval kErrorInvalidOperation  Current system time exceeds threshold value.
+\retval kErrorOk                Get current system timestamp successful.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_getSystemTime(tNetTime* pNetTime_p, BOOL* pValidSystemTime_p)
+{
+    struct timespec currentTime;
+
+    if ((pNetTime_p == NULL) || (pValidSystemTime_p == NULL))
+        return kErrorNoResource;
+
+    // Note: clock_gettime() returns 0 for success
+    if (clock_gettime(CLOCK_REALTIME, &currentTime) != 0)
+    {
+        *pValidSystemTime_p = FALSE;
+        return kErrorGeneralError;
+    }
+
+    if (currentTime.tv_sec < 0)
+    {
+        *pValidSystemTime_p = FALSE;
+        DEBUG_LVL_ERROR_TRACE("%s(): Failed! Invalid time stamp.\n",
+                              __func__);
+        return kErrorInvalidOperation;
+    }
+
+    pNetTime_p->sec = currentTime.tv_sec;
+    pNetTime_p->nsec = currentTime.tv_nsec;
+
+    // Set the flag to indicate the system time is valid
+    *pValidSystemTime_p = TRUE;
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
