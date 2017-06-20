@@ -12,6 +12,7 @@ files.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -260,6 +261,10 @@ typedef struct
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     BOOL                    fRedundancy;                            ///< Managing Node Redundancy is enabled
     tNmtEvent               nmtEventGoToStandby;                    ///< NMT command GoToStandby has been requested
+#endif
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+    BOOL                    fIncrementNetTime;                      ///< Flag to increment net time
+    tNetTime                cycleLength;                            ///< Cycle length in nano seconds and seconds
 #endif
 } tDllkInstance;
 
