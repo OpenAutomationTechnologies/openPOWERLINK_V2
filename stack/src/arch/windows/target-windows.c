@@ -10,7 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -290,6 +290,33 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
     return kErrorOk;
 }
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Get system time
+
+The function returns the current system timestamp.
+
+\param[out]      pNetTime_p         Pointer to current system timestamp.
+\param[out]      pValidSystemTime_p Pointer to flag which is set to indicate
+                                    the system time is valid or not.
+
+\return The function returns a tOplkError code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_getSystemTime(tNetTime* pNetTime_p, BOOL* pValidSystemTime_p)
+{
+    UNUSED_PARAMETER(pNetTime_p);
+    UNUSED_PARAMETER(pValidSystemTime_p);
+
+    //Note: Not implemented for this target
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

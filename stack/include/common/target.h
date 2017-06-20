@@ -10,6 +10,7 @@ This file contains the definitions for the target modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -92,6 +93,10 @@ tOplkError target_setLed(tLedType ledType_p,
 /* function to enumerate interfaces */
 tOplkError target_enumerateNetworkInterfaces(tNetIfId* pInterfaces_p,
                                              size_t* pNoInterfaces_p);
+/* function to get current system timestamp */
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+tOplkError target_getSystemTime(tNetTime* pNetTime_p, BOOL* pValidSystemTime_p);
+#endif
 
 #ifdef __cplusplus
 }
