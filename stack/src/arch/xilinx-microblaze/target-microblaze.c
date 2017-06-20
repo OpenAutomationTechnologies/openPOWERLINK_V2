@@ -12,7 +12,7 @@ systems without OS and not using shared buffer library.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -405,6 +405,33 @@ tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
 
     return ret;
 }
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Get system time
+
+The function returns the current system timestamp.
+
+\param[out]      pNetTime_p         Pointer to current system timestamp.
+\param[out]      pValidSystemTime_p Pointer to flag which is set to indicate
+                                    the system time is valid or not.
+
+\return The function returns a tOplkError code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_getSystemTime(tNetTime* pNetTime_p, BOOL* pValidSystemTime_p)
+{
+    UNUSED_PARAMETER(pNetTime_p);
+    UNUSED_PARAMETER(pValidSystemTime_p);
+
+    //Note: Not implemented for this target
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
