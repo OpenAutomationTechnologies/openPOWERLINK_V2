@@ -1,18 +1,15 @@
 /**
 ********************************************************************************
-\file   pcap-console.h
+\file   netselect.h
 
-\brief  Implementation of PCAP functions for console applications
+\brief  Definitions for network interface selection functions.
 
-This file contains the definitions of helper functions for console applications
-using the PCAP library.
-
+This header file provides the definitions for the network interface selection
+functions used by the openPOWERLINK examples.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -37,8 +34,8 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#ifndef _INC_pcap_console_H_
-#define _INC_pcap_console_H_
+#ifndef _INC_netselect_H_
+#define _INC_netselect_H_
 
 //------------------------------------------------------------------------------
 // includes
@@ -60,10 +57,10 @@ extern "C"
 {
 #endif
 
-int selectPcapDevice(char* pDevName_p);
+int netselect_selectNetworkInterface(char* pDevName_p, size_t maxLen_p);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _INC_pcap_console_H_ */
+#endif /* _INC_netselect_H_ */

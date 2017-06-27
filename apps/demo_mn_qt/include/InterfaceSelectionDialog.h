@@ -54,7 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /**
 \brief  InterfaceSelectDialog class
 
-The class implements the PCAP interface selection dialog.
+The class implements the interface selection dialog.
 */
 //------------------------------------------------------------------------------
 class InterfaceSelectionDialog : public QDialog
@@ -70,6 +70,7 @@ public:
 
 private:
     Ui::InterfaceSelectionDialog    ui;
+    static const int                MAX_INTERFACES;
 };
 
 #endif /* _INC_demo_InterfaceSelectDialog_H_ */

@@ -11,7 +11,7 @@ application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -59,10 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <console/console.h>
 #include <eventlog/eventlog.h>
-
-#if defined(CONFIG_USE_PCAP)
-#include <pcap/pcap-console.h>
-#endif
+#include <netselect/netselect.h>
 
 #include <stdio.h>
 #include <limits.h>
@@ -232,20 +229,16 @@ static tOplkError initPowerlink(UINT32 cycleLen_p,
                           kEventlogCategoryControl,
                           "Initializing openPOWERLINK stack");
 
-#if defined(CONFIG_USE_PCAP)
     eventlog_printMessage(kEventlogLevelInfo,
                           kEventlogCategoryGeneric,
-                          "Using libpcap for network access");
+                          "Select the network interface");
     if (devName_p[0] == '\0')
     {
-        if (selectPcapDevice(devName) < 0)
+        if (netselect_selectNetworkInterface(devName, sizeof(devName)) < 0)
             return kErrorIllegalInstance;
     }
     else
         strncpy(devName, devName_p, 128);
-#else
-    UNUSED_PARAMETER(devName_p);
-#endif
 
     memset(&initParam, 0, sizeof(initParam));
     initParam.sizeOfInitParam = sizeof(initParam);
@@ -548,13 +541,9 @@ static int getOptions(int argc_p,
                 break;
 
             default: /* '?' */
-#if defined(CONFIG_USE_PCAP)
                 printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-d DEV_NAME] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
                 printf(" -d DEV_NAME: Ethernet device name to use e.g. eth1\n");
                 printf("              If option is skipped the program prompts for the interface.\n");
-#else
-                printf("Usage: %s [-n NODE_ID] [-l LOGFILE] [-v LOGLEVEL] [-t LOGCATEGORY] [-p]\n", argv_p[0]);
-#endif
                 printf(" -p: Use parsable log format\n");
                 printf(" -v LOGLEVEL: A bit mask with log levels to be printed in the event logger\n");
                 printf(" -t LOGCATEGORY: A bit mask with log categories to be printed in the event logger\n");

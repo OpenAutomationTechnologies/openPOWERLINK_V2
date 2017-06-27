@@ -2,8 +2,8 @@
 #
 # CMake file of CiA 302 MN console demo application
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2016, kalycito Infotech Private Limited
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ SET(DEMO_SOURCES
     ${OBJDICT_DIR}/${OBJDICT}/obdpi.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlog.c
     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
+    ${COMMON_SOURCE_DIR}/netselect/netselect.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
     ${FIRMWARE_MANAGER_SOURCES}
     )
@@ -98,12 +99,6 @@ ENDIF(CFG_INCLUDE_MN_REDUNDANCY)
 
 ################################################################################
 # Setup compile definitions depending on configuration
-
-# PCAP is used for directlink or userspace daemon
-IF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
-    ADD_DEFINITIONS(-DCONFIG_USE_PCAP)
-    SET (DEMO_SOURCES ${DEMO_SOURCES} ${COMMON_SOURCE_DIR}/pcap/pcap-console.c)
-ENDIF (CFG_KERNEL_STACK_DIRECTLINK OR CFG_KERNEL_STACK_USERSPACE_DAEMON)
 
 IF (CFG_KERNEL_STACK_DIRECTLINK)
     UNSET (CFG_DEMO_MN_CONSOLE_USE_SYNCTHREAD CACHE)

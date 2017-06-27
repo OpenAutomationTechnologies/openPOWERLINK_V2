@@ -1,19 +1,17 @@
 /**
 ********************************************************************************
-\file   pcap-console.c
+\file   netselect.c
 
-\brief  Implementation of PCAP helper functions for console applications
+\brief  Implementation of the network interface selection functions.
 
-This file provides helper functions for console applications using the PCAP
-library.
+This header file provides the implementation for the network interface selection
+functions used by the openPOWERLINK examples.
 
 \ingroup module_app_common
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,10 +40,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+#include <oplk/oplk.h>
+#include "netselect.h"
+
 #include <stdio.h>
 #include <string.h>
-#include <pcap.h>
-#include "pcap-console.h"
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,7 +62,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -71,6 +69,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define MAX_INTERFACES  10  // Define the max. number of interfaces shown to the user
 
 //------------------------------------------------------------------------------
 // local types
@@ -90,73 +89,59 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //------------------------------------------------------------------------------
 /**
-\brief  Select PCAP device
+\brief  Select network interface
 
-With this function the PCAP device to be used for openPOWERLINK is selected
+With this function the network interface to be used for openPOWERLINK is selected
 from a list of devices.
 
 \param[out]     pDevName_p          Pointer to store the device name which
                                     should be used.
+\param[in]      maxLen_p            Max length of the string to store the device
+                                    name.
 
 \return The function returns 0 if a device could be selected, otherwise -1.
 
 */
 //------------------------------------------------------------------------------
-int selectPcapDevice(char* pDevName_p)
+int netselect_selectNetworkInterface(char* pDevName_p, size_t maxLen_p)
 {
-    char        sErr_Msg[PCAP_ERRBUF_SIZE];
-    pcap_if_t*  alldevs;
-    pcap_if_t*  seldev;
-    int         i = 0;
-    int         inum;
+    tNetIfId        aInterfaces[MAX_INTERFACES];
+    size_t          noInterfaces = sizeof(aInterfaces) / sizeof(aInterfaces[0]);
+    size_t          i = 0;
+    unsigned int    num;
 
-    /* Retrieve the device list on the local machine */
-    if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
+    if (oplk_enumerateNetworkInterfaces(aInterfaces, &noInterfaces) == kErrorOk)
     {
-        fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
+        printf("--------------------------------------------------\n");
+        printf("List of Ethernet cards found in this system:\n");
+        printf("--------------------------------------------------\n");
+
+        for (i = 0; i < noInterfaces; i++)
+        {
+            // Print adapters
+            printf("%u. ", (unsigned int)i + 1);
+            printf("%s\n      %s\n", aInterfaces[i].aDeviceDescription, aInterfaces[i].aDeviceName);
+        }
+    }
+    else
+        return -1;
+
+    printf("--------------------------------------------------\n");
+    printf("Select the interface to be used for POWERLINK (1-%u):", (unsigned int)i);
+    if (scanf("%u", &num) == EOF)
+    {
         return -1;
     }
 
     printf("--------------------------------------------------\n");
-    printf("List of Ethernet cards found in this system:\n");
-    printf("--------------------------------------------------\n");
-
-    for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
-    {
-        printf("%d. ", ++i);
-        if (seldev->description)
-            printf("%s\n      %s\n", seldev->description, seldev->name);
-        else
-            printf("%s\n", seldev->name);
-    }
-
-    if (i == 0)
-    {
-        fprintf(stderr, "\nNo interfaces found! Make sure pcap library is installed.\n");
-        return -1;
-    }
-
-    printf("--------------------------------------------------\n");
-    printf("Select the interface to be used for POWERLINK (1-%d):", i);
-    if (scanf("%d", &inum) == EOF)
-    {
-        pcap_freealldevs(alldevs);
-        return -1;
-    }
-
-    printf("--------------------------------------------------\n");
-    if ((inum < 1) || (inum > i))
+    if ((num < 1) || (num > i))
     {
         printf("\nInterface number out of range.\n");
-        pcap_freealldevs(alldevs);
         return -1;
     }
 
-    /* Jump to the selected adapter */
-    for (seldev = alldevs, i = 0; i < (inum - 1); seldev = seldev->next, i++)
-    {   // do nothing
-    }
-    strncpy(pDevName_p, seldev->name, 127);
+    // Return the selected interface name
+    strncpy(pDevName_p, aInterfaces[num - 1].aDeviceName, maxLen_p);
 
     return 0;
 }
@@ -166,6 +151,5 @@ int selectPcapDevice(char* pDevName_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 /// \}
