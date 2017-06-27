@@ -310,6 +310,11 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   API Event. The connection to a simulation environment can be established by
   exported functions and function pointers.
 
+- **CFG_USE_PCAP_EDRV**
+
+  If this option is set to ON, the libaries will be compiled with libpcap for
+  network access instead of Linux raw sockets.
+
 ## Windows Configuration Options
 
 - **CFG_WINDOWS_DLL**

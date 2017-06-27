@@ -469,6 +469,13 @@ SET(HARDWARE_DRIVER_LINUXUSER_SOURCES
     ${EDRV_SOURCE_DIR}/edrv-pcap_linux.c
     )
 
+SET(HARDWARE_DRIVER_LINUXUSERRAWSOCKET_SOURCES
+    ${KERNEL_SOURCE_DIR}/veth/veth-linuxuser.c
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-posix.c
+    ${EDRV_SOURCE_DIR}/edrvcyclic.c
+    ${EDRV_SOURCE_DIR}/edrv-rawsock_linux.c
+    )
+
 SET(HARDWARE_DRIVER_WINDOWS_SOURCES
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${EDRV_SOURCE_DIR}/edrv-pcap_win.c
