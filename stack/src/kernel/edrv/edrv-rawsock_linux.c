@@ -152,7 +152,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     struct sockaddr_ll sock_addr;
     struct ifreq ifr;
     int BlockingMode=0;
-  
+
 
     // Check parameter validity
     ASSERT(pEdrvInitParam_p != NULL);
@@ -188,66 +188,66 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
         return kErrorEdrvInit;
     }
 
-    edrvInstance_l.sock = socket(PF_PACKET,SOCK_RAW,htons(PROTO_PLK));
-    if(edrvInstance_l.sock < 0) 
+    edrvInstance_l.sock = socket(PF_PACKET, SOCK_RAW, htons(PROTO_PLK));
+    if (edrvInstance_l.sock < 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__,strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("%s() cannot open socket. Error = %s\n", __func__, strerror(errno));
         return kErrorEdrvInit;
     }
     
-    if(ioctl(edrvInstance_l.sock, FIONBIO, &BlockingMode) != 0)
+    if (ioctl(edrvInstance_l.sock, FIONBIO, &BlockingMode) != 0)
     {
         result = -1;
-        DEBUG_LVL_ERROR_TRACE("%s() ioctl(FIONBIO) fails. Error = %s\n", __func__,strerror(errno)); 
+        DEBUG_LVL_ERROR_TRACE("%s() ioctl(FIONBIO) fails. Error = %s\n", __func__,strerror(errno));
     }
     
     // Set option PACKET_QDISC_BYPASS. It allows to transmit a frame faster through TCP/IP stack. Available since linux 3.14
     if (setsockopt(edrvInstance_l.sock, SOL_PACKET, PACKET_QDISC_BYPASS, &sock_qdisc_bypass, sizeof(sock_qdisc_bypass)) != 0)
     {
-        DEBUG_LVL_ERROR_TRACE("Couldn't set PACKET_QDISC_BYPASS socket option. Error = %s\n", __func__,strerror(errno));
+        DEBUG_LVL_ERROR_TRACE("Couldn't set PACKET_QDISC_BYPASS socket option. Error = %s\n", __func__, strerror(errno));
     }
-    else 
+    else
     {
         DEBUG_LVL_EDRV_TRACE("Kernel qdisc bypass is enabled\n");
     }
     OPLK_MEMSET(&ifr, 0, sizeof (struct ifreq));
     strncpy(ifr.ifr_name, edrvInstance_l.initParam.hwParam.pDevName, IFNAMSIZ - 1);
 
-    if(ioctl(edrvInstance_l.sock,SIOCGIFFLAGS, &ifr)<0)
+    if (ioctl(edrvInstance_l.sock, SIOCGIFFLAGS, &ifr)<0)
     {
         result = -1;
         DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFFLAGS) fails. Error = %s\n", __func__, strerror(errno));
     }
-        
+
     ifr.ifr_flags = ifr.ifr_flags | IFF_PROMISC;
-    if(ioctl(edrvInstance_l.sock,SIOCSIFFLAGS, &ifr))
+    if (ioctl(edrvInstance_l.sock, SIOCSIFFLAGS, &ifr))
     {
         result = -1;
         DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCSIFFLAGS) with IFF_PROMISC fails. Error = %s\n", __func__, strerror(errno));
     }
 
-    if(ioctl(edrvInstance_l.sock,SIOCGIFINDEX, &ifr) != 0)
+    if (ioctl(edrvInstance_l.sock, SIOCGIFINDEX, &ifr) != 0)
     {
         result = -1;
         DEBUG_LVL_ERROR_TRACE("%s() ioctl(SIOCGIFINDEX) fails. Error = %s\n", __func__, strerror(errno));
     }
     sock_addr.sll_ifindex = ifr.ifr_ifindex;
 
-    
+
     sock_addr.sll_family = AF_PACKET;
     sock_addr.sll_protocol = htons(PROTO_PLK);
-    if(bind(edrvInstance_l.sock, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) !=0)
+    if (bind(edrvInstance_l.sock, (struct sockaddr*)&sock_addr, sizeof(sock_addr)) !=0)
     {
         result = -1;
         DEBUG_LVL_ERROR_TRACE("%s() bind fails. Error = %s\n", __func__, strerror(errno));
     }
-    if(result < 0)
+    if (result < 0)
     {
         close(edrvInstance_l.sock);
         DEBUG_LVL_ERROR_TRACE("%s() Couldn't init ethernet adapter:%s", __func__, ifr.ifr_name);
-        return kErrorEdrvInit;	
+        return kErrorEdrvInit;
     }
-      
+
     if (sem_init(&edrvInstance_l.syncSem, 0, 0) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() couldn't init semaphore\n", __func__);
@@ -271,7 +271,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     pthread_setname_np(edrvInstance_l.hThread, "oplk-edrvrawsock");
 #endif
 
-    // wait until thread is started 
+    // wait until thread is started
     sem_wait(&edrvInstance_l.syncSem);
 
     return kErrorOk;
@@ -293,7 +293,7 @@ tOplkError edrv_exit(void)
    
     edrvInstance_l.StartCommunication = 0;
     usleep(100000); //wait 100ms to terminate thread safely
-    // Destroy the thread	
+    // Destroy the thread
     if(edrvInstance_l.ThreadIsExited)
         pthread_cancel(edrvInstance_l.hThread);
     // Destroy the mutex
@@ -372,15 +372,15 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
         iSockRet = send(edrvInstance_l.sock, (unsigned char *)pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize,0);
-        if(iSockRet < 0)         
+        if (iSockRet < 0)
         {
-            DEBUG_LVL_EDRV_TRACE("%s() send() returned %d (%s)\n",
-                                        __func__, iSockRet, );
+            DEBUG_LVL_EDRV_TRACE("%s() send() returned %d\n",
+                                        __func__, iSockRet);
             return kErrorInvalidOperation;
         }
         else
         {
-            packetHandler((u_char*)&edrvInstance_l,iSockRet,(u_char *)pBuffer_p->pBuffer);
+            packetHandler((u_char*)&edrvInstance_l, iSockRet, (u_char *)pBuffer_p->pBuffer);
         }
     }
 
@@ -641,12 +641,12 @@ static void* workerThread(void* pArgument_p)
    // signal that thread is successfully started
    sem_post(&pInstance->syncSem);
    
-   while(edrvInstance_l.StartCommunication)
+   while (edrvInstance_l.StartCommunication)
    {
-    iSoctRet = recvfrom(edrvInstance_l.sock, buffer,  EDRV_MAX_FRAME_SIZE,0,0,0);
-    if(iSoctRet > 0)
+    iSoctRet = recvfrom(edrvInstance_l.sock, buffer, EDRV_MAX_FRAME_SIZE, 0, 0, 0);
+    if (iSoctRet > 0)
     {
-        packetHandler((u_char*)pInstance,iSoctRet,buffer);
+        packetHandler((u_char*)pInstance, iSoctRet, buffer);
     }
    }
     edrvInstance_l.ThreadIsExited = 1;
@@ -723,5 +723,3 @@ static BOOL getLinkStatus(const char* pIfName_p)
 
     return fRunning;
 }
-
-/// \}
