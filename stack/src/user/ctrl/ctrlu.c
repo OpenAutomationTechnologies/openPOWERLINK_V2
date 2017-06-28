@@ -391,9 +391,8 @@ tOplkError ctrlu_initStack(const tOplkApiInitParam* pInitParam_p)
         goto Exit;
 
     DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
-    OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
-    strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
-    ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
+    OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, sizeof(ctrlParam.aMacAddress));
+    strncpy(ctrlParam.aNetIfName, ctrlInstance_l.initParam.hwParam.pDevName, sizeof(ctrlParam.aNetIfName) - 1);
     ctrlucal_storeInitParam(&ctrlParam);
 
     ret = ctrlucal_executeCmd(kCtrlInitStack, &retVal);

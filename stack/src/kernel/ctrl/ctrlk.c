@@ -471,9 +471,8 @@ static tOplkError initStack(void)
         return ret;
 
     // initialize Edrv
-    OPLK_MEMCPY(edrvInitParam.aMacAddr, instance_l.initParam.aMacAddress, 6);
-    edrvInitParam.hwParam.devNum = instance_l.initParam.ethDevNumber;
-    edrvInitParam.hwParam.pDevName = instance_l.initParam.szEthDevName;
+    OPLK_MEMCPY(edrvInitParam.aMacAddr, instance_l.initParam.aMacAddress, sizeof(edrvInitParam.aMacAddr));
+    edrvInitParam.pDevName = instance_l.initParam.aNetIfName;
     edrvInitParam.pfnRxHandler = dllkframe_processFrameReceived;
     ret = edrv_init(&edrvInitParam);
     if (ret != kErrorOk)
@@ -481,7 +480,7 @@ static tOplkError initStack(void)
 
     // copy local MAC address from Ethernet driver back to init parameters
     // because Ethernet driver may have read it from controller EEPROM
-    OPLK_MEMCPY(instance_l.initParam.aMacAddress, edrv_getMacAddr(), 6);
+    OPLK_MEMCPY(instance_l.initParam.aMacAddress, edrv_getMacAddr(), sizeof(instance_l.initParam.aMacAddress));
     ctrlkcal_storeInitParam(&instance_l.initParam);
 
     // initialize Edrvcyclic

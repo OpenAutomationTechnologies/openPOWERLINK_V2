@@ -132,7 +132,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
+    if (pEdrvInitParam_p->pDevName == NULL)
         return kErrorEdrvInit;
 
     // save the init data
@@ -148,12 +148,12 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
         (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
         (edrvInstance_l.initParam.aMacAddr[5] == 0))
     {   // read MAC address from controller
-        getMacAdrs(edrvInstance_l.initParam.hwParam.pDevName,
+        getMacAdrs(edrvInstance_l.initParam.pDevName,
                    edrvInstance_l.initParam.aMacAddr);
     }
 
     edrvInstance_l.pPcap = pcap_open_live(
-                        edrvInstance_l.initParam.hwParam.pDevName,
+                        edrvInstance_l.initParam.pDevName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milliseconds read timeout

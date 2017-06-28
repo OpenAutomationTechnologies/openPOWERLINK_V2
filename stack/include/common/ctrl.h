@@ -111,9 +111,8 @@ between user and kernel stack.
 */
 typedef struct
 {
-    UINT8           aMacAddress[6];     ///< MAC address of the Ethernet interface
-    UINT            ethDevNumber;       ///< Device number of the Ethernet interface
-    char            szEthDevName[128];  ///< Device name of the Ethernet interface
+    UINT8           aMacAddress[6];     ///< MAC address of the network interface
+    char            aNetIfName[128];    ///< Device name of the network interface
 } tCtrlInitParam;
 
 //------------------------------------------------------------------------------

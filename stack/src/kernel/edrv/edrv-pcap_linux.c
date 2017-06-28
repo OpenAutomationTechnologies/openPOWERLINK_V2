@@ -142,7 +142,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     // clear instance structure
     OPLK_MEMSET(&edrvInstance_l, 0, sizeof(edrvInstance_l));
 
-    if (pEdrvInitParam_p->hwParam.pDevName == NULL)
+    if (pEdrvInitParam_p->pDevName == NULL)
         return kErrorEdrvInit;
 
     // save the init data
@@ -158,7 +158,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
         (edrvInstance_l.initParam.aMacAddr[4] == 0) &&
         (edrvInstance_l.initParam.aMacAddr[5] == 0))
     {   // read MAC address from controller
-        getMacAdrs(edrvInstance_l.initParam.hwParam.pDevName,
+        getMacAdrs(edrvInstance_l.initParam.pDevName,
                    edrvInstance_l.initParam.aMacAddr);
     }
 
@@ -281,7 +281,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     if (pBuffer_p->txBufferNumber.pArg != NULL)
         return kErrorInvalidOperation;
 
-    if (getLinkStatus(edrvInstance_l.initParam.hwParam.pDevName) == FALSE)
+    if (getLinkStatus(edrvInstance_l.initParam.pDevName) == FALSE)
     {
         /* there's no link! We pretend that packet is sent and immediately call
          * tx handler! Otherwise the stack would hang! */
@@ -629,7 +629,7 @@ static pcap_t* startPcap(void)
     char    errorMessage[PCAP_ERRBUF_SIZE];
 
     // Create a pcap live capture handle
-    pPcapInst = pcap_create(edrvInstance_l.initParam.hwParam.pDevName, errorMessage);
+    pPcapInst = pcap_create(edrvInstance_l.initParam.pDevName, errorMessage);
     if (pPcapInst == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() Error!! Can't open pcap: %s\n", __func__, errorMessage);

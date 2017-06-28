@@ -449,7 +449,7 @@ typedef struct
                                                          In this case the stack calls the provided application callback function when synchronous data can be
                                                          exchanged. If a split stack is used (e.g. Linux user/kernel) it must be initialized with NULL. In
                                                          this case the application must use oplk_waitSyncEvent() for waiting on synchronous data. */
-    tHwParam            hwParam;                    ///< The hardware parameters of the node
+    tNetIfParameter     hwParam;                    ///< The network interface card parameters of the node
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
     UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)

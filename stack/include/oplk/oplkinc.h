@@ -67,16 +67,15 @@ typedef struct
 } tNetTime;
 
 /**
-\brief Hardware parameter structure
+\brief Network interface parameter structure
 
-The following structure specifies the hardware parameters of an openPOWERLINK
-Ethernet controller.
+The following structure specifies the network interface parameters
+of a network interface used with openPOWERLINK.
 */
 typedef struct
 {
-    UINT                devNum;     ///< Device number of the used Ethernet controller
-    const char*         pDevName;   ///< Device name of the Ethernet controller (valid if non-null)
-} tHwParam;
+    const char*         pDevName;   ///< Device name of the network interface card (valid if non-null)
+} tNetIfParameter;
 
 /**
 \brief Time of day structure
