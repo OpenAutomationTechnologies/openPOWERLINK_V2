@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK CN library on Windows
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -116,6 +116,7 @@ IF(CFG_STORE_RESTORE)
     ADD_DEFINITIONS(-DCONFIG_INCLUDE_STORE_RESTORE)
 ENDIF()
 ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+ADD_DEFINITIONS(-DCONFIG_FIND_LOCAL_INTERFACES)
 
 # Additional include directories
 INCLUDE_DIRECTORIES(

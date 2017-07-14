@@ -89,6 +89,10 @@ int        target_unlock(void);
 tOplkError target_setLed(tLedType ledType_p,
                          BOOL fLedOn_p);
 
+/* function to enumerate interfaces */
+tOplkError target_enumerateNetworkInterfaces(tNetIfId* pInterfaces_p,
+                                             size_t* pNoInterfaces_p);
+
 #ifdef __cplusplus
 }
 #endif

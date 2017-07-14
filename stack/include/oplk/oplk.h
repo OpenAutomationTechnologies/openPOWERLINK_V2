@@ -9,7 +9,7 @@ API.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -53,10 +53,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define OPLK_MAC_ADDRESS_LENGTH     6
+#define OPLK_MAX_ETH_DEVICE_NAME    64
+#define OPLK_MAX_ETH_DEVICE_DESC    256
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+
+/**
+\brief Structure identifying a network interface
+
+This structure identifies a network interface.
+*/
+typedef struct
+{
+    UINT8   aMacAddress[OPLK_MAC_ADDRESS_LENGTH];           ///< MAC address of the interface
+    char    aDeviceName[OPLK_MAX_ETH_DEVICE_NAME];          ///< Name (system-internal identifier) of the interface
+    char    aDeviceDescription[OPLK_MAX_ETH_DEVICE_DESC];   ///< Description of the interface
+} tNetIfId;
 
 typedef enum
 {
@@ -529,6 +544,8 @@ OPLKDLLEXPORT tOplkError oplk_destroy(void);
 OPLKDLLEXPORT void oplk_exit(void);
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(const tOplkApiInitParam* pInitParam_p);
 OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_shutdown(void);
+OPLKDLLEXPORT tOplkError oplk_enumerateNetworkInterfaces(tNetIfId* pInterfaces_p,
+                                                         size_t* pNoInterfaces_p);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p,
                                          void* pVar_p,

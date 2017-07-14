@@ -10,7 +10,7 @@ This file contains the implementation of the generic API functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -334,6 +334,53 @@ tOplkError oplk_shutdown(void)
 
     ret = oplk_destroy();
     oplk_exit();
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Enumerate network interfaces
+
+This function enumerates all available network interfaces to be used by
+openPOWERLINK.
+
+\param[out]     pInterfaces_p       Pointer to store the list of
+                                    found interfaces.
+\param[in,out]  pNoInterfaces_p     Pointer to the number of interfaces.
+                                    The maximum number of interfaces to be
+                                    stored is passed to the function.
+                                    The number of interfaces found is returned.
+
+\return The function returns a \ref tOplkError error code.
+
+\ingroup module_api
+*/
+//------------------------------------------------------------------------------
+tOplkError oplk_enumerateNetworkInterfaces(tNetIfId* pInterfaces_p,
+                                           size_t* pNoInterfaces_p)
+{
+    tOplkError  ret;
+
+    if ((pInterfaces_p == NULL) || (pNoInterfaces_p == NULL))
+        return kErrorApiInvalidParam;
+
+#if defined(CONFIG_FIND_LOCAL_INTERFACES)
+    ret = target_enumerateNetworkInterfaces(pInterfaces_p, pNoInterfaces_p);
+#else
+    if (*pNoInterfaces_p > 0)
+    {
+        // Set pre-defined interface name
+        memset(pInterfaces_p[0].aMacAddress, 0, sizeof(pInterfaces_p[0].aMacAddress));
+        strcpy(pInterfaces_p[0].aDeviceName, "plk");
+        strcpy(pInterfaces_p[0].aDeviceDescription, "POWERLINK interface");
+        *pNoInterfaces_p = 1;
+
+        ret = kErrorOk;
+    }
+    else
+        ret = kErrorApiInvalidParam;
+#endif
 
     return ret;
 }

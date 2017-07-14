@@ -11,7 +11,7 @@ This file contains the implementation of the WinPcap Ethernet driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -124,6 +124,7 @@ This function initializes the Ethernet driver.
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     char                errorMessage[PCAP_ERRBUF_SIZE];
+    char                aDevicePcapName[256];
     DWORD               threadId;
 
     // Check parameter validity
@@ -152,8 +153,11 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
                    edrvInstance_l.initParam.aMacAddr);
     }
 
+    // Add string specific for WinPCap
+    strcpy(aDevicePcapName, "\\Device\\NPF_");
+    strcat(aDevicePcapName, edrvInstance_l.initParam.pDevName);
     edrvInstance_l.pPcap = pcap_open_live(
-                        edrvInstance_l.initParam.pDevName,
+                        aDevicePcapName,
                         65535,  // snaplen
                         1,      // promiscuous mode
                         1,      // milliseconds read timeout

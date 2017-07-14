@@ -2,7 +2,7 @@
 #
 # File lists for openPOWERLINK stack sources
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
@@ -613,6 +613,7 @@ SET(MEMMAP_DUALPROCSHM_SOURCES
 SET(TARGET_WINDOWS_SOURCES
     ${ARCH_SOURCE_DIR}/windows/target-windows.c
     ${ARCH_SOURCE_DIR}/windows/target-mutex.c
+    ${ARCH_SOURCE_DIR}/windows/netif-windows.c
     )
 
 SET(TARGET_WINDOWS_DUAL_SOURCES
@@ -622,6 +623,7 @@ SET(TARGET_WINDOWS_DUAL_SOURCES
 SET(TARGET_LINUX_SOURCES
     ${ARCH_SOURCE_DIR}/linux/target-linux.c
     ${ARCH_SOURCE_DIR}/linux/target-mutex.c
+    ${ARCH_SOURCE_DIR}/linux/netif-linux.c
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
