@@ -9,7 +9,7 @@ Driver interface for the kernel daemon - Header file
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -44,6 +44,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/driver.h>
 #include <common/ctrl.h>
 #include <common/ctrlcal-mem.h>
+#include <kernel/ctrlk.h>
 
 //------------------------------------------------------------------------------
 // const defines
