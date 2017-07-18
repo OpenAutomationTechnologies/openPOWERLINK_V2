@@ -12,7 +12,7 @@ suitable structure before forwarding to a specific kernel stack module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include "drvintf.h"
 
-#include <kernel/ctrlk.h>
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
@@ -285,7 +284,7 @@ tOplkError drv_sendAsyncFrame(const void* pArg_p)
 
     asyncFrameInfo = (tIoctlDllCalAsync*)pArg_p;
     frameInfo.frameSize = asyncFrameInfo->size;
-    frameInfo.frame.pBuffer = (tPlkFrame*)(pArg_p + sizeof(tIoctlDllCalAsync));
+    frameInfo.frame.pBuffer = (tPlkFrame*)((UINT8*)pArg_p + sizeof(tIoctlDllCalAsync));
 
     return dllkcal_writeAsyncFrame(&frameInfo, asyncFrameInfo->queue);
 }
