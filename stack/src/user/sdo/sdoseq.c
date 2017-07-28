@@ -736,6 +736,8 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
                                    tSdoSeqEvent event_p,
                                    const tAsySdoSeq* pRecvFrame_p)
 {
+    UNUSED_PARAMETER(sdoSeqConHdl_p);
+
     tOplkError  ret = kErrorOk;
 
     switch (event_p)
@@ -779,23 +781,8 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2; // change state to kSdoSeqStateInit2
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             }
-            else
-            {   // error -> close - delete timer
-                timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
 
-                if (((pRecvFrame_p->recvSeqNumCon & SDO_CON_MASK) != 0x00) ||
-                    ((pRecvFrame_p->sendSeqNumCon & SDO_CON_MASK) != 0x00))
-                {   // d.k. only answer with close message if the message sent was not a close message
-                    pSdoSeqCon_p->recvSeqNum = ami_getUint8Le(&pRecvFrame_p->recvSeqNumCon);
-                    pSdoSeqCon_p->sendSeqNum = ami_getUint8Le(&pRecvFrame_p->sendSeqNumCon);
-                    // set rcon and scon to 0
-                    pSdoSeqCon_p->sendSeqNum &= SEQ_NUM_MASK;
-                    pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
-                    sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
-                }
-
-                sdoSeqInstance_l.pfnSdoComConCb(sdoSeqConHdl_p, kAsySdoConStateInitError);
-            }
+            // otherwise, this is not an init from extern therefore silently ignore it
             break;
 
         default:
