@@ -1078,7 +1078,7 @@ OBD_BEGIN()
 
         // Object 1F8Ah: NMT_MNCycleTiming_REC
         OBD_BEGIN_INDEX_RAM(0x1F8A, 0x03, FALSE)
-            OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x00, kObdTypeUInt8, kObdAccConst, tObdUnsigned8, NumberOfEntries, 0x02)
+            OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x00, kObdTypeUInt8, kObdAccR, tObdUnsigned8, NumberOfEntries, 0x02)
             OBD_SUBINDEX_RAM_VAR(0x1F8A, 0x01, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, WaitSoCPReq_U32, 1000)           // in [ns]
             OBD_SUBINDEX_RAM_VAR_RG(0x1F8A, 0x02, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, AsyncSlotTimeout_U32, 100000, 250, 0xFFFFFFFF) // in [ns]
         OBD_END_INDEX(0x1F8A)
@@ -1088,7 +1088,7 @@ OBD_BEGIN()
 
         // Object 1F8Ch: NMT_CurrNMTState_U8
         OBD_BEGIN_INDEX_RAM(0x1F8C, 0x01, FALSE)
-            OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kObdTypeUInt8, (kObdAccR | kObdAccPdo), tObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
+            OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kObdTypeUInt8, kObdAccR, tObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
         OBD_END_INDEX(0x1F8C)
 
         // Object 1F8Dh: NMT_PResPayloadLimitList_AU16
