@@ -572,9 +572,15 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
         case kNmtEventDllCePres:
         case kNmtEventDllCePreq:
         case kNmtEventDllCeSoa:
-            if (triggerLossOfSocEvent())
+            if (nmtState_p == kNmtCsPreOperational2)
+            {   // logical loss of SoC is counted always in PreOp2
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
-
+            }
+            else
+            {   // in other states, avoid double counting with SoC timeouts
+                if (triggerLossOfSocEvent())
+                    pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+            }
         case kNmtEventDllCeAsnd:
         default:
             // remain in this state
