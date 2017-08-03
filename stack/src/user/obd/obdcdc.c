@@ -438,6 +438,9 @@ The function loads the next buffer from the CDC
 static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize_p)
 {
     tOplkError  ret = kErrorOk;
+#if (OBDCDC_DISABLE_FILE_SUPPORT == FALSE)
+    size_t      count;
+#endif
 
     switch (pCdcInfo_p->type)
     {
@@ -464,8 +467,8 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize_p)
                 pCdcInfo_p->bufferSize = bufferSize_p;
             }
 
-            fread(pCdcInfo_p->pCurBuffer, bufferSize_p, 1, pCdcInfo_p->handle.pFdCdcFile);
-            if (ferror(pCdcInfo_p->handle.pFdCdcFile) || feof(pCdcInfo_p->handle.pFdCdcFile))
+            count = fread(pCdcInfo_p->pCurBuffer, bufferSize_p, 1, pCdcInfo_p->handle.pFdCdcFile);
+            if (ferror(pCdcInfo_p->handle.pFdCdcFile) || feof(pCdcInfo_p->handle.pFdCdcFile) || (count == 0))
             {
                 ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
                 if (ret != kErrorOk)

@@ -555,6 +555,7 @@ tOplkError obdconf_loadPart(tObdPart odPart_p,
 {
     tOplkError          ret = kErrorObdStoreHwError;
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
+    size_t              count;
 
     if (odPart_p != pInstEntry->curOdPart)
     {
@@ -570,8 +571,8 @@ tOplkError obdconf_loadPart(tObdPart odPart_p,
     }
 
     // Read OD data from current file position
-    fread(pData_p, size_p, 1, pInstEntry->pFdBkupArchiveFile);
-    if (ferror(pInstEntry->pFdBkupArchiveFile))
+    count = fread(pData_p, size_p, 1, pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -722,18 +723,18 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature
     fseek(pInstEntry->pFdBkupArchiveFile, 0, SEEK_SET);
 
     // Read target signature and calculate the CRC for it
-    fread(&readTargetSign, sizeof(readTargetSign), 1, pInstEntry->pFdBkupArchiveFile);
+    count = fread(&readTargetSign, sizeof(readTargetSign), 1, pInstEntry->pFdBkupArchiveFile);
     dataCrc = obdconf_calculateCrc16(0, &readTargetSign, sizeof(readTargetSign));
-    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile))
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
 
     // Read OD signature and calculate the CRC for it
-    fread(&readOdSign, sizeof(readOdSign), 1, pInstEntry->pFdBkupArchiveFile);
+    count = fread(&readOdSign, sizeof(readOdSign), 1, pInstEntry->pFdBkupArchiveFile);
     dataCrc = obdconf_calculateCrc16(dataCrc, &readOdSign, sizeof(readOdSign));
-    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile))
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
