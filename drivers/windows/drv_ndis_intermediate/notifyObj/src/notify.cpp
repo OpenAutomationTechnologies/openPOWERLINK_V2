@@ -251,6 +251,7 @@ STDMETHODIMP CNotify::NotifyBindingPath(IN DWORD changeFlag_p, IN INetCfgBinding
     LPWSTR               pszwInfIdUpper = NULL;
     DWORD                characteristics;
     HRESULT              hret = S_OK;
+    LPWSTR               pNodeId = NULL;
 
     if (changeFlag_p & (NCN_ENABLE | NCN_REMOVE))
     {
@@ -291,6 +292,23 @@ STDMETHODIMP CNotify::NotifyBindingPath(IN DWORD changeFlag_p, IN INetCfgBinding
                 // Upper binding in our driver, add the adapter
                 if (changeFlag_p & NCN_ADD)
                 {
+                    /*  In Windows 10, bind notifications appear with different Instance ID
+                        for USB Ethernet adapters on each PC restart. The below section
+                        prevents the overflow of "Network Connections" table.
+                    */
+                    hret = pLowerComponent->GetPnpDevNodeId(&pNodeId);
+                    if (hret != S_OK)
+                        goto ExitFree;
+
+                    if (_wcsnicmp(pNodeId, L"USB", 3) == 0)
+                    {
+                        TRACE(L"Do not add removable adapter %s", pNodeId);
+                        CoTaskMemFree(pNodeId);
+                        goto ExitFree;
+                    }
+
+                    CoTaskMemFree(pNodeId);
+
                     hret = addAdapter(pLowerComponent);
                     if (hret != S_OK)
                     {
