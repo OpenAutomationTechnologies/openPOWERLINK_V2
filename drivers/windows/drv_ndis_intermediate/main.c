@@ -332,14 +332,13 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p,
         plkDriverInstance_l.fInitialized = FALSE;
         stopHeartbeatTimer();
 
-        ctrlk_exit();
-
         drv_getStatus(&status);
         if (status == kCtrlStatusRunning)
         {
             ctrlCmd.cmd = kCtrlShutdown;
             drv_executeCmd(&ctrlCmd);
         }
+        ctrlk_exit();
     }
 
     pIrp_p->IoStatus.Information = 0;
