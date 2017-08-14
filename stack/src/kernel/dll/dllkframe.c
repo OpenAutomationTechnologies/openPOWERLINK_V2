@@ -3171,7 +3171,7 @@ static tOplkError cbCnTimer(const tTimerEventArg* pEventArg_p)
 
     // restart the timer to detect further loss of SoC
     ret = hrestimer_modifyTimer(&dllkInstance_g.timerHdlCycle,
-                                dllkInstance_g.dllConfigParam.cycleLen,
+                                dllkInstance_g.dllConfigParam.cycleLen * 1000ULL,
                                 cbCnTimer,
                                 0L,
                                 FALSE);
