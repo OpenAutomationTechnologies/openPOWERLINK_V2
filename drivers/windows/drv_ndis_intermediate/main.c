@@ -548,7 +548,7 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p, PIRP pIrp_p)
             tMemStruc*   pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
             oplkRet = drv_mapPdoMem((UINT8**)&pMemStruc->pKernelAddr,
                                     (UINT8**)&pMemStruc->pUserAddr,
-                                    (size_t*)&pMemStruc->size);
+                                    &pMemStruc->size);
 
             if (oplkRet != kErrorOk)
             {
