@@ -364,7 +364,7 @@ stack. This allows user stack to access the PDO memory directly.
 */
 //------------------------------------------------------------------------------
 tOplkError drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
-                         size_t* pMemSize_p)
+                         UINT32* pMemSize_p)
 {
     tOplkError      ret;
 
