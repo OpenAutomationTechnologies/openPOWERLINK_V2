@@ -9,7 +9,7 @@ Driver interface for the kernel daemon - Header file
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -87,6 +87,11 @@ tOplkError drv_mapPdoMem(void** ppKernelMem_p,
                          size_t* pMemSize_p);
 void       drv_unMapPdoMem(void* pMem_p,
                            size_t memSize_p);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+tOplkError drv_mapSocMem(UINT32* ppUserMem_p,
+                         size_t* pMemSize_p);
+void       drv_unMapSocMem(void);
+#endif
 
 #ifdef __cplusplus
 }

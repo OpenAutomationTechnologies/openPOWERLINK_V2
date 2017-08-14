@@ -6,7 +6,8 @@
 
 This file contains the implementation for kernel CAL timesync module
 for Windows kernel. The timesync module is responsible to synchronize
-data exchange with user layer.
+data exchange with user layer. In addition SoC timestamp forwarding feature
+implementation is done by creating a shared memory for the user and kernel.
 
 The module uses NDIS events to get notification of new data and pass it to the
 user layer by completing pending IOCTLs.
@@ -15,7 +16,7 @@ user layer by completing pending IOCTLs.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -87,8 +88,12 @@ Local variables and flags used by timesync module.
 */
 typedef struct
 {
-    NDIS_EVENT        syncWaitEvent;    ///< NDIS event for synchronization events.
-    BOOL              fInitialized;     ///< Flag to identify initialization status of module.
+    NDIS_EVENT             syncWaitEvent;    ///< NDIS event for synchronization events.
+    BOOL                   fInitialized;     ///< Flag to identify initialization status of module.
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory* pSharedMemory;    ///< Pointer to timesync shared memory.
+    size_t                 memSize;          ///< Timesync shared memory size.
+#endif
 } tTimesynckCalInstance;
 
 //------------------------------------------------------------------------------
@@ -99,6 +104,10 @@ static tTimesynckCalInstance*   pInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tOplkError allocateSocMem(void);
+static void       freeSocMem(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -131,6 +140,11 @@ tOplkError timesynckcal_init(void)
 
     pInstance_l->fInitialized = TRUE;
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (allocateSocMem() != kErrorOk)
+        return kErrorNoResource;
+#endif
+
     return kErrorOk;
 }
 
@@ -145,6 +159,10 @@ The function cleans up the CAL timesync module.
 //------------------------------------------------------------------------------
 void timesynckcal_exit(void)
 {
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    freeSocMem();
+#endif
+
     if (pInstance_l != NULL)
     {
         NdisFreeMemory(pInstance_l, 0, 0);
@@ -240,15 +258,61 @@ The function returns the reference to the timesync shared memory.
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 {
-    // Not implemented yet
-    return NULL;
+    return pInstance_l->pSharedMemory;
 }
-#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
+//------------------------------------------------------------------------------
+/**
+\brief  Allocate timesync shared memory
 
+The function allocates shared memory required to transfer the SoC timestamp from
+the kernel layer to the user layer.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError allocateSocMem(void)
+{
+    // Set timesync shared memory size
+    pInstance_l->memSize = sizeof(tTimesyncSharedMemory);
+
+    // Allocate timesync shared memory
+    pInstance_l->pSharedMemory = (tTimesyncSharedMemory*)OPLK_MALLOC(pInstance_l->memSize);
+    if (pInstance_l->pSharedMemory == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Unable to allocate SoC memory!\n", __func__);
+        return kErrorNoResource;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Free timesync shared memory
+
+The function allocates shared memory required to transfer the SoC timestamp
+from the kernel layer to the user layer.
+*/
+//------------------------------------------------------------------------------
+static void freeSocMem(void)
+{
+    if (pInstance_l->pSharedMemory != NULL)
+    {
+        OPLK_FREE(pInstance_l->pSharedMemory);
+        pInstance_l->pSharedMemory = NULL;
+        pInstance_l->memSize = 0;
+    }
+    else
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Pointer to timesync shared memory is NULL!\n",
+                              __func__);
+    }
+}
+#endif
 /// \}

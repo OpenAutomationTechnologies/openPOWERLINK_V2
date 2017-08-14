@@ -11,7 +11,7 @@ the openPOWERLINK kernel stack daemon.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -586,11 +586,31 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p,
             tMemStruc*  pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             drv_unMapPdoMem(pMemStruc->pUserAddr, pMemStruc->size);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+            drv_unMapSocMem();
+#endif
 
             status = STATUS_SUCCESS;
             pIrp_p->IoStatus.Information = 0;
             break;
         }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+        case PLK_CMD_SOC_GET_MEM:
+        {
+            tSocMem* pSocMem = (tSocMem*)pIrp_p->AssociatedIrp.SystemBuffer;
+
+            oplkRet = drv_mapSocMem(&pSocMem->socMemOffset, &pSocMem->socMemSize);
+
+            if (oplkRet != kErrorOk)
+                pIrp_p->IoStatus.Information = 0; // return size zero to indicate failure
+            else
+                pIrp_p->IoStatus.Information = sizeof(tSocMem);
+
+            status = STATUS_SUCCESS;
+            break;
+        }
+#endif
 
         default:
             DEBUG_LVL_ERROR_TRACE("PLK: - Invalid cmd (cmd=%d)\n",
