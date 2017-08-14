@@ -50,7 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #undef _WIN32_WINNT
 #endif
 #if !defined(_WIN32_WINNT)
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0601
 #endif
 
 // Do not use extended Win32 API functions
