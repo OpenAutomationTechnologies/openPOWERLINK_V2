@@ -341,12 +341,22 @@ The function implements openPOWERLINK kernel module close function.
 static int powerlinkRelease(struct inode* pInode_p,
                             struct file* pFile_p)
 {
+    UINT16 status;
+	 UINT16 retVal;
     UNUSED_PARAMETER(pInode_p);
     UNUSED_PARAMETER(pFile_p);
 
     DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
 
     stopHeartbeatTimer();
+      
+    // Close lower driver resources
+	 status = ctrlkcal_getStatus();
+	 if (status == kCtrlStatusRunning)
+	 {
+	   ctrlk_executeCmd(kCtrlShutdown, &retVal, &status, NULL);
+    }
+   
     ctrlk_exit();
     atomic_dec(&openCount_g);
 

@@ -332,14 +332,13 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p,
         plkDriverInstance_l.fInitialized = FALSE;
         stopHeartbeatTimer();
 
-        ctrlk_exit();
-
         drv_getStatus(&status);
         if (status == kCtrlStatusRunning)
         {
             ctrlCmd.cmd = kCtrlShutdown;
             drv_executeCmd(&ctrlCmd);
         }
+        ctrlk_exit();
     }
 
     pIrp_p->IoStatus.Information = 0;
@@ -643,6 +642,7 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
     UNICODE_STRING                  deviceLinkUnicodeString;
     NDIS_DEVICE_OBJECT_ATTRIBUTES   deviceObjectAttributes;
     PDRIVER_DISPATCH                dispatchTable[IRP_MJ_MAXIMUM_FUNCTION + 1];
+    UNICODE_STRING                  sddlString;
 
     DEBUG_LVL_ALWAYS_TRACE("PLK %s()...\n", __func__);
 
@@ -656,7 +656,9 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
 
     NdisInitUnicodeString(&deviceName, PLK_DEV_STRING);
     NdisInitUnicodeString(&deviceLinkUnicodeString, PLK_LINK_NAME);
-
+	 // SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R from  wdmsec.h
+	 NdisInitUnicodeString(&sddlString, L"D:P(A;;GA;;;SY)(A;;GRGWGX;;;BA)(A;;GRGW;;;WD)(A;;GR;;;RC)");
+   
     NdisZeroMemory(&deviceObjectAttributes, sizeof(NDIS_DEVICE_OBJECT_ATTRIBUTES));
     // type implicit from the context
     deviceObjectAttributes.Header.Type = NDIS_OBJECT_TYPE_DEFAULT;
@@ -666,7 +668,7 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
     deviceObjectAttributes.SymbolicName = &deviceLinkUnicodeString;
     deviceObjectAttributes.MajorFunctions = &dispatchTable[0];
     deviceObjectAttributes.ExtensionSize = 0;
-    deviceObjectAttributes.DefaultSDDLString = NULL;
+    deviceObjectAttributes.DefaultSDDLString = &sddlString;
     deviceObjectAttributes.DeviceClassGuid = 0;
 
     status = NdisRegisterDeviceEx(driverHandle_p,
