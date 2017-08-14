@@ -42,7 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#define _WIN32_WINNT            0x0601  // Windows version must be at least Windows XP
+#define _WIN32_WINNT            0x0601  // Windows version must be at least Windows Vista
 #define WIN32_LEAN_AND_MEAN             // Do not use extended Win32 API functions
 #include <Windows.h>
 
