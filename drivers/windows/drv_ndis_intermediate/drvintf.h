@@ -88,6 +88,11 @@ tOplkError drv_mapPdoMem(void** ppKernelMem_p,
                          size_t* pMemSize_p);
 void       drv_unMapPdoMem(void* pMem_p,
                            size_t memSize_p);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+tOplkError drv_mapSocMem(void** ppUserMem_p,
+                         size_t* pMemSize_p);
+void       drv_unMapSocMem(void);
+#endif
 
 #ifdef __cplusplus
 }

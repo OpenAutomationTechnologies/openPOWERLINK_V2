@@ -48,6 +48,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
 #include <kernel/errhndk.h>
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#include <kernel/timesynckcal.h>
+#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -94,7 +97,10 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tMemInfo pdoMemInfo_l;
+static tMemInfo pdoMemInfo_l;       // PDO memory instance
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tMemInfo socMemInfo_l;       // SoC memory instance
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -456,6 +462,121 @@ void drv_unMapPdoMem(void* pMem_p,
     pdoMemInfo_l.pUserVa = NULL;
 }
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Map SoC shared memory
+
+This routine maps the SoC memory allocated in the kernel layer of the openPOWERLINK
+stack. This allows user stack to access the SoC memory directly.
+
+\param[out]     ppUserMem_p         Double pointer to the shared memory segment in user space.
+\param[in,out]  pMemSize_p          Pointer to size of SoC memory.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_driver_ndisim
+*/
+//------------------------------------------------------------------------------
+tOplkError drv_mapSocMem(void** ppUserMem_p,
+                         size_t* pMemSize_p)
+{
+    if ((ppUserMem_p == NULL) || (pMemSize_p == NULL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Invalid pointer !\n", __func__);
+        return kErrorNoResource;
+    }
+
+    // Get SoC memory
+    socMemInfo_l.pKernelVa = timesynckcal_getSharedMemory();
+    if (socMemInfo_l.pKernelVa == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Timesync shared memory is NULL !", __func__);
+        return kErrorNoResource;
+    }
+
+    // Set SoC memory size
+    socMemInfo_l.memSize = sizeof(tTimesyncSharedMemory);
+
+    if (*pMemSize_p > socMemInfo_l.memSize)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Higher memory requested (Kernel:%uz User:%uz) !\n",
+                              __func__,
+                              socMemInfo_l.memSize,
+                              *pMemSize_p);
+        *pMemSize_p = 0;
+        return kErrorNoResource;
+    }
+
+    // Allocate new MDL pointing to SoC memory
+    socMemInfo_l.pMdl = IoAllocateMdl(socMemInfo_l.pKernelVa,
+                                      socMemInfo_l.memSize,
+                                      FALSE,
+                                      FALSE,
+                                      NULL);
+
+    if (socMemInfo_l.pMdl == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Error allocating MDL !\n", __func__);
+        return kErrorNoResource;
+    }
+
+    // Update the MDL with physical addresses
+    MmBuildMdlForNonPagedPool(socMemInfo_l.pMdl);
+
+    // Maps the physical pages that are described by an MDL to a virtual address
+    socMemInfo_l.pUserVa = MmMapLockedPagesSpecifyCache(socMemInfo_l.pMdl,    // MDL
+                                                        UserMode,             // Mode
+                                                        MmCached,             // Caching
+                                                        NULL,                 // Address
+                                                        FALSE,                // Bug-check?
+                                                        NormalPagePriority);  // Priority
+
+    if (socMemInfo_l.pUserVa == NULL)
+    {
+        MmUnmapLockedPages(socMemInfo_l.pUserVa, socMemInfo_l.pMdl);
+        IoFreeMdl(socMemInfo_l.pMdl);
+        DEBUG_LVL_ERROR_TRACE("%s() Error mapping MDL !\n", __func__);
+        return kErrorNoResource;
+    }
+
+    *ppUserMem_p = socMemInfo_l.pUserVa;
+    *pMemSize_p = socMemInfo_l.memSize;
+
+    DEBUG_LVL_ALWAYS_TRACE("Mapped SoC memory info U:%p K:%p size:%uz\n",
+                           socMemInfo_l.pUserVa,
+                           socMemInfo_l.pKernelVa,
+                           socMemInfo_l.memSize);
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Unmap SoC shared memory
+
+Unmap the SoC memory shared with the user layer.
+
+\ingroup module_driver_ndisim
+*/
+//------------------------------------------------------------------------------
+void drv_unMapSocMem(void)
+{
+    if (socMemInfo_l.pMdl == NULL)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() MDL already deleted !\n", __func__);
+        return;
+    }
+
+    if (socMemInfo_l.pUserVa != NULL)
+    {
+        MmUnmapLockedPages(socMemInfo_l.pUserVa, socMemInfo_l.pMdl);
+        IoFreeMdl(socMemInfo_l.pMdl);
+    }
+
+    socMemInfo_l.pUserVa = NULL;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
