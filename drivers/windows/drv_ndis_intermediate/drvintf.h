@@ -87,7 +87,7 @@ tOplkError  drv_sendAsyncFrame(UINT8* pArg_p);
 tOplkError  drv_writeErrorObject(tErrHndIoctl* pWriteObject_p);
 tOplkError  drv_readErrorObject(tErrHndIoctl* pReadObject_p);
 tOplkError  drv_mapPdoMem(UINT8** ppKernelMem_p, UINT8** ppUserMem_p,
-                          size_t* pMemSize_p);
+                          UINT32* pMemSize_p);
 void        drv_unMapPdoMem(UINT8* pMem_p, size_t memSize_p);
 
 #ifdef __cplusplus
