@@ -97,6 +97,7 @@ typedef struct
     BOOL          fInitialized;                     ///< Flag for event initialization status.
     UINT8         aUintRxBuffer[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];   /// Array for user internal events.
     UINT8         aK2URxBuffer[sizeof(tEvent) + MAX_EVENT_ARG_SIZE];    /// Array for kernel to user events.
+    BOOL          fStopThread;
 } tEventkCalInstance;
 
 //------------------------------------------------------------------------------
@@ -170,6 +171,7 @@ tOplkError eventkcal_init(void)
                                NULL,
                                NULL);
 
+    instance_l.fStopThread = FALSE;
     ntStatus = PsCreateSystemThread(&instance_l.hThreadHandle,
                                     desiredAccess,
                                     &objectAttributes,
@@ -219,6 +221,7 @@ tOplkError eventkcal_exit(void)
     UINT    i = 0;
 
     instance_l.fInitialized = FALSE;
+    instance_l.fStopThread = TRUE;
 
     NdisSetEvent(&instance_l.kernelWaitEvent);
     NdisSetEvent(&instance_l.userWaitEvent);
@@ -484,7 +487,7 @@ static void eventThread(void* pArg)
 
     instance_l.fThreadIsRunning = TRUE;
 
-    while (instance_l.fInitialized)
+    while (!instance_l.fStopThread)
     {
         fRet = NdisWaitEvent(&instance_l.kernelWaitEvent, timeout);
         if (fRet && (instance_l.kernelEventCount == 0))
