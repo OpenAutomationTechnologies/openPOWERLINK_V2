@@ -198,8 +198,9 @@ To build the PCP daemon:
   - **8139**: Realtek 8139-based network interface cards (100 MBit/s)
   - **8111**: Realtek 8111/8168 network interface cards (1 GBit/s)
   - **8255x**: Intel 8255x-based network interface cards (100 MBit/s)
-  - **82573**: Intel 82573-based network interface cards (1 GBit/s)
-  - **i210**: Intel I210-based network interface cards (1 GBit/s)
+  - **82573**: Intel Gigabit network interface cards (1 GBit/s)
+               (supported chipsets: 82573L, 82567V, 82583V, 82567LM, 82574L, 82540EM)
+  - **i210**:  Intel I210-based network interface cards (1 GBit/s)
   - **emacps**: Zynq Emac network interface controller (1 GBit/s)
 
   Several kernel drivers can be built at once, just append another

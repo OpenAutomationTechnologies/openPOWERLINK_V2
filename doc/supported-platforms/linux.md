@@ -21,8 +21,8 @@ This file contains documentation for the openPOWERLINK stack on Linux.
 One of the following network controllers is required to run openPOWERLINK on
 Linux.
 
+- Network controller card with Intel 82573L, 82540EM (or compatible) 1GBit Ethernet chip
 - Network controller card with Realtek 8111 (or compatible) 1GBit Ethernet chip
-- Network controller card with Intel 82573L (or compatible) 1GBit Ethernet chip
 - Network controller card with Realtek RTL8139 Rev C or D chip
 - Network controller card with Intel 8255x 100MBit Ethernet chip
 - Network controller card with Intel I210 1GBit Ethernet chip

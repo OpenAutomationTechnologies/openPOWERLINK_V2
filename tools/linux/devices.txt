@@ -3,6 +3,7 @@
 82573,Intel Corporation 82583V,e1000e
 82573,Intel Corporation 82567LM,e1000e
 82573,Intel Corporation 82574L,e1000e
+82573,Intel Corporation 82540EM,e1000
 8139,RTL-8139,8139too
 8139,RTL-8100/8101L/8139,8139too
 8255x,Intel Corporation 82557,e100

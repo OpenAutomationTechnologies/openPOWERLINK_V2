@@ -190,7 +190,7 @@ pciid=`echo $devs | cut -f$num -d","`
 driver=`echo $drivers | cut -f$num -d","`
 
 echo "unbinding PCI device $pciid"
-echo -n $pciid > /sys/bus/pci/drivers/${driver}/unbind
+echo -n $pciid > "/sys/bus/pci/drivers/${driver}/unbind"
 
 ###############################################################################
 #

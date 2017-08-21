@@ -118,5 +118,5 @@ pciid=`echo $devs | cut -f$num -d","`
 driver=`echo $drivers | cut -f$num -d","`
 
 echo "rebinding PCI device $pciid to network driver"
-echo -n $pciid > /sys/bus/pci/drivers/${driver}/bind
+echo -n $pciid > "/sys/bus/pci/drivers/${driver}/bind"
 
