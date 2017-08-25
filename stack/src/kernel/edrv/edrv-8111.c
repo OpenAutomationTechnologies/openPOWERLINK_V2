@@ -11,7 +11,7 @@ Realtek 8111/8168.
 *******************************************************************************/
 
 /* ------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -269,6 +269,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define REGDW_TCR_VER_8101E                             (R_REGDW_TCR_HW_VER_ID0 | \
                                                         (R_REGDW_TCR_HW_VER_ID1 & \
                                                          ~R_REGDW_TCR_HW_VER_ID2))
+
+#define REGDW_TCR_VER_8111C                             (~R_REGDW_TCR_HW_VER_ID0 & \
+                                                        R_REGDW_TCR_HW_VER_ID1 & \
+                                                        ~R_REGDW_TCR_HW_VER_ID2)
 
 #define REGDW_TCR_VER_8111D                             (R_REGDW_TCR_HW_VER_ID0_FIELD_HI & \
                                                         ~R_REGDW_TCR_HW_VER_ID0_FIELD_LO & \
@@ -1706,7 +1710,8 @@ static int initOnePciDev(struct pci_dev* pPciDev_p,
     if (((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8111B_8168B) &&
         ((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8100E) &&
         ((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8101E) &&
-        ((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8111D))
+        ((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8111D) &&
+        ((temp & REGDW_TCR_VER_MASK) != REGDW_TCR_VER_8111C))
     {
         // unsupported chip
         printk("%s Unsupported chip! TCR = 0x%08lX\n", __FUNCTION__, (ULONG)temp);
