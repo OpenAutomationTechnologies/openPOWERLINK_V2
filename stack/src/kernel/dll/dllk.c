@@ -12,6 +12,7 @@ This file contains the implementation of the DLL kernel module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -87,6 +88,9 @@ TGT_DLLK_DEFINE_CRITICAL_SECTION
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+#define DLLK_SEC_TO_USEC_FACTOR 1000000U
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -269,6 +273,11 @@ tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p)
     {   // monitor POWERLINK cycle, calculate frame timeout
         dllkInstance_g.frameTimeout = (1000LL * ((UINT64)dllkInstance_g.dllConfigParam.cycleLen)) +
             ((UINT64)dllkInstance_g.dllConfigParam.lossOfFrameTolerance);
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+        // Store the cycle time value in nsec and sec format for net time computation
+        dllkInstance_g.cycleLength.sec = dllkInstance_g.dllConfigParam.cycleLen / DLLK_SEC_TO_USEC_FACTOR;
+        dllkInstance_g.cycleLength.nsec = (dllkInstance_g.dllConfigParam.cycleLen % DLLK_SEC_TO_USEC_FACTOR) * 1000;
+#endif
     }
     else
     {
