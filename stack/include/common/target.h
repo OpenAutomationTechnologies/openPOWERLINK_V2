@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/led.h>
 
 //------------------------------------------------------------------------------
 // const defines
@@ -50,7 +51,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
-
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -68,6 +68,8 @@ tOplkError target_setIpAdrs(char* ifName_p, UINT32 ipAddress_p, UINT32 subnetMas
 tOplkError target_setDefaultGateway(UINT32 defaultGateway_p);
 ULONGLONG  target_getCurrentTimestamp(void);
 void       target_enableGlobalInterrupt(BYTE fEnable_p) SECTION_TARGET_GLOBAL_INT;
+void       target_setInterruptContextFlag(BOOL fEnable_p) SECTION_TARGET_SET_INTCONT;
+BOOL       target_getInterruptContextFlag(void) SECTION_TARGET_GET_INTCONT;
 UINT32     target_getTickCount(void);
 
 /* functions for mutex implementation */
@@ -80,6 +82,9 @@ void       target_destroyMutex(OPLK_MUTEX_T mutexId_p);
 int target_initLock(OPLK_LOCK_T* pSlock_p);
 int target_lock(void);
 int target_unlock(void);
+
+/* function for LED */
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p);
 
 #ifdef __cplusplus
 }

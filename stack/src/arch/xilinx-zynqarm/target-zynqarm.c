@@ -40,7 +40,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <oplk/oplk.h>
+#include <common/oplkinc.h>
+#include <common/target.h>
+
 #include <xscugic.h>
 #include <xtime_l.h>
 #include <xil_cache.h>
@@ -90,6 +92,13 @@ extern XScuGic_Config XScuGic_ConfigTable[];
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// Xilinx Exception enable function
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C!
+#define XIL_EXCEPTION_ENABLE()  __extension__ ({Xil_ExceptionEnable();})
+#else
+#define XIL_EXCEPTION_ENABLE()  Xil_ExceptionEnable()
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -281,6 +290,31 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
     return kErrorOk;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Set POWERLINK status/error LED
+
+The function sets the POWERLINK status/error LED.
+
+\param  ledType_p       Determines which LED shall be set/reset.
+\param  fLedOn_p        Set the addressed LED on (TRUE) or off (FALSE).
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_setLed(tLedType ledType_p, BOOL fLedOn_p)
+{
+    UNUSED_PARAMETER(ledType_p);
+    UNUSED_PARAMETER(fLedOn_p);
+
+    //Note: This function is not yet implemented since there is no design with
+    //      the C5 SoC ARM executing the kernel layer.
+
+    return kErrorOk;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -357,7 +391,7 @@ static void initInterrupts(void)
                                  (Xil_ExceptionHandler)XScuGic_InterruptHandler,
                                  &gicInstance_l);
 
-    Xil_ExceptionEnable();
+    XIL_EXCEPTION_ENABLE();
 }
 
-///\}
+/// \}

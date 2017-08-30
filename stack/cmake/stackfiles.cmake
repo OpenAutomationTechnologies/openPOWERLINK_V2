@@ -3,7 +3,7 @@
 # File lists for openPOWERLINK stack sources
 #
 # Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-# Copyright (c) 2014, Kalycito Infotech Private Limited
+# Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -78,8 +78,10 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/api/generic.c
     ${USER_SOURCE_DIR}/api/processimage.c
     ${USER_SOURCE_DIR}/api/sdotest.c
-    ${USER_SOURCE_DIR}/obd/obd.c
+    ${USER_SOURCE_DIR}/api/service.c
+    ${USER_SOURCE_DIR}/obd/obdu.c
     ${USER_SOURCE_DIR}/obd/obdcreate.c
+    ${USER_SOURCE_DIR}/obd/obdal.c
     ${USER_SOURCE_DIR}/dll/dllucal.c
     ${USER_SOURCE_DIR}/event/eventu.c
     ${USER_SOURCE_DIR}/nmt/nmtu.c
@@ -99,9 +101,36 @@ SET(USER_SOURCES
     ${USER_SOURCE_DIR}/sdo/sdoseq.c
     ${USER_SOURCE_DIR}/sdo/sdoasnd.c
     ${USER_SOURCE_DIR}/sdo/sdoudp.c
+    ${USER_SOURCE_DIR}/timesync/timesyncu.c
     ${USER_SOURCE_DIR}/errhnd/errhndu.c
     ${USER_SOURCE_DIR}/ctrl/ctrlu.c
-    ${USER_SOURCE_DIR}/ledu.c
+    )
+
+################################################################################
+# User obd configuration archive sources
+SET(OBD_CONF_LINUXUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    ${USER_SOURCE_DIR}/obd/obdconfcrc-generic.c
+    )
+
+SET(OBD_CONF_WINDOWSUSER_SOURCES
+    ${USER_SOURCE_DIR}/obd/obdconf-fileio.c
+    ${USER_SOURCE_DIR}/obd/obdconfcrc-generic.c
+    )
+
+################################################################################
+# SDO Stack Target specific sources
+
+SET(SDO_LINUX_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-linux.c
+    )
+
+SET(SDO_WINDOWS_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-windows.c
+    )
+
+SET(SDO_SOCKETWRAPPER_SOURCES
+    ${USER_SOURCE_DIR}/sdo/sdoudp-socketwrapper.c
     )
 
 ################################################################################
@@ -109,6 +138,10 @@ SET(USER_SOURCES
 
 SET(CTRL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-ioctl.c
+    )
+
+SET(CTRL_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-pcie.c
     )
 
 SET(CTRL_UCAL_POSIXMEM_SOURCES
@@ -128,6 +161,10 @@ SET(CTRL_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/ctrl/ctrlucal-noosdual.c
     )
 
+SET(CTRL_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/ctrl/ctrlucal-winioctl.c
+    )
+
 ################################################################################
 # User DLL CAL sources
 
@@ -137,6 +174,10 @@ SET(DLL_UCAL_CIRCBUF_SOURCES
 
 SET(DLL_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/dll/dllucal-ioctl.c
+    )
+
+SET(DLL_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/dll/dllucal-winioctl.c
     )
 
 ################################################################################
@@ -162,6 +203,10 @@ SET(ERRHND_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/errhnd/errhnducal-noosdual.c
     )
 
+SET(ERRHND_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/errhnd/errhnducal-winioctl.c
+    )
+
 ################################################################################
 # User event CAL sources
 
@@ -172,6 +217,11 @@ SET(EVENT_UCAL_LINUXUSER_SOURCES
 
 SET(EVENT_UCAL_LINUXIOCTL_SOURCES
     ${USER_SOURCE_DIR}/event/eventucal-linuxioctl.c
+    )
+
+SET(EVENT_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-linuxpcie.c
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
 SET(EVENT_UCAL_WINDOWS_SOURCES
@@ -194,31 +244,50 @@ SET(EVENT_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
     )
 
+SET(EVENT_UCAL_WINDOWSPCIE_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c
+    ${USER_SOURCE_DIR}/event/eventucal-winpcie.c
+    )
+
+SET(EVENT_UCAL_WINDOWSIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/event/eventucal-winioctl.c
+    )
+
 ################################################################################
 # User PDO CAL sources
 SET(PDO_UCAL_LOCAL_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-local.c
     )
 
 SET(PDO_UCAL_POSIX_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-posixshm.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-bsdsem.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-bsdsem.c
     )
 
 SET(PDO_UCAL_LINUXMMAPIOCTL_SOURCES
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-ioctl.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-ioctl.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxmmap.c
     )
 
+SET(PDO_UCAL_LINUXPCIE_SOURCES
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-ioctl.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-linuxpcie.c
+    )
+
 SET(PDO_UCAL_HOSTIF_SOURCES
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-hostif.c
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c
     )
 
 SET(PDO_UCAL_DUALPROCSHM_SOURCES
     ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c
-    ${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-noosdual.c
+    )
+
+SET(PDO_UCAL_WINDOWSMMAPIOCTL_SOURCES
+    ${USER_SOURCE_DIR}/timesync/timesyncucal-winioctl.c
+    ${USER_SOURCE_DIR}/pdo/pdoucalmem-winioctl.c
     )
 
 ################################################################################
@@ -242,8 +311,11 @@ SET(KERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
+    ${KERNEL_SOURCE_DIR}/led/ledk.c
+    ${KERNEL_SOURCE_DIR}/led/ledktimer.c
     )
 
 ################################################################################
@@ -318,6 +390,11 @@ SET(EVENT_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     )
 
+SET(EVENT_KCAL_WINKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/event/eventkcal-winkernel.c
+    ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
+    )
+
 SET(EVENT_KCAL_NOOSKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/event/eventkcalintf-circbuf.c
     ${KERNEL_SOURCE_DIR}/event/eventkcal-nooscircbuf.c
@@ -338,27 +415,32 @@ SET(EVENT_KCAL_DUALPROCSHM_SOURCES
 
 SET(PDO_KCAL_LOCAL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-local.c
     )
 
 SET(PDO_KCAL_POSIXMEM_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-posixshm.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-bsdsem.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-bsdsem.c
     )
 
 SET(PDO_KCAL_LINUXKERNEL_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
+    )
+
+SET(PDO_KCAL_LINUXKERNEL_SOURCES
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-winkernel.c
+    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-winkernel.c
     )
 
 SET(PDO_KCAL_HOSTIF_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c
     )
 
 SET(PDO_KCAL_DUALPROCSHM_SOURCES
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-noosdual.c
     )
 
 ################################################################################
@@ -381,6 +463,17 @@ SET(HARDWARE_DRIVER_LINUXKERNEL_SOURCES
      ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
      ${KERNEL_SOURCE_DIR}/timer/hrestimer-linuxkernel.c
      ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     )
+
+SET(HARDWARE_DRIVER_WINNDISIM_SOURCES
+     ${KERNEL_SOURCE_DIR}/veth/veth-ndisintemediate.c
+     ${KERNEL_SOURCE_DIR}/timer/hrestimer-ndistimer.c
+     ${EDRV_SOURCE_DIR}/edrvcyclic.c
+     ${EDRV_SOURCE_DIR}/edrv-ndisintermediate.c
+     )
+
+SET(HARDWARE_DRIVER_LINUXPCIE_SOURCES
+     ${KERNEL_SOURCE_DIR}/veth/veth-linuxpcie.c
      )
 
 SET(HARDWARE_DRIVER_OPENMAC_SOURCES
@@ -432,6 +525,11 @@ SET(CIRCBUF_LINUXKERNEL_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
     )
 
+SET(CIRCBUF_WINKERNEL_SOURCES
+    ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
+    ${COMMON_SOURCE_DIR}/circbuf/circbuf-winkernel.c
+    )
+
 SET(CIRCBUF_NOOS_SOURCES
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noos.c
@@ -459,8 +557,20 @@ SET(MEMMAP_NOOSHOSTIF_SOURCES
     ${COMMON_SOURCE_DIR}/memmap/memmap-nooshostif.c
     )
 
+SET(MEMMAP_WINIOCTL_SOURCES
+    ${COMMON_SOURCE_DIR}/memmap/memmap-winioctl.c
+    )
+
+SET(MEMMAP_LINUXPCIE_SOURCES
+    ${COMMON_SOURCE_DIR}/memmap/memmap-linuxpcie.c
+    )
+
 SET(MEMMAP_NULL_SOURCES
     ${COMMON_SOURCE_DIR}/memmap/memmap-null.c
+    )
+
+SET(MEMMAP_DUALPROCSHM_SOURCES
+    ${COMMON_SOURCE_DIR}/memmap/memmap-noosdual.c
     )
 
 ################################################################################
@@ -472,28 +582,32 @@ SET(TARGET_WINDOWS_SOURCES
     ${ARCH_SOURCE_DIR}/windows/target-mutex.c
     )
 
+SET(TARGET_WINDOWS_DUAL_SOURCES
+    ${ARCH_SOURCE_DIR}/windows/lock-dualprocnoos.c
+    )
+
 SET(TARGET_LINUX_SOURCES
     ${ARCH_SOURCE_DIR}/linux/target-linux.c
     ${ARCH_SOURCE_DIR}/linux/target-mutex.c
     )
 
 SET(TARGET_MICROBLAZE_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/systemtimer.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-microblaze.c
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/target-mutex.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/systemtimer.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/usleep.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/target-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/target-mutex.c
     )
 
 SET(TARGET_MICROBLAZE_LOCAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-localnoos.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/lock-localnoos.c
     )
 
 SET(TARGET_MICROBLAZE_DUAL_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/lock-dualprocnoos.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/lock-dualprocnoos.c
     )
 
 SET(TARGET_MICROBLAZE_OPENMAC_SOURCES
-    ${ARCH_SOURCE_DIR}/xilinx_microblaze/openmac-microblaze.c
+    ${ARCH_SOURCE_DIR}/xilinx-microblaze/openmac-microblaze.c
     )
 
 SET(TARGET_XILINX_ARM_SOURCES
@@ -545,7 +659,6 @@ SET(OPLK_HEADERS
     ${STACK_INCLUDE_DIR}/oplk/version.h
     ${STACK_INCLUDE_DIR}/oplk/event.h
     ${STACK_INCLUDE_DIR}/oplk/basictypes.h
-    ${STACK_INCLUDE_DIR}/oplk/led.h
     ${STACK_INCLUDE_DIR}/oplk/nmt.h
     ${STACK_INCLUDE_DIR}/oplk/obd.h
     ${STACK_INCLUDE_DIR}/oplk/obdcdc.h
@@ -573,11 +686,13 @@ SET(STACK_HEADERS
     ${STACK_INCLUDE_DIR}/common/defaultcfg.h
     ${STACK_INCLUDE_DIR}/common/dllcal.h
     ${STACK_INCLUDE_DIR}/common/errhnd.h
+    ${STACK_INCLUDE_DIR}/common/led.h
     ${STACK_INCLUDE_DIR}/common/oplkinc.h
     ${STACK_INCLUDE_DIR}/common/pdo.h
     ${STACK_INCLUDE_DIR}/common/target.h
     ${STACK_INCLUDE_DIR}/common/ftracedebug.h
     ${STACK_INCLUDE_DIR}/common/timer.h
+    ${STACK_INCLUDE_DIR}/common/timersync.h
     )
 
 SET(USER_HEADERS
@@ -594,6 +709,8 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/nmtcnu.h
     ${STACK_INCLUDE_DIR}/user/nmtmnu.h
     ${STACK_INCLUDE_DIR}/user/nmtu.h
+    ${STACK_INCLUDE_DIR}/user/obdconf.h
+    ${STACK_INCLUDE_DIR}/user/obdu.h
     ${STACK_INCLUDE_DIR}/user/pdou.h
     ${STACK_INCLUDE_DIR}/user/pdoucal.h
     ${STACK_INCLUDE_DIR}/user/sdocom.h
@@ -605,6 +722,8 @@ SET(USER_HEADERS
     ${STACK_INCLUDE_DIR}/user/statusu.h
     ${STACK_INCLUDE_DIR}/user/syncu.h
     ${STACK_INCLUDE_DIR}/user/timeru.h
+    ${STACK_INCLUDE_DIR}/user/timesyncu.h
+    ${STACK_INCLUDE_DIR}/user/timesyncucal.h
     )
 
 SET(KERNEL_HEADERS
@@ -628,6 +747,8 @@ SET(KERNEL_HEADERS
     ${STACK_INCLUDE_DIR}/kernel/veth.h
     ${STACK_INCLUDE_DIR}/kernel/edrv.h
     ${STACK_INCLUDE_DIR}/kernel/edrvcyclic.h
+    ${STACK_INCLUDE_DIR}/kernel/timesynck.h
+    ${STACK_INCLUDE_DIR}/kernel/timesynckcal.h
     )
 
 SET(OBJDICT_HEADERS

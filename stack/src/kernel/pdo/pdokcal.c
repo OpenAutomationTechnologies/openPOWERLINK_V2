@@ -107,9 +107,6 @@ tOplkError pdokcal_init(void)
     if ((Ret = pdokcal_openMem()) != kErrorOk)
         return Ret;
 
-    if ((Ret = pdokcal_initSync()) != kErrorOk)
-        return Ret;
-
     dllk_regRpdoHandler(cbProcessRpdo);
 
     return Ret;
@@ -128,7 +125,6 @@ The function de-initializes the PDO kernel CAL module.
 //------------------------------------------------------------------------------
 tOplkError pdokcal_exit(void)
 {
-    pdokcal_exitSync();
     pdokcal_closeMem();
     return kErrorOk;
 }
@@ -153,7 +149,7 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
         case kEventTypePdokAlloc:
             {
                 tPdoAllocationParam* pAllocationParam;
-                pAllocationParam = (tPdoAllocationParam*)pEvent_p->pEventArg;
+                pAllocationParam = (tPdoAllocationParam*)pEvent_p->eventArg.pEventArg;
                 Ret = pdok_allocChannelMem(pAllocationParam);
             }
             break;
@@ -161,7 +157,7 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
         case kEventTypePdokConfig:
             {
                 tPdoChannelConf* pChannelConf;
-                pChannelConf = (tPdoChannelConf*)pEvent_p->pEventArg;
+                pChannelConf = (tPdoChannelConf*)pEvent_p->eventArg.pEventArg;
                 Ret = pdok_configureChannel(pChannelConf);
             }
             break;
@@ -169,7 +165,7 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
         case kEventTypePdokSetupPdoBuf:
             {
                 tPdoMemSize*     pPdoMemSize;
-                pPdoMemSize = (tPdoMemSize*)pEvent_p->pEventArg;
+                pPdoMemSize = (tPdoMemSize*)pEvent_p->eventArg.pEventArg;
                 Ret = pdok_setupPdoBuffers(pPdoMemSize->rxPdoMemSize,
                                            pPdoMemSize->txPdoMemSize);
             }
@@ -179,20 +175,16 @@ tOplkError pdokcal_process(tEvent* pEvent_p)
             {
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
                 tFrameInfo*  pFrameInfo;
-                pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
-                Ret = pdok_processRxPdo(pFrameInfo->pFrame, pFrameInfo->frameSize);
+                pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
+                Ret = pdok_processRxPdo(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
 #else
                 tPlkFrame* pFrame;
 
-                pFrame = (tPlkFrame*)pEvent_p->pEventArg;
+                pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
 
                 Ret = pdok_processRxPdo(pFrame, pEvent_p->eventArgSize);
 #endif
             }
-            break;
-
-        case kEventTypePdokControlSync:
-            Ret = pdokcal_controlSync(*((BOOL*)pEvent_p->pEventArg));
             break;
 
         default:
@@ -231,12 +223,12 @@ static tOplkError cbProcessRpdo(tFrameInfo* pFrameInfo_p)
     event.eventType = kEventTypePdoRx;
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE
     event.eventArgSize   = sizeof(tFrameInfo);
-    event.pEventArg      = pFrameInfo_p;
+    event.eventArg.pEventArg = pFrameInfo_p;
 #else
     // limit copied data to size of PDO (because from some CNs the frame is larger than necessary)
-    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->pFrame->data.pres.sizeLe) +
+    event.eventArgSize = ami_getUint16Le(&pFrameInfo_p->frame.pBuffer->data.pres.sizeLe) +
                                          PLK_FRAME_OFFSET_PDO_PAYLOAD; // pFrameInfo_p->frameSize;
-    event.pEventArg = pFrameInfo_p->pFrame;
+    event.eventArg.pEventArg = pFrameInfo_p->frame.pBuffer;
 #endif
     ret = eventk_postEvent(&event);
 #if CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE

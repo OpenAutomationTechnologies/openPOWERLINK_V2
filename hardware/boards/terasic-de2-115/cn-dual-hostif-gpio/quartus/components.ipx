@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<library>
+    <path path="../../../../ipcore/altera/components.ipx" />
+    <path path="../../../../ipcore/altera/qsys/cn_pcp.qsys"/>
+    <path path="../../../../ipcore/altera/qsys/cn_host.qsys"/>
+</library>

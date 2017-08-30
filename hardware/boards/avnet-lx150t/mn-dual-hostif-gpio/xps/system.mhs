@@ -46,6 +46,7 @@
  PORT axi_openmac_0_iMii_rxData_pin = axi_openmac_0_iMii_rxData, DIR = I, VEC = [7:0]
  PORT axi_openmac_0_iMii_rxError_pin = axi_openmac_0_iMii_rxError, DIR = I, VEC = [1:0]
  PORT axi_openmac_0_iMii_rxClk_pin = axi_openmac_0_iMii_rxClk, DIR = I, VEC = [1:0], SIGIS = CLK
+ PORT POWERLINK_LED_GPIO_IO_O_pin = POWERLINK_LED_GPIO_IO_O, DIR = O, VEC = [1:0]
 
 BEGIN proc_sys_reset
  PARAMETER INSTANCE = proc_sys_reset_0
@@ -440,6 +441,7 @@ BEGIN axi_openmac
  PARAMETER C_S_AXI_MAC_REG_RNG1_HIGHADDR = 0x7c42ffff
  PARAMETER gui_phyType = 2
  PARAMETER gui_extraSmi = 1
+ PARAMETER gui_tmrPulse = 1
  BUS_INTERFACE M_AXI_MAC_DMA = axi4_0
  BUS_INTERFACE S_AXI_MAC_REG = axi4lite_pcp
  BUS_INTERFACE S_AXI_MAC_PKT = axi4lite_pcp
@@ -450,6 +452,7 @@ BEGIN axi_openmac
  PORT ioSmi_dio = axi_openmac_0_ioSmi_dio
  PORT MAC_IRQ = axi_openmac_0_MAC_IRQ
  PORT TIMER_IRQ = axi_openmac_0_TIMER_IRQ
+ PORT TIMER_PULSE_IRQ = axi_openmac_0_TIMER_PULSE_IRQ
  PORT iClk50 = clk_50_0000MHzPLL0
  PORT S_AXI_MAC_PKT_ACLK = clk_100_0000MHzPLL0
  PORT iMii_txClk = axi_openmac_0_iMii_txClk
@@ -469,13 +472,16 @@ BEGIN axi_hostinterface
  PARAMETER C_HIGHADDR = 0x76c0ffff
  PARAMETER C_HOST_BASEADDR = 0x72c00000
  PARAMETER C_HOST_HIGHADDR = 0x72c0ffff
+ PARAMETER Size_B_Pdo = 36864
+ PARAMETER Size_KB_K2UQ = 4
+ PARAMETER Size_KB_U2KQ = 4
  BUS_INTERFACE S_AXI_PCP = axi4lite_pcp
  BUS_INTERFACE M_AXI_PCP = axi4_0
  BUS_INTERFACE S_AXI_HOST = axi4lite_host
  PORT S_AXI_PCP_ACLK = clk_50_0000MHzPLL0
  PORT M_AXI_ACLK = clk_100_0000MHzPLL0
  PORT S_AXI_HOST_ACLK = clk_50_0000MHzPLL0
- PORT irqSync_irq = axi_openmac_0_TIMER_IRQ
+ PORT irqSync_irq = axi_openmac_0_TIMER_PULSE_IRQ
  PORT irqOut_irq = axi_hostinterface_0_irqOut_irq_pin_0
 END
 
@@ -501,4 +507,15 @@ BEGIN axi_gpio
  PORT S_AXI_ACLK = clk_100_0000MHzPLL0
  PORT GPIO_IO_O = HOST_BENCHMARK_GPIO_IO_O
  PORT GPIO_IO_I = HOST_BENCHMARK_GPIO_IO_O
+END
+
+BEGIN axi_gpio
+ PARAMETER INSTANCE = POWERLINK_LED
+ PARAMETER HW_VER = 1.01.b
+ PARAMETER C_GPIO_WIDTH = 2
+ PARAMETER C_BASEADDR = 0x41000000
+ PARAMETER C_HIGHADDR = 0x4100FFFF
+ BUS_INTERFACE S_AXI = axi4lite_pcp
+ PORT S_AXI_ACLK = clk_100_0000MHzPLL0
+ PORT GPIO_IO_O = POWERLINK_LED_GPIO_IO_O
 END

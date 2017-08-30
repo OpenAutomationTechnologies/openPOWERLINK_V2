@@ -153,7 +153,7 @@ tOplkError processSync(void)
 {
     tOplkError      ret = kErrorOk;
     UINT32          appOutVal;
-    UINT8           appInVal;
+    UINT32          appInVal;
 
     ret = oplk_exchangeProcessImageOut();
     if (ret != kErrorOk)
@@ -170,10 +170,10 @@ tOplkError processSync(void)
     /* setup output image - digital inputs */
     appInVal = gpio_getAppInput();
 
-    pProcessImageIn_l->digitalIn[0] = appInVal;
-    pProcessImageIn_l->digitalIn[1] = appInVal;
-    pProcessImageIn_l->digitalIn[2] = appInVal;
-    pProcessImageIn_l->digitalIn[3] = appInVal;
+    pProcessImageIn_l->digitalIn[0] = (appInVal & 0x000000FF) >> 0;
+    pProcessImageIn_l->digitalIn[1] = (appInVal & 0x0000FF00) >> 8;
+    pProcessImageIn_l->digitalIn[2] = (appInVal & 0x00FF0000) >> 16;
+    pProcessImageIn_l->digitalIn[3] = (appInVal & 0xFF000000) >> 24;
 
     ret = oplk_exchangeProcessImageIn();
 

@@ -279,18 +279,6 @@ CDC file and configuring the CNs using SDO transfers.
 
 //------------------------------------------------------------------------------
 /**
-\defgroup module_ledu ledu
-
-\brief User LED module
-
-The user LED module is responsible to control the POWERLIK status and error
-LEDs. The LEDs reflect the current status of the stack.
-\ingroup user_layer
-*/
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-/**
 \defgroup module_obd obd
 
 \brief Object dictionary module
@@ -330,12 +318,53 @@ objects.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_obdal obdal
+
+\brief Object dictionary abstraction layer module
+
+The object dictionary abstraction layer module implements an abstraction layer
+for accessing different POWERLINK Object Dictionaries (OD).
+For detailed information about the POWERLINK OD refer to \ref sect_powerlink_od
+
+As first priority, the default object dictionary will be accessed from this
+module. If an object does not exist in the default object dictionary, the call
+will be forwarded to a user defined implementation of the object dictionary as
+a user event.
+
+\see module_obd
+\see module_eventu
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup module_timeru timeru
 
 \brief User timer module
 
 The user timer module provides timers which can be used by the user layer
 modules like the NMT module for time triggered tasks.
+
+\ingroup user_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timesyncu timesyncu
+
+\brief User timesync module
+
+The user timesync module is in charge of handling the time synchronization of the
+application to the POWERLINK network. It is responsible for notifying the
+application at the configured synchronization point by using the communication
+abstraction layer module (timesync CAL).
+
+\see module_timesynck
+\see module_timesyncucal
+\see module_timesynckcal
 
 \ingroup user_layer
 */

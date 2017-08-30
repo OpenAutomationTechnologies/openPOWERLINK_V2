@@ -2,7 +2,7 @@
 ********************************************************************************
 \file   dualprocshm-target.h
 
-\brief  Dual Processor Library - Target header file
+\brief  Dual processor library - Target header file
 
 This header file defines platform specific macros (e.g. data types) and selects
 the platform specific header files (e.g. dualprocshm-zynq.h) which contains the
@@ -43,7 +43,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
 
 #if defined(__ZYNQ__)
 
@@ -52,6 +51,22 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #elif defined(__C5SOC__)
 
 #include "dualprocshm-c5soc.h"
+
+#elif defined(_KERNEL_MODE)
+
+#include "dualprocshm-pcie.h"
+
+#elif defined (__DE2i_150__)
+
+#include "dualprocshm-pcie.h"
+
+#elif defined (__BR_OPLK_PCIe_IF__)
+
+#include "dualprocshm-pcie.h"
+
+#elif defined (__LINUX_PCIE__)
+
+#include "dualprocshm-pcie.h"
 
 #else
 
@@ -91,6 +106,7 @@ If the following data types are not defined in the environment, then they are
 set to those provided by stdint.h.
 */
 /**@{*/
+#ifndef _NTDEF_        // defined in ntdef.H, included by dualprocshm-winkernel.h
 #ifndef INT
 #define INT         int
 #endif
@@ -100,33 +116,43 @@ set to those provided by stdint.h.
 #endif
 
 #ifndef ULONG
-#define ULONG        unsigned long
+#define ULONG       unsigned long
 #endif
 
 #ifndef UINT8
-#define UINT8       uint8_t
+#define UINT8     uint8_t
 #endif
 
 #ifndef UINT16
-#define UINT16      uint16_t
+#define UINT16    uint16_t
 #endif
 
 #ifndef UINT32
-#define UINT32      uint32_t
+#define UINT32    uint32_t
 #endif
 
-#ifndef BOOL
-#define BOOL        uint8_t
+#ifndef UINT64
+#define UINT64      uint64_t
 #endif
 /**@}*/
 
 #ifndef FALSE
-#define FALSE       0x00
+#define FALSE     0x00
 #endif
 
 #ifndef TRUE
-#define TRUE        0xFF
+#define TRUE      0xFF
 #endif
+
+#endif // _NTDEF_
+
+#ifndef BOOL
+#if defined(_WIN32) || defined(_WIN64)
+#define BOOL      unsigned char
+#else
+#define BOOL      uint8_t
+#endif // _WIN32
+#endif // BOOL
 
 #ifndef UNUSED_PARAMETER
 #define UNUSED_PARAMETER(par)    (void)par
@@ -134,6 +160,10 @@ set to those provided by stdint.h.
 
 #ifndef TRACE
 #define TRACE(...)
+#endif
+
+#ifndef PTR_T
+#define PTR_T          unsigned long
 #endif
 
 /**
@@ -157,9 +187,41 @@ set to the following by default.
 
 #ifndef DUALPROCSHM_MEMCPY
 #define DUALPROCSHM_MEMCPY(dst, src, siz)   memcpy((dst), (src), (siz))
-
 #endif
+
+#ifndef DPSHM_MAKE_NONCACHEABLE
+#define DPSHM_MAKE_NONCACHEABLE(pHdl_p)     pHdl_p
+#endif
+
 /**@}*/
+
+#ifndef MAX_COMMON_MEM_SIZE
+#define MAX_COMMON_MEM_SIZE        2048                         ///< Max common memory size
+#endif
+
+#ifndef MAX_DYNAMIC_BUFF_COUNT
+#define MAX_DYNAMIC_BUFF_COUNT     20                           ///< Number of maximum dynamic buffers
+#endif
+
+#ifndef MAX_DYNAMIC_BUFF_COUNT
+#define MAX_DYNAMIC_BUFF_SIZE      MAX_DYNAMIC_BUFF_COUNT * 4   ///< Max dynamic buffer size
+#endif
+
+#ifndef SHARED_MEM_BASE
+#error "Shared memory base not defined!!!"
+#endif
+
+#ifndef COMMON_MEM_BASE
+#error "Common memory base not defined!!!"
+#endif
+
+#ifndef MEM_ADDR_TABLE_BASE
+#error "Dynamic memory address table base not defined!!!"
+#endif
+
+#ifndef MEM_INTR_BASE
+#error "Interrupt memory address not defined!!!"
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
@@ -170,6 +232,25 @@ set to the following by default.
 This function callback is called by the synchronization event.
 */
 typedef void (*targetSyncHdl)(void*);
+
+/**
+\brief Processor instance
+
+The processor instance determines if the caller is the Pcp or the Host.
+*/
+typedef enum
+{
+    kDualProcFirst = 0,              ///< Instance on first processor
+    kDualProcSecond = 1,             ///< Instance on second processor
+    kDualProcLast = 2,               ///< End of list flag
+} eDualProcInstance;
+
+/**
+\brief Processor instance data type
+
+Data type for the enumerator \ref eDualProcInstance.
+*/
+typedef UINT8 tDualProcInstance;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -183,13 +264,13 @@ UINT8*  dualprocshm_getCommonMemAddr(UINT16* pSize_p);
 UINT8*  dualprocshm_getSharedMemInst(UINT32* pSize_p);
 UINT8*  dualprocshm_getDynMapTableAddr(void);
 UINT8*  dualprocshm_getIntrMemAddr(void);
-void    dualprocshm_releaseIntrMemAddr();
+void    dualprocshm_releaseIntrMemAddr(void);
 void    dualprocshm_targetReadData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void    dualprocshm_targetWriteData(UINT8* pBase_p, UINT16 size_p, UINT8* pData_p);
 void    dualprocshm_releaseCommonMemAddr(UINT16 pSize_p);
 void    dualprocshm_releaseDynMapTableAddr(void);
-void    dualprocshm_targetAcquireLock(UINT8* pBase_p, UINT8 lockToken_p) SECTION_DUALPROCSHM_ACQUIRE_LOCK;
-void    dualprocshm_targetReleaseLock(UINT8* pBase_p) SECTION_DUALPROCSHM_RELEASE_LOCK;
+void    dualprocshm_targetAcquireLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_ACQUIRE_LOCK;
+void    dualprocshm_targetReleaseLock(tDualprocLock* pBase_p, tDualProcInstance procInstance_p) SECTION_DUALPROCSHM_RELEASE_LOCK;
 void    dualprocshm_regSyncIrqHdl(targetSyncHdl callback_p, void* pArg_p);
 void    dualprocshm_enableSyncIrq(BOOL fEnable_p);
 #ifdef __cplusplus

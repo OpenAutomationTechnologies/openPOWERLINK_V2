@@ -50,6 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <common/ami.h>
 
+#include <kernel/timesynck.h>
+
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>
 #endif
@@ -98,7 +100,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError controlPdokcalSync(BOOL fEnable_p);
+static tOplkError controlTimeSync(BOOL fEnable_p);
 
 static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p, tNmtEvent nmtEvent_p);
 static tOplkError processNmtEvent(tEvent* pEvent_p);
@@ -145,7 +147,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
     switch (pEvent_p->eventType)
     {
         case kEventTypeNmtStateChange:
-            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->pEventArg;
+            pNmtStateChange = (tEventNmtStateChange*)pEvent_p->eventArg.pEventArg;
             ret = processNmtStateChange(pNmtStateChange->newNmtState,
                                         pNmtStateChange->oldNmtState,
                                         pNmtStateChange->nmtEvent);
@@ -156,7 +158,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
             break;
 
         case kEventTypeDllkFillTx:
-            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->pEventArg),
+            ret = processFillTx(*((tDllAsyncReqPriority*)pEvent_p->eventArg.pEventArg),
                                 dllkInstance_g.nmtState);
             break;
 
@@ -181,7 +183,7 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 #if defined(CONFIG_INCLUDE_PRES_FORWARD)
         case kEventTypeRequPresForward:
-            ret = requestPresForward(*((UINT*)pEvent_p->pEventArg));
+            ret = requestPresForward(*((UINT*)pEvent_p->eventArg.pEventArg));
             break;
 #endif
 
@@ -211,9 +213,9 @@ tOplkError dllk_process(tEvent* pEvent_p)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Control PDOK CAL sync function
+\brief  Control CAL timesync function
 
-This function controls the kernel PDO CAL sync function. It enables/disables
+This function controls the kernel CAL timesync function. It enables/disables
 the sync function by sending the appropriate event.
 
 \param  fEnable_p       Flag determines if sync should be enabled or disabled.
@@ -221,17 +223,36 @@ the sync function by sending the appropriate event.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError controlPdokcalSync(BOOL fEnable_p)
+static tOplkError controlTimeSync(BOOL fEnable_p)
 {
-    tEvent event;
-    BOOL fEnable = fEnable_p;
+    tOplkError  ret = kErrorOk;
+    tEvent      event;
+    BOOL        fEnable = fEnable_p;
 
-    event.eventSink = kEventSinkPdokCal;
-    event.eventType = kEventTypePdokControlSync;
-    event.pEventArg = &fEnable;
+    event.eventSink = kEventSinkTimesynck;
+    event.eventType = kEventTypeTimesynckControl;
+    event.eventArg.pEventArg = &fEnable;
     event.eventArgSize = sizeof(fEnable);
 
-    return eventk_postEvent(&event);
+    ret = eventk_postEvent(&event);
+
+#if CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER
+    if (ret == kErrorOk)
+    {
+        // Activate/deactivate external synchronization interrupt
+        synctimer_controlExtSyncIrq(fEnable);
+    }
+#endif
+
+#if CONFIG_TIMER_USE_HIGHRES == TRUE
+    if (ret == kErrorOk)
+    {
+        // Activate/deactivate external synchronization interrupt
+        hrestimer_controlExtSyncIrq(fEnable);
+    }
+#endif
+
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -260,7 +281,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
     {
         case kNmtGsOff:
         case kNmtGsInitialising:
-            dllkInstance_g.relativeTime = 0;
+            dllkInstance_g.socTime.relTime = 0;
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
@@ -315,7 +336,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 #endif
 
             // deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
+            if ((ret = controlTimeSync(FALSE)) != kErrorOk)
                 return ret;
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
@@ -369,14 +390,14 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
             // update PRes (for sudden changes to PreOp2)
             ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
-                                            newNmtState_p);
+                                            (dllkInstance_g.curTxBufferOffsetCycle ^ 1)],
+                                            kNmtCsPreOperational2);
             if (ret != kErrorOk)
                 return ret;
 
             ret = dllkframe_updateFramePres(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                dllkInstance_g.curTxBufferOffsetCycle],
-                                            newNmtState_p);
+                                            dllkInstance_g.curTxBufferOffsetCycle],
+                                            kNmtCsPreOperational2);
             if (ret != kErrorOk)
                 return ret;
 
@@ -417,7 +438,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
                 return ret;
 #endif
             /// deactivate sync generation
-            if ((ret = controlPdokcalSync(FALSE)) != kErrorOk)
+            if ((ret = controlTimeSync(FALSE)) != kErrorOk)
                 return ret;
 
             ret = edrvcyclic_stopCycle(FALSE);
@@ -463,7 +484,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         case kNmtMsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
+            if ((ret = controlTimeSync(TRUE)) != kErrorOk)
                 return ret;
             break;
 
@@ -479,7 +500,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
                 if ((ret = hrestimer_deleteTimer(&dllkInstance_g.timerHdlSwitchOver)) != kErrorOk)
                     return ret;
 
-                dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+                dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
                 // initialize SoAReq number for ProcessSync (cycle preparation)
                 dllkInstance_g.syncLastSoaReq = dllkInstance_g.curLastSoaReq;
                 // trigger synchronous task for cycle preparation
@@ -493,7 +514,7 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
 
         case kNmtCsReadyToOperate:
             /// activate sync generation
-            if ((ret = controlPdokcalSync(TRUE)) != kErrorOk)
+            if ((ret = controlTimeSync(TRUE)) != kErrorOk)
                 return ret;
             // signal update of IdentRes and StatusRes on SoA
             dllkInstance_g.updateTxFrame = DLLK_UPDATE_BOTH;
@@ -591,7 +612,7 @@ static tOplkError processNmtEvent(tEvent* pEvent_p)
     tNmtEvent*      pNmtEvent;
     tNmtState       NmtState;
 
-    pNmtEvent = (tNmtEvent*)pEvent_p->pEventArg;
+    pNmtEvent = (tNmtEvent*)pEvent_p->eventArg.pEventArg;
 
     switch (*pNmtEvent)
     {
@@ -679,6 +700,17 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                 ret = dllkframe_checkFrame(pTxFrame, frameSize);
                 if (ret != kErrorOk)
                     goto Exit;
+
+                if (frameSize < C_DLL_MIN_ETH_FRAME)
+                {
+                    // Zero the frame buffer until minimum frame size to avoid
+                    // relicts in padding area. The async Tx buffers are always
+                    // allocated with maximum size, so we can zero safely.
+                    OPLK_MEMSET(((UINT8*)pTxFrame) + frameSize, 0,
+                                C_DLL_MIN_ETH_FRAME - frameSize);
+
+                    frameSize = C_DLL_MIN_ETH_FRAME;
+                }
 
                 pTxBuffer->txFrameSize = frameSize;    // set buffer valid
                 *pTxBufferState = kDllkTxBufReady;
@@ -908,7 +940,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
         if (nmtState_p != kNmtCsOperational)
             fReadyFlag_p = FALSE;
 
-        FrameInfo.pFrame = pTxFrame;
+        FrameInfo.frame.pBuffer = pTxFrame;
         FrameInfo.frameSize = pTxBuffer->txFrameSize;
         ret = dllkframe_processTpdo(&FrameInfo, fReadyFlag_p);
         if (ret != kErrorOk)
@@ -953,9 +985,23 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
     pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    // Forward SoC time information to timesync module. Note that this SoC time
+    // info is sent after the current cycle is completed (due to double buffers)!
+    ret = timesynck_setSocTime(&dllkInstance_g.socTime);
+    if (ret != kErrorOk)
+        return ret;
+#endif
+
     // Set SoC relative time
-    ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.relativeTime);
-    dllkInstance_g.relativeTime += dllkInstance_g.dllConfigParam.cycleLen;
+    ami_setUint64Le(&pTxFrame->data.soc.relativeTimeLe, dllkInstance_g.socTime.relTime);
+    dllkInstance_g.socTime.relTime += dllkInstance_g.dllConfigParam.cycleLen;
+
+    if (!dllkInstance_g.socTime.fRelTimeValid)
+    {
+        // SoC time information is valid from now on...
+        dllkInstance_g.socTime.fRelTimeValid = TRUE;
+    }
 
     // Update SOC Prescaler Flag
     ami_setUint8Le(&pTxFrame->data.soc.flag1, dllkInstance_g.mnFlag1 & (PLK_FRAME_FLAG1_PS | PLK_FRAME_FLAG1_MC));

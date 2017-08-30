@@ -38,8 +38,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _INC_dualprocshm_c5soc_H_
 #define _INC_dualprocshm_c5soc_H_
 
-#define OPLK_OPTIMIZE               TRUE                            ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
-
 /* BASE ADDRESSES */
 #if defined(__NIOS2__)
 
@@ -63,8 +61,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 //------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+
+//------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief Dual processor lock
+
+The structure holds the locking parameters used for the
+locking mechanism in dual processor shared memory library.
+
+*/
+typedef struct sDualprocLock
+{
+    unsigned char   lockToken;      ///< Locking token
+    unsigned char   aPadding1[3];   ///< Padding array variable 1
+} tDualprocLock;
 
 //------------------------------------------------------------------------------
 // function prototypes

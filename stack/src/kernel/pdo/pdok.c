@@ -510,23 +510,6 @@ tOplkError pdok_setupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSize_p)
     return kErrorOk;
 }
 
-//------------------------------------------------------------------------------
-/**
-\brief  Send a sync event
-
-The function sends a sync event.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_pdok
-*/
-//------------------------------------------------------------------------------
-tOplkError pdok_sendSyncEvent(void)
-{
-    pdokcal_sendSyncEvent();
-    return kErrorOk;
-}
-
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -550,7 +533,7 @@ NMT_CS_OPERATIONAL.
 static tOplkError cbProcessTpdo(tFrameInfo* pFrameInfo_p, BOOL fReadyFlag_p)
 {
     tOplkError      Ret = kErrorOk;
-    Ret = copyTxPdo(pFrameInfo_p->pFrame, pFrameInfo_p->frameSize, fReadyFlag_p);
+    Ret = copyTxPdo(pFrameInfo_p->frame.pBuffer, pFrameInfo_p->frameSize, fReadyFlag_p);
     return Ret;
 }
 

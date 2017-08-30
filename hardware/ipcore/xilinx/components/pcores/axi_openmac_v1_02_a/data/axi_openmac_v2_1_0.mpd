@@ -81,9 +81,11 @@ PARAMETER gui_txBurstSize   = 4,  DT = natural, TYPE = NON_HDL, RANGE = (4,8,16,
 PARAMETER gui_rxBufLoc      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
 PARAMETER gui_rxBufSize     = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:32), ISVALID = (gui_rxBufLoc == 1)
 PARAMETER gui_rxBurstSize   = 4,  DT = natural, TYPE = NON_HDL, RANGE = (4,8,16,32,64), ISVALID = (gui_rxBufLoc == 2)
-PARAMETER gui_tmrCount      = 1,  DT = natural, TYPE = NON_HDL, RANGE = (1:2)
-PARAMETER gui_tmrPulseEn    = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
-PARAMETER gui_tmrPulseWdt   = 10, DT = natural, TYPE = NON_HDL, RANGE = (1:31)
+PARAMETER gui_tmrPulse      = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
+PARAMETER gui_tmrPulseEn    = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE"), ISVALID = (gui_tmrPulse != 0)
+PARAMETER gui_tmrPulseWdt   = 10, DT = natural, TYPE = NON_HDL, RANGE = (1:31), ISVALID = (gui_tmrPulse != 0)
+    # I wanted this ISVALID-expression: (gui_tmrPulse != 0 && gui_tmrPulseEn != 0)
+    # .. but due to some bug it is not working :(
 PARAMETER gui_actEn         = 0,  DT = natural, TYPE = NON_HDL, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
 
 ###############################################################################
@@ -137,7 +139,7 @@ PARAMETER gDmaReadFifoLength        = 16,       IPLEVEL_UPDATE_VALUE_PROC = get_
 PARAMETER gPacketBufferLocTx        = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLocTx,     DT = natural, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
 PARAMETER gPacketBufferLocRx        = 1,        IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLocRx,     DT = natural, RANGE = (1,2), VALUES = (1 = "LOCAL", 2 = "EXTERNAL")
 PARAMETER gPacketBufferLog2Size     = 10,       IPLEVEL_UPDATE_VALUE_PROC = get_gPacketBufferLog2Size,  DT = natural
-PARAMETER gTimerCount               = 2,        IPLEVEL_UPDATE_VALUE_PROC = get_gTimerCount,            DT = natural
+PARAMETER gTimerEnablePulse         = 0,        IPLEVEL_UPDATE_VALUE_PROC = get_gTimerEnablePulse,      DT = natural
 PARAMETER gTimerEnablePulseWidth    = 0,        IPLEVEL_UPDATE_VALUE_PROC = get_gTimerEnablePulseWidth, DT = natural, RANGE = (0,1), VALUES = (0 = "FALSE", 1 = "TRUE")
 PARAMETER gTimerPulseRegWidth       = 10,       IPLEVEL_UPDATE_VALUE_PROC = get_gTimerPulseRegWidth,    DT = natural
 
@@ -231,6 +233,7 @@ PORT S_AXI_MAC_PKT_RRESP    = RRESP,    DIR = O, BUS = S_AXI_MAC_PKT, ENDIAN = L
 ###############################################################################
 ## INTERRUPTS
 PORT TIMER_IRQ  = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
+PORT TIMER_PULSE_IRQ = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = EDGE_RISING, ISVALID = (gui_tmrPulse != 0)
 PORT MAC_IRQ    = "", DIR = O, SIGIS = INTERRUPT, SENSITIVITY = LEVEL_HIGH
 
 ###############################################################################
@@ -264,6 +267,5 @@ PORT oSmi_dio_tri   = "", DIR = O,  IO_IF = SMI
 ###############################################################################
 ## Others
 PORT oPktActivity   = "", DIR = O, ISVALID = (gui_actEn != 0)
-PORT oMacTimerOut   = "", DIR = O, VEC = [gTimerCount-1:0]
 
 END

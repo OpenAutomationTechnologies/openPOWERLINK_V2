@@ -53,6 +53,7 @@ entity toplevel is
         EXT_CLK             : in    std_logic;
         -- PHY Interfaces
         PHY_GXCLK           : out   std_logic_vector(1 downto 0);
+        PHY_LINK_n          : in    std_logic_vector(1 downto 0);
         PHY_RXCLK           : in    std_logic_vector(1 downto 0);
         PHY_RXER            : in    std_logic_vector(1 downto 0);
         PHY_RXDV            : in    std_logic_vector(1 downto 0);
@@ -96,9 +97,10 @@ entity toplevel is
         CFI_FLASH_RESET_n   : out std_logic;
         CFI_FLASH_WP_n      : out std_logic;
         CFI_FLASH_RY        : in std_logic;
-        -- LED green
-        LEDG                : out   std_logic_vector(1 downto 0);
-        -- Low active KEY
+        -- LED
+        LEDG                : out   std_logic_vector(7 downto 0);
+        LEDR                : out   std_logic_vector(15 downto 0);
+        -- KEY
         KEY_n               : in    std_logic_vector(3 downto 0);
         -- LCD
         LCD_ON              : out   std_logic;
@@ -141,10 +143,11 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                       : out   std_logic_vector(1 downto 0);
             openmac_0_smi_clk                           : out   std_logic_vector(1 downto 0);
             openmac_0_smi_dio                           : inout std_logic_vector(1 downto 0)  := (others => 'X');
-            openmac_0_mactimerout_export                : out   std_logic_vector(0 downto 0);
+            openmac_0_pktactivity_export                : out   std_logic;
+
             host_0_benchmark_pio_export                 : out   std_logic_vector(7 downto 0);
-            status_led_pio_export                       : out   std_logic_vector(1 downto 0);
-            key_pio_export                              : in    std_logic_vector(3 downto 0);
+            powerlink_led_export                        : out   std_logic_vector(1 downto 0);
+
             epcs_flash_dclk                             : out   std_logic;
             epcs_flash_sce                              : out   std_logic;
             epcs_flash_sdo                              : out   std_logic;
@@ -170,7 +173,10 @@ architecture rtl of toplevel is
             tristate_cfi_flash_0_tcm_read_n_out         : out   std_logic;
             tristate_cfi_flash_0_tcm_write_n_out        : out   std_logic;
             tristate_cfi_flash_0_tcm_data_out           : inout std_logic_vector(7 downto 0)  := (others => 'X');
-            tristate_cfi_flash_0_tcm_chipselect_n_out   : out   std_logic
+            tristate_cfi_flash_0_tcm_chipselect_n_out   : out   std_logic;
+            -- Application ports
+            app_pio_in_port                             : in    std_logic_vector(31 downto 0) := (others => 'X');
+            app_pio_out_port                            : out   std_logic_vector(31 downto 0)
         );
     end component mnDualHostifGpio;
 
@@ -192,8 +198,10 @@ architecture rtl of toplevel is
     signal clk100_p     : std_logic;
     signal pllLocked    : std_logic;
     signal sramAddr     : std_logic_vector(SRAM_ADDR'high downto 0);
-    signal key          : std_logic_vector(KEY_n'range);
+    signal plk_status_error : std_logic_vector(1 downto 0);
+    signal openmac_activity : std_logic;
 
+    signal app_input        : std_logic_vector(31 downto 0);
 begin
 
     SRAM_ADDR <= sramAddr(SRAM_ADDR'range);
@@ -204,12 +212,34 @@ begin
     LCD_ON      <= '1';
     LCD_BLON    <= '1';
 
-    key         <= not KEY_n;
-
     SDRAM_CLK   <= clk100_p;
 
     CFI_FLASH_RESET_n   <= cnInactivated;
     CFI_FLASH_WP_n      <= cnInactivated;
+
+    ---------------------------------------------------------------------------
+    -- Green LED assignments
+    LEDG        <= plk_status_error(0) &  -- POWERLINK Status LED
+                   "000" &  -- Reserved
+                   (openmac_activity and not PHY_LINK_n(0)) & -- Gated activity
+                   not PHY_LINK_n(0) & -- Link
+                   (openmac_activity and not PHY_LINK_n(1)) & -- Gated activity
+                   not PHY_LINK_n(1); -- Link
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Red LED assignments
+    LEDR        <= x"000" & -- Reserved
+                   "000" & -- Reserved
+                   plk_status_error(1); -- POWERLINK Error LED
+    ---------------------------------------------------------------------------
+
+    ---------------------------------------------------------------------------
+    -- Application Input and Output assignments
+
+    -- Input: Map KEY nibble to Application Input
+    app_input   <= x"0000000" & not KEY_n;
+    ---------------------------------------------------------------------------
 
     inst : component mnDualHostifGpio
         port map (
@@ -231,7 +261,7 @@ begin
             openmac_0_smi_nPhyRst                       => PHY_RESET_n,
             openmac_0_smi_clk                           => PHY_MDC,
             openmac_0_smi_dio                           => PHY_MDIO,
-            openmac_0_mactimerout_export                => open,
+            openmac_0_pktactivity_export                => openmac_activity,
 
             tri_state_sram_0_tcm_address_out            => sramAddr,
             tri_state_sram_0_tcm_read_n_out             => SRAM_OE_n,
@@ -242,9 +272,7 @@ begin
 
             pcp_0_benchmark_pio_export                  => BENCHMARK,
 
-            status_led_pio_export                       => LEDG,
-
-            key_pio_export                              => key,
+            powerlink_led_export                        => plk_status_error,
 
             host_0_benchmark_pio_export                 => BENCHMARK_AP,
 
@@ -272,7 +300,10 @@ begin
             tristate_cfi_flash_0_tcm_read_n_out         => CFI_FLASH_OE_n,
             tristate_cfi_flash_0_tcm_write_n_out        => CFI_FLASH_WE_n,
             tristate_cfi_flash_0_tcm_data_out           => CFI_FLASH_DATA,
-            tristate_cfi_flash_0_tcm_chipselect_n_out   => CFI_FLASH_CE_n
+            tristate_cfi_flash_0_tcm_chipselect_n_out   => CFI_FLASH_CE_n,
+
+            app_pio_in_port                             => app_input,
+            app_pio_out_port                            => open
         );
 
     -- Pll Instance

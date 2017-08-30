@@ -9,7 +9,7 @@ library without an OS which is using the dualprocshm interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Private Limited.
+Copyright (c) 2015, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +42,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
+// Include memory file to override default queue sizes
+#include <dualprocshm-mem.h>
+#include <oplkcfg-board.h> // Board specific configuration
 
 //------------------------------------------------------------------------------
 // const defines
@@ -58,8 +61,12 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_NMT_MN
 #define CONFIG_INCLUDE_SDOS
 #define CONFIG_INCLUDE_SDOC
+#define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_VETH
+
+// Enable feature manually if the platform is supporting it (only C5 SoC and Zynq).
+//#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
@@ -85,14 +92,13 @@ Note: The settings are specific for MN with openMAC!
     ///< fast TX support by Edrv
 #define CONFIG_EDRV_EARLY_RX_INT            FALSE
     ///< support TX handler call when DMA transfer finished
-#define CONFIG_EDRV_AUTO_RESPONSE           FALSE
+#define CONFIG_EDRV_AUTO_RESPONSE           TRUE
     ///< support auto-response (e.g. openMAC)
+#define CONFIG_EDRV_AUTO_RESPONSE_DELAY     TRUE
 #define CONFIG_EDRV_TIME_TRIG_TX            TRUE
     ///< support time triggered transmission (e.g. openMAC)
 #define CONFIG_EDRV_MAX_TX2_BUFFERS         64
     ///< set number for second Tx buffer queue to support larger networks
-#define CONFIG_EDRVCYC_NEG_SHIFT_US         100U
-    ///< us (timer irq before next cycle)
 /**@}*/
 
 /**
@@ -107,6 +113,8 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 #define CONFIG_DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
+#define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC   TRUE
+#define CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS        8
     ///< disable deferred RX frames if Edrv does not support it
 #define CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS        5
 /**@}*/
@@ -119,8 +127,6 @@ The timer defines determine the high resolution timer module.
 #define CONFIG_TIMER_USE_HIGHRES               TRUE
     ///< use high resolution timer
 /**@}*/
-
-#define CONFIG_EVENT_SIZE_CIRCBUF_KERNEL_INTERNAL   2048
 
 //------------------------------------------------------------------------------
 // typedef

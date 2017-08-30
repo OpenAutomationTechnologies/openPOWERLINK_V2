@@ -73,7 +73,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define CTRL_PROC_ID    0xFB                    ///< Processor Id for kernel layer
 
 //------------------------------------------------------------------------------
 // local types
@@ -127,7 +126,6 @@ tOplkError ctrlkcal_init(void)
     OPLK_MEMSET(&dualProcConfig, 0, sizeof(tDualprocConfig));
 
     dualProcConfig.procInstance = kDualProcFirst;
-    dualProcConfig.procId = CTRL_PROC_ID;
 
     dualRet = dualprocshm_create(&dualProcConfig, &instance_l.dualProcDrvInst);
     if (dualRet != kDualprocSuccessful)
@@ -350,6 +348,77 @@ tOplkError ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p)
     }
 
     return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Read file chunk
+
+The function reads the file chunk descriptor and data from the file transfer
+buffer.
+
+\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
+\param  bufferSize_p    Size of buffer for storing the chunk data
+\param  pBuffer_p       Pointer to buffer for storing the chunk data
+
+\return The function returns a tOplkError code.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                                  size_t bufferSize_p, UINT8* pBuffer_p)
+{
+    tDualprocReturn dualret;
+
+    // Check if caller provides sufficiently large buffer
+    if (bufferSize_p < CONFIG_CTRL_FILE_CHUNK_SIZE)
+        return kErrorNoResource;
+
+    dualret = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
+                                         offsetof(tCtrlBuf, fileChunkDesc),
+                                         sizeof(tOplkApiFileChunkDesc),
+                                         (UINT8*)pDesc_p);
+    if (dualret != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot read file chunk descriptor (0x%X)\n", dualret);
+        return kErrorGeneralError;
+    }
+
+    // Check the chunk size in descriptor
+    if (pDesc_p->length > bufferSize_p)
+    {
+        DEBUG_LVL_ERROR_TRACE("File chunk size exceeds limit!\n");
+        return kErrorGeneralError;
+    }
+
+    dualret = dualprocshm_readDataCommon(instance_l.dualProcDrvInst,
+                                         offsetof(tCtrlBuf, aFileChunkBuffer),
+                                         bufferSize_p, pBuffer_p);
+    if (dualret != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("Cannot read file chunk data (0x%X)\n", dualret);
+        return kErrorGeneralError;
+    }
+
+    return kErrorOk;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum file chunk size
+
+The function returns the maximum file chunk size supported by the ctrl cal
+implementation.
+
+\return The function returns the maximum file chunk size.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+size_t ctrlkcal_getMaxFileChunkSize(void)
+{
+    return CONFIG_CTRL_FILE_CHUNK_SIZE;
 }
 
 //============================================================================//

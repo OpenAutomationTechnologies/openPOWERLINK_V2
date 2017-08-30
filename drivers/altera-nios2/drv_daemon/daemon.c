@@ -44,7 +44,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <system.h>
 #include <sys/alt_cache.h>
 #include <unistd.h>
-#include <altera_avalon_pio_regs.h>
 
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
@@ -159,7 +158,7 @@ static tOplkError initPlk(void)
 {
     tOplkError ret;
 
-    ret = ctrlk_init();
+    ret = ctrlk_init(NULL);
 
     if (ret != kErrorOk)
     {

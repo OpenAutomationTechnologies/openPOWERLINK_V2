@@ -5,7 +5,7 @@
 \brief  User event CAL module for non-OS platform using circbuffer
 
 This file implements the user event handler CAL module for a non-OS
-platform. It uses the circular buffer interface for the user-to-kernel
+platform. It uses the circular buffer interface for the kernel-to-user
 event queue and direct calls for the user-internal queue.
 
 \see eventucalintf-circbuf.c

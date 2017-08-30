@@ -66,10 +66,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMER_MIN_VAL_SINGLE                5000        // min 5us
 #define TIMER_MIN_VAL_CYCLE                 100000      // min 100us
 
-#define PROVE_OVERRUN
-
-#define TTC_RESOLUTION_FACTOR               144         // Resolution factor for counter
-
 #define XTTC_BASE                           0xf8002000  // base addr of TTC1
 #define SIZE                                0x00001000
 #define XTTC1_TIMERBASE                     0x00000000  // offset of counter 0
@@ -106,11 +102,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /* Setup the timers to use pre-scaling, using a fixed value for now that will work
  * across most input frequency, but it may need to be more dynamic
  */
-#define PRESCALE_EXPONENT                   4   // 2 ^ PRESCALE_EXPONENT = PRESCALE
-#define PRESCALE                            16  // The exponent must match this
+#define PRESCALE_EXPONENT                   8       // 2 ^ PRESCALE_EXPONENT = PRESCALE
+#define PRESCALE                            256     // The exponent must match this
 #define CLK_CNTRL_PRESCALE                  (((PRESCALE_EXPONENT - 1) << 1) | 0x1)
+#define TTC_RESOLUTION_FACTOR               2304    // Resolution factor for counter. This depends on the source clock frequency for the TTC and the prescaler value.
+                                                    // Current design uses a source clock frequency of 111 MHz.
 
-#define USEC_TO_COUNT(timeout)                      ((UINT)timeout / TTC_RESOLUTION_FACTOR)
+#define NSEC_TO_COUNT(timeout)                      ((UINT)timeout / TTC_RESOLUTION_FACTOR)
 
 #define XTTCPSS_READ_REG(index, offset)             __raw_readl(pTtcBaseAddr_l[index] + offset)
 
@@ -314,7 +312,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
                                  BOOL fContinue_p)
 {
     tHresTimerInfo*     pTimerInfo;
-    UINT16              counter = 0;
+    ULONGLONG           counter = 0;
     UINT                index;
     UINT8               reg;
 
@@ -331,7 +329,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
             {
                 // free structure found
                 break;
@@ -343,7 +341,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             return kErrorTimerNoTimerCreated;
         }
 
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -359,8 +357,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     // increment timer handle (if timer expires right after this statement,
     // the user would detect an unknown timer handle and discard it)
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     // Adjust the Timeout if its to small
     if (fContinue_p != FALSE)
@@ -379,7 +377,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 
     // Get the counter value from the timeout
-    counter = (UINT16)USEC_TO_COUNT(time_p);
+    counter = (ULONGLONG)NSEC_TO_COUNT(time_p);
     if (counter > 0xFFFF)
     {
         return kErrorTimerNoTimerCreated;
@@ -398,7 +396,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     {
         pTimerInfo->fContinuously = fContinue_p;
         // Set the interval for continuos timer
-        XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_INTR_VAL_OFFSET, counter);
+        XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_INTR_VAL_OFFSET, (UINT16)counter);
 
         // Enable the interval interrupt
         reg = XTTCPSS_READ_REG(pTimerInfo->index, XTTCPSS_IER_OFFSET);
@@ -414,7 +412,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     {
         pTimerInfo->fContinuously = fContinue_p;
         // Set match counter for oneshot timer
-        XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_MATCH_1_OFFSET, counter);
+        XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_MATCH_1_OFFSET, (UINT16)counter);
         // Enable the Match1 interrupt
         reg = XTTCPSS_READ_REG(pTimerInfo->index, XTTCPSS_IER_OFFSET);
         reg = XTTCPSS_INTR_MATCH_1;
@@ -475,7 +473,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {
             // invalid handle
             return ret;
@@ -483,7 +481,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     }
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     // Disable the interrupt for this timer
@@ -497,6 +495,41 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_CNT_CNTRL_OFFSET, reg);
 
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
+
+This function enables/disables the external synchronization interrupt. If the
+external synchronization interrupt is not supported, the call is ignored.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_controlExtSyncIrq(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set external synchronization interrupt time
+
+This function sets the time when the external synchronization interrupt shall
+be triggered to synchronize the host processor. If the external synchronization
+interrupt is not supported, the call is ignored.
+
+\param  time_p          Time when the sync shall be triggered
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
+{
+    UNUSED_PARAMETER(time_p);
 }
 
 //============================================================================//
@@ -532,7 +565,7 @@ static irqreturn_t timerCounterIsr(INT irqNum_p, void* pDevInstData_p)
     }
     // Acknowledge the Interrupt
     XTTCPSS_WRITE_REG(pTimerInfo->index, XTTCPSS_ISR_OFFSET, reg);
-    index = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl);
+    index = HDL_TO_IDX(pTimerInfo->eventArg.timerHdl.handle);
 
     if (index >= TIMER_COUNT)
     {

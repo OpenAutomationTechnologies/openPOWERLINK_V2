@@ -54,9 +54,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 #define OPENMAC_MEMUNCACHED(pMem_p, size_p)                 pMem_p
-#define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              microblaze_flush_dcache_range((UINT32)pMem_p, size_p)
-#define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         microblaze_invalidate_dcache_range((UINT32)pMem_p, size_p)
+#define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)              Xil_L1DCacheFlushRange((UINT32)(pMem_p), size_p)
+#define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)         Xil_L1DCacheInvalidateRange((UINT32)(pMem_p), size_p)
 #define OPENMAC_GETDMAOBSERVER()                            Xil_In16(OPENMAC_DOB_BASE)
+#define OPENMAC_GETPENDINGIRQ()                             0
+//FIXME: Test IRQ timing on Xilinx, and implement OPENMAC_GETPENDINGIRQ macro if required
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 
@@ -64,7 +66,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_TIMERIRQENABLE(timer_p)                     Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x0, 1)
 #define OPENMAC_TIMERIRQACK(timer_p)                        Xil_Out8(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x1, 1)
 #define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x4, val_p)
-#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidthNs_p)   Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x8, OMETH_NS_2_TICKS(pulseWidthNs_p))
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidth_p)     Xil_Out32(OPENMAC_TIMER_BASE + OPENMAC_TIMER_OFFSET(timer_p) + 0x8, pulseWidth_p)
+#endif
+
 #define OPENMAC_TIMERGETTIMEVALUE()                         Xil_In32(OPENMAC_TIMER_BASE + 0xC)
 
 //------------------------------------------------------------------------------

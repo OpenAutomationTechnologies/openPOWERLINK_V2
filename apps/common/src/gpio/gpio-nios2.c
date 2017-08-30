@@ -70,8 +70,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define GPIO_STATUS_LED_BIT     1
-#define GPIO_ERROR_LED_BIT      2
 
 //------------------------------------------------------------------------------
 // local types
@@ -143,44 +141,6 @@ UINT8 gpio_getNodeid(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
-    else
-        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_STATUS_LED_BIT);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        IOWR_ALTERA_AVALON_PIO_SET_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
-    else
-        IOWR_ALTERA_AVALON_PIO_CLEAR_BITS(STATUS_LED_PIO_BASE, GPIO_ERROR_LED_BIT);
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Gets the application input
 
 The function returns application inputs.
@@ -190,17 +150,17 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8 key;
+    UINT32 input;
 
-#ifdef KEY_PIO_BASE
-    key = IORD_ALTERA_AVALON_PIO_DATA(KEY_PIO_BASE);
+#ifdef APP_PIO_BASE
+    input = IORD_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
@@ -216,8 +176,8 @@ The function sets the application outputs.
 //------------------------------------------------------------------------------
 void gpio_setAppOutputs(UINT32 val_p)
 {
-#ifdef HEX_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(HEX_PIO_BASE, val_p);
+#ifdef APP_PIO_BASE
+    IOWR_ALTERA_AVALON_PIO_DATA(APP_PIO_BASE, val_p);
 #else
     UNUSED_PARAMETER(val_p);
 #endif

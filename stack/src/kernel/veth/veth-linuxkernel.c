@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 
+#if defined(CONFIG_INCLUDE_VETH)
 #include <net/arp.h>
 #include <net/protocol.h>
 #include <net/pkt_sched.h>
@@ -279,7 +280,7 @@ static int veth_xmit(struct sk_buff* pSkb_p, struct net_device* pNetDevice_p)
     //save timestemp
     pNetDevice_p->trans_start = jiffies;
 
-    frameInfo.pFrame = (tPlkFrame*)pSkb_p->data;
+    frameInfo.frame.pBuffer = (tPlkFrame*)pSkb_p->data;
     frameInfo.frameSize = pSkb_p->len;
 
     //call send fkt on DLL
@@ -373,7 +374,7 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
 
     skb_reserve(pSkb, 2);
 
-    OPLK_MEMCPY((void*)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->pFrame, pFrameInfo_p->frameSize);
+    OPLK_MEMCPY((void*)skb_put(pSkb, pFrameInfo_p->frameSize), pFrameInfo_p->frame.pBuffer, pFrameInfo_p->frameSize);
 
     pSkb->protocol = eth_type_trans(pSkb, pNetDevice);
     pSkb->ip_summed = CHECKSUM_UNNECESSARY;
@@ -381,12 +382,12 @@ static tOplkError veth_receiveFrame(tFrameInfo* pFrameInfo_p,
     netif_rx(pSkb);         // call netif_rx with skb
 
     DEBUG_LVL_VETH_TRACE("veth_receiveFrame: SrcMAC: %02X:%02X:%02x:%02X:%02X:%02x\n",
-                         pFrameInfo_p->pFrame->aSrcMac[0],
-                         pFrameInfo_p->pFrame->aSrcMac[1],
-                         pFrameInfo_p->pFrame->aSrcMac[2],
-                         pFrameInfo_p->pFrame->aSrcMac[3],
-                         pFrameInfo_p->pFrame->aSrcMac[4],
-                         pFrameInfo_p->pFrame->aSrcMac[5]);
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[0],
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[1],
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[2],
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[3],
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[4],
+                         pFrameInfo_p->frame.pBuffer->aSrcMac[5]);
 
     // update receive statistics
     pStats->rx_packets++;
@@ -398,3 +399,5 @@ Exit:
 }
 
 /// \}
+
+#endif // CONFIG_INCLUDE_VETH

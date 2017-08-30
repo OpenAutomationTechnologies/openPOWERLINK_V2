@@ -48,10 +48,20 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+// Size of max. UDP payload for a UDP frame transmitted over POWERLINK
+// Header for calculation: 20 (IPv4) + 8 (UDP) = 28 bytes
+#define SDO_MAX_RX_FRAME_SIZE_UDP      (C_DLL_MAX_ASYNC_MTU - 28)
+
+#define SDOUDP_INADDR_ANY       0
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+typedef struct
+{
+    ULONG           ipAddr;     /// IP address in network byte order
+    ULONG           port;       /// Port in network byte order
+} tSdoUdpCon;
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -69,7 +79,15 @@ tOplkError sdoudp_exit(void);
 tOplkError sdoudp_config(ULONG ipAddr_p, UINT port_p);
 tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p);
 tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
+void       sdoudp_receiveData(tSdoUdpCon* pSdoUdpCon_p, tAsySdoSeq* pSdoSeqData_p, UINT dataSize_p);
 tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p);
+
+tOplkError sdoudp_initSocket(void);
+void       sdoudp_exitSocket(void);
+tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p);
+tOplkError sdoudp_closeSocket(void);
+tOplkError sdoudp_sendToSocket(tSdoUdpCon* pSdoUdpCon_p, tPlkFrame* pSrcData_p, UINT32 dataSize_p);
+void       sdoudp_criticalSection(BOOL fEnable_p);
 
 #endif
 

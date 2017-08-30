@@ -51,7 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/syncu.h>
 #include <user/eventu.h>
 #include <common/ami.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 #include <oplk/frame.h>
 #include <oplk/benchmark.h>
 
@@ -890,7 +890,7 @@ tOplkError nmtmnu_triggerStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeNmtMnuNodeCmd;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &nodeCmd;
+    event.eventArg.pEventArg = &nodeCmd;
     event.eventArgSize = sizeof(nodeCmd);
     ret = eventu_postEvent(&event);
 
@@ -917,7 +917,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
     // Save new MN state in object 0x1F8E
     newMnNmtState   = (UINT8)nmtStateChange_p.newNmtState;
-    ret = obd_writeEntry(0x1F8E, 240, &newMnNmtState, 1);
+    ret = obdu_writeEntry(0x1F8E, 240, &newMnNmtState, 1);
     if (ret != kErrorOk)
         return ret;
 
@@ -936,13 +936,13 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
                 // read object 0x1F80 NMT_StartUp_U32
                 obdSize = 4;
-                ret = obd_readEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
+                ret = obdu_readEntry(0x1F80, 0, &nmtMnuInstance_g.nmtStartup, &obdSize);
                 if (ret != kErrorOk)
                     break;
 
                 // compute StatusReqDelay = object 0x1006 * C_NMT_STATREQ_CYCLE
                 obdSize = sizeof(timeout);
-                ret = obd_readEntry(0x1006, 0, &timeout, &obdSize);
+                ret = obdu_readEntry(0x1006, 0, &timeout, &obdSize);
                 if (ret != kErrorOk)
                     break;
 
@@ -958,7 +958,7 @@ tOplkError nmtmnu_cbNmtStateChange(tEventNmtStateChange nmtStateChange_p)
 
                 // fetch MNTimeoutPreOp2_U32 from OD
                 obdSize = sizeof(timeout);
-                ret = obd_readEntry(0x1F89, 4, &timeout, &obdSize);
+                ret = obdu_readEntry(0x1F89, 4, &timeout, &obdSize);
                 if (ret != kErrorOk)
                     break;
 
@@ -1084,7 +1084,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         // timer event
         case kEventTypeTimer:
             {
-                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->pEventArg;
+                tTimerEventArg*  pTimerEventArg = (tTimerEventArg*)pEvent_p->eventArg.pEventArg;
                 UINT             nodeId;
 
                 nodeId = (UINT)(pTimerEventArg->argument.value & NMTMNU_TIMERARG_NODE_MASK);
@@ -1096,7 +1096,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
                     pNodeInfo = NMTMNU_GET_NODEINFO(nodeId);
                     ObdSize = 1;
-                    ret = obd_readEntry(0x1F8E, nodeId, &bNmtState, &ObdSize);
+                    ret = obdu_readEntry(0x1F8E, nodeId, &bNmtState, &ObdSize);
                     if (ret != kErrorOk)
                         break;
 
@@ -1189,7 +1189,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeHeartbeat:
             {
-                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->pEventArg;
+                tHeartbeatEvent* pHeartbeatEvent = (tHeartbeatEvent*)pEvent_p->eventArg.pEventArg;
                 ret = processInternalEvent(pHeartbeatEvent->nodeId, pHeartbeatEvent->nmtState,
                                            pHeartbeatEvent->errorCode, kNmtMnuIntNodeEventHeartbeat);
             }
@@ -1197,7 +1197,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeNmtMnuNmtCmdSent:
             {
-                tPlkFrame*          pFrame = (tPlkFrame*)pEvent_p->pEventArg;
+                tPlkFrame*          pFrame = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
                 UINT                nodeId;
                 tNmtCommand         nmtCommand;
                 UINT8               bNmtState;
@@ -1313,7 +1313,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
         case kEventTypeNmtMnuNodeCmd:
             {
-                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->pEventArg;
+                tNmtMnuNodeCmd*      pNodeCmd = (tNmtMnuNodeCmd*)pEvent_p->eventArg.pEventArg;
                 tNmtMnuIntNodeEvent  NodeEvent;
                 tObdSize             ObdSize;
                 UINT8                bNmtState;
@@ -1355,7 +1355,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
 
                 // fetch current NMT state
                 ObdSize = sizeof(bNmtState);
-                ret = obd_readEntry(0x1F8E, pNodeCmd->nodeId, &bNmtState, &ObdSize);
+                ret = obdu_readEntry(0x1F8E, pNodeCmd->nodeId, &bNmtState, &ObdSize);
                 if (ret != kErrorOk)
                     goto Exit;
 
@@ -1369,7 +1369,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         case kEventTypeNmtMnuNodeAdded:
             {
                 UINT        nodeId;
-                nodeId = *((UINT*)pEvent_p->pEventArg);
+                nodeId = *((UINT*)pEvent_p->eventArg.pEventArg);
                 ret = cbNodeAdded(nodeId);
             }
             break;
@@ -1377,7 +1377,7 @@ tOplkError nmtmnu_processEvent(tEvent* pEvent_p)
         case kEventTypeReceivedAmni:
             {
                 UINT        nodeId;
-                nodeId = *((UINT*)pEvent_p->pEventArg);
+                nodeId = *((UINT*)pEvent_p->eventArg.pEventArg);
                 ret = nmtMnuInstance_g.pfnCbNodeEvent(nodeId, kNmtNodeEventAmniReceived,
                                                       kNmtGsOff, 0, FALSE);
             }
@@ -1466,10 +1466,10 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
     UINT                    sourceNodeId;
     UINT                    commandSize;
 
-    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->pFrame == NULL))
+    if ((pFrameInfo_p == NULL) || (pFrameInfo_p->frame.pBuffer == NULL))
         return kErrorNmtInvalidFramePointer;
 
-    pNmtRequestService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtRequestService;
+    pNmtRequestService = &pFrameInfo_p->frame.pBuffer->data.asnd.payload.nmtRequestService;
     nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtRequestService->nmtCommandId);
     targetNodeId = ami_getUint8Le(&pNmtRequestService->targetNodeId);
     commandSize = min(sizeof(pNmtRequestService->aNmtCommandData),
@@ -1478,7 +1478,7 @@ static tOplkError cbNmtRequest(tFrameInfo* pFrameInfo_p)
                                    pNmtRequestService->aNmtCommandData, commandSize);
     if (ret != kErrorOk)
     {   // error -> reply with kNmtCmdInvalidService
-        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
+        sourceNodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
         ret = nmtmnu_sendNmtCommand(sourceNodeId, kNmtCmdInvalidService);
         if (ret == kErrorInvalidOperation)
             ret = kErrorOk;
@@ -1522,7 +1522,7 @@ static tOplkError cbIdentResponse(UINT nodeId_p, tIdentResponse* pIdentResponse_
 
         // check DeviceType (0x1F84)
         obdSize = 4;
-        ret = obd_readEntry(0x1F84, nodeId_p, &dwDevType, &obdSize);
+        ret = obdu_readEntry(0x1F84, nodeId_p, &dwDevType, &obdSize);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -1730,7 +1730,7 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
 
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof(count);
-    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    ret = obdu_readEntry(0x1F81, 0, &count, &obdSize);
     if (ret != kErrorOk)
         return ret;
     if (count > tabentries(nmtMnuInstance_g.aNodeInfo))
@@ -1742,13 +1742,13 @@ static tOplkError startBootStep1(BOOL fNmtResetAllIssued_p)
     nmtMnuInstance_g.mandatorySlaveCount = 0;
     nmtMnuInstance_g.signalSlaveCount = 0;
     // check 0x1F81
-    localNodeId = obd_getNodeId();
+    localNodeId = obdu_getNodeId();
 
     pNodeInfo = nmtMnuInstance_g.aNodeInfo;
     for (subIndex = 1; subIndex <= count; subIndex++, pNodeInfo++)
     {
         obdSize = 4;
-        ret = obd_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
+        ret = obdu_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -1843,7 +1843,7 @@ static tOplkError resetRedundancy(void)
 
     // read number of nodes from object 0x1F81/0
     obdSize = sizeof(count);
-    ret = obd_readEntry(0x1F81, 0, &count, &obdSize);
+    ret = obdu_readEntry(0x1F81, 0, &count, &obdSize);
     if (ret != kErrorOk)
         return ret;
     if (count > tabentries(nmtMnuInstance_g.aNodeInfo))
@@ -1854,13 +1854,13 @@ static tOplkError resetRedundancy(void)
     nmtMnuInstance_g.mandatorySlaveCount = 0;
     nmtMnuInstance_g.signalSlaveCount = 0;
     // check 0x1F81
-    localNodeId = obd_getNodeId();
+    localNodeId = obdu_getNodeId();
 
     pNodeInfo = nmtMnuInstance_g.aNodeInfo;
     for (subIndex = 1; subIndex <= count; subIndex++, pNodeInfo++)
     {
         obdSize = 4;
-        ret = obd_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
+        ret = obdu_readEntry(0x1F81, subIndex, &nodeCfg, &obdSize);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -1921,7 +1921,7 @@ static tOplkError switchoverRedundancy(void)
     UINT8               destinationNmtState;
 
     pNodeInfo = nmtMnuInstance_g.aNodeInfo;
-    localNodeId = obd_getNodeId();
+    localNodeId = obdu_getNodeId();
     for (subIndex = 1;
          subIndex <= tabentries(nmtMnuInstance_g.aNodeInfo);
          subIndex++, pNodeInfo++)
@@ -1943,7 +1943,7 @@ static tOplkError switchoverRedundancy(void)
             }
 
             // write object 0x1F8F NMT_MNNodeExpState_AU8
-            ret = obd_writeEntry(0x1F8F, subIndex, &destinationNmtState, 1);
+            ret = obdu_writeEntry(0x1F8F, subIndex, &destinationNmtState, 1);
             if (ret != kErrorOk)
                 goto Exit;
         }
@@ -1991,7 +1991,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkStartReducedCycle;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = NULL;
+    event.eventArg.pEventArg = NULL;
     event.eventArgSize = 0;
     ret = eventu_postEvent(&event);
     if (ret != kErrorOk)
@@ -2022,7 +2022,7 @@ static tOplkError doPreop1(tEventNmtStateChange nmtStateChange_p)
 
     // start timer for 0x1F89/2 MNTimeoutPreOp1_U32
     obdSize = sizeof(dwTimeout);
-    ret = obd_readEntry(0x1F89, 2, &dwTimeout, &obdSize);
+    ret = obdu_readEntry(0x1F89, 2, &dwTimeout, &obdSize);
     if (ret != kErrorOk)
         return ret;
 
@@ -2073,7 +2073,7 @@ static tOplkError startBootStep2(void)
     {
         obdSize = 1;
         // read object 0x1F8F NMT_MNNodeExpState_AU8
-        ret = obd_readEntry(0x1F8F, index, &nmtState, &obdSize);
+        ret = obdu_readEntry(0x1F8F, index, &nmtState, &obdSize);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -2099,7 +2099,7 @@ static tOplkError startBootStep2(void)
 
             // update object 0x1F8F NMT_MNNodeExpState_AU8 to PreOp2
             nmtState = (UINT8)(kNmtCsPreOperational2 & 0xFF);
-            ret = obd_writeEntry(0x1F8F, index, &nmtState, 1);
+            ret = obdu_writeEntry(0x1F8F, index, &nmtState, 1);
             if (ret != kErrorOk)
                 goto Exit;
 
@@ -2155,7 +2155,7 @@ static tOplkError nodeBootStep2(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p)
     {   // node is async-only
         // read object 0x1F8E NMT_MNNodeCurrState_AU8
         obdSize = 1;
-        ret = obd_readEntry(0x1F8E, nodeId_p, &bNmtState, &obdSize);
+        ret = obdu_readEntry(0x1F8E, nodeId_p, &bNmtState, &obdSize);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -2379,7 +2379,7 @@ static tOplkError processRedundancyHeartbeat(UINT nodeId_p, tNmtState nodeNmtSta
 
     nodeNmtState = nodeNmtState_p;
     // update object 0x1F8E NMT_MNNodeCurrState_AU8
-    ret = obd_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
+    ret = obdu_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
     if (ret != kErrorOk)
         return ret;
 
@@ -2471,7 +2471,7 @@ static INT processNodeEventIdentResponse(UINT nodeId_p, tNmtState nodeNmtState_p
                 return -1;
         }
     }
-    *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
+    *pRet_p = obdu_writeEntry(0x1F8F, nodeId_p, &bNmtState, 1);
     if (*pRet_p != kErrorOk)
         return -1;
 
@@ -3219,7 +3219,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
         // C_NMT_STATE_TOLERANCE!
 
         // Get initial NMT state
-        *pRet_p = obd_readEntry(0x1F8F, nodeId_p, &initialNmtState, &objSize);
+        *pRet_p = obdu_readEntry(0x1F8F, nodeId_p, &initialNmtState, &objSize);
         if (*pRet_p != kErrorOk)
             return -1;
 
@@ -3236,7 +3236,7 @@ static INT processNodeEventNmtCmdSent(UINT nodeId_p, tNmtState nodeNmtState_p, t
     }
 
     // write object 0x1F8F NMT_MNNodeExpState_AU8
-    *pRet_p = obd_writeEntry(0x1F8F, nodeId_p, &destinationNmtState, 1);
+    *pRet_p = obdu_writeEntry(0x1F8F, nodeId_p, &destinationNmtState, 1);
     if (*pRet_p != kErrorOk)
         return -1;
 
@@ -3431,7 +3431,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 
     obdSize = 1;
     // read object 0x1F8F NMT_MNNodeExpState_AU8
-    ret = obd_readEntry(0x1F8F, nodeId_p, &bExpNmtState, &obdSize);
+    ret = obdu_readEntry(0x1F8F, nodeId_p, &bExpNmtState, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -3480,7 +3480,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
         pNodeInfo_p->nodeState = kNmtMnuNodeStateReadyToOp;
 
         // update object 0x1F8F NMT_MNNodeExpState_AU8 to ReadyToOp
-        ret = obd_writeEntry(0x1F8F, nodeId_p, &nodeNmtState, 1);
+        ret = obdu_writeEntry(0x1F8F, nodeId_p, &nodeNmtState, 1);
         if (ret != kErrorOk)
             goto Exit;
 
@@ -3581,7 +3581,7 @@ static tOplkError checkNmtState(UINT nodeId_p, tNmtMnuNodeInfo* pNodeInfo_p,
 ExitButUpdate:
     // check if NMT_MNNodeCurrState_AU8 has to be changed
     obdSize = 1;
-    retUpdate = obd_readEntry(0x1F8E, nodeId_p, &nmtStatePrev, &obdSize);
+    retUpdate = obdu_readEntry(0x1F8E, nodeId_p, &nmtStatePrev, &obdSize);
     if (retUpdate != kErrorOk)
     {
         ret = retUpdate;
@@ -3590,7 +3590,7 @@ ExitButUpdate:
     if (nodeNmtState != nmtStatePrev)
     {
         // update object 0x1F8E NMT_MNNodeCurrState_AU8
-        retUpdate = obd_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
+        retUpdate = obdu_writeEntry(0x1F8E, nodeId_p, &nodeNmtState, 1);
         if (retUpdate != kErrorOk)
         {
             ret =retUpdate;
@@ -3875,7 +3875,7 @@ static tOplkError prcCalcPResResponseTimeNs(UINT nodeId_p, UINT nodeIdPredNode_p
 
     // read object 0x1F8D NMT_PResPayloadLimitList_AU16
     obdSize = 2;
-    ret = obd_readEntry(0x1F8D, nodeIdPredNode_p, &pResPayloadLimitPredNode, &obdSize);
+    ret = obdu_readEntry(0x1F8D, nodeIdPredNode_p, &pResPayloadLimitPredNode, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -3933,19 +3933,19 @@ static tOplkError prcCalcPResChainingSlotTimeNs(UINT nodeIdLastNode_p,
     // read object 0x1F98 NMT_CycleTiming_REC
     // Sub-Index 05h PResActPayloadLimit_U16
     obdSize = 2;
-    ret = obd_readEntry(0x1F98, 5, &pResActPayloadLimit, &obdSize);
+    ret = obdu_readEntry(0x1F98, 5, &pResActPayloadLimit, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1F8B NMT_MNPReqPayloadLimitList_AU16
     obdSize = 2;
-    ret = obd_readEntry(0x1F8B, nodeIdLastNode_p, &cnPReqPayloadLastNode, &obdSize);
+    ret = obdu_readEntry(0x1F8B, nodeIdLastNode_p, &cnPReqPayloadLastNode, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1F92 NMT_MNCNPResTimeout_AU32
     obdSize = 4;
-    ret = obd_readEntry(0x1F92, nodeIdLastNode_p, &cnResTimeoutLastNodeNs, &obdSize);
+    ret = obdu_readEntry(0x1F92, nodeIdLastNode_p, &cnResTimeoutLastNodeNs, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -4221,12 +4221,12 @@ static tOplkError prcAdd(UINT nodeIdPrevAdd_p)
 
     // read object 0x1006 NMT_CycleLen_U32
     obdSize = sizeof(UINT32);
-    ret = obd_readEntry(0x1006, 0, &cycleLenUs, &obdSize);
+    ret = obdu_readEntry(0x1006, 0, &cycleLenUs, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
     // read object 0x1C14 DLL_CNLossOfSocTolerance_U32
-    ret = obd_readEntry(0x1C14, 0, &cNLossOfSocToleranceNs, &obdSize);
+    ret = obdu_readEntry(0x1C14, 0, &cNLossOfSocToleranceNs, &obdSize);
     if (ret != kErrorOk)
         goto Exit;
 
@@ -4759,7 +4759,7 @@ static tOplkError sendNmtCommand(UINT nodeId_p, tNmtCommand nmtCommand_p,
     }
 
     // build info structure
-    frameInfo.pFrame = pFrame;
+    frameInfo.frame.pBuffer = pFrame;
     frameInfo.frameSize = sizeof(aBuffer);
 
     // send NMT-Request

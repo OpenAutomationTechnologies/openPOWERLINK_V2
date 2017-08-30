@@ -151,14 +151,19 @@ This structure is the Tx buffer descriptor.
 */
 struct sEdrvTxBuffer
 {
-    UINT                txFrameSize;    ///< Size of Tx frame (without CRC)
-    UINT32              timeOffsetNs;   ///< Tx delay to a previously sent frame [ns]
-    UINT32              timeOffsetAbs;  ///< Absolute Tx time [ticks]
-    UINT64              launchTime;     ///< Launch time of frame [ns]
-    tEdrvTxHandler      pfnTxHandler;   ///< Tx callback function
-    tEdrvTxBufferNumber txBufferNumber; ///< Edrv Tx buffer number
-    UINT8*              pBuffer;        ///< Pointer to the Tx buffer
-    UINT                maxBufferSize;  ///< Maximum size of the Tx buffer
+    UINT                txFrameSize;        ///< Size of Tx frame (without CRC)
+    UINT32              timeOffsetNs;       ///< Tx delay to a previously sent frame [ns]
+    BOOL                fLaunchTimeValid;   ///< Flag to identify a valid launch time
+    union
+    {
+        UINT32          ticks;              ///< Launch time of the frame in ticks
+        UINT64          nanoseconds;        ///< Launch time of the frame in nano seconds
+    } launchTime;
+
+    tEdrvTxHandler      pfnTxHandler;       ///< Tx callback function
+    tEdrvTxBufferNumber txBufferNumber;     ///< Edrv Tx buffer number
+    UINT8*              pBuffer;            ///< Pointer to the Tx buffer
+    UINT                maxBufferSize;      ///< Maximum size of the Tx buffer
 };
 
 /**

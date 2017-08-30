@@ -106,7 +106,7 @@ qsysUtil::addHdlParam  gDmaReadFifoLength      NATURAL 16          $hdlParamVisi
 qsysUtil::addHdlParam  gPacketBufferLocTx      NATURAL 1           $hdlParamVisible
 qsysUtil::addHdlParam  gPacketBufferLocRx      NATURAL 1           $hdlParamVisible
 qsysUtil::addHdlParam  gPacketBufferLog2Size   NATURAL 10          $hdlParamVisible
-qsysUtil::addHdlParam  gTimerCount             NATURAL 2           $hdlParamVisible
+qsysUtil::addHdlParam  gTimerEnablePulse       NATURAL 0           $hdlParamVisible
 qsysUtil::addHdlParam  gTimerEnablePulseWidth  NATURAL 0           $hdlParamVisible
 qsysUtil::addHdlParam  gTimerPulseRegWidth     NATURAL 10          $hdlParamVisible
 
@@ -132,7 +132,7 @@ qsysUtil::addGuiParam  gui_txBurstSize NATURAL 1       "Tx Dma Burst Size"      
 qsysUtil::addGuiParam  gui_rxBufLoc    NATURAL 1       "Rx Buffer Location"                ""          "${cPktBufLocal}:Local ${cPktBufExtern}:External"
 qsysUtil::addGuiParam  gui_rxBufSize   NATURAL 1       "Rx Buffer Size"                    "KiB"       "1:32"
 qsysUtil::addGuiParam  gui_rxBurstSize NATURAL 1       "Rx Dma Burst Size"                 "Word"      "1 4 8 16 32 64"
-qsysUtil::addGuiParam  gui_tmrCount    NATURAL 1       "Number of Hardware Timers"         ""          "1:2"
+qsysUtil::addGuiParam  gui_tmrPulse    BOOLEAN FALSE   "Enable Timer Pulse"                ""          ""
 qsysUtil::addGuiParam  gui_tmrPulseEn  BOOLEAN FALSE   "Timer Pulse Width Control"         ""          ""
 qsysUtil::addGuiParam  gui_tmrPulseWdt NATURAL 10      "Timer Pulse Width register width"  ""          "1:31"
 qsysUtil::addGuiParam  gui_actEn       BOOLEAN FALSE   "Packet activity LED"               ""          ""
@@ -154,9 +154,8 @@ set_parameter_property gui_rxBufLoc    DESCRIPTION     "Select the Rx buffer loc
                                                         this configuration is preferred to save BRAM resources."
 set_parameter_property gui_rxBufSize   DESCRIPTION     "Set the LOCAL Rx buffer size in KiB. Note that this setting affects the BRAM resource utilization!"
 set_parameter_property gui_rxBurstSize DESCRIPTION     "Set the number of words transferred in each burst if the Rx buffer location is EXTERNAL."
-set_parameter_property gui_tmrCount    DESCRIPTION     "Set the number of hardware timers for interrupt or pulse generation.
-                                                        Timer 1 generates an interrupt and optional timer 2 can be used to generate a pulse."
-set_parameter_property gui_tmrPulseEn  DESCRIPTION     "Enable the timer pulse with control of timer 2. Otherwise the generated signal will toggle."
+set_parameter_property gui_tmrPulse    DESCRIPTION     "Enable the optional timer for pulse generation. It can be used for external synchronization."
+set_parameter_property gui_tmrPulseEn  DESCRIPTION     "Enable the timer pulse width control of timer 2. Otherwise the generated pulse is asserted only for one clock cycle."
 set_parameter_property gui_tmrPulseWdt DESCRIPTION     "Determine the timer 2 pulse width control register width.
                                                         Example: Generate a pulse of 1 us (fclk=50 MHz) requires 1 us * 50 MHz = 50 ticks.
                                                         To generate 50 ticks a width of log2(50) ~ 6 is needed."
@@ -182,7 +181,7 @@ add_display_item        $gui_namePktBuf gui_rxBufLoc    PARAMETER
 add_display_item        $gui_namePktBuf gui_rxBufSize   PARAMETER
 add_display_item        $gui_namePktBuf gui_rxBurstSize PARAMETER
 
-add_display_item        $gui_nameTimer  gui_tmrCount    PARAMETER
+add_display_item        $gui_nameTimer  gui_tmrPulse    PARAMETER
 add_display_item        $gui_nameTimer  gui_tmrPulseEn  PARAMETER
 add_display_item        $gui_nameTimer  gui_tmrPulseWdt PARAMETER
 
@@ -207,6 +206,7 @@ proc elaboration_callback {} {
     }
 
     # Generate ports depending on GUI parameters.
+    generateTimerPulse
     generatePktBuf
     generateDma
     generateRmii
@@ -277,7 +277,8 @@ proc controlGui {} {
     set phyCount    [get_parameter_value gui_phyCount]
     set txBufLoc    [get_parameter_value gui_txBufLoc]
     set rxBufLoc    [get_parameter_value gui_rxBufLoc]
-    set tmrPulseEn   [get_parameter_value gui_tmrPulseEn]
+    set tmrPulse    [get_parameter_value gui_tmrPulse]
+    set tmrPulseEn  [get_parameter_value gui_tmrPulseEn]
 
     # If only one phy is used no extra SMI port necessary.
     if { ${phyCount} > 1 } {
@@ -305,7 +306,14 @@ proc controlGui {} {
     }
 
     # Enable timer pulse settings
-    if { ${tmrPulseEn} } {
+    if { ${tmrPulse} } {
+        set_parameter_property gui_tmrPulseEn VISIBLE TRUE
+    } else {
+        set_parameter_property gui_tmrPulseEn VISIBLE FALSE
+    }
+
+    # Enable timer pulse width settings
+    if { ${tmrPulse} && ${tmrPulseEn} } {
         set_parameter_property gui_tmrPulseWdt VISIBLE TRUE
     } else {
         set_parameter_property gui_tmrPulseWdt VISIBLE FALSE
@@ -318,8 +326,6 @@ proc checkGui {} {
     set phyType     [get_parameter_value gui_phyType]
     set txBufLoc    [get_parameter_value gui_txBufLoc]
     set rxBufLoc    [get_parameter_value gui_rxBufLoc]
-    set tmrCount    [get_parameter_value gui_tmrCount]
-    set tmrPulseEn  [get_parameter_value gui_tmrPulseEn]
 
     # Set warning if no RMII is used!
     if { ${phyType} != ${::cPhyPortRmii} } {
@@ -329,13 +335,6 @@ proc checkGui {} {
     # External packet buffer location requires connection to heap memory.
     if { [getDmaUsed] } {
         send_message info "Connect the Avalon Master 'dma' to the memory where Heap is located!"
-    }
-
-    # Timer pulse enable needs more than one timer!
-    if { ${tmrCount} < 2 && ${tmrPulseEn} } {
-        set tmrCountDisplay     [get_parameter_property gui_tmrCount DISPLAY_NAME]
-        set tmrPulseEnDisplay   [get_parameter_property gui_tmrPulseEn DISPLAY_NAME]
-        send_message error "If you enable \"${tmrPulseEnDisplay}\", the value \"${tmrCountDisplay}\" must be larger 2!"
     }
 }
 
@@ -348,6 +347,18 @@ proc checkClkRate { lstParam lstRate } {
     }
 
     return ""
+}
+
+# Generate timer pulse interrupt sender.
+# -> Clock:     mainClk
+# -> Reset:     mainRst
+# -> MM Slave:  macTimer
+proc generateTimerPulse {} {
+    if { [getTimerPulseUsed] } {
+        set_interface_property timerPulse ENABLED TRUE
+    } else {
+        set_interface_property timerPulse ENABLED FALSE
+    }
 }
 
 # Generate packet buffer slave interface.
@@ -451,10 +462,15 @@ proc setCmacro {} {
     set phyCount    [get_parameter_value gui_phyCount]
     set txBufLoc    [get_parameter_value gui_txBufLoc]
     set rxBufLoc    [get_parameter_value gui_rxBufLoc]
-    set tmrCount    [get_parameter_value gui_tmrCount]
     set tmrPulseWdt [get_parameter_value gui_tmrPulseWdt]
 
     # Get boolean parameters and convert them
+    if { [get_parameter_value gui_tmrPulse] } {
+        set tmrPulse ${::cTrue}
+    } else {
+        set tmrPulse ${::cFalse}
+    }
+
     if { [get_parameter_value gui_tmrPulseEn] } {
         set tmrPulseEn ${::cTrue}
     } else {
@@ -482,10 +498,10 @@ proc setCmacro {} {
     set_module_assignment embeddedsw.CMacro.PKTBUFSIZE          [getPktBufSize]
 
     # Timer count
-    set_module_assignment embeddedsw.CMacro.TIMERCNT            ${tmrCount}
+    set_module_assignment embeddedsw.CMacro.TIMERPULSE          ${tmrPulse}
 
     # Timer pulse enabled
-    set_module_assignment embeddedsw.CMacro.TIMERPULSE          ${tmrPulseEn}
+    set_module_assignment embeddedsw.CMacro.TIMERPULSECONTROL   ${tmrPulseEn}
 
     # Timer pulse width
     set_module_assignment embeddedsw.CMacro.TIMERPULSEREGWIDTH  ${tmrPulseWdt}
@@ -501,8 +517,8 @@ proc setHdl {} {
     set txBurstSize         [get_parameter_value gui_txBurstSize]
     set rxBufLoc            [get_parameter_value gui_rxBufLoc]
     set rxBurstSize         [get_parameter_value gui_rxBurstSize]
-    set tmrCount            [get_parameter_value gui_tmrCount]
-    set tmrPulseEn           [get_parameter_value gui_tmrPulseEn]
+    set tmrPulse            [get_parameter_value gui_tmrPulse]
+    set tmrPulseEn          [get_parameter_value gui_tmrPulseEn]
     set tmrPulseWdt         [get_parameter_value gui_tmrPulseWdt]
     set actEn               [get_parameter_value gui_actEn]
 
@@ -555,9 +571,20 @@ proc setHdl {} {
     set_parameter_value gPacketBufferLog2Size   [getPktBufSizeLog2]
 
     # Timer configuration
-    set_parameter_value gTimerCount             ${tmrCount}
+    set_parameter_value gTimerEnablePulse       ${tmrPulse}
     set_parameter_value gTimerEnablePulseWidth  ${tmrPulseEn}
     set_parameter_value gTimerPulseRegWidth     ${tmrPulseWdt}
+}
+
+# Returns TRUE if timer pulse is used
+proc getTimerPulseUsed {} {
+    set tmrPulse    [get_parameter_value gui_tmrPulse]
+
+    if { ${tmrPulse} } {
+        return TRUE
+    } else {
+        return FALSE
+    }
 }
 
 # Returns TRUE if DMA is used (any location is external).
@@ -810,6 +837,15 @@ set_interface_property  timerIrq ENABLED true
 
 add_interface_port      timerIrq ins_timerIrq_irq irq Output 1
 
+# connection point timerPulse
+add_interface           timerPulse interrupt end
+# No associatedAddressablePoint since interrupt goes to external sink!
+set_interface_property  timerPulse associatedClock mainClk
+set_interface_property  timerPulse associatedReset mainRst
+set_interface_property  timerPulse ENABLED true
+
+add_interface_port      timerPulse ins_timerPulse_irq irq Output 1
+
 # connection point macIrq
 add_interface           macIrq interrupt end
 set_interface_property  macIrq associatedAddressablePoint macReg
@@ -854,9 +890,3 @@ add_interface           pktActivity conduit end
 set_interface_property  pktActivity ENABLED true
 
 add_interface_port      pktActivity coe_pktActivity export Output 1
-
-# connection point macTimerOut
-add_interface           macTimerOut conduit end
-set_interface_property  macTimerOut ENABLED true
-
-add_interface_port      macTimerOut coe_macTimerOut export Output gtimercount

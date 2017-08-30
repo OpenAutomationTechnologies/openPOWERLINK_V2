@@ -70,14 +70,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define EDRV_PHY_RST_READY_MS       5       ///< Phy ready after reset [ms]
 
 #define EDRV_MAX_BUFFER_SIZE        1518    ///< MTU
-#define EDRV_MAX_RX_BUFFERS         16      ///< Number of supported Rx buffers
+#define EDRV_MAX_RX_BUFFERS         32      ///< Number of supported Rx buffers
 #define EDRV_MAX_FILTERS            16      ///< Number of supported Rx Filters
 #define EDRV_MAX_AUTO_RESPONSES     14      ///< Number of supported auto-response
 
 #define HWTIMER_SYNC            0   ///< Sync hardware timer
 #define HWTIMER_EXT_SYNC        1   ///< External sync hardware timer
 
-#if (OPENMAC_TIMERCNT > 1)
+#if (OPENMAC_TIMERPULSE != 0)
 #define TIMER_USE_EXT_SYNC_INT
 #endif
 
@@ -92,6 +92,8 @@ typedef void (*tOpenmacIrqCb) (void* pArg_p);
 
 /**
 \brief openMAC IRQ sources
+
+This enumerator identifies the possible openMAC interrupt request sources.
 */
 typedef enum
 {

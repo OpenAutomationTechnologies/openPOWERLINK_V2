@@ -85,7 +85,7 @@ typedef struct
 {
     tDllCalQueue                dllCalQueue;        ///< DLL CAL queue
     tDllAsyncReqPriority        priority;           ///< Request priority
-    int                         fd;                 ///< File descriptor of openPOWERLINK driver
+    OPLK_FILE_HANDLE            fd;                 ///< File descriptor of openPOWERLINK driver
 } tDllCalIoctlInstance;
 
 //------------------------------------------------------------------------------

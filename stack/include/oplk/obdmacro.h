@@ -452,7 +452,7 @@ macros as well.
 The macros ..._DOMAIN, ..._USERDEF and ..._USERDEF_RG define a variable
 information structure of type tVarEntry in the RAM along with the sub-index entry.
 This structure contains the data length and a pointer to the data. Upon initialization
-of the openPOWERLINK stack with the function oplk_init() all variable information is
+of the openPOWERLINK stack with the function oplk_create() all variable information is
 deleted. The application has to link these objects to its own variables by calling
 the function oplk_linkObject().
 */

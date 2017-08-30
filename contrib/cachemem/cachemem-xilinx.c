@@ -68,8 +68,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // Define data cache invalidate and flush if data cache is available
 #if (XPAR_MICROBLAZE_USE_DCACHE == 1)
-#define CACHEMEM_FLUSH(addr, len)       microblaze_flush_dcache_range(addr,len)
-#define CACHEMEM_INVALIDATE(addr, len)  microblaze_invalidate_dcache_range(addr, len)
+#define CACHEMEM_FLUSH(addr, len)       Xil_L1DCacheFlushRange((u32)(addr),len)
+#define CACHEMEM_INVALIDATE(addr, len)  Xil_L1DCacheInvalidateRange((u32)(addr), len)
 #else
 // Empty macros, because there is no cache!
 #define CACHEMEM_FLUSH(addr, len)

@@ -80,6 +80,19 @@ different event queues.
 
 //------------------------------------------------------------------------------
 /**
+\defgroup module_ledk ledk
+
+\brief Kernel LED module
+
+The kernel LED module is responsible to control the POWERLIK status and error
+LEDs. The LEDs reflect the current status of the stack.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
 \defgroup module_pdok pdok
 
 \brief Kernel PDO module
@@ -160,6 +173,25 @@ to the POWERLINK cycle.
 \brief Timestamp module
 
 The timestamp module provides some helper functions for handling timestamps.
+
+\ingroup kernel_layer
+*/
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/**
+\defgroup module_timesynck timesynck
+
+\brief Kernel timesync module
+
+The kernel timesync module is in charge of handling the time synchronization
+to the POWERLINK network in the openPOWERLINK kernel layer. It is responsible for
+notifying the user side at the configured synchronization point by using the
+communication abstraction layer module (timesync CAL).
+
+\see module_timesyncu
+\see module_timesynckcal
+\see module_timesyncucal
 
 \ingroup kernel_layer
 */

@@ -72,11 +72,14 @@ information between the kernel and the user layer.
 */
 typedef struct
 {
-    UINT16              magic;      ///< Magic 0xA5A5 identifies valid struct
-    tCtrlKernelStatus   status;     ///< Status of the kernel stack
-    UINT16              heartbeat;  ///< Heartbeat counter
-    tCtrlCmd            ctrlCmd;    ///< The control command structure
-    tCtrlInitParam      initParam;  ///< The initialization parameter structure
+    UINT16                  magic;          ///< Magic 0xA5A5 identifies valid struct
+    tCtrlKernelStatus       status;         ///< Status of the kernel stack
+    UINT16                  heartbeat;      ///< Heartbeat counter
+    tCtrlCmd                ctrlCmd;        ///< The control command structure
+    tCtrlInitParam          initParam;      ///< The initialization parameter structure
+    tOplkApiFileChunkDesc   fileChunkDesc;  ///< File chunk descriptor
+    UINT8                   aFileChunkBuffer[CONFIG_CTRL_FILE_CHUNK_SIZE];
+                                            ///< File chunk transfer buffer
 } tCtrlBuf;
 
 //------------------------------------------------------------------------------

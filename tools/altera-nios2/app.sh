@@ -109,13 +109,15 @@ case ${APP_TYPE} in
         SEL_PROC_NAME=${CFG_APP_PROC_NAME}
         SEL_CPU_NAME=${CFG_APP_CPU_NAME}
         SEL_SYS_TIMER_NAME=${CFG_APP_SYS_TIMER_NAME}
-        SEL_TCI_MEM_NAME=${CFG_APP_TCI_MEM_NAME}
+        SEL_TC_MEM_NAME=${CFG_APP_TC_MEM_NAME}
         SEL_BSP_TYPE=${CFG_APP_BSP_TYPE}
         SEL_BSP_OPT_LEVEL=${CFG_APP_BSP_OPT_LEVEL}
         SEL_MAX_HEAP_BYTES=${CFG_APP_MAX_HEAP_BYTES}
         SEL_EPCS=${CFG_APP_EPCS}
         SEL_DEF_MEM_NAME=${CFG_APP_DEF_MEM_NAME}
         SEL_HOSTED_BOOT=${CFG_APP_HOSTED_BOOT}
+        SEL_EXCEPTION_STACK_MEM=${CFG_APP_EXCEPTION_STACK_MEM}
+        SEL_EXCEPTION_STACK_SIZE=${CFG_APP_EXCEPTION_STACK_SIZE}
         ;;
     drv)
         echo "INFO: Generate application for driver."
@@ -123,13 +125,15 @@ case ${APP_TYPE} in
         SEL_PROC_NAME=${CFG_DRV_PROC_NAME}
         SEL_CPU_NAME=${CFG_DRV_CPU_NAME}
         SEL_SYS_TIMER_NAME=${CFG_DRV_SYS_TIMER_NAME}
-        SEL_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
+        SEL_TC_MEM_NAME=${CFG_DRV_TC_MEM_NAME}
         SEL_BSP_TYPE=${CFG_DRV_BSP_TYPE}
         SEL_BSP_OPT_LEVEL=${CFG_DRV_BSP_OPT_LEVEL}
         SEL_MAX_HEAP_BYTES=${CFG_DRV_MAX_HEAP_BYTES}
         SEL_EPCS=${CFG_DRV_EPCS}
         SEL_DEF_MEM_NAME=${CFG_DRV_DEF_MEM_NAME}
         SEL_HOSTED_BOOT=${CFG_DRV_HOSTED_BOOT}
+        SEL_EXCEPTION_STACK_MEM=${CFG_DRV_EXCEPTION_STACK_MEM}
+        SEL_EXCEPTION_STACK_SIZE=${CFG_DRV_EXCEPTION_STACK_SIZE}
         ;;
     *)
         echo "ERROR: No APP_TYPE specified in ${APP_SETTINGS_FILE}!"
@@ -150,17 +154,33 @@ BSP_GEN_ARGS="${SEL_BSP_TYPE} ${BSP_PATH} ${BOARD_PATH}/quartus \
 --set hal.enable_clean_exit false \
 --set hal.enable_exit false \
 --set hal.enable_reduced_device_drivers true \
---set hal.enable_small_c_library true \
+--set hal.enable_small_c_library false \
 --set hal.enable_lightweight_device_driver_api true \
 --cpu-name ${SEL_CPU_NAME} \
 --set hal.sys_clk_timer ${SEL_SYS_TIMER_NAME} \
 "
 
-if [ -n "${SEL_TCI_MEM_NAME}" ];
+if [ -n "${SEL_TC_MEM_NAME}" ];
 then
-    BSP_GEN_ARGS+="--cmd add_section_mapping .tc_i_mem ${SEL_TCI_MEM_NAME} \
+    BSP_GEN_ARGS+="--cmd add_section_mapping .tc_mem ${SEL_TC_MEM_NAME} \
                    --set hal.linker.enable_alt_load_copy_exceptions false "
-    echo "INFO: tc_i_mem is used by the system!"
+    echo "INFO: tc_mem is used by the system!"
+fi
+
+if [ -z "${DEBUG}" ]; then
+    # Exception stack only handled in release...
+    if [ -n "${SEL_EXCEPTION_STACK_MEM}" ]; then
+        BSP_GEN_ARGS+="--set hal.linker.enable_exception_stack true \
+                       --set hal.linker.exception_stack_memory_region_name ${SEL_EXCEPTION_STACK_MEM} "
+        echo "INFO: Enable exception stack on memory ${SEL_EXCEPTION_STACK_MEM}!"
+
+        if [ -n "${SEL_EXCEPTION_STACK_SIZE}" ]; then
+            BSP_GEN_ARGS+="--set hal.linker.exception_stack_size ${SEL_EXCEPTION_STACK_SIZE} "
+            echo "INFO: Exception stack size is set to ${SEL_EXCEPTION_STACK_SIZE}!"
+        else
+            echo "INFO: Exception stack size is set to default value (1024)!"
+        fi
+    fi
 fi
 
 # Add flag for explicitly using EPCS flash.
@@ -326,6 +346,30 @@ ${OPLK_BASE_DIR}/tools/altera-nios2/fix-app-makefile ${OUT_PATH}/Makefile
 
 # Add EPCS flash makefile rules
 if [ -n "${SEL_EPCS}" ]; then
+    # Create system.mk to get system info
+    SOPCINFO_FILE=$(find ${BOARD_PATH}/quartus -name *.sopcinfo)
+    SWINFO_FILE=${OUT_PATH}/swinfo
+    SETTINGS_FILE=${OUT_PATH}/system.mk
+
+    sopcinfo2swinfo --input=${SOPCINFO_FILE} --output=${SWINFO_FILE}
+    RET=$?
+
+    if [ ${RET} -ne 0 ]; then
+        echo "ERROR: Generating ${SWINFO_FILE} file failed with error ${RET}!"
+        exit ${RET}
+    fi
+
+    swinfo2header --swinfo ${SWINFO_FILE} --format mk --single ${SETTINGS_FILE} --module ${SEL_CPU_NAME}
+    RET=$?
+
+    if [ ${RET} -ne 0 ]; then
+        echo "ERROR: Generating ${SETTINGS_FILE} file failed with error ${RET}!"
+        exit ${RET}
+    fi
+
+    # Remove unused swinfo file
+    rm -f ${SWINFO_FILE}
+
     chmod +x ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs
     ${OPLK_BASE_DIR}/tools/altera-nios2/add-app-makefile-epcs ${OUT_PATH}/Makefile
 fi

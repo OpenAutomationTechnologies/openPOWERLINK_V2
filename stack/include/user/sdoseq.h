@@ -69,9 +69,13 @@ typedef enum
     kAsySdoConStateInitError            = 0x01,     ///< An error occured during initialization
     kAsySdoConStateConClosed            = 0x02,     ///< The SDO connection is closed
     kAsySdoConStateAckReceived          = 0x03,     ///< An acknowledge has been received
-    kAsySdoConStateFrameSent            = 0x04,     ///< A frame has been sent
-    kAsySdoConStateTimeout              = 0x05,     ///< A timeout has occured
-    kAsySdoConStateTransferAbort        = 0x06,     ///< The SDO transfer has been aborted
+    kAsySdoConStateFrameSent            = 0x04,     /**< A frame with command layer data
+                                                         has been sent or added to the
+                                                         Tx history buffer */
+    kAsySdoConStateFrameReceived        = 0x05,     /**< A frame with command layer data
+                                                         was received */
+    kAsySdoConStateTimeout              = 0x06,     ///< A timeout has occured
+    kAsySdoConStateTransferAbort        = 0x07,     ///< The SDO transfer has been aborted
 } eAsySdoConState;
 
 /**

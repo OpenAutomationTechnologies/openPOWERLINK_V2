@@ -45,6 +45,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#define PLK_CLASS_NAME    "plk"
+#define PLK_DEV_NAME      "plk" // used for "/dev" and "/proc" entry
+#define PLK_DRV_NAME      "plk"
+#define PLK_DEV_FILE      "/dev/plk"
+#define PLK_IOC_MAGIC     '='
 
 //------------------------------------------------------------------------------
 //  Commands for <ioctl>
@@ -59,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_CMD_DLLCAL_ASYNCSEND                _IO  (PLK_IOC_MAGIC, 7)
 #define PLK_CMD_ERRHND_WRITE                    _IOW (PLK_IOC_MAGIC, 8, tErrHndIoctl)
 #define PLK_CMD_ERRHND_READ                     _IOR (PLK_IOC_MAGIC, 9, tErrHndIoctl)
-#define PLK_CMD_PDO_SYNC                        _IO  (PLK_IOC_MAGIC, 10)
+#define PLK_CMD_TIMESYNC_SYNC                   _IO  (PLK_IOC_MAGIC, 10)
 
 //------------------------------------------------------------------------------
 // typedef

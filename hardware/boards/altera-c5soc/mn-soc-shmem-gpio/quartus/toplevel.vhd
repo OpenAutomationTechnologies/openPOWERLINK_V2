@@ -32,10 +32,12 @@ library libcommon;
 use libcommon.global.all;
 
 entity toplevel is
+    generic (
+        gBoardRev               :       string := "D"
+    );
     port (
         -- FPGA peripherals ports
         fpga_dipsw_pio          : in    std_logic_vector (3 downto 0);
-        fpga_led_pio            : out   std_logic_vector (3 downto 0);
         fpga_button_pio         : in    std_logic_vector (1 downto 0);
         -- HPS memory controller ports
         hps_memory_mem_a        : out   std_logic_vector (14 downto 0);
@@ -139,6 +141,7 @@ entity toplevel is
        fpga_clk_50              : in    std_logic;
        PLNK_MII_TXEN            : out   std_logic_vector(1 downto 0);-- txEnable
        PLNK_MII_TXD             : out   std_logic_vector(7 downto 0);-- txData
+       PLNK_PHY_CLK             : in    std_logic;
        PLNK_MII_TXCLK           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- txClk
        PLNK_MII_RXERR           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- rxError
        PLNK_MII_RXDV            : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- rxDataValid
@@ -146,7 +149,9 @@ entity toplevel is
        PLNK_MII_RXCLK           : in    std_logic_vector(1 downto 0)  := (others => 'X'); -- rxClk
        PLNK_SMI_PHYRSTN         : out   std_logic_vector(0 downto 0);-- nPhyRst
        PLNK_SMI_CLK             : out   std_logic_vector(0 downto 0);-- clk
-       PLNK_SMI_DIO             : inout std_logic_vector(0 downto 0)  := (others => 'X')-- dio
+       PLNK_SMI_DIO             : inout std_logic_vector(0 downto 0)  := (others => 'X');-- dio
+       -- POWERLINK LED module
+       pcp_led                  : out   std_logic_vector (1 downto 0)
     );
 end toplevel;
 
@@ -163,6 +168,7 @@ architecture rtl of toplevel is
   signal h2f_gp_in              : std_logic_vector(31 downto 0);
   signal h2f_gp_out             : std_logic_vector(31 downto 0);
 
+  signal miiTxClk               : std_logic_vector(1 downto 0);
 
   component mnSocShmemGpio is
         port (
@@ -267,7 +273,6 @@ architecture rtl of toplevel is
             hps_0_f2h_cold_reset_req_reset_n                    : in    std_logic := 'X';
             hps_0_f2h_debug_reset_req_reset_n                   : in    std_logic := 'X';
             hps_0_f2h_warm_reset_req_reset_n                    : in    std_logic := 'X';
-            led_pio_external_connection_export                  : out   std_logic_vector(3 downto 0);
             dipsw_pio_external_connection_export                : in    std_logic_vector(3 downto 0)  := (others => 'X');
             button_pio_external_connection_export               : in    std_logic_vector(1 downto 0)  := (others => 'X');
             ddr3_emif_0_status_local_init_done                  : out   std_logic;
@@ -299,13 +304,13 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                               : out   std_logic_vector(0 downto 0);
             openmac_0_smi_clk                                   : out   std_logic_vector(0 downto 0);
             openmac_0_smi_dio                                   : inout std_logic_vector(0 downto 0)  := (others => 'X');
-            openmac_0_mactimerout_export                        : out   std_logic_vector(0 downto 0);
             host_0_hps_0_h2f_gp_gp_in                           : in    std_logic_vector(31 downto 0) := (others => 'X');
             host_0_hps_0_h2f_gp_gp_out                          : out   std_logic_vector(31 downto 0);
             host_0_hps_0_h2f_cold_reset_reset_n                 : out   std_logic;
             pcp_0_cpu_resetrequest_resetrequest                 : in    std_logic                     := 'X';
             pcp_0_cpu_resetrequest_resettaken                   : out   std_logic;
-            pcp_0_benchmark_pio_export                          : out   std_logic_vector(7 downto 0)
+            pcp_0_benchmark_pio_export                          : out   std_logic_vector(7 downto 0);
+            powerlink_led_export                                : out   std_logic_vector(1 downto 0)
         );
     end component mnSocShmemGpio;
 
@@ -347,7 +352,6 @@ architecture rtl of toplevel is
             memory_oct_rzqin                      =>  hps_memory_oct_rzqin,
             --DIP Switch FPGA
             dipsw_pio_external_connection_export  =>  fpga_dipsw_pio,
-            led_pio_external_connection_export    =>  fpga_led_pio,
             button_pio_external_connection_export =>  fpga_button_pio,
             hps_io_hps_io_emac1_inst_TX_CLK =>  hps_emac1_TX_CLK,
             hps_io_hps_io_emac1_inst_TXD0   =>  hps_emac1_TXD0,
@@ -440,7 +444,7 @@ architecture rtl of toplevel is
             oct_rzqin                             =>  fpga_oct_rzqin,
             openmac_0_mii_txEnable                =>  PLNK_MII_TXEN,
             openmac_0_mii_txData                  =>  PLNK_MII_TXD,
-            openmac_0_mii_txClk                   =>  PLNK_MII_TXCLK,
+            openmac_0_mii_txClk                   =>  miiTxClk,
             openmac_0_mii_rxError                 =>  PLNK_MII_RXERR,
             openmac_0_mii_rxDataValid             =>  PLNK_MII_RXDV,
             openmac_0_mii_rxData                  =>  PLNK_MII_RXD,
@@ -448,17 +452,32 @@ architecture rtl of toplevel is
             openmac_0_smi_nPhyRst                 =>  PLNK_SMI_PHYRSTN,
             openmac_0_smi_clk                     =>  PLNK_SMI_CLK,
             openmac_0_smi_dio                     =>  PLNK_SMI_DIO,
-            openmac_0_mactimerout_export          =>  open,
             host_0_hps_0_h2f_gp_gp_in             =>  h2f_gp_in,
             host_0_hps_0_h2f_gp_gp_out            =>  h2f_gp_out,
             host_0_hps_0_h2f_cold_reset_reset_n   =>  h2f_cold_reset_n,
             pcp_0_cpu_resetrequest_resetrequest   => not(hps_fpga_reset_n and h2f_gp_out(0)),
             pcp_0_cpu_resetrequest_resettaken     => h2f_gp_in(0),
-            pcp_0_benchmark_pio_export            => open
+            pcp_0_benchmark_pio_export            => open,
+            powerlink_led_export                  => pcp_led
         );
 
     -- Remove NIOS out of reset after DDR3 and PLL ready to operate
     hps_fpga_reset_n <= pllLocked and ddr3_afi_resetn and h2f_cold_reset_n;
+
+    -- Select Phy Tx clock source
+    process(PLNK_PHY_CLK, PLNK_MII_TXCLK)
+    begin
+        case gBoardRev is
+            when "C" =>
+                miiTxClk    <= PLNK_MII_TXCLK;
+
+            when "D" =>
+                miiTxClk    <= PLNK_PHY_CLK & PLNK_PHY_CLK;
+
+            when others =>
+                assert (false) report "The board revision is unknown!" severity failure;
+        end case;
+    end process;
 
     -- PLL for Qsys
     pllInst : pll

@@ -4,6 +4,7 @@
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
 # Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -75,7 +76,7 @@ SET_PROPERTY(CACHE CFG_POWERLINK_EDRV PROPERTY STRINGS 8139 82573 8255x i210 811
 ################################################################################
 # Set global directories
 ################################################################################
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
 SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
@@ -117,8 +118,13 @@ ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8255x")
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "i210")
 
     SET(MODULE_NAME "oplki210")
-    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=210 -DEDRV_USE_TTTX=TRUE")
+    SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_EDRV=210")
     SET(MODULE_SOURCE_FILES ${MODULE_SOURCE_FILES} ${EDRV_SOURCE_DIR}/edrv-i210.c)
+    IF(CFG_OPLK_MN)
+        SET(MODULE_DEFS "${MODULE_DEFS} -DEDRV_USE_TTTX=TRUE")
+    ELSE()
+        SET(MODULE_DEFS "${MODULE_DEFS} -DEDRV_USE_TTTX=FALSE")
+    ENDIF()
 
 ELSEIF(CFG_POWERLINK_EDRV STREQUAL "8111")
 
@@ -152,10 +158,10 @@ IF(CFG_OPLK_MN)
     ENDIF()
     SET(MODULE_DEFS "${MODULE_DEFS} -DCONFIG_MN")
     SET(MODULE_NAME "${MODULE_NAME}mn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/mn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)
 ELSE()
     SET(MODULE_NAME "${MODULE_NAME}cn")
-    INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/proj/cn)
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/cn)
 ENDIF()
 
 ###############################################################################
@@ -189,7 +195,7 @@ ENDFOREACH()
 #
 SET(MODULE_SOURCE_FILES
     ${MODULE_SOURCE_FILES}
-    ${CMAKE_SOURCE_DIR}/main.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-printk.c
     ${EDRV_SOURCE_DIR}/edrvcyclic.c
     ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c
@@ -211,12 +217,14 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c
     ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-linuxkernel.c
-    ${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-linuxkernel.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynck.c
+    ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxkernel.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c
     ${KERNEL_SOURCE_DIR}/errhnd/errhndkcal-local.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxkernel.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-linuxkernel.c
+    ${COMMON_SOURCE_DIR}/bufalloc/bufalloc.c
     ${COMMON_SOURCE_DIR}/debugstr.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
     )
@@ -301,8 +309,8 @@ ADD_CUSTOM_TARGET(
 ################################################################################
 # add installation rules
 
-INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(FILES ${MODULE_OUTPUT_DIR}/${MODULE_NAME}.ko DESTINATION ${PROJECT_NAME})
+INSTALL(FILES ${TOOLS_DIR}/linux/50-openPOWERLINK.rules DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkload DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/plkunload DESTINATION ${PROJECT_NAME})
+INSTALL(PROGRAMS ${TOOLS_DIR}/linux/devices.txt DESTINATION ${PROJECT_NAME})

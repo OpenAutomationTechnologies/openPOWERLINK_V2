@@ -12,6 +12,19 @@
    element $${FILENAME}
    {
    }
+   element POWERLINK_LED
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
    element jtag_uart_0.avalon_jtag_slave
    {
       datum baseAddress
@@ -56,19 +69,6 @@
       datum sopceditor_expanded
       {
          value = "0";
-         type = "boolean";
-      }
-   }
-   element clock_crossing_0
-   {
-      datum _sortIndex
-      {
-         value = "10";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "1";
          type = "boolean";
       }
    }
@@ -171,20 +171,12 @@
          type = "boolean";
       }
    }
-   element cpu_bridge.s0
+   element mm_bridge_0
    {
-      datum _lockedAddress
+      datum _sortIndex
       {
-         value = "1";
-         type = "boolean";
-      }
-   }
-   element slow_bridge.s0
-   {
-      datum baseAddress
-      {
-         value = "32768";
-         type = "String";
+         value = "10";
+         type = "int";
       }
    }
    element flash_bridge.s0
@@ -200,7 +192,7 @@
          type = "String";
       }
    }
-   element clock_crossing_0.s0
+   element mm_bridge_0.s0
    {
       datum _lockedAddress
       {
@@ -213,7 +205,23 @@
          type = "String";
       }
    }
-   element tc_i_mem.s1
+   element slow_bridge.s0
+   {
+      datum baseAddress
+      {
+         value = "32768";
+         type = "String";
+      }
+   }
+   element cpu_bridge.s0
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element tc_mem.s1
    {
       datum _lockedAddress
       {
@@ -234,6 +242,14 @@
          type = "String";
       }
    }
+   element POWERLINK_LED.s1
+   {
+      datum baseAddress
+      {
+         value = "4128";
+         type = "String";
+      }
+   }
    element timer_0.s1
    {
       datum baseAddress
@@ -242,7 +258,7 @@
          type = "String";
       }
    }
-   element tc_i_mem.s2
+   element tc_mem.s2
    {
       datum _lockedAddress
       {
@@ -281,7 +297,7 @@
          type = "boolean";
       }
    }
-   element tc_i_mem
+   element tc_mem
    {
       datum _sortIndex
       {
@@ -322,9 +338,24 @@
  <parameter name="projectName" value="" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058128673" />
+ <parameter name="timeStamp" value="1460439900681" />
  <parameter name="useTestBenchNamingPattern" value="false" />
- <instanceScript></instanceScript>
+ <instanceParameter
+   name="tcmemSize"
+   displayName="Tightly Coupled Memory Size"
+   type="integer"
+   defaultValue="24576"
+   legalRanges=""
+   description="Size of Nios II tightly coupled memory in bytes." />
+ <instanceScript><![CDATA[# request a specific version of the scripting API
+package require -exact qsys 13.0
+
+# Set the name of the procedure to manipulate parameters
+set_module_property COMPOSITION_CALLBACK compose
+
+proc compose {} {
+    set_instance_parameter_value tc_mem memorySize [get_parameter_value tcmemSize]
+}]]></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
  <interface name="rst_clk50" internal="clk50.clk_in_reset" type="reset" dir="end" />
  <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />
@@ -374,6 +405,11 @@
    internal="jtag_reset_bridge.out_reset"
    type="reset"
    dir="start" />
+ <interface
+   name="powerlink_led"
+   internal="POWERLINK_LED.external_connection"
+   type="conduit"
+   dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -384,15 +420,15 @@
    kind="altera_avalon_onchip_memory2"
    version="13.0.1.99.2"
    enabled="1"
-   name="tc_i_mem">
+   name="tc_mem">
   <parameter name="allowInSystemMemoryContentEditor" value="false" />
   <parameter name="blockType" value="AUTO" />
   <parameter name="dataWidth" value="32" />
   <parameter name="dualPort" value="true" />
   <parameter name="initMemContent" value="true" />
-  <parameter name="initializationFileName" value="tc_i_mem" />
+  <parameter name="initializationFileName" value="tc_mem" />
   <parameter name="instanceID" value="NONE" />
-  <parameter name="memorySize" value="4096" />
+  <parameter name="memorySize" value="24576" />
   <parameter name="readDuringWriteMode" value="DONT_CARE" />
   <parameter name="simAllowMRAMContentsFile" value="false" />
   <parameter name="simMemInitOnlyFilename" value="0" />
@@ -402,7 +438,7 @@
   <parameter name="useNonDefaultInitFile" value="false" />
   <parameter name="useShallowMemBlocks" value="false" />
   <parameter name="writable" value="true" />
-  <parameter name="autoInitializationFileName">$${FILENAME}_tc_i_mem</parameter>
+  <parameter name="autoInitializationFileName" value="$${FILENAME}_tc_mem" />
   <parameter name="deviceFamily" value="Cyclone IV E" />
   <parameter name="deviceFeatures">ADDRESS_STALL 1 CELL_LEVEL_BACK_ANNOTATION_DISABLED 0 COMPILER_SUPPORT 1 DSP 0 DSP_SHIFTER_BLOCK 0 DUMP_ASM_LAB_BITS_FOR_POWER 1 EMUL 1 ENABLE_ADVANCED_IO_ANALYSIS_GUI_FEATURES 1 EPCS 1 ESB 0 FAKE1 0 FAKE2 0 FAKE3 0 FAMILY_LEVEL_INSTALLATION_ONLY 1 FITTER_USE_FALLING_EDGE_DELAY 0 GENERATE_DC_ON_CURRENT_WARNING_FOR_INTERNAL_CLAMPING_DIODE 0 HARDCOPY 0 HAS_18_BIT_MULTS 0 HAS_ACE_SUPPORT 1 HAS_ADJUSTABLE_OUTPUT_IO_TIMING_MEAS_POINT 0 HAS_ADVANCED_IO_INVERTED_CORNER 0 HAS_ADVANCED_IO_POWER_SUPPORT 1 HAS_ADVANCED_IO_TIMING_SUPPORT 1 HAS_ALM_SUPPORT 0 HAS_ATOM_AND_ROUTING_POWER_MODELED_TOGETHER 0 HAS_AUTO_DERIVE_CLOCK_UNCERTAINTY_SUPPORT 0 HAS_AUTO_FIT_SUPPORT 1 HAS_BALANCED_OPT_TECHNIQUE_SUPPORT 1 HAS_BENEFICIAL_SKEW_SUPPORT 1 HAS_BITLEVEL_DRIVE_STRENGTH_CONTROL 1 HAS_BSDL_FILE_GENERATION 1 HAS_CGA_SUPPORT 1 HAS_CHECK_NETLIST_SUPPORT 0 HAS_CLOCK_REGION_CHECKER_ENABLED 1 HAS_CORE_JUNCTION_TEMP_DERATING 0 HAS_CROSSTALK_SUPPORT 0 HAS_CUSTOM_REGION_SUPPORT 1 HAS_DAP_JTAG_FROM_HPS 0 HAS_DATA_DRIVEN_ACVQ_HSSI_SUPPORT 0 HAS_DDB_FDI_SUPPORT 0 HAS_DESIGN_ANALYZER_SUPPORT 1 HAS_DETAILED_IO_RAIL_POWER_MODEL 1 HAS_DETAILED_LEIM_STATIC_POWER_MODEL 1 HAS_DETAILED_LE_POWER_MODEL 1 HAS_DETAILED_ROUTING_MUX_STATIC_POWER_MODEL 1 HAS_DETAILED_THERMAL_CIRCUIT_PARAMETER_SUPPORT 1 HAS_DEVICE_MIGRATION_SUPPORT 1 HAS_DIAGONAL_MIGRATION_SUPPORT 0 HAS_EMIF_TOOLKIT_SUPPORT 0 HAS_ERROR_DETECTION_SUPPORT 0 HAS_FAMILY_VARIANT_MIGRATION_SUPPORT 0 HAS_FANOUT_FREE_NODE_SUPPORT 1 HAS_FAST_FIT_SUPPORT 1 HAS_FITTER_EARLY_TIMING_ESTIMATE_SUPPORT 1 HAS_FITTER_ECO_SUPPORT 1 HAS_FIT_NETLIST_OPT_RETIME_SUPPORT 1 HAS_FIT_NETLIST_OPT_SUPPORT 1 HAS_FORMAL_VERIFICATION_SUPPORT 1 HAS_FPGA_XCHANGE_SUPPORT 1 HAS_FSAC_LUTRAM_REGISTER_PACKING_SUPPORT 0 HAS_FULL_DAT_MIN_TIMING_SUPPORT 1 HAS_FULL_INCREMENTAL_DESIGN_SUPPORT 1 HAS_FUNCTIONAL_SIMULATION_SUPPORT 1 HAS_FUNCTIONAL_VERILOG_SIMULATION_SUPPORT 0 HAS_FUNCTIONAL_VHDL_SIMULATION_SUPPORT 0 HAS_GLITCH_FILTERING_SUPPORT 1 HAS_HC_READY_SUPPORT 0 HAS_HIGH_SPEED_LOW_POWER_TILE_SUPPORT 0 HAS_HOLD_TIME_AVOIDANCE_ACROSS_CLOCK_SPINE_SUPPORT 1 HAS_HSPICE_WRITER_SUPPORT 1 HAS_HSSI_POWER_CALCULATOR 0 HAS_IBISO_WRITER_SUPPORT 0 HAS_INCREMENTAL_DAT_SUPPORT 1 HAS_INCREMENTAL_SYNTHESIS_SUPPORT 1 HAS_INTERFACE_PLANNER_SUPPORT 0 HAS_IO_ASSIGNMENT_ANALYSIS_SUPPORT 1 HAS_IO_DECODER 0 HAS_IO_PLACEMENT_OPTIMIZATION_SUPPORT 1 HAS_IO_SMART_RECOMPILE_SUPPORT 0 HAS_JITTER_SUPPORT 1 HAS_JTAG_SLD_HUB_SUPPORT 1 HAS_LIMITED_TCL_FITTER_SUPPORT 0 HAS_LOGIC_LOCK_SUPPORT 1 HAS_MICROPROCESSOR 0 HAS_MIF_SMART_COMPILE_SUPPORT 1 HAS_MINMAX_TIMING_MODELING_SUPPORT 1 HAS_MIN_TIMING_ANALYSIS_SUPPORT 1 HAS_MUX_RESTRUCTURE_SUPPORT 1 HAS_NEW_HC_FLOW_SUPPORT 0 HAS_NEW_SERDES_MAX_RESOURCE_COUNT_REPORTING_SUPPORT 1 HAS_NEW_VPR_SUPPORT 1 HAS_NONSOCKET_TECHNOLOGY_MIGRATION_SUPPORT 0 HAS_NO_HARDBLOCK_PARTITION_SUPPORT 0 HAS_NO_JTAG_USERCODE_SUPPORT 0 HAS_OPERATING_SETTINGS_AND_CONDITIONS_REPORTING_SUPPORT 1 HAS_PAD_LOCATION_ASSIGNMENT_SUPPORT 0 HAS_PARTIAL_RECONFIG_SUPPORT 0 HAS_PHYSICAL_NETLIST_OUTPUT 0 HAS_PHYSICAL_ROUTING_SUPPORT 0 HAS_PIN_SPECIFIC_VOLTAGE_SUPPORT 1 HAS_PLDM_REF_SUPPORT 1 HAS_POWER_ESTIMATION_SUPPORT 1 HAS_PRELIMINARY_CLOCK_UNCERTAINTY_NUMBERS 0 HAS_PRE_FITTER_FPP_SUPPORT 0 HAS_PRE_FITTER_LUTRAM_NETLIST_CHECKER_ENABLED 0 HAS_PVA_SUPPORT 1 HAS_RCF_SUPPORT 1 HAS_RCF_SUPPORT_FOR_DEBUGGING 0 HAS_RED_BLACK_SEPARATION_SUPPORT 0 HAS_RE_LEVEL_TIMING_GRAPH_SUPPORT 1 HAS_RISEFALL_DELAY_SUPPORT 1 HAS_SIGNAL_PROBE_SUPPORT 1 HAS_SIGNAL_TAP_SUPPORT 1 HAS_SIMULATOR_SUPPORT 0 HAS_SPLIT_IO_SUPPORT 1 HAS_SPLIT_LC_SUPPORT 1 HAS_SYNTH_FSYN_NETLIST_OPT_SUPPORT 1 HAS_SYNTH_NETLIST_OPT_RETIME_SUPPORT 1 HAS_SYNTH_NETLIST_OPT_SUPPORT 1 HAS_TCL_FITTER_SUPPORT 0 HAS_TECHNOLOGY_MIGRATION_SUPPORT 0 HAS_TEMPLATED_REGISTER_PACKING_SUPPORT 1 HAS_TIME_BORROWING_SUPPORT 0 HAS_TIMING_DRIVEN_SYNTHESIS_SUPPORT 1 HAS_TIMING_INFO_SUPPORT 1 HAS_TIMING_OPERATING_CONDITIONS 1 HAS_TIMING_SIMULATION_SUPPORT 1 HAS_TITAN_BASED_MAC_REGISTER_PACKER_SUPPORT 0 HAS_U2B2_SUPPORT 0 HAS_USER_HIGH_SPEED_LOW_POWER_TILE_SUPPORT 0 HAS_USE_FITTER_INFO_SUPPORT 1 HAS_VCCPD_POWER_RAIL 0 HAS_VERTICAL_MIGRATION_SUPPORT 1 HAS_VIEWDRAW_SYMBOL_SUPPORT 0 HAS_VIO_SUPPORT 1 HAS_VIRTUAL_DEVICES 0 HAS_WYSIWYG_DFFEAS_SUPPORT 1 HAS_XIBISO_WRITER_SUPPORT 1 IFP_USE_LEGACY_IO_CHECKER 0 INCREMENTAL_DESIGN_SUPPORTS_COMPATIBLE_CONSTRAINTS 1 INSTALLED 0 IS_CONFIG_ROM 0 IS_DEFAULT_FAMILY 0 IS_HARDCOPY_FAMILY 0 LVDS_IO 1 M10K_MEMORY 0 M144K_MEMORY 0 M20K_MEMORY 0 M4K_MEMORY 0 M512_MEMORY 0 M9K_MEMORY 1 MLAB_MEMORY 0 MRAM_MEMORY 0 NOT_LISTED 0 NO_RPE_SUPPORT 0 NO_SUPPORT_FOR_LOGICLOCK_CONTENT_BACK_ANNOTATION 1 NO_SUPPORT_FOR_STA_CLOCK_UNCERTAINTY_CHECK 0 NO_TDC_SUPPORT 0 POSTFIT_BAK_DATABASE_EXPORT_ENABLED 1 POSTMAP_BAK_DATABASE_EXPORT_ENABLED 1 PROGRAMMER_SUPPORT 1 QFIT_IN_DEVELOPMENT 0 QMAP_IN_DEVELOPMENT 0 RAM_LOGICAL_NAME_CHECKING_IN_CUT_ENABLED 1 REPORTS_METASTABILITY_MTBF 1 REQUIRES_INSTALLATION_PATCH 0 REQUIRES_LIST_OF_TEMPERATURE_AND_VOLTAGE_OPERATING_CONDITIONS 1 RESERVES_SIGNAL_PROBE_PINS 0 RESOLVE_MAX_FANOUT_EARLY 1 RESOLVE_MAX_FANOUT_LATE 0 RESPECTS_FIXED_SIZED_LOCKED_LOCATION_LOGICLOCK 1 RESTRICTED_USER_SELECTION 0 RISEFALL_SUPPORT_IS_HIDDEN 0 STRICT_TIMING_DB_CHECKS 0 SUPPORTS_ADDITIONAL_OPTIONS_FOR_UNUSED_IO 0 SUPPORTS_CRC 1 SUPPORTS_DIFFERENTIAL_AIOT_BOARD_TRACE_MODEL 1 SUPPORTS_DSP_BALANCING_BACK_ANNOTATION 0 SUPPORTS_GENERATION_OF_EARLY_POWER_ESTIMATOR_FILE 1 SUPPORTS_GLOBAL_SIGNAL_BACK_ANNOTATION 0 SUPPORTS_MAC_CHAIN_OUT_ADDER 0 SUPPORTS_RAM_PACKING_BACK_ANNOTATION 0 SUPPORTS_REG_PACKING_BACK_ANNOTATION 0 SUPPORTS_SIGNALPROBE_REGISTER_PIPELINING 1 SUPPORTS_SINGLE_ENDED_AIOT_BOARD_TRACE_MODEL 1 SUPPORTS_USER_MANUAL_LOGIC_DUPLICATION 1 TMV_RUN_CUSTOMIZABLE_VIEWER 1 TMV_RUN_INTERNAL_DETAILS 1 TMV_RUN_INTERNAL_DETAILS_ON_IO 0 TMV_RUN_INTERNAL_DETAILS_ON_IOBUF 1 TMV_RUN_INTERNAL_DETAILS_ON_LCELL 0 TMV_RUN_INTERNAL_DETAILS_ON_LRAM 0 TRANSCEIVER_3G_BLOCK 0 TRANSCEIVER_6G_BLOCK 0 USES_ACV_FOR_FLED 1 USES_ADB_FOR_BACK_ANNOTATION 1 USES_ALTERA_LNSIM 0 USES_ASIC_ROUTING_POWER_CALCULATOR 0 USES_DATA_DRIVEN_PLL_COMPUTATION_UTIL 1 USES_DEV 1 USES_ICP_FOR_ECO_FITTER 0 USES_LIBERTY_TIMING 0 USES_POWER_SIGNAL_ACTIVITIES 1 USES_THIRD_GENERATION_TIMING_MODELS_TIS 1 USES_U2B2_TIMING_MODELS 0 USE_ADVANCED_IO_POWER_BY_DEFAULT 1 USE_ADVANCED_IO_TIMING_BY_DEFAULT 1 USE_BASE_FAMILY_DDB_PATH 0 USE_OCT_AUTO_CALIBRATION 1 USE_RELAX_IO_ASSIGNMENT_RULES 0 USE_RISEFALL_ONLY 1 USE_SEPARATE_LIST_FOR_TECH_MIGRATION 0 USE_SINGLE_COMPILER_PASS_PLL_MIF_FILE_WRITER 1 USE_TITAN_IO_BASED_IO_REGISTER_PACKER_UTIL 0 WYSIWYG_BUS_WIDTH_CHECKING_IN_CUT_ENABLED 1</parameter>
  </module>
@@ -456,24 +492,6 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="8" />
   <parameter name="clockRate" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_mm_clock_crossing_bridge"
-   version="13.0"
-   enabled="1"
-   name="clock_crossing_0">
-  <parameter name="DATA_WIDTH" value="32" />
-  <parameter name="SYMBOL_WIDTH" value="8" />
-  <parameter name="ADDRESS_WIDTH" value="16" />
-  <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
-  <parameter name="MAX_BURST_SIZE" value="1" />
-  <parameter name="COMMAND_FIFO_DEPTH" value="4" />
-  <parameter name="RESPONSE_FIFO_DEPTH" value="4" />
-  <parameter name="MASTER_SYNC_DEPTH" value="2" />
-  <parameter name="SLAVE_SYNC_DEPTH" value="2" />
-  <parameter name="AUTO_M0_CLK_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_S0_CLK_CLOCK_RATE" value="100000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <module kind="altera_nios2_qsys" version="13.0" enabled="1" name="cpu_0">
   <parameter name="setting_showUnpublishedSettings" value="false" />
@@ -531,7 +549,7 @@
   <parameter name="userDefinedSettings" value="" />
   <parameter name="resetSlave" value="Absolute" />
   <parameter name="mmu_TLBMissExcSlave" value="" />
-  <parameter name="exceptionSlave" value="tc_i_mem.s1" />
+  <parameter name="exceptionSlave" value="tc_mem.s1" />
   <parameter name="breakSlave">cpu_0.jtag_debug_module</parameter>
   <parameter name="setting_perfCounterWidth" value="32" />
   <parameter name="setting_interruptControllerType" value="Internal" />
@@ -577,7 +595,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_i_mem.s2' start='0x8000000' end='0x8001000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='cpu_0.jtag_debug_module' start='0x2002800' end='0x2003000' /><slave name='tc_mem.s2' start='0x8000000' end='0x8006000' /><slave name='timer_0.s1' start='0x20000000' end='0x20000020' /><slave name='benchmark_pio.s1' start='0x20000020' end='0x20000040' /><slave name='jtag_uart_0.avalon_jtag_slave' start='0x20000040' end='0x20000048' /><slave name='POWERLINK_LED.s1' start='0x20001020' end='0x20001040' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="100000000" />
   <parameter name="deviceFamilyName" value="Cyclone IV E" />
   <parameter name="internalIrqMaskSystemInfo" value="255" />
@@ -587,7 +605,7 @@
   <parameter name="tightlyCoupledDataMaster1MapParam" value="" />
   <parameter name="tightlyCoupledDataMaster2MapParam" value="" />
   <parameter name="tightlyCoupledDataMaster3MapParam" value="" />
-  <parameter name="tightlyCoupledInstructionMaster0MapParam"><![CDATA[<address-map><slave name='tc_i_mem.s1' start='0x8000000' end='0x8001000' /></address-map>]]></parameter>
+  <parameter name="tightlyCoupledInstructionMaster0MapParam"><![CDATA[<address-map><slave name='tc_mem.s1' start='0x8000000' end='0x8006000' /></address-map>]]></parameter>
   <parameter name="tightlyCoupledInstructionMaster1MapParam" value="" />
   <parameter name="tightlyCoupledInstructionMaster2MapParam" value="" />
   <parameter name="tightlyCoupledInstructionMaster3MapParam" value="" />
@@ -677,6 +695,41 @@
   <parameter name="NUM_RESET_OUTPUTS" value="1" />
   <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
  </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="POWERLINK_LED">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="true" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Output" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="2" />
+  <parameter name="clockRate" value="50000000" />
+ </module>
+ <module
+   kind="altera_avalon_mm_bridge"
+   version="13.0"
+   enabled="1"
+   name="mm_bridge_0">
+  <parameter name="DATA_WIDTH" value="32" />
+  <parameter name="SYMBOL_WIDTH" value="8" />
+  <parameter name="ADDRESS_WIDTH" value="16" />
+  <parameter name="ADDRESS_UNITS" value="SYMBOLS" />
+  <parameter name="MAX_BURST_SIZE" value="1" />
+  <parameter name="MAX_PENDING_RESPONSES" value="1" />
+  <parameter name="LINEWRAPBURSTS" value="0" />
+  <parameter name="PIPELINE_COMMAND" value="0" />
+  <parameter name="PIPELINE_RESPONSE" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
  <connection
    kind="avalon"
    version="13.0"
@@ -699,58 +752,20 @@
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="clock_crossing_0.s0_reset" />
+   end="tc_mem.reset1" />
  <connection
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
-   end="tc_i_mem.reset1" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="tc_i_mem.reset2" />
+   end="tc_mem.reset2" />
  <connection
    kind="reset"
    version="13.0"
    start="clk100.clk_reset"
    end="timer_0.reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="benchmark_pio.clk" />
- <connection kind="clock" version="13.0" start="clk100.clk" end="tc_i_mem.clk1" />
- <connection kind="clock" version="13.0" start="clk100.clk" end="tc_i_mem.clk2" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk100.clk"
-   end="clock_crossing_0.s0_clk" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="clock_crossing_0.m0_clk" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="clock_crossing_0.m0_reset" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="clock_crossing_0.m0"
-   end="benchmark_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0020" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="clock_crossing_0.m0"
-   end="jtag_uart_0.avalon_jtag_slave">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0040" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
+ <connection kind="clock" version="13.0" start="clk100.clk" end="tc_mem.clk1" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="tc_mem.clk2" />
  <connection
    kind="reset"
    version="13.0"
@@ -759,17 +774,8 @@
  <connection
    kind="avalon"
    version="13.0"
-   start="clock_crossing_0.m0"
-   end="timer_0.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
    start="cpu_0.tightly_coupled_instruction_master_0"
-   end="tc_i_mem.s1">
+   end="tc_mem.s1">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08000000" />
   <parameter name="defaultConnection" value="false" />
@@ -778,18 +784,9 @@
    kind="avalon"
    version="13.0"
    start="cpu_0.data_master"
-   end="tc_i_mem.s2">
+   end="tc_mem.s2">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x08000000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="cpu_0.data_master"
-   end="clock_crossing_0.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x20000000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -806,27 +803,17 @@
    kind="reset"
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
-   end="tc_i_mem.reset2" />
+   end="tc_mem.reset2" />
  <connection
    kind="reset"
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
-   end="tc_i_mem.reset1" />
+   end="tc_mem.reset1" />
  <connection
    kind="reset"
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
    end="jtag_uart_0.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="cpu_0.jtag_debug_module_reset"
-   end="clock_crossing_0.s0_reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="cpu_0.jtag_debug_module_reset"
-   end="clock_crossing_0.m0_reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="jtag_uart_0.clk" />
  <connection
    kind="reset"
@@ -838,12 +825,12 @@
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
-   end="tc_i_mem.reset1" />
+   end="tc_mem.reset1" />
  <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
-   end="tc_i_mem.reset2" />
+   end="tc_mem.reset2" />
  <connection
    kind="reset"
    version="13.0"
@@ -859,16 +846,6 @@
    version="13.0"
    start="clk100.clk_reset"
    end="benchmark_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="clock_crossing_0.m0_reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="clock_crossing_0.s0_reset" />
  <connection
    kind="reset"
    version="13.0"
@@ -913,15 +890,6 @@
    end="cpu_bridge.s0">
   <parameter name="arbitrationPriority" value="1" />
   <parameter name="baseAddress" value="0x0000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="clock_crossing_0.m0"
-   end="slow_bridge.s0">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x8000" />
   <parameter name="defaultConnection" value="false" />
  </connection>
  <connection
@@ -1088,6 +1056,88 @@
    version="13.0"
    start="cpu_0.jtag_debug_module_reset"
    end="jtag_reset_bridge.in_reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="POWERLINK_LED.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="POWERLINK_LED.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="POWERLINK_LED.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="POWERLINK_LED.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="mm_bridge_0.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="cpu_0.data_master"
+   end="mm_bridge_0.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x20000000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="mm_bridge_0.m0"
+   end="jtag_uart_0.avalon_jtag_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0040" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="mm_bridge_0.m0"
+   end="slow_bridge.s0">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x8000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="mm_bridge_0.m0"
+   end="POWERLINK_LED.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="mm_bridge_0.m0"
+   end="benchmark_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0020" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="13.0" start="mm_bridge_0.m0" end="timer_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="mm_bridge_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="mm_bridge_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="cpu_0.jtag_debug_module_reset"
+   end="mm_bridge_0.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="0" />
 </system>

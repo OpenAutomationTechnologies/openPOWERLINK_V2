@@ -64,7 +64,9 @@ SET (DEMO_SOURCES
      ${DEMO_SOURCE_DIR}/Leds.cpp
      ${DEMO_SOURCE_DIR}/NodeState.cpp
      ${DEMO_SOURCE_DIR}/NmtCommandDialog.cpp
+     ${DEMO_SOURCE_DIR}/EventLog.cpp
      ${CONTRIB_SOURCE_DIR}/console/printlog.c
+     ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
      )
 
 SET (DEMO_RESOURCES ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.qrc)
@@ -82,6 +84,7 @@ SET (DEMO_HEADERS
      ${DEMO_INCLUDE_DIR}/SdoDialog.h
      ${DEMO_INCLUDE_DIR}/NodeState.h
      ${DEMO_INCLUDE_DIR}/NmtCommandDialog.h
+     ${DEMO_INCLUDE_DIR}/EventLog.h
      )
 
 INCLUDE_DIRECTORIES(
@@ -161,5 +164,5 @@ TARGET_LINK_LIBRARIES(demo_mn_qt ${ARCH_LIBRARIES} ${QT_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(TARGETS demo_mn_qt RUNTIME DESTINATION ${PROJECT_NAME})
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})

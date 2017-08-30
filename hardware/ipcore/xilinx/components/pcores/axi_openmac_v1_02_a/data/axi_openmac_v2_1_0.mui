@@ -129,28 +129,28 @@
     '>
 
     <!-- Timer -->
-    <!ENTITY gui_tmrCount '
-    <widget id="gui_tmrCount">
-        <key>gui_tmrCount</key>
-        <label>Number of Hardware Timers</label>
-        <tip>Set the number of hardware timers for interrupt or pulse generation.
-        Timer 1 generates an interrupt and
-        optional timer 2 can be used to generate a pulse.</tip>
+    <!ENTITY gui_tmrPulse '
+    <widget id="gui_tmrPulse">
+        <key>gui_tmrPulse</key>
+        <label>Enable Timer Pulse</label>
+        <tip>Enable the optional timer for pulse generation.
+        It can be used for external synchronization.</tip>
     </widget>
     '>
     <!ENTITY gui_tmrPulseEn '
     <widget id="gui_tmrPulseEn">
         <key>gui_tmrPulseEn</key>
         <label>Timer Pulse Width Control</label>
-        <tip>Enable the timer pulse with control of timer 2. Otherwise the
-        generated signal will toggle.</tip>
+        <tip>Enable the timer pulse width control of timer 2.
+        Otherwise the generated pulse is asserted only for one clock cycle.</tip>
     </widget>
     '>
     <!ENTITY gui_tmrPulseWdt '
     <widget id="gui_tmrPulseWdt">
         <key>gui_tmrPulseWdt</key>
         <label>Timer Pulse Width register width</label>
-        <tip>Determine the timer 2 pulse width control register width.
+        <tip>This setting is only valid if "Timer Pulse Width Control" is enabled!
+        Determine the timer 2 pulse width control register width.
         Example: Generate a pulse of 1 us (fclk=50 MHz) requires 1 us * 50 MHz = 50 ticks.
         To generate 50 ticks a width of log2(50) ~ 6 is needed.</tip>
     </widget>
@@ -344,7 +344,7 @@
         </group>
         <group id="Timer">
             <display>Timer</display>
-            <item>&gui_tmrCount;</item>
+            <item>&gui_tmrPulse;</item>
             <item>&gui_tmrPulseEn;</item>
             <item>&gui_tmrPulseWdt;</item>
         </group>

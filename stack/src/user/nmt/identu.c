@@ -321,7 +321,7 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
     UINT                    index;
     tIdentuCbResponse       pfnCbResponse;
 
-    nodeId = ami_getUint8Le(&pFrameInfo_p->pFrame->srcNodeId);
+    nodeId = ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->srcNodeId);
     index = nodeId - 1;
 
     if (index < tabentries(instance_g.apfnCbResponse))
@@ -346,14 +346,14 @@ static tOplkError identu_cbIdentResponse(tFrameInfo* pFrameInfo_p)
                 if (instance_g.apIdentResponse[index] == NULL)
                 {   // malloc failed
                     ret = pfnCbResponse(nodeId,
-                                        &pFrameInfo_p->pFrame->data.asnd.payload.identResponse);
+                                        &pFrameInfo_p->frame.pBuffer->data.asnd.payload.identResponse);
                     goto Exit;
                 }
             }
 
             // copy IdentResponse to instance structure
             OPLK_MEMCPY(instance_g.apIdentResponse[index],
-                        &pFrameInfo_p->pFrame->data.asnd.payload.identResponse,
+                        &pFrameInfo_p->frame.pBuffer->data.asnd.payload.identResponse,
                         sizeof(tIdentResponse));
             ret = pfnCbResponse(nodeId, instance_g.apIdentResponse[index]);
         }

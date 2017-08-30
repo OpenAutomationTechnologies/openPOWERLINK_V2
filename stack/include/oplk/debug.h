@@ -64,6 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_TIMERU                0x00000100
 #define DEBUG_LVL_TIMERH                0x00000200
 #define DEBUG_LVL_CTRL                  0x00000400
+#define DEBUG_LVL_DRVINTF               0x00000800
 
 #define DEBUG_LVL_PDO                   0x00800000
 #define DEBUG_LVL_SDO                   0x01000000
@@ -154,6 +155,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DEBUG_LVL_CTRL_TRACE(...)
 #endif
 
+#if (DEBUG_GLB_LVL & DEBUG_LVL_DRVINTF)
+#define DEBUG_LVL_DRVINTF_TRACE(...)               TRACE(__VA_ARGS__)
+#else
+#define DEBUG_LVL_DRVINTF_TRACE(...)
+#endif
+
 #if (DEBUG_GLB_LVL & DEBUG_LVL_TIMERU)
 #define DEBUG_LVL_TIMERU_TRACE(...)                TRACE(__VA_ARGS__)
 #else
@@ -213,8 +220,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //  definition of TRACE
 //------------------------------------------------------------------------------
 #ifndef NDEBUG
-#define TRACE(...) trace(__VA_ARGS__)
-
+#if ((TARGET_SYSTEM == _WIN32_) && defined(_KERNEL_MODE))
+#define TRACE(...)      DbgPrint(__VA_ARGS__)
+#else
+#define TRACE(...)      trace(__VA_ARGS__)
+#endif
 #ifdef __cplusplus
 extern "C"
 {
@@ -251,8 +261,8 @@ void trace(const char* fmt, ...);
 // This macro doesn't print out C-file and line number of the failed assertion
 // but a string, which exactly names the mistake.
 //------------------------------------------------------------------------------
-#if !defined(ASSERTMSG) && !defined(NDEBUG)
-
+#ifndef ASSERTMSG
+#ifndef NDEBUG
 #define ASSERTMSG(expr, string) \
     if (!(expr)) \
     { \
@@ -260,9 +270,8 @@ void trace(const char* fmt, ...);
         for (;;);\
     }
 #else
-
 #define ASSERTMSG(expr, string)
-
-#endif
+#endif /* NDEBUG */
+#endif /* ASSERTMSG */
 
 #endif /* _INC_oplk_debug_H_ */

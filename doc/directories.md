@@ -18,7 +18,6 @@ drivers                       | openPOWERLINK drivers (kernel layer of a split-s
 hardware                      | Hardware specific sources like IP cores, VHDL code and board specific software
 objdicts                      | CANopen object dictionaries used by the stack
 stack                         | openPOWERLINK stack sources
-staging                       | Unstable, unclean and untested source code
 tools                         | Miscellaneous tools and utilities
 unittests                     | CUnit Unit test framework
 
@@ -51,6 +50,7 @@ timer                         | Timer library
 trace                         | Functions for handling trace output
 dualprocshm                   | Shared memory library for dual processor systems
 sd_fat16                      | FAT16 SD card access library for Zynq SoC
+ndislib                       | NDIS library for Windows kernel space drivers
 
 ## Object dictionaries {#sect_directories_objdict}
 

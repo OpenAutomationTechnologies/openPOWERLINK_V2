@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/ctrlkcal.h>
 #include <kernel/dllkcal.h>
 #include <kernel/pdokcal.h>
+#include <kernel/timesynckcal.h>
 
 #include <kernel/eventk.h>
 #include <kernel/eventkcal.h>
@@ -285,7 +286,7 @@ static int powerlinkOpen(struct inode* pDeviceFile_p, struct file* pInstance_p)
 
     init_timer(&heartbeatTimer_g);
 
-    if (ctrlk_init() != kErrorOk)
+    if (ctrlk_init(NULL) != kErrorOk)
     {
         atomic_dec(&openCount_g);
         return -EIO;
@@ -429,8 +430,8 @@ static int  powerlinkIoctl(struct inode* dev, struct file* filp,
             ret = readErrorObject(arg);
             break;
 
-        case PLK_CMD_PDO_SYNC:
-            if ((oplRet = pdokcal_waitSyncEvent()) == kErrorRetry)
+        case PLK_CMD_TIMESYNC_SYNC:
+            if ((oplRet = timesynckcal_waitSyncEvent()) == kErrorRetry)
                 ret = -ERESTARTSYS;
             else
                 ret = 0;
@@ -459,6 +460,7 @@ The function implements openPOWERLINK kernel module mmap function.
 static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
 {
     BYTE*       pPdoMem;
+    tOplkError  ret = kErrorOk;
 
     DEBUG_LVL_ALWAYS_TRACE("%s() vma: vm_start:%lX vm_end:%lX vm_pgoff:%lX\n",
                            __func__, vma->vm_start, vma->vm_end, vma->vm_pgoff);
@@ -466,7 +468,9 @@ static int powerlinkMmap(struct file* filp, struct vm_area_struct* vma)
     vma->vm_flags |= VM_RESERVED;
     vma->vm_ops = &powerlinkVmOps;
 
-    if ((pPdoMem = pdokcal_getPdoMemRegion()) == NULL)
+    ret = pdokcal_getPdoMemRegion(&pPdoMem, NULL);
+
+    if (ret != kErrorOk || pPdoMem == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() no pdo memory allocated!\n", __func__);
         return -ENOMEM;
@@ -663,7 +667,7 @@ static int sendAsyncFrame(unsigned long arg)
     }
 
     //TRACE("%s() Received frame size:%d\n", __func__, asyncFrame.size);
-    frameInfo.pFrame = (tPlkFrame*)pBuf;
+    frameInfo.frame.pBuffer = (tPlkFrame*)pBuf;
     frameInfo.frameSize = asyncFrameInfo.size;
 
     dllkcal_writeAsyncFrame(&frameInfo, asyncFrameInfo.queue);

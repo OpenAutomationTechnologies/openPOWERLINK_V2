@@ -98,6 +98,21 @@ void Output::setValue(int dataIn_p, int nodeId_p)
 
 //------------------------------------------------------------------------------
 /**
+\brief  Disable the output LEDs
+
+Disable the output LEDs to show that they are not actively controlled by the
+application.
+
+\param  nodeId_p            Node ID of CN
+*/
+//------------------------------------------------------------------------------
+void Output::disable(int nodeId_p)
+{
+    ppLeds[nodeId_p]->disableLeds();
+}
+
+//------------------------------------------------------------------------------
+/**
 \brief  Add a CN
 
 Adds a controlled node to the node list.
@@ -110,6 +125,7 @@ void Output::addNode(int nodeId_p)
     if ((nodeId_p >= 0) && (nodeId_p <= NODE_ID_MAX))
     {
         ppLeds[nodeId_p]->show();
+        ppLeds[nodeId_p]->disableLeds();
         //apNodes[nodeId_p]->setFixedSize(NODE_WIDTH, NODE_HEIGHT);
         pOutputLayout->update();
     }

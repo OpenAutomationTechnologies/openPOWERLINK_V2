@@ -55,13 +55,15 @@ SET(LIB_ARCH_SOURCES
                      ${TARGET_MICROBLAZE_SOURCES}
                      ${TARGET_MICROBLAZE_LOCAL_SOURCES}
                      ${TARGET_MICROBLAZE_OPENMAC_SOURCES}
+                     ${SDO_SOCKETWRAPPER_SOURCES}
     )
 
 ################################################################################
 # Set architecture specific includes
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
-                    ${ARCH_SOURCE_DIR}/xilinx_microblaze
+                    ${ARCH_SOURCE_DIR}/xilinx-microblaze
+                    ${CONTRIB_SOURCE_DIR}/socketwrapper
                     ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/libomethlib/include
                     ${CFG_COMPILE_LIB_CN_HW_LIB_DIR}/include
                    )
@@ -72,7 +74,7 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${XIL_PCP_CFLAGS} -fmessage-length=0 -mcpu=$
 
 ################################################################################
 # Deactivate optimization for usleep
-SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
+SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/xilinx-microblaze/usleep.c
                             PROPERTIES COMPILE_FLAGS "-O0")
 
 ########################################################################

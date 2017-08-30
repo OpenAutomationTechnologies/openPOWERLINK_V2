@@ -78,7 +78,7 @@ extern "C"
 {
 #endif
 
-tOplkError pdou_init(tSyncCb pfnSyncCb_p);
+tOplkError pdou_init(void);
 tOplkError pdou_exit(void);
 
 #if defined(CONFIG_INCLUDE_PDO)

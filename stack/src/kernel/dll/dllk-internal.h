@@ -52,6 +52,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllkfilter.h>
 #include <kernel/dllktgt.h>
 #include <common/timer.h>
+#include <common/timesync.h>
 
 //------------------------------------------------------------------------------
 // check for correct compilation options
@@ -193,7 +194,7 @@ This structure contains the data of a DLLk instance.
 typedef struct
 {
     tNmtState               nmtState;                               ///< Current NMT state
-    UINT64                  relativeTime;                           ///< Current RelativeTime
+    tTimesyncSocTime        socTime;                                ///< Current SoC Time
     tEdrvTxBuffer*          pTxBuffer;                              ///< Buffers for TX frames
     UINT                    maxTxFrames;                            ///< Max TX frames
     UINT8                   flag1;                                  ///< Flag 1 with EN, EC for PRes, StatusRes

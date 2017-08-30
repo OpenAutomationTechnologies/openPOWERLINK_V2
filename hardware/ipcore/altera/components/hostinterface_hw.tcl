@@ -260,9 +260,11 @@ set_parameter_property  sys_uniqueId        VISIBLE             FALSE
 add_parameter           gui_sizeDynBuf0     NATURAL             2
 set_parameter_property  gui_sizeDynBuf0     DEFAULT_VALUE       2
 set_parameter_property  gui_sizeDynBuf0     TYPE                NATURAL
-set_parameter_property  gui_sizeDynBuf0     DISPLAY_NAME        "Dynamic Buffer for RX Virtual Ethernet Queue"
+set_parameter_property  gui_sizeDynBuf0     DISPLAY_NAME        "Dynamic Buffer for Rx Virtual Ethernet Queue"
 set_parameter_property  gui_sizeDynBuf0     UNITS               "Kilobytes"
 set_parameter_property  gui_sizeDynBuf0     ALLOWED_RANGES      {2}
+set_parameter_property  gui_sizeDynBuf0     DESCRIPTION         "The dynamic buffer for virtual Ethernet
+                                                                is used to map Rx buffers to the host processor."
 
 add_parameter           gui_sizeDynBuf1     NATURAL             2
 set_parameter_property  gui_sizeDynBuf1     DEFAULT_VALUE       2
@@ -270,6 +272,9 @@ set_parameter_property  gui_sizeDynBuf1     TYPE                NATURAL
 set_parameter_property  gui_sizeDynBuf1     DISPLAY_NAME        "Dynamic Buffer for Kernel-to-User Queue"
 set_parameter_property  gui_sizeDynBuf1     UNITS               "Kilobytes"
 set_parameter_property  gui_sizeDynBuf1     ALLOWED_RANGES      {2}
+set_parameter_property  gui_sizeDynBuf1     DESCRIPTION         "The dynamic buffer for Kernel-to-User queue is used to
+                                                                map event arguments (e.g. asynchronous Rx buffer) to the
+                                                                host processor."
 
 add_parameter           gui_sizeErrorCnter  NATURAL             3108
 set_parameter_property  gui_sizeErrorCnter  DEFAULT_VALUE       3108
@@ -277,41 +282,54 @@ set_parameter_property  gui_sizeErrorCnter  TYPE                NATURAL
 set_parameter_property  gui_sizeErrorCnter  DISPLAY_NAME        "Error Counter"
 set_parameter_property  gui_sizeErrorCnter  UNITS               "Bytes"
 set_parameter_property  gui_sizeErrorCnter  ALLOWED_RANGES      {36:CN 3108:MN 1024 2048 4096 8192}
+set_parameter_property  gui_sizeErrorCnter  DESCRIPTION         "The error counter buffer is used to forward the error
+                                                                counters to the host processor. Either select CN (36 byte),
+                                                                MN (3108 byte) or a different provided number."
 
 add_parameter           gui_sizeTxNmtQ      NATURAL             2
 set_parameter_property  gui_sizeTxNmtQ      DEFAULT_VALUE       2
 set_parameter_property  gui_sizeTxNmtQ      TYPE                NATURAL
-set_parameter_property  gui_sizeTxNmtQ      DISPLAY_NAME        "TX NMT Queue"
+set_parameter_property  gui_sizeTxNmtQ      DISPLAY_NAME        "Tx NMT Queue"
 set_parameter_property  gui_sizeTxNmtQ      UNITS               "Kilobytes"
 set_parameter_property  gui_sizeTxNmtQ      ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeTxNmtQ      DESCRIPTION         "The Tx NMT queue buffer is used to transfer NMT commands
+                                                                to the kernel DLL."
 
 add_parameter           gui_sizeTxGenQ      NATURAL             2
 set_parameter_property  gui_sizeTxGenQ      DEFAULT_VALUE       2
 set_parameter_property  gui_sizeTxGenQ      TYPE                NATURAL
-set_parameter_property  gui_sizeTxGenQ      DISPLAY_NAME        "TX Generic Queue"
+set_parameter_property  gui_sizeTxGenQ      DISPLAY_NAME        "Tx Generic Queue"
 set_parameter_property  gui_sizeTxGenQ      UNITS               "Kilobytes"
 set_parameter_property  gui_sizeTxGenQ      ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeTxGenQ      DESCRIPTION         "The Tx generic queue buffer is used to transfer ASnd frames
+                                                                (e.g. SDO) to the kernel DLL."
 
 add_parameter           gui_sizeTxSyncQ     NATURAL             2
 set_parameter_property  gui_sizeTxSyncQ     DEFAULT_VALUE       2
 set_parameter_property  gui_sizeTxSyncQ     TYPE                NATURAL
-set_parameter_property  gui_sizeTxSyncQ     DISPLAY_NAME        "TX Sync Queue"
+set_parameter_property  gui_sizeTxSyncQ     DISPLAY_NAME        "Tx Sync Queue"
 set_parameter_property  gui_sizeTxSyncQ     UNITS               "Kilobytes"
 set_parameter_property  gui_sizeTxSyncQ     ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeTxSyncQ     DESCRIPTION         "The Tx sync queue buffer is used to transfer SyncReq data
+                                                                to the kernel DLL. This queue is only used by MN."
 
 add_parameter           gui_sizeTxVethQ     NATURAL             2
 set_parameter_property  gui_sizeTxVethQ     DEFAULT_VALUE       2
 set_parameter_property  gui_sizeTxVethQ     TYPE                NATURAL
-set_parameter_property  gui_sizeTxVethQ     DISPLAY_NAME        "TX Virtual Ethernet Queue"
+set_parameter_property  gui_sizeTxVethQ     DISPLAY_NAME        "Tx Virtual Ethernet Queue"
 set_parameter_property  gui_sizeTxVethQ     UNITS               "Kilobytes"
 set_parameter_property  gui_sizeTxVethQ     ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeTxVethQ     DESCRIPTION         "The Tx virtual Ethernet queue buffer is used to transfer
+                                                                non-POWERLINK frames to the kernel DLL."
 
 add_parameter           gui_sizeRxVethQ     NATURAL             1
 set_parameter_property  gui_sizeRxVethQ     DEFAULT_VALUE       1
 set_parameter_property  gui_sizeRxVethQ     TYPE                NATURAL
-set_parameter_property  gui_sizeRxVethQ     DISPLAY_NAME        "RX Virtual Ethernet Queue"
+set_parameter_property  gui_sizeRxVethQ     DISPLAY_NAME        "Rx Virtual Ethernet Queue"
 set_parameter_property  gui_sizeRxVethQ     UNITS               "Kilobytes"
 set_parameter_property  gui_sizeRxVethQ     ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeRxVethQ     DESCRIPTION         "The Rx virtual Ethernet queue buffer is used to transfer
+                                                                received non-POWERLINK frames to the host processor."
 
 add_parameter           gui_sizeK2UQ        NATURAL             8
 set_parameter_property  gui_sizeK2UQ        DEFAULT_VALUE       8
@@ -319,6 +337,8 @@ set_parameter_property  gui_sizeK2UQ        TYPE                NATURAL
 set_parameter_property  gui_sizeK2UQ        DISPLAY_NAME        "Kernel-to-User Queue"
 set_parameter_property  gui_sizeK2UQ        UNITS               "Kilobytes"
 set_parameter_property  gui_sizeK2UQ        ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeK2UQ        DESCRIPTION         "The Kernel-to-User queue buffer is used for event
+                                                                exchange from kernel to user layer."
 
 add_parameter           gui_sizeU2KQ        NATURAL             8
 set_parameter_property  gui_sizeU2KQ        DEFAULT_VALUE       8
@@ -326,12 +346,16 @@ set_parameter_property  gui_sizeU2KQ        TYPE                NATURAL
 set_parameter_property  gui_sizeU2KQ        DISPLAY_NAME        "User-to-Kernel Queue"
 set_parameter_property  gui_sizeU2KQ        UNITS               "Kilobytes"
 set_parameter_property  gui_sizeU2KQ        ALLOWED_RANGES      {1 2 4 8 16 32 64}
+set_parameter_property  gui_sizeU2KQ        DESCRIPTION         "The User-to-Kernel queue buffer is used for event
+                                                                exchange from user to kernel layer."
 
 add_parameter           gui_sizePdo         NATURAL             36864
 set_parameter_property  gui_sizePdo         DEFAULT_VALUE       36864
 set_parameter_property  gui_sizePdo         TYPE                NATURAL
 set_parameter_property  gui_sizePdo         DISPLAY_NAME        "Process Data Objects (PDO)"
 set_parameter_property  gui_sizePdo         UNITS               "Bytes"
+set_parameter_property  gui_sizePdo         DESCRIPTION         "The PDO buffer is used to exchange input and
+                                                                output process data."
 
 add_parameter           gui_sizeTotal       NATURAL             49152
 set_parameter_property  gui_sizeTotal       DEFAULT_VALUE       49152

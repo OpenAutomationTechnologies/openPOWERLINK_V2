@@ -159,7 +159,18 @@ The structure contains all information about a POWERLINK frame.
 typedef struct
 {
     UINT            frameSize;                      ///< Size of the frame
-    tPlkFrame*      pFrame;                         ///< Pointer to the frame
+    UINT32          padding1;                       ///< Padding variable 1
+    // Use a union of tPlkFrame pointer variable and 64 bit
+    // variable to avoid corruption of pointer variable in
+    // heterogeneous processor system. The padding2 variable is
+    // used to reserve 8 bytes memory for pBuffer and
+    // to ensure that garbage value is cleared before sharing
+    // the pointer variable.
+    union
+    {
+        tPlkFrame*      pBuffer;                   ///< Pointer to the frame buffer
+        UINT64          padding2;                  ///< 64 bit place holder
+    } frame;
 } tFrameInfo;
 
 /**
@@ -207,6 +218,7 @@ typedef struct
     UINT32              reducedSwitchOverTimeMn;    ///< Switch over time when CS_PREOPERATIONAL1 in [us]
     UINT32              delayedSwitchOverTimeMn;    ///< Switch over time otherwise in [us]
 #endif
+    UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
 } tDllConfigParam;
 
 /**
@@ -233,6 +245,7 @@ typedef struct
     UINT32              defaultGateway;                 ///< IP default gateway address
     UINT8               sHostname[32];                  ///< Hostname
     UINT8               aVendorSpecificExt2[48];        ///< Vendor-specific extenstion field 2
+    UINT32              padding1;                       ///< Padding variable 1
 } tDllIdentParam;
 
 /**

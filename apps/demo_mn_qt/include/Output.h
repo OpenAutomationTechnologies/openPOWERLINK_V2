@@ -76,6 +76,7 @@ public slots:
     void addNode(int nodeId_p);
     void removeNode(int nodeId_p);
     void removeAllNodes();
+    void disable(int nodeId_p);
 
 signals:
 

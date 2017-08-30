@@ -50,6 +50,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/dllk.h>
 #include <kernel/dllkcal.h>
 #include <kernel/errhndk.h>
+#include <kernel/timesynck.h>
 #include <oplk/benchmark.h>
 
 #if defined(CONFIG_INCLUDE_PDO)
@@ -202,6 +203,11 @@ tOplkError eventk_process(tEvent* pEvent_p)
             eventSource = kEventSourceErrk;
             break;
 
+        case kEventSinkTimesynck:
+            ret = timesynck_process(pEvent_p);
+            eventSource = kEventSourceTimesynck;
+            break;
+
         default:
             // Unknown sink, provide error event to API layer
             eventk_postError(kEventSourceEventk, ret,
@@ -250,7 +256,6 @@ tOplkError eventk_postEvent(tEvent* pEvent_p)
         case kEventSinkApi:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-        case kEventSinkLedu:
             ret = eventkcal_postUserEvent(pEvent_p);
             break;
 
@@ -261,6 +266,7 @@ tOplkError eventk_postEvent(tEvent* pEvent_p)
         case kEventSinkPdok:
         case kEventSinkPdokCal:
         case kEventSinkErrk:
+        case kEventSinkTimesynck:
             ret = eventkcal_postKernelEvent(pEvent_p);
             break;
 
@@ -310,7 +316,7 @@ tOplkError eventk_postError(tEventSource eventSource_p, tOplkError oplkError_p,
     oplkEvent.eventSink = kEventSinkApi;
     OPLK_MEMSET(&oplkEvent.netTime, 0x00, sizeof(oplkEvent.netTime));
     oplkEvent.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
-    oplkEvent.pEventArg = &eventError;
+    oplkEvent.eventArg.pEventArg = &eventError;
 
     ret = eventk_postEvent(&oplkEvent);
 
@@ -344,7 +350,7 @@ static tOplkError handleNmtEventinDll(tEvent* pEvent_p)
     BENCHMARK_MOD_27_RESET(0);
 
     if ((pEvent_p->eventType == kEventTypeNmtEvent) &&
-        (*((tNmtEvent*)pEvent_p->pEventArg) == kNmtEventDllCeSoa))
+        (*((tNmtEvent*)pEvent_p->eventArg.pEventArg) == kNmtEventDllCeSoa))
     {
         BENCHMARK_MOD_27_SET(0);
         // forward SoA event to DLLk module for cycle preprocessing

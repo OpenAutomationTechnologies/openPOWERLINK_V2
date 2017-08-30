@@ -16,4 +16,4 @@ flash_programmer.sh
 *.jic
 *.hex
 mem_init
-
+system.mk

@@ -49,7 +49,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdocom.h>
 #include <user/identu.h>
 #include <user/nmtu.h>
-#include <oplk/obd.h>
+#include <user/obdu.h>
 
 #if !defined(CONFIG_INCLUDE_SDOC)
 #error "CFM module needs openPOWERLINK module SDO client!"
@@ -215,7 +215,7 @@ tOplkError cfmu_init(tCfmCbEventCnProgress pfnCbEventCnProgress_p,
     {
         varParam.subindex = subindex;
         varParam.validFlag = kVarValidAll;
-        ret = obd_defineVar(&varParam);
+        ret = obdu_defineVar(&varParam);
         if ((ret != kErrorOk) &&
             (ret != kErrorObdIndexNotExist) &&
             (ret != kErrorObdSubindexNotExist))
@@ -263,7 +263,7 @@ tOplkError cfmu_exit(void)
             {
                 varParam.subindex = nodeId;
                 varParam.validFlag = kVarValidAll;
-                obd_defineVar(&varParam);
+                obdu_defineVar(&varParam);
                 // ignore return code, because buffer has to be freed anyway
 
                 OPLK_FREE(pBuffer);
@@ -353,11 +353,11 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
     // fetch pointer to ConciseDCF from object 0x1F22
     // (this allows the application to link its own memory to this object)
-    pNodeInfo->pDataConciseDcf = (UINT8*)obd_getObjectDataPtr(0x1F22, nodeId_p);
+    pNodeInfo->pDataConciseDcf = (UINT8*)obdu_getObjectDataPtr(0x1F22, nodeId_p);
     if (pNodeInfo->pDataConciseDcf == NULL)
         return kErrorCfmNoConfigData;
 
-    obdSize = obd_getDataSize(0x1F22, nodeId_p);
+    obdSize = obdu_getDataSize(0x1F22, nodeId_p);
     pNodeInfo->bytesRemaining = (UINT32)obdSize;
     pNodeInfo->eventCnProgress.totalNumberOfBytes = pNodeInfo->bytesRemaining;
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
@@ -389,7 +389,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
         // add size of network configuration (domains in CFM_ConciseDcfList_ADOM)
         for (subindex = 1; subindex <= NMT_MAX_NODE_ID; subindex++)
         {
-            obdSize = obd_getDataSize(0x1F22, subindex);
+            obdSize = obdu_getDataSize(0x1F22, subindex);
             // Download only cDCFs with at least one entry
             if (obdSize > 4)
                 pNodeInfo->eventCnProgress.totalNumberOfBytes += (UINT32)obdSize;
@@ -416,13 +416,13 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
     else
     {
         obdSize = sizeof(expConfDate);
-        ret = obd_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
+        ret = obdu_readEntry(0x1F26, nodeId_p, &expConfDate, &obdSize);
         if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F26 returns 0x%X\n", nodeId_p, ret);
         }
         obdSize = sizeof(expConfTime);
-        ret = obd_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
+        ret = obdu_readEntry(0x1F27, nodeId_p, &expConfTime, &obdSize);
         if (ret != kErrorOk)
         {
             DEBUG_LVL_CFM_TRACE("CN%x Error Reading 0x1F27 returns 0x%X\n", nodeId_p, ret);
@@ -449,7 +449,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p, tNmtNodeEvent nodeEvent_p, tNmtS
 
 #if (CONFIG_CFM_CONFIGURE_CYCLE_LENGTH != FALSE)
     obdSize = sizeof(cfmInstance_g.leCycleLength);
-    ret = obd_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
+    ret = obdu_readEntryToLe(0x1006, 0x00, &cfmInstance_g.leCycleLength, &obdSize);
     if (ret != kErrorOk)
     {   // local OD access failed
         DEBUG_LVL_CFM_TRACE("Local OBD read failed %d\n", ret);
@@ -900,7 +900,11 @@ static tOplkError downloadObject(tCfmNodeInfo* pNodeInfo_p)
     }
     else
     {   // download finished
+#if defined(CONFIG_INCLUDE_NMT_RMN)
+        ret = downloadNetConf(pNodeInfo_p);
+#else
         ret = finishDownload(pNodeInfo_p);
+#endif
         if (ret != kErrorOk)
             return ret;
     }
@@ -952,14 +956,14 @@ static tOplkError downloadNetConf(tCfmNodeInfo* pNodeInfo_p)
         tObdSize        obdSize;
         UINT8*          pData;
 
-        obdSize = obd_getDataSize(0x1F22, subindex);
+        obdSize = obdu_getDataSize(0x1F22, subindex);
         // Download only cDCFs with at least one entry
         if (obdSize <= 4)
             continue;
 
         // fetch pointer to ConciseDCF from object 0x1F22
         // (this allows the application to link its own memory to this object)
-        pData = (UINT8*)obd_getObjectDataPtr(0x1F22, subindex);
+        pData = (UINT8*)obdu_getObjectDataPtr(0x1F22, subindex);
         if (pData == NULL)
             return kErrorCfmNoConfigData;
 

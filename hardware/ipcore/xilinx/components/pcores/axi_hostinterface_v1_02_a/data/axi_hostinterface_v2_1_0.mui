@@ -141,8 +141,9 @@
       <!ENTITY Size_KB_DynBuf0 '
       <widget id="Size_KB_DynBuf0">
             <key>Size_KB_DynBuf0</key>
-            <label>Dynamic Buffer for RX Virtual Ethernet Queue: </label>
-            <tip>[CDATA[Kilobytes]]</tip>
+            <label>Dynamic Buffer for Rx Virtual Ethernet Queue: </label>
+            <tip>The dynamic buffer for virtual Ethernet
+            is used to map Rx buffers to the host processor.</tip>
       </widget>
       '>
 
@@ -150,7 +151,9 @@
       <widget id="Size_KB_DynBuf1">
             <key>Size_KB_DynBuf1</key>
             <label>Dynamic Buffer for Kernel-to-User Queue: </label>
-            <tip>[CDATA[Kilobytes]]</tip>
+            <tip>The dynamic buffer for Kernel-to-User queue is used to map
+            event arguments (e.g. asynchronous Rx buffer) to the host
+            processor.</tip>
       </widget>
       '>
 
@@ -158,63 +161,73 @@
       <widget id="Size_B_ErrorCounter">
             <key>Size_B_ErrorCounter</key>
             <label>Error Counter: </label>
-            <tip><![CDATA[Bytes]]></tip>
+            <tip>The error counter buffer is used to forward the error
+            counters to the host processor. Either select "CN" (36 byte),
+            "MN" (3108 byte) or a different provided number.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_TxNmtQ '
       <widget id="Size_KB_TxNmtQ">
             <key>Size_KB_TxNmtQ</key>
-            <label>TX NMT Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <label>Tx NMT Queue: </label>
+            <tip>The Tx NMT queue buffer is used to transfer NMT commands
+            to the kernel DLL.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_TxGenQ '
       <widget id="Size_KB_TxGenQ">
             <key>Size_KB_TxGenQ</key>
-            <label>TX Generic Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <label>Tx Generic Queue: </label>
+            <tip>The Tx generic queue buffer is used to transfer ASnd frames
+            (e.g. SDO) to the kernel DLL.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_TxSynQ '
       <widget id="Size_KB_TxSynQ">
             <key>Size_KB_TxSynQ</key>
-            <label>TX Sync Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <label>Tx Sync Queue: </label>
+            <tip>The Tx sync queue buffer is used to transfer SyncReq data
+            to the kernel DLL. This queue is only used by MN.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_TxVetQ '
       <widget id="Size_KB_TxVetQ">
             <key>Size_KB_TxVetQ</key>
-            <label>TX Virtual Ethernet Queue</label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <label>Tx Virtual Ethernet Queue</label>
+            <tip>The Tx virtual Ethernet queue buffer is used to transfer
+            non-POWERLINK frames to the kernel DLL.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_RxVetQ '
       <widget id="Size_KB_RxVetQ">
             <key>Size_KB_RxVetQ</key>
-            <label>RX Virtual Ethernet Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <label>Rx Virtual Ethernet Queue: </label>
+            <tip>The Rx virtual Ethernet queue buffer is used to transfer
+            received non-POWERLINK frames to the host processor.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_K2UQ '
       <widget id="Size_KB_K2UQ">
             <key>Size_KB_K2UQ</key>
             <label>Kernel-to-User Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <tip>The Kernel-to-User queue buffer is used for event
+            exchange from kernel to user layer.</tip>
       </widget>
       '>
       <!ENTITY Size_KB_U2KQ '
       <widget id="Size_KB_U2KQ">
             <key>Size_KB_U2KQ</key>
             <label>User-to-Kernel Queue: </label>
-            <tip><![CDATA[Kilobytes]]></tip>
+            <tip>The User-to-Kernel queue buffer is used for event
+            exchange from user to kernel layer.</tip>
       </widget>
       '>
       <!ENTITY Size_B_Pdo '
       <widget id="Size_B_Pdo">
             <key>Size_B_Pdo</key>
             <label>Process Data Objects (PDO): </label>
-            <tip><![CDATA[Bytes]]></tip>
+            <tip>"The PDO buffer is used to exchange input and
+            output process data.</tip>
       </widget>
       '>
 <!--

@@ -61,6 +61,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/synctimer.h>
 #endif
 
+#include <kernel/timesynck.h>
+
 #include <common/ami.h>
 #include <oplk/benchmark.h>
 
@@ -119,8 +121,8 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
 static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtState_p);
 static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* pRxBuffer_p,
                                       tNmtState nmtState_p, tEdrvReleaseRxBuffer* pReleaseRxBuffer_p);
-static tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
-static void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
+static INLINE tOplkError forwardRpdo(tFrameInfo* pFrameInfo_p);
+static INLINE void       postInvalidFormatError(UINT nodeId_p, tNmtState nmtState_p);
 static BOOL       presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
                                            tNmtState nodeNmtState_p);
 
@@ -236,7 +238,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
     }
 #endif
 
-    frameInfo.pFrame = pFrame;
+    frameInfo.frame.pBuffer = pFrame;
     frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
 
     if (ami_getUint16Be(&pFrame->etherType) != C_DLL_ETHERTYPE_EPL)
@@ -325,7 +327,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
             event.eventSink = kEventSinkNmtk;
             event.eventType = kEventTypeNmtEvent;
             event.eventArgSize = sizeof(nmtEvent);
-            event.pEventArg = &nmtEvent;
+            event.eventArg.pEventArg = &nmtEvent;
             ret = eventk_postEvent(&event);
         }
     }
@@ -391,8 +393,8 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNmtCmdSent;
             event.eventArgSize = pTxBuffer_p->txFrameSize;
-            event.pEventArg = pTxFrame;
-            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.pEventArg, event.eventArgSize);
+            event.eventArg.pEventArg = pTxFrame;
+            //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.eventArg, event.eventArgSize);
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -430,7 +432,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority;
+    event.eventArg.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
     if (ret != kErrorOk)
@@ -506,7 +508,7 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority;
+    event.eventArg.pEventArg = &priority;
     event.eventArgSize = sizeof(priority);
     ret = eventk_postEvent(&event);
 
@@ -1540,7 +1542,7 @@ tOplkError dllkframe_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p,
 
                 event.eventSink = kEventSinkDlluCal;
                 event.eventType = kEventTypeAsndNotRx;
-                event.pEventArg = (void*)&asndNotRx;
+                event.eventArg.pEventArg = (void*)&asndNotRx;
                 event.eventArgSize = sizeof(tDllAsndNotRx);
 
                 // Post event with dummy frame
@@ -1577,7 +1579,7 @@ tOplkError dllkframe_cbMnTimerCycle(tTimerEventArg* pEventArg_p)
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
-    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl.handle != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }
@@ -1751,7 +1753,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tPlkFrame*      pFrame;
     BYTE            bFlag1;
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
 
     if (!NMT_IF_ACTIVE_CN(nmtState_p))
     {   // MN is active -> wrong msg type
@@ -1850,7 +1852,7 @@ The function checks if a PRes frame is invalid.
 static BOOL presFrameFormatIsInvalid(tFrameInfo* pFrameInfo_p, tDllkNodeInfo* pIntNodeInfo_p,
                                      tNmtState nodeNmtState_p)
 {
-    tPlkFrame*  pFrame = pFrameInfo_p->pFrame;
+    tPlkFrame*  pFrame = pFrameInfo_p->frame.pBuffer;
     size_t      frameSize = pFrameInfo_p->frameSize;
     size_t      payloadSize = ami_getUint16Le(&pFrame->data.pres.sizeLe);
 
@@ -1907,7 +1909,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
     tDllkPresFw*    pPresFw;
 #endif
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
     nodeId = ami_getUint8Le(&pFrame->srcNodeId);
 
 #if defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD)
@@ -1931,7 +1933,7 @@ static tOplkError processReceivedPres(tFrameInfo* pFrameInfo_p, tNmtState nmtSta
         event.eventSink = kEventSinkApi;
         event.eventType = kEventTypeReceivedPres;
         event.eventArgSize = sizeof(presEvent);
-        event.pEventArg = &presEvent;
+        event.eventArg.pEventArg = &presEvent;
 
         ret = eventk_postEvent(&event);
         pPresFw->numResponse++;
@@ -2074,6 +2076,7 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 {
     tOplkError      ret = kErrorOk;
     tPlkFrame*      pFrame;
+    UINT64          relTime;
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     tEdrvTxBuffer*  pTxBuffer = NULL;
 #endif
@@ -2088,7 +2091,6 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
     }
 
     pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
-    dllkInstance_g.relativeTime = ami_getUint64Le(&pFrame->data.soc.relativeTimeLe);
 
 #if CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE
     // post PRes to transmit FIFO of the ethernet controller, but don't start
@@ -2121,6 +2123,28 @@ static tOplkError processReceivedSoc(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
             dllkInstance_g.cycleCount = (dllkInstance_g.cycleCount + 1) %
                             dllkInstance_g.dllConfigParam.multipleCycleCnt;
         }
+
+        // Get SoC time stamps
+        relTime = ami_getUint64Le(&pFrame->data.soc.relativeTimeLe);
+        dllkInstance_g.socTime.netTime.nsec = ami_getUint32Le(&pFrame->data.soc.netTimeLe.nsec);
+        dllkInstance_g.socTime.netTime.sec = ami_getUint32Le(&pFrame->data.soc.netTimeLe.sec);
+
+        // Validate locally stored SoC time
+        if (!dllkInstance_g.socTime.fRelTimeValid)
+        {
+            // From the first change in the SoC time stamp it is considered valid
+            if (dllkInstance_g.socTime.relTime != relTime)
+                dllkInstance_g.socTime.fRelTimeValid = TRUE;
+        }
+
+        dllkInstance_g.socTime.relTime = relTime;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+        // Forward Soc time stamp to timesync modules
+        ret = timesynck_setSocTime(&dllkInstance_g.socTime);
+        if (ret != kErrorOk)
+            return ret;
+#endif
     }
 
     // reprogram timer
@@ -2180,7 +2204,7 @@ static tOplkError processReceivedAmni(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtS
     event.eventSink = kEventSinkNmtMnu;
     event.eventType = kEventTypeReceivedAmni;
     event.eventArgSize = sizeof(nodeId);
-    event.pEventArg = &nodeId;
+    event.eventArg.pEventArg = &nodeId;
     ret = eventk_postEvent(&event);
 
     if (!NMT_IF_ACTIVE_CN(nmtState_p))
@@ -2387,8 +2411,7 @@ static tOplkError processReceivedSoa(tEdrvRxBuffer* pRxBuffer_p, tNmtState nmtSt
 
                 PrcCycleTiming.pResTimeFirstNs = ami_getUint32Le(&pFrame->data.soa.payload.syncRequest.presTimeFirstLe);
 
-                if ((syncControl & PLK_SYNC_PRES_TIME_FIRST_VALID) &&
-                    (dllkInstance_g.prcPResTimeFirst != PrcCycleTiming.pResTimeFirstNs))
+                if (syncControl & PLK_SYNC_PRES_TIME_FIRST_VALID)
                 {
                     dllkInstance_g.prcPResTimeFirst = PrcCycleTiming.pResTimeFirstNs;
 
@@ -2573,7 +2596,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
     UNUSED_PARAMETER(pRxBuffer_p);
 #endif
 
-    pFrame = pFrameInfo_p->pFrame;
+    pFrame = pFrameInfo_p->frame.pBuffer;
 
     // ASnd service registered?
     asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
@@ -2671,6 +2694,26 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
             dllkInstance_g.syncReqPrevNodeId = 0;
         }
 #endif
+        nodeId = ami_getUint8Le(&pFrame->dstNodeId);
+
+        // Processing of NMT commands in kernel layer
+        if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))
+        {
+            if (asndServiceId == kDllAsndNmtCommand)
+            {
+                // Forward NMT command
+                ret = dllkcal_nmtCmdReceived(&pFrame->data.asnd.payload.nmtCommandService);
+                if (ret == kErrorReject)
+                {
+                    DEBUG_LVL_ERROR_TRACE("%s kErrorReject is not allowed in this situation!",
+                                          __func__);
+                    ret = kErrorInvalidOperation;
+                }
+
+                if (ret != kErrorOk)
+                    goto Exit;
+            }
+        }
 
         if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterAny)
         {   // ASnd service ID is registered
@@ -2687,7 +2730,6 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p, tEdrvRxBuffer* p
         else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
-            nodeId = ami_getUint8Le(&pFrame->dstNodeId);
             if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))
             {   // ASnd frame is intended for us
                 // forward frame via async receive FIFO to userspace
@@ -2818,7 +2860,7 @@ static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeHeartbeat;
             event.eventArgSize = sizeof(heartbeatEvent);
-            event.pEventArg = &heartbeatEvent;
+            event.eventArg.pEventArg = &heartbeatEvent;
         }
         else
         {   // CN shall be deleted softly, so remove it now without issuing any error
@@ -2829,7 +2871,7 @@ static tOplkError updateNode(tDllkNodeInfo* pIntNodeInfo_p, UINT nodeId_p,
             event.eventType = kEventTypeDllkDelNode;
             // $$$ d.k. set Event.netTime to current time
             event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
+            event.eventArg.pEventArg = &nodeOpParam;
         }
 
         if ((ret = eventk_postEvent(&event)) != kErrorOk)
@@ -3007,7 +3049,7 @@ static void handleErrorSignaling(tPlkFrame* pFrame_p, UINT nodeId_p)
         issueReq.service = kDllReqServiceStatus;
         issueReq.nodeId = pIntNodeInfo->nodeId;
         issueReq.soaFlag1 = pIntNodeInfo->soaFlag1;
-        event.pEventArg = &issueReq;
+        event.eventArg.pEventArg = &issueReq;
         event.eventArgSize = sizeof(tDllCalIssueRequest);
         if ((ret = eventk_postEvent(&event)) != kErrorOk)
         {
@@ -3041,7 +3083,7 @@ static tOplkError cbCnTimer(tTimerEventArg* pEventArg_p)
 
     TGT_DLLK_ENTER_CRITICAL_SECTION();
 
-    if (pEventArg_p->timerHdl != dllkInstance_g.timerHdlCycle)
+    if (pEventArg_p->timerHdl.handle != dllkInstance_g.timerHdlCycle)
     {   // zombie callback - just exit
         goto Exit;
     }

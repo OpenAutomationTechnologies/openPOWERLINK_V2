@@ -76,6 +76,7 @@ ENDIF()
 ################################################################################
 
 SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/..)
+SET(OPLK_STACK_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 INCLUDE(cmake/directories.cmake)
 INCLUDE(cmake/stackfiles.cmake)

@@ -17,7 +17,7 @@ _HEAP_SIZE = DEFINED(_HEAP_SIZE) ? _HEAP_SIZE : 0xA00000;
 
 MEMORY
 {
-   pcp_i_bram_ctrl_pcp_d_bram_ctrl : ORIGIN = 0x40000050, LENGTH = 0x7FB0
+   pcp_i_bram_ctrl_pcp_d_bram_ctrl : ORIGIN = 0x00000050, LENGTH = 0x7FB0
    ps7_ddr_0_S_AXI_HP0_BASEADDR : ORIGIN = 0x30000000, LENGTH = 0x10000000
 }
 
@@ -29,19 +29,19 @@ ENTRY(_start)
 
 SECTIONS
 {
-.vectors.reset 0x40000000 : {
+.vectors.reset 0x00000000 : {
    KEEP (*(.vectors.reset))
 }
 
-.vectors.sw_exception 0x40000008 : {
+.vectors.sw_exception 0x00000008 : {
    KEEP (*(.vectors.sw_exception))
 }
 
-.vectors.interrupt 0x40000010 : {
+.vectors.interrupt 0x00000010 : {
    KEEP (*(.vectors.interrupt))
 }
 
-.vectors.hw_exception 0x40000020 : {
+.vectors.hw_exception 0x00000020 : {
    KEEP (*(.vectors.hw_exception))
 }
 

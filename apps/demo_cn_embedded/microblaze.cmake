@@ -73,7 +73,7 @@ SET(DEMO_ARCH_SOURCES
 
 INCLUDE_DIRECTORIES(
                     ${XIL_BSP_DIR}/include
-                    ${OPLK_BASE_DIR}/stack/src/arch/xilinx_microblaze
+                    ${OPLK_BASE_DIR}/stack/src/arch/xilinx-microblaze
                     ${COMMON_SOURCE_DIR}/gpio
                    )
 

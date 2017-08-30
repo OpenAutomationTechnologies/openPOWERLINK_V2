@@ -114,8 +114,7 @@ On the Zynq SoC, openPOWERLINK runs on a Linux OS which is running on the
 ARM Cortex A9 processing system (PS) of the SoC. The following section contains
 additional information about the openPOWERLINK Linux implementation on the Zynq SoC.
 
-For general information about running openPOWERLINK on Linux refer to
-["openPOWERLINK on Linux"](\ref page_platform_linux).
+For general information about running openPOWERLINK on Linux refer to \ref page_platform_linux.
 
 __NOTE__: Third-party libraries such as libpcap, and libqt etc. must also be
           cross-compiled for Zynq ARM apart from openPOWERLINK.
@@ -252,7 +251,7 @@ image or a bit stream.
 The FSBL for the openPOWERLINK demo on Zynq is compiled by importing the project
 files from the Xilinx installation directory into the bootloader project
 directory and setting up the necessary configuration to build the bootloader
-using CMake configution files.
+using CMake configuration files.
 Follow the steps below to compile Zynq FSBL for demos:
 
 * Open a shell where the Xilinx ISE 14.7 Toolchain is configured.
@@ -270,7 +269,7 @@ Follow the steps below to compile Zynq FSBL for demos:
 
 ## Building {#sect_zynq_noos_build}
 
-For building openPOWERLINK for FPGA based non-OS systema on Zynq SoC, refer to the
+For building openPOWERLINK for FPGA based non-OS system on Zynq SoC, refer to the
 [generic build instructions](\ref page_build) and execute all required build
 steps from this section. The following build steps can be carried out:
 

@@ -14,7 +14,7 @@ Release library versions must be available, depending on your CMAKE_BUILD_TYPE.
 If the needed library is missing you get an OPLKLIB-NOTFOUND or
 OPLKLIB_DEBUG-NOTFOUND error in the demos CMake configuration.
 If you use the Visual Studio generator on Windows, both libraries must be
-available as you can swith between Debug and Release inside the Visual Studio
+available as you can switch between Debug and Release inside the Visual Studio
 solution.
 
 
@@ -126,7 +126,7 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. libpcap will be used as Ethernet driver.
 
-  - __Linux User Space Daemon__
+  - __Linux Userspace Daemon__
 
     The library `liboplkappXn-userintf.a` will be used. It contains the interface
     to a Linux user space daemon. The kernel part of the openPOWERLINK stack is
@@ -138,17 +138,39 @@ Follow the steps below to cross compile your demo application for Altera Cyclone
     to a Linux kernel module. The kernel part of the openPOWERLINK stack is
     located in the separate kernel module driver.
 
+  - __Kernel stack on PCIe card__
+
+    The library `liboplkappmn-kernelpcie.a` will be used. It contains the interface
+    to a Linux kernel PCIe interface driver.
+    The kernel part of the openPOWERLINK stack is located on an external PCIe
+    device. The status/control and data exchange between the application and kernel
+    stack is handled by the PCIe interface driver.
+
 ## Windows Specific Options  {#sect_build_demos_windows_options}
 
 - **CFG_BUILD_KERNEL_STACK**
 
-  Determines how to build the kernel stack. The following option is available and
-  automatically (implicitly) pre-selected:
+  Determines how to build the kernel stack. The following options are available:
 
   - __Link to Application__
 
     The openPOWERLINK kernel part will be directly linked to the user part and
     application. WinPCAP will be used as Ethernet driver.
+
+  - __Kernel stack on PCIe card__
+
+    The library `liboplkmnapp-pcieintf.lib` will be used. It contains the interface
+    to an external PCIe device via an NDIS PCIe miniport driver.
+    The kernel part of the openPOWERLINK stack is located on the external PCIe device.
+    Shared memory is used for status/control and data exchange between the user
+    and kernel layers of the openPOWERLINK stack.
+
+  - __Windows Kernel Module__
+
+    The library `liboplkmnapp-kernelintf.lib` will be used. It contains the interface
+    to the NDIS intermediate driver running in the Windows kernel space. The kernel part
+    is located in the NDIS intermediate driver. The NDIS intermediate driver uses native
+    NIC miniport driver to access network interface.
 
 ## Options for embedded platforms (Non-OS) {#sect_build_demos_noos_options}
 

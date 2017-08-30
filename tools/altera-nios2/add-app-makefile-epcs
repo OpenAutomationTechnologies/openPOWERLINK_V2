@@ -6,16 +6,30 @@ MAKE_FILE=$1
 
 cat >> ${MAKE_FILE} <<'Heredoc'
 
+# Rules for EPCS bootloader with remote update core consideration
+include system.mk
+
+EPCSBOOT_DIR := $(OPLK_BASE_DIR)/contrib/bootloader/altera-nios2/epcsboot/build
+EPCS_BASE := $(EPCS_FLASH_CONTROLLER_BASE)
+EPCS_REGS_OFFSET := $(EPCS_FLASH_CONTROLLER_REGISTER_OFFSET)
+EPCS_CODE_BASE := $(EPCS_BASE)
+EPCS_REGS_BASE := $$(( $(EPCS_BASE) + $(EPCS_REGS_OFFSET) ))
+
+.PHONY : update-epcsboot
+update-epcsboot:
+	@$(ECHO) Info: Compile EPCS boot in $(EPCSBOOT_DIR)
+	@$(MAKE) -C $(EPCSBOOT_DIR) clean all CODE_BASE=$(EPCS_CODE_BASE) \
+	EPCS_REGS_BASE=$(EPCS_REGS_BASE) REMOTE_UPDATE_BASE=$(REMOTE_UPDATE_BASE)
+	@$(ECHO) Info: Update memory initialization in $(SOF_FILE)
+	$(CP) $(EPCSBOOT_DIR)/epcsboot.hex $(QUARTUS_PROJECT_DIR)/$(EPCS_FLASH_CONTROLLER_MEMORY_INFO_MEM_INIT_FILENAME).hex
+	$(MAKE) -C $(QUARTUS_PROJECT_DIR) update-mif
+
 # Rules for EPCS flash programming commands (EPCS contains SOF and application)
 PROGRAM_EPCS_SUFFIX := -epcs
 PROGRAM_EPCS_TARGET := $(addsuffix $(PROGRAM_EPCS_SUFFIX), $(FLASH_FILES))
 PROGRAM_EPCS_OVERRIDE := --override=$(OPLK_BASE_DIR)/tools/altera-nios2/nios2-flash-override.txt
 PROG_DIR_REL := $(QUARTUS_PROJECT_DIR)/../../common/prog
 PROG_DIR := $(realpath $(PROG_DIR_REL))
-
-ifneq ("$(DOWNLOAD_CABLE_FLAG)","")
-	PROG_CABLE_ARG := --cable '$(DOWNLOAD_CABLE_FLAG)'
-endif
 
 .PHONY : program-epcs
 program-epcs : $(PROGRAM_EPCS_TARGET)
@@ -28,13 +42,14 @@ $(PROGRAM_EPCS_TARGET) : $(ELF)
 	@$(ECHO) Info: Using prog directory $(PROG_DIR)
 	@if [ -n "$($(basename $@)_EPCS_FLAGS)" ]; \
 	then \
-		$(OPLK_BASE_DIR)/tools/altera-nios2/program-epcs.sh $(SOF_FILE) $(ELF) --prog $(PROG_DIR) $(PROG_CABLE_ARG); \
+		$(OPLK_BASE_DIR)/tools/altera-nios2/program-epcs.sh $(SOF_FILE) $(ELF) --prog $(PROG_DIR) $(DOWNLOAD_CABLE_FLAG); \
 	fi
 
 # Rule for epcs help output
 help::
 	@$(ECHO)
 	@$(ECHO) "  EPCS flash targets:"
+	@$(ECHO) "    update-epcsboot   - Update EPCS bootloader in SOF"
 	@$(ECHO) "    program-epcs      - Program EPCS flash device with SOF and ELF"
 
 Heredoc

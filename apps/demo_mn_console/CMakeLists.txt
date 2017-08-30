@@ -53,6 +53,8 @@ SET(DEMO_SOURCES
     ${DEMO_SOURCE_DIR}/main.c
     ${DEMO_SOURCE_DIR}/app.c
     ${DEMO_SOURCE_DIR}/event.c
+    ${COMMON_SOURCE_DIR}/eventlog/eventlog.c
+    ${COMMON_SOURCE_DIR}/eventlog/eventlogstring.c
     ${CONTRIB_SOURCE_DIR}/console/printlog.c
     ${CONTRIB_SOURCE_DIR}/getopt/getopt.c
     )
@@ -81,6 +83,10 @@ ELSE (CFG_KERNEL_STACK_DIRECTLINK)
         ADD_DEFINITIONS(-DCONFIG_USE_SYNCTHREAD)
     ENDIF (CFG_DEMO_MN_CONSOLE_USE_SYNCTHREAD)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+
+IF (CFG_KERNEL_STACK_PCIE_INTF)
+    ADD_DEFINITIONS(-D__LINUX_PCIE__)
+ENDIF()
 
 ################################################################################
 # Setup the architecture specific definitions
@@ -120,6 +126,5 @@ TARGET_LINK_LIBRARIES(demo_mn_console ${ARCH_LIBRARIES})
 ################################################################################
 # Installation rules
 
-INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
-INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${CMAKE_PROJECT_NAME})
-
+INSTALL(TARGETS demo_mn_console RUNTIME DESTINATION ${PROJECT_NAME})
+INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/mnobd.cdc DESTINATION ${PROJECT_NAME})

@@ -45,8 +45,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define OPLK_OPTIMIZE               TRUE                        ///< Optimize the dualprocessor library for openPOWERLINK stack on non-OS
-
 
 /* BASE ADDRESSES */
 #if defined(__MICROBLAZE__)
@@ -66,7 +64,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 #define TARGET_SYNC_IRQ_ID         XPAR_PS7_SCUGIC_0_DEVICE_ID
-#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_IRQ_INTR
+#define TARGET_SYNC_IRQ            XPAR_FABRIC_AXI_OPENMAC_0_TIMER_PULSE_IRQ_INTR
 
 ///< Interrupt controller specific defines
 #ifdef XPAR_PS7_SCUGIC_0_BASEADDR
@@ -84,8 +82,25 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 //------------------------------------------------------------------------------
+// const defines
+//------------------------------------------------------------------------------
+#define DUALPROC_INSTANCE_COUNT    2    ///< Number of supported instances
+
+//------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
+/**
+\brief Dual processor lock
+
+The structure holds the locking parameters used for the
+locking mechanism in dual processor shared memory library.
+
+*/
+typedef struct sDualprocLock
+{
+    unsigned char   lockToken;      ///< Locking token
+    unsigned char   aPadding1[3];   ///< Padding array variable 1
+} tDualprocLock;
 
 //------------------------------------------------------------------------------
 // function prototypes

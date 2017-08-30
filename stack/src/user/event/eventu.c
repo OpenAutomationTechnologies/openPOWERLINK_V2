@@ -56,10 +56,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <user/sdotest.h>
 #endif
 
-#if defined(CONFIG_INCLUDE_LEDU)
-#include <user/ledu.h>
-#endif
-
 #include <stddef.h>
 
 //============================================================================//
@@ -98,6 +94,7 @@ The user event instance holds the Api process callback function pointer.
 typedef struct
 {
     tProcessEventCb         pfnApiProcessEventCb;  ///< Callback for generic api events
+    BOOL                    fInitialized;          ///< Flag to determine status of eventu module
 } tEventuInstance;
 
 //------------------------------------------------------------------------------
@@ -134,9 +131,14 @@ tOplkError eventu_init(tProcessEventCb pfnApiProcessEventCb_p)
 {
     tOplkError ret = kErrorOk;
 
+    OPLK_MEMSET(&instance_l, 0, sizeof(tEventuInstance));
+
     instance_l.pfnApiProcessEventCb = pfnApiProcessEventCb_p;
 
     ret = eventucal_init();
+
+    if (ret == kErrorOk)
+        instance_l.fInitialized = TRUE;
 
     return ret;
 }
@@ -159,6 +161,8 @@ tOplkError eventu_exit(void)
     tOplkError ret = kErrorOk;
 
     ret = eventucal_exit();
+
+    instance_l.fInitialized = FALSE;
 
     return ret;
 }
@@ -183,7 +187,13 @@ specific module
 tOplkError eventu_process(tEvent* pEvent_p)
 {
     tOplkError              ret = kErrorOk;
-    tEventSource            eventSource;
+    tEventSource            eventSource = kEventSourceInvalid;
+
+    if (!instance_l.fInitialized)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n", __func__);
+        return kErrorNoResource;
+    }
 
     switch (pEvent_p->eventSink)
     {
@@ -210,13 +220,6 @@ tOplkError eventu_process(tEvent* pEvent_p)
             eventSource = kEventSourceSdoAsySeq;
             break;
 #endif
-
-        case kEventSinkLedu:
-#if defined(CONFIG_INCLUDE_LEDU)
-            ret = ledu_processEvent(pEvent_p);
-            eventSource = kEventSourceLedu;
-#endif
-            break;
 
         case kEventSinkErru:
             break;
@@ -271,6 +274,12 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
 {
     tOplkError ret = kErrorOk;
 
+    if (!instance_l.fInitialized)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Eventu module is not initialized\n", __func__);
+        return kErrorNoResource;
+    }
+
     // Split event post to user internal and user to kernel
     switch (pEvent_p->eventSink)
     {
@@ -282,6 +291,7 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkPdok:
         case kEventSinkPdokCal:
         case kEventSinkErrk:
+        case kEventSinkTimesynck:
             ret = eventucal_postKernelEvent(pEvent_p);
             break;
 
@@ -293,7 +303,6 @@ tOplkError eventu_postEvent(tEvent* pEvent_p)
         case kEventSinkSdoTest:
         case kEventSinkDlluCal:
         case kEventSinkErru:
-        case kEventSinkLedu:
             ret = eventucal_postUserEvent(pEvent_p);
             break;
 
@@ -342,7 +351,7 @@ tOplkError eventu_postError(tEventSource eventSource_p,  tOplkError error_p,
     event.eventSink = kEventSinkApi;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
     event.eventArgSize = offsetof(tEventError, errorArg) + argSize_p;
-    event.pEventArg = &eventError;
+    event.eventArg.pEventArg = &eventError;
 
     ret = eventu_postEvent(&event);
 

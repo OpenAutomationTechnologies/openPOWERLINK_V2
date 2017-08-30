@@ -127,7 +127,6 @@ int main(void)
     tOplkError  ret = kErrorOk;
     const UINT8 aMacAddr[] = {MAC_ADDR};
     UINT8       nodeid;
-    UINT32      version;
 
     // Initialize helper modules
     gpio_init();
@@ -151,10 +150,9 @@ int main(void)
     initEvents(&eventCbPowerlink);
     arp_init((UINT8)instance_l.nodeId);
 
-    version = oplk_getVersion();
     PRINTF("----------------------------------------------------\n");
     PRINTF("openPOWERLINK embedded CN DEMO application\n");
-    PRINTF("using openPOWERLINK Stack: %x.%x.%x\n", PLK_STACK_VER(version), PLK_STACK_REF(version), PLK_STACK_REL(version));
+    PRINTF("using openPOWERLINK Stack: %s\n", oplk_getVersionString());
     PRINTF("----------------------------------------------------\n");
 
     PRINTF("NODEID=0x%02X\n", instance_l.nodeId);
@@ -167,7 +165,10 @@ int main(void)
         goto Exit;
 
     if ((ret = oplk_setNonPlkForward(TRUE)) != kErrorOk)
-        goto Exit;
+    {
+        PRINTF("WARNING: oplk_setNonPlkForward() failed with \"%s\"\n(Error:0x%x!)\n",
+               debugstr_getRetValStr(ret), ret);
+    }
 
     loopMain(&instance_l);
 
@@ -218,8 +219,8 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.fAsyncOnly              = FALSE;
     initParam.featureFlags            = -1;
     initParam.cycleLen                = pInstance_p->cycleLen;  // required for error detection
-    initParam.isochrTxMaxPayload      = 36;                     // const
-    initParam.isochrRxMaxPayload      = 36;                     // const
+    initParam.isochrTxMaxPayload      = C_DLL_ISOCHR_MAX_PAYL;  // const
+    initParam.isochrRxMaxPayload      = C_DLL_ISOCHR_MAX_PAYL;  // const
     initParam.presMaxLatency          = 2000;                   // const; only required for IdentRes
     initParam.asndMaxLatency          = 2000;                   // const; only required for IdentRes
     initParam.preqActPayloadLimit     = 36;                     // required for initialization (+28 bytes)
@@ -248,10 +249,17 @@ static tOplkError initPowerlink(tInstance* pInstance_p)
     initParam.pfnCbSync  = processSync;
 
     // initialize POWERLINK stack
-    ret = oplk_init(&initParam);
+    ret = oplk_initialize();
     if (ret != kErrorOk)
     {
-        PRINTF("oplk_init() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        PRINTF("oplk_initialize() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
+        return ret;
+    }
+
+    ret = oplk_create(&initParam);
+    if (ret != kErrorOk)
+    {
+        PRINTF("oplk_create() failed with \"%s\"\n(Error:0x%x!)\n", debugstr_getRetValStr(ret), ret);
         return ret;
     }
 
@@ -326,7 +334,8 @@ static void shutdownPowerlink(tInstance* pInstance_p)
 
     PRINTF("Shut down DEMO\n");
 
-    oplk_shutdown();
+    oplk_destroy();
+    oplk_exit();
 }
 
 //------------------------------------------------------------------------------

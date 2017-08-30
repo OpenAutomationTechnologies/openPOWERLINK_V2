@@ -109,24 +109,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _WINCE_             (32 + 0x20000)
 
 //------------------------------------------------------------------------------
-//  definitions for function inlining
-
-#define INLINE_FUNCTION             // empty define
-#undef  INLINE_ENABLED              // disable actual inlining of functions
-#undef  INLINE_FUNCTION_DEF         // disable inlining for all compilers per default
-
-//------------------------------------------------------------------------------
 //  To determine the system, first check for used compiler
 
 #if defined (__GNUC__)
-
-// GNU C compiler supports function inlining
-#define INLINE_FUNCTION_DEF extern inline
-
-// to actually enable inlining just include the following three lines
-// #undef INLINE_FUNCTION
-// #define INLINE_FUNCTION     INLINE_FUNCTION_DEF
-// #define INLINE_ENABLED      TRUE
 
 //------------------------------------------------------------------------------
 // define target system
@@ -173,6 +158,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
+#define OPLK_DEPRECATED      __attribute__((deprecated))
+
 #elif defined(_MSC_VER)
 
 #if _MSC_VER < 1400         // requires visual studio 2005 or higher
@@ -198,7 +185,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #endif
 
-#define __func__ __FUNCTION__
+#define __func__        __FUNCTION__
+#define OPLK_DEPRECATED      __declspec(deprecated)
 
 #endif /*#elif defined (_MSC_VER) */
 
@@ -234,7 +222,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #elif (TARGET_SYSTEM == _WIN32_)
 
+#ifdef _KERNEL_MODE
+#include <oplk/targetdefs/winkernel.h>
+#else
 #include <oplk/targetdefs/windows.h>
+#endif
 
 #elif (TARGET_SYSTEM == _WINCE_)
 

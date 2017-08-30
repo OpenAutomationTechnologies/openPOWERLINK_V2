@@ -42,6 +42,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // includes
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
+#include <common/target.h>
 #include <kernel/synctimer.h>
 #include <target/openmac.h>
 #include <omethlib.h>
@@ -57,6 +58,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef TIMER_SYNC_SECOND_LOSS_OF_SYNC
 #define TIMER_SYNC_SECOND_LOSS_OF_SYNC      FALSE
+#endif
+
+#ifndef CONFIG_EXT_SYNC_PULSE_NS
+#define CONFIG_EXT_SYNC_PULSE_NS            0 // default one clock cycle pulse
 #endif
 
 //------------------------------------------------------------------------------
@@ -91,6 +96,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PROPORTIONAL_FRACTION       (1 << PROPORTIONAL_FRACTION_SHIFT)
 
 #define TIMER_DRV_MIN_TIME_DIFF     500
+
+#define EXT_SYNC_PULSE_MAX       ((1 << OPENMAC_TIMERPULSEREGWIDTH)-1)
 
 //------------------------------------------------------------------------------
 // local types
@@ -137,8 +144,8 @@ typedef struct
     tTimerInfo                  aTimerInfo[TIMER_COUNT];            ///< Array with timer information for a set of timers
     UINT                        activeTimerHdl;                     ///< Handle of the active timer
 #ifdef TIMER_USE_EXT_SYNC_INT
-    BOOL                        fExtSyncEnable;                     ///< Flag to enable the external synchronization interrupt
-    UINT32                      syncIntCycle;                       ///< Cycle time of the external synchronization interrupt
+    BOOL                        fExtSyncIntEnable;                  ///< Flag to enable the external synchronization interrupt
+    UINT32                      extSyncIntCycle;                    ///< Cycle time of the external synchronization interrupt
 #endif //TIMER_USE_EXT_SYNC_INT
 } tTimerInstance;
 
@@ -172,6 +179,7 @@ static tOplkError drvModifyTimerAbs(UINT timerHdl_p, UINT32 absoluteTime_p);
 static tOplkError drvModifyTimerRel(UINT timerHdl_p, INT timeAdjustment_p,
                                     UINT32* pAbsoluteTime_p,
                                     BOOL* pfAbsoluteTimeAlreadySet_p);
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p);
 
 static tOplkError drvDeleteTimer(UINT timerHdl_p);
 
@@ -192,7 +200,10 @@ This function initializes the synchronization timer module.
 //------------------------------------------------------------------------------
 tOplkError synctimer_init(void)
 {
-    tOplkError ret = kErrorOk;
+    tOplkError  ret = kErrorOk;
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    UINT32      pulseWidth;
+#endif
 
     OPLK_MEMSET(&instance_l, 0, sizeof(instance_l));
 
@@ -201,7 +212,16 @@ tOplkError synctimer_init(void)
 #ifdef TIMER_USE_EXT_SYNC_INT
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
+    instance_l.extSyncIntCycle = 1; // Every cycle (default)
 #endif //TIMER_USE_EXT_SYNC_INT
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    pulseWidth = OMETH_NS_2_TICKS(CONFIG_EXT_SYNC_PULSE_NS);
+    if (pulseWidth > EXT_SYNC_PULSE_MAX)
+        pulseWidth = EXT_SYNC_PULSE_MAX;
+
+    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, pulseWidth);
+#endif
 
     ret = openmac_isrReg(kOpenmacIrqSync, drvInterruptHandler, NULL);
 
@@ -229,6 +249,10 @@ tOplkError synctimer_exit(void)
     OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
     OPENMAC_TIMERSETCOMPAREVALUE(HWTIMER_EXT_SYNC, 0);
 #endif //TIMER_USE_EXT_SYNC_INT
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, 0);
+#endif
 
     openmac_isrReg(kOpenmacIrqSync, NULL, NULL);
 
@@ -334,18 +358,34 @@ tOplkError synctimer_setSyncShift(UINT32 advanceShift_p)
 This function sets the cycle time.
 
 \param  cycleLen_p      Cycle time in mircroseconds
+\param  minSyncTime_p   Minimum period for sending sync event [us]
 
 \return The function returns a tOplkError error code.
 
 \ingroup module_synctimer
 */
 //------------------------------------------------------------------------------
-tOplkError synctimer_setCycleLen(UINT32 cycleLen_p)
+tOplkError synctimer_setCycleLen(UINT32 cycleLen_p, UINT32 minSyncTime_p)
 {
     tOplkError ret = kErrorOk;
 
     ctrlSetConfiguredTimeDiff(OMETH_US_2_TICKS(cycleLen_p));
 
+#ifdef TIMER_USE_EXT_SYNC_INT
+    if ((cycleLen_p == 0) || (minSyncTime_p == 0))
+    {
+        // - Handle a cycle time of 0 (avoids div by 0)
+        // - Handle not configured minimum sync period
+        instance_l.extSyncIntCycle = 1;
+    }
+    else
+    {
+        // Calculate synchronization event cycle
+        instance_l.extSyncIntCycle = ((minSyncTime_p + cycleLen_p - 1) / cycleLen_p);
+    }
+#else
+    UNUSED_PARAMETER(minSyncTime_p);
+#endif //TIMER_USE_EXT_SYNC_INT
     return ret;
 }
 
@@ -475,51 +515,36 @@ tOplkError synctimer_stopSync(void)
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
 
+This function enables/disables the external synchronization interrupt if the
+needed hardware resources are available. Otherwise the call is ignored.
+The external synchronization is used for the host processor.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_synctimer
+*/
+//------------------------------------------------------------------------------
+void synctimer_controlExtSyncIrq(BOOL fEnable_p)
+{
 #ifdef TIMER_USE_EXT_SYNC_INT
-//------------------------------------------------------------------------------
-/**
-\brief  Enable second sync interrupt
+    if (fEnable_p)
+    {
+        OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
+    }
+    else
+    {
+        OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
+    }
 
-This function enables the external sync interrupt of 2nd CMP timer
-
-\param  syncIntCycle_p      Trigger external sync int every nth cycle
-\param  pulseWidth_p        Pulse width of external sync interrupt in nanoseconds.
-                            If 0 external sync int is just toggled.
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_synctimer
-*/
-//------------------------------------------------------------------------------
-void synctimer_enableExtSyncIrq(UINT32 syncIntCycle_p, UINT32 pulseWidth_p)
-{
-    instance_l.fExtSyncEnable = TRUE;
-    instance_l.syncIntCycle = syncIntCycle_p;
-
-    OPENMAC_TIMERIRQENABLE(HWTIMER_EXT_SYNC);
-    OPENMAC_TIMERIRQSETPULSE(HWTIMER_EXT_SYNC, pulseWidth_p);
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Disable second sync interrupt
-
-This function disables the external sync interrupt of 2nd CMP timer
-
-\return The function returns a tOplkError error code.
-
-\ingroup module_synctimer
-*/
-//------------------------------------------------------------------------------
-void synctimer_disableExtSyncIrq(void)
-{
-    instance_l.fExtSyncEnable = FALSE;
-    instance_l.syncIntCycle = 0;
-
-    OPENMAC_TIMERIRQDISABLE(HWTIMER_EXT_SYNC);
-}
+    instance_l.fExtSyncIntEnable = fEnable_p;
+#else
+    UNUSED_PARAMETER(fEnable_p);
 #endif //TIMER_USE_EXT_SYNC_INT
+}
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
@@ -814,6 +839,25 @@ Exit:
 
 //------------------------------------------------------------------------------
 /**
+\brief  wait blocking until interrupt is acknowledged
+
+This function blocks further processing until a certain IRQ number
+is no longer pending, which ensures proper timer setup even if the
+hardware delays the IRQ acknowledging. However, it introduces an additional
+but necessary delay.
+
+\param  irqNum_p    IRQ number
+
+*/
+//------------------------------------------------------------------------------
+static inline void drvBlockUntilAcknowledged(BYTE irqNum_p)
+{
+    while (OPENMAC_GETPENDINGIRQ() & (1 << irqNum_p));
+}
+
+
+//------------------------------------------------------------------------------
+/**
 \brief  Delete sync timer
 
 This function deletes the timer handle.
@@ -937,7 +981,7 @@ static void drvCalcExtSyncIrqValue(void)
     UINT32          targetAbsoluteTime;
     static UINT32   cycleCnt = 0;
 
-    if ((++cycleCnt == instance_l.syncIntCycle))
+    if ((++cycleCnt == instance_l.extSyncIntCycle))
     {
         // get absolute time from sync timer
         pTimerInfo = &instance_l.aTimerInfo[TIMER_HDL_SYNC];
@@ -949,7 +993,7 @@ static void drvCalcExtSyncIrqValue(void)
                                      instance_l.advanceShift);    // plus sync shift
         cycleCnt = 0;
     }
-    else if (cycleCnt > instance_l.syncIntCycle)
+    else if (cycleCnt > instance_l.extSyncIntCycle)
     {
          cycleCnt = 0;
     }
@@ -976,6 +1020,8 @@ static void drvInterruptHandler(void* pArg_p)
     UNUSED_PARAMETER(pArg_p);
 
     OPENMAC_TIMERIRQACK(HWTIMER_SYNC);
+
+    target_setInterruptContextFlag(TRUE);
 
     timerHdl = instance_l.activeTimerHdl;
     if (timerHdl < TIMER_COUNT)
@@ -1008,7 +1054,7 @@ static void drvInterruptHandler(void* pArg_p)
             case TIMER_HDL_SYNC:
 #ifdef TIMER_USE_EXT_SYNC_INT
                 BENCHMARK_MOD_24_SET(0);
-                if (instance_l.fExtSyncEnable != FALSE)
+                if (instance_l.fExtSyncIntEnable != FALSE)
                 {
                     drvCalcExtSyncIrqValue();
                 }
@@ -1043,6 +1089,9 @@ static void drvInterruptHandler(void* pArg_p)
     }
 
     drvConfigureShortestTimer();
+    drvBlockUntilAcknowledged(HWTIMER_SYNC);
+
+    target_setInterruptContextFlag(FALSE);
 
     BENCHMARK_MOD_24_RESET(4);
 }

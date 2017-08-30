@@ -39,11 +39,11 @@ code remains maintainable.
   space between the operator and the variable.
 - Put the opening brace immediately after the function name and add a space between a
   control statement (if, switch, for, ...) and the opening brace.
-- Always put a linebreak after a conditional statement, even if the body is only
+- Always put a line break after a conditional statement, even if the body is only
   a return or other simple action.
 - Keep line length below 80 characters. This enables to view and compare two
   files side by side on the screen. However, this is not a strict rule! If the
-  line is only some characters longer and a linebreak would decrease
+  line is only some characters longer and a line break would decrease
   readability than you should keep it on a single line. If a line must be split
   the following rules should be followed:
     + Break after a comma.
@@ -248,6 +248,43 @@ eventucal-win32.c
 
 - Use the predefined macros located in oplk/basictypes.h for standard data types
   (e.g. BOOL, INT, UINT, INT8, UINT8,  INT16, UINT16, DOUBLE, ...)
+
+# Structure padding {#sect_coding_naming_padding}
+
+Additional variables should be included in structures shared across different
+processor architectures to avoid alignment and packing problems arising from
+the inherent architectural difference of the processors or compilers.
+
+These variables should be named `padding` suffixed with the padding variable
+count.
+
+__Examples:__
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+typedef struct
+{
+    UINT32          uint32Var;                   // Unsigned integer variable
+    UINT64          uint64Var;                   // Unsigned 64 bit integer variable
+} tSharedStruct;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+On 64 bit processor, a padding of 4 bytes will be included by the compiler in the
+structure `tSharedStruct` to align it on processor word boundary i.e. 8 bytes,
+increasing the size of the structure to 16 bytes.
+
+On 32 bit system, with a word alignment of 4 bytes, `tSharedStruct` will have a
+total size of 12 bytes.
+
+To make the size equal across the processors, a variable of 4 bytes should be included
+after the `uint32Var` variable to increase the size to 16 bytes on both processors.
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+typedef struct
+{
+    UINT32          uint32Var;                   // Unsigned integer variable
+    UINT32          padding1;                    // Padding variable 1
+    UINT64          uint64Var;                   // Unsigned 64 bit integer variable
+} tSharedStruct;
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # Comments {#sect_coding_comments}
 

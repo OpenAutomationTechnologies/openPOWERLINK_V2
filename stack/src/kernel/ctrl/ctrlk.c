@@ -52,8 +52,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/errhndk.h>
 #include <kernel/nmtk.h>
 #include <kernel/pdok.h>
+#include <kernel/timesynck.h>
 
 #include "../dll/dllkframe.h"
+
+#if defined(CONFIG_INCLUDE_LEDK)
+#include <kernel/ledk.h>
+#endif
 
 #if CONFIG_TIMER_USE_HIGHRES != FALSE
 #include <kernel/hrestimer.h>
@@ -108,6 +113,7 @@ typedef struct
     tCtrlInitParam      initParam;          ///< Initialization parameters
     UINT16              heartbeat;          ///< Heartbeat counter
     UINT32              features;           ///< Features provided by the kernel stack
+    tCtrlkExecuteCmdCb  pfnExecuteCmdCb;    ///< Command execution callback
 } tCtrlkInstance;
 
 //------------------------------------------------------------------------------
@@ -132,12 +138,14 @@ static void setupKernelFeatures(void);
 
 The function initializes the kernel control module.
 
+\param  pfnExecuteCmdCb_p   Command execution callback
+
 \return The function returns a tOplkError error code.
 
 \ingroup module_ctrlk
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlk_init(void)
+tOplkError ctrlk_init(tCtrlkExecuteCmdCb pfnExecuteCmdCb_p)
 {
     tOplkError      ret = kErrorOk;
     if ((ret = ctrlkcal_init()) != kErrorOk)
@@ -150,6 +158,8 @@ tOplkError ctrlk_init(void)
     instance_l.heartbeat = 1;
 
     setupKernelFeatures();
+
+    instance_l.pfnExecuteCmdCb = pfnExecuteCmdCb_p;
 
     return kErrorOk;
 
@@ -169,6 +179,8 @@ The function cleans up the kernel control module.
 //------------------------------------------------------------------------------
 void ctrlk_exit(void)
 {
+    instance_l.pfnExecuteCmdCb = NULL;
+
     ctrlkcal_exit();
 }
 
@@ -213,6 +225,10 @@ BOOL ctrlk_process(void)
 
     eventkcal_process();
 
+#if defined(CONFIG_INCLUDE_LEDK)
+    ledk_process();
+#endif
+
     ret = ctrlkcal_process();
     if (ret != kErrorOk)
     {
@@ -248,6 +264,12 @@ tOplkError ctrlk_executeCmd(tCtrlCmdType cmd_p, UINT16* pRet_p,
     tCtrlKernelStatus   status;
     BOOL                fExit;
     tOplkError          retVal;
+
+    if (instance_l.pfnExecuteCmdCb != NULL)
+    {
+        if (instance_l.pfnExecuteCmdCb(cmd_p, pRet_p, pStatus_p, pfExit_p))
+            return kErrorOk;
+    }
 
     switch (cmd_p)
     {
@@ -355,6 +377,49 @@ UINT16 ctrlk_getHeartbeat(void)
     return instance_l.heartbeat;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Read file chunk
+
+The function reads the file chunk descriptor and data from the file transfer
+buffer. The caller must provide a sufficiently large buffer to store a data
+chunk. The maximum chunk size can be obtained by calling
+\ref ctrlk_getMaxFileChunkSize.
+
+\param  pDesc_p         Pointer to buffer for storing the chunk descriptor
+\param  bufferSize_p    Size of buffer for storing the chunk data
+\param  pBuffer_p       Pointer to buffer for storing the chunk data
+
+\return The function returns a tOplkError code.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                               size_t bufferSize_p, UINT8* pBuffer_p)
+{
+    if (pDesc_p == NULL || bufferSize_p == 0 || pBuffer_p == NULL)
+        return kErrorInvalidInstanceParam;
+
+    return ctrlkcal_readFileChunk(pDesc_p, bufferSize_p, pBuffer_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get maximum file chunk size
+
+The function returns the maximum file chunk size supported by the kernel stack.
+
+\return The function returns the maximum file chunk size.
+
+\ingroup module_ctrlk
+*/
+//------------------------------------------------------------------------------
+size_t ctrlk_getMaxFileChunkSize(void)
+{
+    return ctrlkcal_getMaxFileChunkSize();
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
@@ -420,7 +485,10 @@ static tOplkError initStack(void)
         return ret;
 #endif
 
-    dllk_regSyncHandler(pdok_sendSyncEvent);
+    if ((ret = timesynck_init()) != kErrorOk)
+        return ret;
+
+    dllk_regSyncHandler(timesynck_sendSyncEvent);
 
     // initialize dllkcal module
     if ((ret = dllkcal_init()) != kErrorOk)
@@ -429,6 +497,10 @@ static tOplkError initStack(void)
 #if defined(CONFIG_INCLUDE_PDO)
     if ((ret = pdok_init()) != kErrorOk)
         return ret;
+#endif
+
+#if defined(CONFIG_INCLUDE_LEDK)
+    ret = ledk_init();
 #endif
 
     // initialize Virtual Ethernet Driver
@@ -478,9 +550,15 @@ static tOplkError shutdownStack(void)
 
     eventk_exit();
 
+    timesynck_exit();
+
 #if defined (CONFIG_INCLUDE_NMT_MN)
     // DLL and events are shutdown, now it's save to shutdown edrvcyclic
     edrvcyclic_exit();
+#endif
+
+#if defined(CONFIG_INCLUDE_LEDK)
+    ledk_exit();
 #endif
 
     edrv_exit();
@@ -532,6 +610,10 @@ void setupKernelFeatures(void)
 
 #if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
     instance_l.features |= OPLK_KERNEL_PRES_CHAINING_CN;
+#endif
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.features |= OPLK_KERNEL_SOC_TIME_FORWARD;
 #endif
 }
 

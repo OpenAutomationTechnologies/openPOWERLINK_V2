@@ -58,14 +58,17 @@ The following enumeration lists all valid ctrl commands.
 */
 typedef enum
 {
-    kCtrlNone = 0,                      ///< No command
-    kCtrlInitStack,                     ///< Initialize kernel modules
-    kCtrlCleanupStack,                  ///< Cleanup kernel modules
-    kCtrlShutdown,                      ///< Shutdown stack
-    kCtrlGetVersionHigh,                ///< Get higher part of kernel stack version
-    kCtrlGetVersionLow,                 ///< Get lower part of kernel stack version
-    kCtrlGetFeaturesHigh,               ///< Get higher part of features of kernel stack
-    kCtrlGetFeaturesLow,                ///< Get lower part of features of kernel stack
+    kCtrlNone                   = 0x0000,   ///< No command
+    kCtrlInitStack              = 0x0001,   ///< Initialize kernel modules
+    kCtrlCleanupStack           = 0x0002,   ///< Cleanup kernel modules
+    kCtrlShutdown               = 0x0003,   ///< Shutdown stack
+    kCtrlGetVersionHigh         = 0x0004,   ///< Get higher part of kernel stack version
+    kCtrlGetVersionLow          = 0x0005,   ///< Get lower part of kernel stack version
+    kCtrlGetFeaturesHigh        = 0x0006,   ///< Get higher part of features of kernel stack
+    kCtrlGetFeaturesLow         = 0x0007,   ///< Get lower part of features of kernel stack
+    kCtrlWriteFileChunk         = 0x0008,   ///< Write file chunk to kernel stack
+    kCtrlReconfigFactoryImage   = 0x0009,   ///< Reconfigure kernel stack with factory image
+    kCtrlReconfigUpdateImage    = 0x000A,   ///< Reconfigure kernel stack with update image
 } eCtrlCmdType;
 
 /**
@@ -82,10 +85,10 @@ The following enumeration defines valid states of the kernel stack.
 */
 typedef enum
 {
-    kCtrlStatusUnavailable = 0,         ///< Kernel stack is unavailable
-    kCtrlStatusReady,                   ///< Kernel stack is ready
-    kCtrlStatusRunning,                 ///< Kernel stack is running
-    kCtrlStatusUnchanged,               ///< State has not changed
+    kCtrlStatusUnavailable      = 0x0000,   ///< Kernel stack is unavailable
+    kCtrlStatusReady            = 0x0001,   ///< Kernel stack is ready
+    kCtrlStatusRunning          = 0x0002,   ///< Kernel stack is running
+    kCtrlStatusUnchanged        = 0x0003,   ///< State has not changed
 } eCtrlKernelStatus;
 
 /**

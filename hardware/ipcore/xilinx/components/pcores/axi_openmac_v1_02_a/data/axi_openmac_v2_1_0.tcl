@@ -110,15 +110,15 @@ proc generate {drv_handle} {
     set phyCount    [xget_param_value $periph gPhyPortCount]
     set txBufLoc    [xget_param_value $periph gPacketBufferLocTx]
     set rxBufLoc    [xget_param_value $periph gPacketBufferLocRx]
-    set tmrCount    [xget_param_value $periph gTimerCount]
+    set tmrPulse    [xget_param_value $periph gui_tmrPulse]
     set tmrPulsEn   [xget_param_value $periph gTimerEnablePulseWidth]
     set tmrPulseWdt [xget_param_value $periph gTimerPulseRegWidth]
     set dmaObserv   [xget_param_value $periph gEnableDmaObserver]
     set pktBufSize  [expr int(pow(2, [xget_param_value $periph "gPacketBufferLog2Size"]))]
 
     # Construct CMACROs
-    set lst_name    [list REG_BASE REG_SPAN TIMER_BASE TIMER_SPAN PKT_BASE PKT_SPAN PHYCNT DMAOBSERV PKTLOCTX PKTLOCRX PKTBUFSIZE TIMERCNT TIMERPULSE TIMERPULSEREGWIDTH]
-    set lst_val     [list ${regBase} ${regSpan} ${timerBase} ${timerSpan} ${pktBase} ${pktSpan} ${phyCount} ${dmaObserv} ${txBufLoc} ${rxBufLoc} ${pktBufSize} ${tmrCount} ${tmrPulsEn} ${tmrPulseWdt}]
+    set lst_name    [list REG_BASE REG_SPAN TIMER_BASE TIMER_SPAN PKT_BASE PKT_SPAN PHYCNT DMAOBSERV PKTLOCTX PKTLOCRX PKTBUFSIZE TIMERPULSE TIMERPULSECONTROL TIMERPULSEREGWIDTH]
+    set lst_val     [list ${regBase} ${regSpan} ${timerBase} ${timerSpan} ${pktBase} ${pktSpan} ${phyCount} ${dmaObserv} ${txBufLoc} ${rxBufLoc} ${pktBufSize} ${tmrPulse} ${tmrPulsEn} ${tmrPulseWdt}]
 
     # Generate header file
     set filePath "../../include"
@@ -355,8 +355,8 @@ proc get_gPacketBufferLog2Size { param_handle } {
 }
 
 # This function returns the gui parameter directly.
-proc get_gTimerCount { param_handle } {
-    return [getParentHwParam $param_handle "gui_tmrCount"]
+proc get_gTimerEnablePulse { param_handle } {
+    return [getParentHwParam $param_handle "gui_tmrPulse"]
 }
 
 # This function returns the gui parameter directly.

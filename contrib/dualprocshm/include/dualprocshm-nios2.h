@@ -41,8 +41,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdint.h>
+#include <stdint.h> // For uint*_t
+#include <stdlib.h> // For malloc/free
+#include <string.h> // For memset/memcpy
 #include <stddef.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <alt_types.h>
 #include <sys/alt_cache.h>
@@ -62,8 +65,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_MAKE_NONCACHEABLE(ptr) \
     (void*)(((unsigned long)ptr) | NIOS2_BYPASS_DCACHE_MASK)
 
-#define DUALPROCSHM_MALLOC(size)        alt_uncached_malloc(size)
-#define DUALPROCSHM_FREE(ptr)           alt_uncached_free(ptr)
+#define DUALPROCSHM_MALLOC(size)              alt_uncached_malloc(size)
+#define DUALPROCSHM_FREE(ptr)                 alt_uncached_free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
 #define DPSHM_UNREG_SYNC_INTR(callback, arg)
 #define DPSHM_CLEAR_SYNC_IRQ()
 
@@ -89,10 +93,19 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_WRITE16(base, val)        IOWR_16DIRECT((UINT32)base, 0, val)
 #define DPSHM_READ32(base)              IORD_32DIRECT((UINT32)base, 0)
 #define DPSHM_WRITE32(base, val)        IOWR_32DIRECT((UINT32)base, 0, val)
-#define DPSHM_ENABLE_INTR(fEnable)      target_enableGlobalInterrupt(fEnable)
 
 #ifdef __INT_BUS__
-#define DPSHM_ENABLE_HOST_SYNC_IRQ()
+
+#define DPSHM_CONNECT_SYNC_IRQ()
+#define DPSHM_DISCONNECT_SYNC_IRQ()
+
+#elif defined(__PCIE__)
+
+#define DPSHM_CONNECT_SYNC_IRQ()    \
+                    DPSHM_WRITE8(TARGET_SYNC_INT_BASE, 0x1)
+#define DPSHM_DISCONNECT_SYNC_IRQ()   \
+                    DPSHM_WRITE8(TARGET_SYNC_INT_BASE, 0x0)
+
 #else
 #error "Currently only Internal Bus between shared memory and driver is supported!!"
 #endif
@@ -100,39 +113,29 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Memory barrier
 #define DPSHM_DMB()                     __asm("sync")
 
-// Cache hadling. NIOS2 supports only uncached memory regions.
+// Cache handling. NIOS2 supports only uncached memory regions.
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    ((void)0);
+    ((void)0)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    ((void)0);
+    ((void)0)
 
-#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p)                         \
-    ({                                                                  \
-         INT ret;                                                       \
-                                                                        \
-         ret = alt_ic_isr_register(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ, \
-                                   pfnIrqCb_p, pArg_p, NULL);           \
-         ret;                                                           \
-     })
+#define DPSHM_REG_SYNC_INTR(pfnIrqCb_p, pArg_p) \
+    UNUSED_PARAMETER(pfnIrqCb_p);               \
+    UNUSED_PARAMETER(pArg_p)
 
-#define DPSHM_ENABLE_SYNC_INTR()                                        \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ);  \
-         ret;                                                           \
-     })
-#define DPSHM_DISABLE_SYNC_INTR()                                       \
-    ({                                                                  \
-         INT ret;                                                       \
-         ret = alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ); \
-         ret;                                                           \
-     })
+#define DPSHM_ENABLE_SYNC_INTR() \
+        alt_ic_irq_enable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
 
+#define DPSHM_DISABLE_SYNC_INTR() \
+        alt_ic_irq_disable(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ)
+
+#ifndef TRACE
 #ifndef NDEBUG
-#define TRACE(...)                      trace(__VA_ARGS__)
+#define TRACE(...)                      printf(__VA_ARGS__)
 #else
 #define TRACE(...)
+#endif
 #endif
 
 #endif /* _INC_dualprocshm_nios2_H_ */

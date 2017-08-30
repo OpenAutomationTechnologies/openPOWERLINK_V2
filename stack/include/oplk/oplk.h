@@ -46,7 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/frame.h>
 #include <oplk/sdo.h>
 #include <oplk/obd.h>
-#include <oplk/led.h>
+#include <oplk/obdal.h>
 #include <oplk/cfm.h>
 #include <oplk/event.h>
 
@@ -115,20 +115,6 @@ typedef struct
     tNmtBootEvent               bootEvent;      ///< Boot event that occured
     UINT16                      errorCode;      ///< Contains an error code if bootEvent == \ref kNmtBootEventError
 } tOplkApiEventBoot;
-
-
-/**
-\brief LED event
-
-This structure specifies a LED event. It contains change events for the POWERLINK
-status and error LEDs. It allows the application to change the status and error
-LEDs on the device according to the specification.
-*/
-typedef struct
-{
-    tLedType                    ledType;        ///< Determines the type of the LED
-    BOOL                        fOn;            ///< The state of the LED
-} tOplkApiEventLed;
 
 /**
 \brief CFM result event
@@ -232,6 +218,18 @@ typedef struct
 } tOplkApiEventReceivedSdoSeq;
 
 /**
+\brief User specific OD access event
+
+This structure specifies the event for a user specific object access.
+It is used to forward an access to an object which doesn't exist in the default
+object dictionary to the API.
+*/
+typedef struct
+{
+    tObdAlConHdl*               pUserObdAccHdl; ///< Pointer to handle for user specific OD access
+} tOplkApiEventUserObdAccess;
+
+/**
 \brief Application event types
 
 This enumeration specifies the valid application events which can be
@@ -282,14 +280,10 @@ typedef enum
     kOplkApiEventSdo                = 0x62,
 
     /** Object dictionary access. This event informs about an access of the
-    object dictionary. The event argument contains an OBD callback parameter
-    (\ref tObdCbParam). */
+    object dictionary. It happens only, if \ref oplk_cbGenericObdAccess is
+    assigned as function pointer to the concerning object in \ref objdict.h.
+    The event argument contains an OD callback parameter (\ref tObdCbParam). */
     kOplkApiEventObdAccess          = 0x69,
-
-    /** Status and error LED event. The event allows the application to perform
-    the signaling of the POWERLINK LEDs according to the specification. The event
-    argument contains a LED event (\ref kOplkApiEventLed). */
-    kOplkApiEventLed                = 0x70,
 
     /** CFM progress event. This event informs the application about the progress
     of the configuration of a specific CN. The event argument contains the CN
@@ -327,14 +321,23 @@ typedef enum
 
     /** Received SDO command layer. This event informs the application about
     a received SDO command layer. This event argument contains information on the
-    received SDO command layer. (\ref tOplkApiEventReceivedSdoCom). */
+    received SDO command layer (\ref tOplkApiEventReceivedSdoCom). */
     kOplkApiEventReceivedSdoCom     = 0x83,
 
     /** Received SDO sequence layer. This event informs the application about
     a received SDO sequence layer. This event argument contains information on the
-    received SDO sequence layer. (\ref tOplkApiEventReceivedSdoSeq). */
+    received SDO sequence layer (\ref tOplkApiEventReceivedSdoSeq). */
     kOplkApiEventReceivedSdoSeq     = 0x84,
 
+    /** User specific OD access. This event informs the application about
+    an object access to a non-existing object in the default OD. The event
+    argument contains information about the accessed object and used data
+    (\ref tOplkApiEventUserObdAccess).
+    Per default, this event is disabled. It can be enabled with
+    \ref oplk_enableUserObdAccess. Either, the processing finishes within the
+    event function call, or \ref kErrorReject has to be returned, whereas the
+    processing must finish with a call to \ref oplk_finishUserObdAccess. */
+    kOplkApiEventUserObdAccess       = 0x85,
 } eOplkApiEventType;
 
 /**
@@ -357,10 +360,9 @@ typedef union
     tEventNmtStateChange        nmtStateChange;     ///< NMT state change information (\ref kOplkApiEventNmtStateChange)
     tEventError                 internalError;      ///< Internal stack error (\ref kOplkApiEventCriticalError, \ref kOplkApiEventWarning)
     tSdoComFinished             sdoInfo;            ///< SDO information (\ref kOplkApiEventSdo)
-    tObdCbParam                 obdCbParam;         ///< OBD callback parameter (\ref kOplkApiEventObdAccess)
+    tObdCbParam                 obdCbParam;         ///< OD callback parameter (\ref kOplkApiEventObdAccess)
     tOplkApiEventNode           nodeEvent;          ///< Node event information (\ref kOplkApiEventNode)
     tOplkApiEventBoot           bootEvent;          ///< Boot event information (\ref kOplkApiEventBoot)
-    tOplkApiEventLed            ledEvent;           ///< LED event information (\ref kOplkApiEventLed)
     tCfmEventCnProgress         cfmProgress;        ///< CFM progress information (\ref kOplkApiEventCfmProgress)
     tOplkApiEventCfmResult      cfmResult;          ///< CFM result information (\ref kOplkApiEventCfmResult)
     tErrHistoryEntry            errorHistoryEntry;  ///< Error history entry (\ref kOplkApiEventHistoryEntry)
@@ -371,6 +373,7 @@ typedef union
     tOplkApiEventDefaultGwChange defaultGwChange;   ///< Default gateway change event (\ref kOplkApiEventDefaultGwChange)
     tOplkApiEventReceivedSdoCom receivedSdoCom;     ///< Received SDO command layer (\ref kOplkApiEventReceivedSdoCom)
     tOplkApiEventReceivedSdoSeq receivedSdoSeq;     ///< Received SDO sequence layer (\ref kOplkApiEventReceivedSdoSeq)
+    tOplkApiEventUserObdAccess  userObdAccess;      ///< Access to user specific object (\ref kOplkApiEventUserObdAccess)
 } tOplkApiEventArg;
 
 /**
@@ -390,10 +393,10 @@ typedef tOplkError (*tOplkApiCbEvent)(tOplkApiEventType eventType_p, tOplkApiEve
 \brief openPOWERLINK initialization parameters
 
 The structure defines the openPOWERLINK initialization parameters. The openPOWERLINK
-stack will be initialized with these parameters when oplk_init() is called. Most
+stack will be initialized with these parameters when oplk_create() is called. Most
 of the parameters will be stored in the object dictionary. Some of these objects
 are constant (read-only) objects and the initialization parameters are the only way of
-setting their values. Writable objects could be overwritten later at the boot-up
+setting their values. Writeable objects could be overwritten later at the boot-up
 process. This could be done by reading a CDC file for an MN or by configuration
 of a CN from an MN via SDO transfers.
 
@@ -452,6 +455,11 @@ typedef struct
     tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
                                                     /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
+    UINT32              minSyncTime;                ///< Minimum synchronization period supported by the application [us]
+                                                    /**< This parameter configures the period of synchronization events triggered by the openPOWERLINK stack.
+                                                         Note that the resulting synchronization period can only be a multiple of the configured cycle lenght.
+                                                         If this value is set to 0, no minimum synchronization period is specified. */
+    tObdInitParam       obdInitParam;               ///< Initialization parameters for the object dictionary
 } tOplkApiInitParam;
 
 /**
@@ -465,6 +473,46 @@ typedef struct
     UINT           imageSize;                       ///< Size of the process image
 } tOplkApiProcessImage;
 
+/**
+\brief  File chunk descriptor
+
+This structure defines the file chunk descriptor used for transferring a file
+to the kernel stack.
+*/
+typedef struct
+{
+    UINT8           fFirst;     ///< Start flag to identify the first chunk of the file
+    UINT8           fLast;      ///< Last flag to identify the last chunk of the file
+    UINT16          reserved;
+    UINT32          length;     ///< Length of the chunk
+    UINT32          offset;     ///< Offset of the chunk in the file
+} tOplkApiFileChunkDesc;
+
+/**
+\brief  Stack information structure
+
+This structure provides information about the kernel and user stack.
+*/
+typedef struct
+{
+    UINT32          userVersion;                    ///< User stack version
+    UINT32          userFeature;                    ///< User stack feature bit mask
+    UINT32          kernelVersion;                  ///< Kernel stack version
+    UINT32          kernelFeature;                  ///< Kernel stack feature bit mask
+} tOplkApiStackInfo;
+
+/**
+\brief  SoC time information structure
+
+This structure provides the SoC time information to the API.
+*/
+typedef struct
+{
+    tNetTime        netTime;                        ///< Net time given in IEEE 1588 format
+    UINT64          relTime;                        ///< Relative time given in us
+    BOOL            fValidRelTime;                  ///< TRUE if relative time is validated
+} tOplkApiSocTimeInfo;
+
 //------------------------------------------------------------------------------
 // function prototypes
 //------------------------------------------------------------------------------
@@ -474,9 +522,14 @@ extern "C"
 #endif
 
 // Generic API functions
-OPLKDLLEXPORT tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
-OPLKDLLEXPORT tOplkError oplk_shutdown(void);
+OPLKDLLEXPORT tOplkError oplk_initialize(void);
+OPLKDLLEXPORT tOplkError oplk_create(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT tOplkError oplk_destroy(void);
+OPLKDLLEXPORT void       oplk_exit(void);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_init(tOplkApiInitParam* pInitParam_p);
+OPLKDLLEXPORT OPLK_DEPRECATED tOplkError oplk_shutdown(void);
 OPLKDLLEXPORT tOplkError oplk_execNmtCommand(tNmtEvent NmtEvent_p);
+OPLKDLLEXPORT tOplkError oplk_cbGenericObdAccess(tObdCbParam MEM* pParam_p);
 OPLKDLLEXPORT tOplkError oplk_linkObject(UINT objIndex_p, void* pVar_p, UINT* pVarEntries_p,
                                          tObdSize* pEntrySize_p, UINT firstSubindex_p);
 OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
@@ -485,6 +538,8 @@ OPLKDLLEXPORT tOplkError oplk_readObject(tSdoComConHdl* pSdoComConHdl_p, UINT no
 OPLKDLLEXPORT tOplkError oplk_writeObject(tSdoComConHdl* pSdoComConHdl_p, UINT nodeId_p, UINT index_p,
                                           UINT subindex_p, void* pSrcData_le_p, UINT size_p,
                                           tSdoType sdoType_p, void* pUserArg_p);
+OPLKDLLEXPORT tOplkError oplk_finishUserObdAccess(tObdAlConHdl* pUserObdConHdl_p);
+OPLKDLLEXPORT tOplkError oplk_enableUserObdAccess(BOOL fEnable_p);
 OPLKDLLEXPORT tOplkError oplk_freeSdoChannel(tSdoComConHdl sdoComConHdl_p);
 OPLKDLLEXPORT tOplkError oplk_abortSdo(tSdoComConHdl sdoComConHdl_p, UINT32 abortCode_p);
 OPLKDLLEXPORT tOplkError oplk_readLocalObject(UINT index_p, UINT subindex_p, void* pDstData_p, UINT* pSize_p);
@@ -497,13 +552,17 @@ OPLKDLLEXPORT tOplkError oplk_postUserEvent(void* pUserArg_p);
 OPLKDLLEXPORT tOplkError oplk_triggerMnStateChange(UINT nodeId_p, tNmtNodeCommand nodeCommand_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcBuffer(BYTE* pbCdc_p, UINT cdcSize_p);
 OPLKDLLEXPORT tOplkError oplk_setCdcFilename(char* pszCdcFilename_p);
+OPLKDLLEXPORT tOplkError oplk_setOdArchivePath(const char* pBackupPath_p);
 OPLKDLLEXPORT tOplkError oplk_process(void);
 OPLKDLLEXPORT tOplkError oplk_getIdentResponse(UINT nodeId_p, tIdentResponse** ppIdentResponse_p);
 OPLKDLLEXPORT tOplkError oplk_getEthMacAddr(UINT8* pMacAddr_p);
 OPLKDLLEXPORT BOOL       oplk_checkKernelStack(void);
 OPLKDLLEXPORT tOplkError oplk_waitSyncEvent(ULONG timeout_p);
 OPLKDLLEXPORT UINT32     oplk_getVersion(void);
+OPLKDLLEXPORT char*      oplk_getVersionString(void);
 OPLKDLLEXPORT UINT32     oplk_getStackConfiguration(void);
+OPLKDLLEXPORT tOplkError oplk_getStackInfo(tOplkApiStackInfo* pStackInfo_p);
+OPLKDLLEXPORT tOplkError oplk_getSocTime(tOplkApiSocTimeInfo* pTimeInfo_p);
 
 // Process image API functions
 OPLKDLLEXPORT tOplkError oplk_allocProcessImage(UINT sizeProcessImageIn_p, UINT sizeProcessImageOut_p);
@@ -533,6 +592,12 @@ OPLKDLLEXPORT tOplkError oplk_testSdoComDelCon(void);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqSend(UINT uiNodeId_p, tSdoType SdoType_p,
                                               tAsySdoSeq* pSdoCom_p, size_t SdoSize_p);
 OPLKDLLEXPORT tOplkError oplk_testSdoSeqDelCon(void);
+
+// Service API functions
+OPLKDLLEXPORT tOplkError oplk_serviceWriteFileChunk(tOplkApiFileChunkDesc* pDesc_p,
+                                                    UINT8* pChunkData_p);
+OPLKDLLEXPORT size_t     oplk_serviceGetFileChunkSize(void);
+OPLKDLLEXPORT tOplkError oplk_serviceExecFirmwareReconfig(BOOL fFactory_p);
 
 #ifdef __cplusplus
 }

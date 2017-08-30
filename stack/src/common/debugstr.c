@@ -104,6 +104,12 @@ typedef struct
     char*               sAbortCode;
 } tAbortCodeInfo;
 
+typedef struct
+{
+    tNmtNodeCommand     nodeCommand;
+    char*               sNodeCommand;
+} tNmtNodeCommandInfo;
+
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
@@ -199,7 +205,7 @@ static char* eventSourceStr_l[] =
     "EventSourceCfgMau",        // CfgMau module
     "EventSourceEventu",        // Eventu module
     "EventSourceOplkApi",       // Api module
-    "EventSourceLedu",          // Ledu module
+    "0x1d",                     // reserved
     "EventSourceGw309Ascii",    // GW309ASCII module
     "EventSourceErru"           // User error module
 };
@@ -218,7 +224,7 @@ static char* eventSinkStr_l[] =
     "EventSinkErru",
     "EventSinkSdoAsySeq",
     "EventSinkNmtMnu",
-    "EventSinkLedu",
+    "0x0b",                     // reserved
     "EventSinkPdokCal",
     "EventSinkGw309Ascii",
     "EventSinkApi"
@@ -307,7 +313,6 @@ static tApiEventInfo apiEventInfo_l[] =
     { kOplkApiEventBoot,             "Boot event"                        },
     { kOplkApiEventSdo,              "SDO event"                         },
     { kOplkApiEventObdAccess,        "OBD access"                        },
-    { kOplkApiEventLed,              "LED event"                         },
     { kOplkApiEventCfmProgress,      "CFM progress"                      },
     { kOplkApiEventCfmResult,        "CFM result"                        },
     { kOplkApiEventReceivedAsnd,     "Received ASnd"                     },
@@ -457,6 +462,12 @@ static tRetValInfo retValInfo_l[] =
     { kErrorCfmNoConfigData,          "No configuration data present"},
     { kErrorCfmUnsuppDatatypeDcf,     "Unsupported datatype found in DCF -> this entry was not configured"},
 
+    /* area for OD configuration store restore module 0x0D0 - 0x0DF */
+    { kErrorObdStoreHwError,           "HW error while accessing non-volatile memory"},
+    { kErrorObdStoreInvalidState,      "Non-volatile memory is in invalid state (nothing saved)"},
+    { kErrorObdStoreDataLimitExceeded, "Data count is less than the expected size"},
+    { kErrorObdStoreDataObsolete,      "Data stored in the archive is obsolete"},
+
     { kErrorApiTaskDeferred,          "openPOWERLINK performs a task in the background and informs the application (or vice-versa) when it is finished"},
     { kErrorApiInvalidParam,          "Invalid parameters were passed to a function (e.g. invalid node id)"},
     { kErrorApiNoObdInitRam,          "No function pointer for ObdInitRam supplied"},
@@ -604,6 +615,18 @@ static tAbortCodeInfo abortCodeInfo_g[] =
     { SDO_AC_OBJECT_DICTIONARY_NOT_EXIST,       "SDO_AC_OBJECT_DICTIONARY_NOT_EXIST" },
     { SDO_AC_CONFIG_DATA_EMPTY,                 "SDO_AC_CONFIG_DATA_EMPTY" },
     { 0,                                        "SDO_AC_OK" }
+};
+
+static tNmtNodeCommandInfo nmtNodeCommandInfo_l[] =
+{
+    { kNmtNodeCommandBoot,         "NmtNodeCommandBoot" },
+    { kNmtNodeCommandSwOk,         "NmtNodeCommandSwOk" },
+    { kNmtNodeCommandSwUpdated,    "NmtNodeCommandSwUpdated" },
+    { kNmtNodeCommandConfOk,       "NmtNodeCommandConfOk" },
+    { kNmtNodeCommandConfRestored, "NmtNodeCommandConfRestored" },
+    { kNmtNodeCommandConfReset,    "NmtNodeCommandConfReset" },
+    { kNmtNodeCommandConfErr,      "NmtNodeCommandConfErr" },
+    { kNmtNodeCommandStart,        "NmtNodeCommandStart" },
 };
 
 //============================================================================//
@@ -808,6 +831,31 @@ char* debugstr_getNmtBootEventTypeStr(tNmtBootEvent BootEventType_p)
     {
         return OplkNmtBootEvtTypeStr_g[BootEventType_p];
     }
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Return the string of the specified NMT node command
+
+The function returns the string describing the specified NMT node command.
+
+\param  nodeCommand_p         NMT node command to print
+
+\return The function returns a string describing the specified NMT node command.
+
+\ingroup module_debugstr
+*/
+//------------------------------------------------------------------------------
+char* debugstr_getNmtNodeCommandTypeStr(tNmtNodeCommand nodeCommand_p)
+{
+    UINT         i;
+
+    for (i = 0; i < tabentries(nmtNodeCommandInfo_l); i++)
+    {
+        if (nmtNodeCommandInfo_l[i].nodeCommand == nodeCommand_p)
+            return (nmtNodeCommandInfo_l[i].sNodeCommand);
+    }
+    return invalidStr_l;
 }
 
 //------------------------------------------------------------------------------

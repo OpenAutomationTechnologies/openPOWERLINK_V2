@@ -9,10 +9,12 @@ The openPOWERLINK stack itself is implemented via stack libraries. A stack
 library can either contain the whole stack (_complete library_), the user part
 (_application library_) or the kernel part (_driver library_).
 
-__NOTE:__ In order to be able to build an application, both, the Debug and the
-Release library versions must be available. If one of the libraries is missing
-you get an OPLKLIB-NOTFOUND or OPLKLIB_DEBUG-NOTFOUND error in the demos
-CMake configuration.
+__NOTE:__ In order to be able to build an application with Visual Studio,
+both, the Debug and the Release library versions must be available.
+If one of the libraries is missing you get an OPLKLIB-NOTFOUND or
+OPLKLIB_DEBUG-NOTFOUND error in the demos CMake configuration.
+Both libraries are required as you can switch between Debug
+and Release inside the Visual Studio solution.
 
 ## Linux {#sect_build_stack_build_linux}
 
@@ -252,6 +254,13 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   the network. It is used by the Linux user space daemon driver. It is configured
   to contain only CN functionality.
 
+- **CFG_COMPILE_LIB_MNAPP_PCIEINTF**
+
+  Compile openPOWERLINK MN application library which contains the interface to
+  a Linux kernel PCIe interface driver. It is used along with a Linux kernel
+  PCIe interface driver, for status/control and data exchange with the kernel
+  stack which runs on an external PCIe device.
+
 
 ## Windows Configuration Options
 
@@ -270,6 +279,24 @@ the configuration options on the command line (-DCFG_XXX=XXX) or
   Compile complete openPOWERLINK CN library. The library contains an Ethernet
   driver which is using the WinPCAP library for accessing the network. It is
   configured to contain only CN functionality.
+
+- **CFG_COMPILE_LIB_MNAPP_PCIEINTF**
+
+  Compile openPOWERLINK MN application library which contains the interface to
+  the openPOWERLINK driver running on an external PCIe device. It is used together
+  with an NDIS PCIe miniport driver in the Windows kernel space. The NDIS PCIe
+  miniport driver is used as the communication interface between the application
+  library and the PCIe device running the openPOWERLINK kernel layer. The NDIS
+  PCIe driver uses shared memory for status/control information and data
+  exchange between application library and the PCIe device.
+
+- **CFG_COMPILE_LIB_MNAPP_KERNELINTF**
+
+  Compile openPOWERLINK MN application library which contains interface to the
+  NDIS intermediate driver running in Windows kernel space. The kernel layer of
+  the stack is located in the NDIS intermediate driver. The NDIS driver
+  communicates with the native NIC miniport driver to access the network
+  interface.
 
 ## Options for embedded systems (No-OS) {#sect_build_stack_options_noos}
 

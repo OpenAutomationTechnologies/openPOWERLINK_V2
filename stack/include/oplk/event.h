@@ -96,7 +96,7 @@ typedef enum
     kEventTypeGw309AsciiReq         = 0x23,     ///< GW309ASCII request (arg is pointer to pointer of tGw309AsciiRequest)
     kEventTypeNmtMnuNodeAdded       = 0x24,     ///< node was added to isochronous phase by DLL (arg is pointer to unsigned int containing the node-ID)
     kEventTypePdokSetupPdoBuf       = 0x25,     ///< dealloc PDOs
-    kEventTypePdokControlSync       = 0x26,     ///< enable/disable the pdokcal sync trigger (arg is pointer to BOOL)
+    kEventTypeTimesynckControl      = 0x26,     ///< Enable/disable the timesync trigger (arg is pointer to BOOL)
     kEventTypeReleaseRxFrame        = 0x27,     ///< Free receive buffer (arg is pointer to the buffer to release)
     kEventTypeAsndNotRx             = 0x28,     ///< Didn't receive ASnd frame for DLL user module (arg is pointer to tDllAsndNotRx)
     kEventTypeAsndRxInfo            = 0x29,     ///< Received ASnd frame for DLL user module (arg is pointer to tFrameInfo)
@@ -131,11 +131,12 @@ typedef enum
     kEventSinkErru                  = 0x08,     ///< events for Error signaling module
     kEventSinkSdoAsySeq             = 0x09,     ///< events for asyncronous SDO Sequence Layer module
     kEventSinkNmtMnu                = 0x0A,     ///< events for NmtMnu module
-    kEventSinkLedu                  = 0x0B,     ///< events for Ledu module
+    // Reserved (0x0B)
     kEventSinkPdokCal               = 0x0C,     ///< events for PdokCal module
     kEventSinkGw309Ascii            = 0x0E,     ///< events for GW309ASCII module
     kEventSinkApi                   = 0x0F,     ///< events for API module
     kEventSinkSdoTest               = 0x10,     ///< events for SDO testing module
+    kEventSinkTimesynck             = 0x11,     ///< events for Timesynck module
 
     kEventSinkInvalid               = 0xFF      ///< Identifies an invalid sink
 } eEventSink;
@@ -177,10 +178,11 @@ typedef enum
     kEventSourceCfgMau              = 0x1A,     ///< Events from CfgMau module
     kEventSourceEventu              = 0x1B,     ///< Events from Eventu module
     kEventSourceOplkApi             = 0x1C,     ///< Events from Api module
-    kEventSourceLedu                = 0x1D,     ///< Events from Ledu module
+    // Reserved (0x1D)
     kEventSourceGw309Ascii          = 0x1E,     ///< Events from GW309ASCII module
     kEventSourceErru                = 0x1F,     ///< Events from User Error handler module
     kEventSourceSdoTest             = 0x20,     ///< Events from SDO testing module
+    kEventSourceTimesynck           = 0x21,     ///< events from Timesynck module
 
     kEventSourceInvalid             = 0xFF      ///< Identifies an invalid event source
 } eEventSource;
@@ -227,7 +229,15 @@ typedef struct
     tEventSink          eventSink;              ///< Sink of this event
     tNetTime            netTime;                ///< Timestamp of the event
     UINT                eventArgSize;           ///< Size of the event argument
-    void*               pEventArg;              ///< Pointer to event argument
+    // Replace the event argument pointer variable with
+    // union to maintain same size and alignment
+    // for the structure on different processor architectures
+    // like x86_64 (64 bit) and NIOS2 (32 bit).
+    union
+    {
+        void*           pEventArg;              ///< Pointer to event argument
+        UINT64          padding;                ///< 64 Bit placeholder
+    } eventArg;
 } tEvent;
 
 /**

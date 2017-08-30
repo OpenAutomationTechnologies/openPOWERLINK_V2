@@ -39,7 +39,6 @@ lib libcommon ../../../../../../common/lib/src/global vhdl
 lib libcommon ../../../../../../common/lib/src/addrDecodeRtl vhdl
 lib libcommon ../../../../../../common/lib/src/bcd2ledRtl vhdl
 lib libcommon ../../../../../../common/lib/src/binaryEncoderRtl vhdl
-lib libcommon ../../../../../../common/lib/src/clkXingRtl vhdl
 lib libcommon ../../../../../../common/lib/src/cntRtl vhdl
 lib libcommon ../../../../../../common/lib/src/edgedetectorRtl vhdl
 lib libcommon ../../../../../../common/lib/src/lutFileRtl vhdl
@@ -47,3 +46,4 @@ lib libcommon ../../../../../../common/lib/src/nShiftRegRtl vhdl
 lib libcommon ../../../../../../common/lib/src/registerFileRtl vhdl
 lib libcommon ../../../../../../common/lib/src/synchronizerRtl vhdl
 lib libcommon ../../../../../../common/lib/src/syncTog-rtl-ea vhdl
+lib libcommon ../../../../../../common/lib/src/clkXingRtl vhdl

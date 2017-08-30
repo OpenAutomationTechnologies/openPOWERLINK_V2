@@ -123,6 +123,8 @@ lock is freed.
 //------------------------------------------------------------------------------
 int target_lock(void)
 {
+    target_enableGlobalInterrupt(FALSE);
+
     return 0;
 }
 
@@ -139,6 +141,8 @@ This function frees the given lock.
 //------------------------------------------------------------------------------
 int target_unlock(void)
 {
+    target_enableGlobalInterrupt(TRUE);
+
     return 0;
 }
 

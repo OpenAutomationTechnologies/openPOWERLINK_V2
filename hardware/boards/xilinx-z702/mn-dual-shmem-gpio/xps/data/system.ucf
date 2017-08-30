@@ -60,6 +60,25 @@ NET axi_openmac_0_oSmi_clk_pin<1> LOC = "M21" |  IOSTANDARD = "LVCMOS25";
 NET axi_openmac_0_oSmi_nPhyRst_pin<1> LOC = "J18" | TIG |  IOSTANDARD = "LVCMOS25";
 #NET axi_powerlink_0_phy1_link_pin LOC = "G20" |  IOSTANDARD = "LVCMOS25";
 
+## FMC (2)
+### Connector (FMC-105-DEBUG J1)
+NET pcp_benchmark_pin<0> LOC = "V14" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA02_P
+NET pcp_benchmark_pin<1> LOC = "V15" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA02_N
+NET pcp_benchmark_pin<2> LOC = "AA16" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA03_P
+NET pcp_benchmark_pin<3> LOC = "AB16" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA03_N
+NET pcp_benchmark_pin<4> LOC = "V13" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA04_P
+NET pcp_benchmark_pin<5> LOC = "W13" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA04_N
+NET pcp_benchmark_pin<6> LOC = "AB19" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA05_P
+NET pcp_benchmark_pin<7> LOC = "AB20" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA05_N
+NET host_benchmark_pin<0> LOC = "U17" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA06_P
+NET host_benchmark_pin<1> LOC = "V17" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA06_N
+NET host_benchmark_pin<2> LOC = "T21" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA07_P
+NET host_benchmark_pin<3> LOC = "U21" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA07_N
+NET host_benchmark_pin<4> LOC = "AA17" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA08_P
+NET host_benchmark_pin<5> LOC = "AB17" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA08_N
+NET host_benchmark_pin<6> LOC = "U15" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA09_P
+NET host_benchmark_pin<7> LOC = "U16" | TIG | IOSTANDARD=LVCMOS25; # FMC_LA09_N
+
 ################################################################################
 # TIMING CONSTRAINTS
 ## Clock groups
@@ -126,8 +145,8 @@ NET PW_LEDS_6BIT_TRI_IO[4] LOC = "W5"  |  IOSTANDARD = "LVCMOS25";
 NET PW_LEDS_6BIT_TRI_IO[5] LOC = "W17"  |  IOSTANDARD = "LVCMOS25";
 
 #POWERLINK STATUS
-NET POWERLINK_LED_TRI_IO[0] LOC = "D15"  |  IOSTANDARD = "LVCMOS25";
-NET POWERLINK_LED_TRI_IO[1] LOC = "E15"  |  IOSTANDARD = "LVCMOS25";
+Net POWERLINK_LED_GPIO_IO_O_pin[0] LOC = "D15" | IOSTANDARD = "LVCMOS25"; # PL STATUS LED
+Net POWERLINK_LED_GPIO_IO_O_pin[1] LOC = "E15" | IOSTANDARD = "LVCMOS25"; # PL ERROR LED
 
 #POWERLINK NODESWITH -MODEL
 NET Node_Switches_I_pin[0] LOC = "W7"  |  IOSTANDARD = "LVCMOS25";

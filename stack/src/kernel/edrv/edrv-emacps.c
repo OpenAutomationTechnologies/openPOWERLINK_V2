@@ -852,13 +852,10 @@ static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p)
                                  pTxBuffer->txFrameSize,
                                  DMA_TO_DEVICE);
 
-                if (pTxBuffer != NULL)
+                // Call Tx handler of Data link layer
+                if (pTxBuffer->pfnTxHandler != NULL)
                 {
-                    // Call Tx handler of Data link layer
-                    if (pTxBuffer->pfnTxHandler != NULL)
-                    {
-                        pTxBuffer->pfnTxHandler(pTxBuffer);
-                    }
+                    pTxBuffer->pfnTxHandler(pTxBuffer);
                 }
             }
         } while (edrvInstance_l.txDescHead != edrvInstance_l.txDescTail);

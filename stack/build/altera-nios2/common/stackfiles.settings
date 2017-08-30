@@ -63,9 +63,11 @@ ${USER_SOURCE_DIR}/cfmu.c \
 USER_SOURCES="\
 ${USER_SOURCE_DIR}/api/generic.c \
 ${USER_SOURCE_DIR}/api/sdotest.c \
+${USER_SOURCE_DIR}/api/service.c \
 ${USER_SOURCE_DIR}/api/processimage.c \
-${USER_SOURCE_DIR}/obd/obd.c \
+${USER_SOURCE_DIR}/obd/obdu.c \
 ${USER_SOURCE_DIR}/obd/obdcreate.c \
+${USER_SOURCE_DIR}/obd/obdal.c \
 ${USER_SOURCE_DIR}/dll/dllucal.c \
 ${USER_SOURCE_DIR}/event/eventu.c \
 ${USER_SOURCE_DIR}/nmt/nmtu.c \
@@ -85,9 +87,16 @@ ${USER_SOURCE_DIR}/sdo/sdocom-dummy.c \
 ${USER_SOURCE_DIR}/sdo/sdotest-com.c \
 ${USER_SOURCE_DIR}/sdo/sdotest-seq.c \
 ${USER_SOURCE_DIR}/sdo/sdocom.c \
+${USER_SOURCE_DIR}/timesync/timesyncu.c \
 ${USER_SOURCE_DIR}/errhnd/errhndu.c \
 ${USER_SOURCE_DIR}/ctrl/ctrlu.c \
-${USER_SOURCE_DIR}/ledu.c \
+"
+
+################################################################################
+# SDO Stack Target specific sources
+
+SDO_SOCKETWRAPPER_SOURCES="\
+${USER_SOURCE_DIR}/sdo/sdoudp-socketwrapper.c \
 "
 
 ################################################################################
@@ -150,17 +159,17 @@ ${USER_SOURCE_DIR}/event/eventucalintf-circbuf.c \
 
 PDO_UCAL_LOCAL_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-local.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-null.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-local.c \
 "
 
 PDO_UCAL_HOSTIF_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-hostif.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-hostif.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-hostif.c \
 "
 
 PDO_UCAL_DUALPROCSHM_SOURCES="\
 ${USER_SOURCE_DIR}/pdo/pdoucalmem-noosdual.c \
-${USER_SOURCE_DIR}/pdo/pdoucalsync-noosdual.c \
+${USER_SOURCE_DIR}/timesync/timesyncucal-noosdual.c \
 "
 
 ################################################################################
@@ -184,8 +193,11 @@ ${KERNEL_SOURCE_DIR}/pdo/pdok.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdoklut.c \
 ${KERNEL_SOURCE_DIR}/pdo/pdokcal-triplebufshm.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynck.c \
 ${KERNEL_SOURCE_DIR}/errhnd/errhndk.c \
 ${KERNEL_SOURCE_DIR}/ctrl/ctrlk.c \
+${KERNEL_SOURCE_DIR}/led/ledk.c \
+${KERNEL_SOURCE_DIR}/led/ledktimer.c \
 "
 
 ################################################################################
@@ -248,17 +260,17 @@ ${KERNEL_SOURCE_DIR}/event/eventkcal-noosdual.c \
 
 PDO_KCAL_LOCAL_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-local.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-null.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-local.c \
 "
 
 PDO_KCAL_HOSTIF_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-hostif.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-hostif.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-hostif.c \
 "
 
 PDO_KCAL_DUALPROCSHM_SOURCES="\
 ${KERNEL_SOURCE_DIR}/pdo/pdokcalmem-noosdual.c \
-${KERNEL_SOURCE_DIR}/pdo/pdokcalsync-noosdual.c \
+${KERNEL_SOURCE_DIR}/timesync/timesynckcal-noosdual.c \
 "
 
 ################################################################################
@@ -351,25 +363,29 @@ ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-noos.c \
 DUALPROCSHM_DRIVER_SOURCES="\
 ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-c5soc.c \
 "
+
+DUALPROCSHM_PCIE_SOURCES="\
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-pcp.c \
+"
 ################################################################################
 # Target system specific sources
 ################################################################################
 
 TARGET_NIOS2_SOURCES="\
-${ARCH_SOURCE_DIR}/altera_nios2/target-nios2.c \
-${ARCH_SOURCE_DIR}/altera_nios2/target-mutex.c \
+${ARCH_SOURCE_DIR}/altera-nios2/target-nios2.c \
+${ARCH_SOURCE_DIR}/altera-nios2/target-mutex.c \
 "
 
 TARGET_NIOS2_LOCAL_SOURCES="\
-${ARCH_SOURCE_DIR}/altera_nios2/lock-localnoos.c \
+${ARCH_SOURCE_DIR}/altera-nios2/lock-localnoos.c \
 "
 
 TARGET_NIOS2_DUAL_SOURCES="\
-${ARCH_SOURCE_DIR}/altera_nios2/lock-dualprocnoos.c \
+${ARCH_SOURCE_DIR}/altera-nios2/lock-dualprocnoos.c \
 "
 
 TARGET_NIOS2_OPENMAC_SOURCES="\
-${ARCH_SOURCE_DIR}/altera_nios2/openmac-nios2.c \
+${ARCH_SOURCE_DIR}/altera-nios2/openmac-nios2.c \
 "
 
 ################################################################################

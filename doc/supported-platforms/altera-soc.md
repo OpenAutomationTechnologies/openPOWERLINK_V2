@@ -140,3 +140,19 @@ Requirement: Steps in the section *How to build the binary* are completed.
 5. Browse to `<openPOWERLINK_directory>` (via the button *Browse...*)
 6. Select the `demo_mn_embedded` project.
 7. Press the button *Finish*.
+
+# Troubleshooting {#sect_altera-soc_trouble}
+
+- Frame CRC error for the transmitted frames from PHY
+
+  The PHYs of Altera Cyclone V SoC revision D development board are configured to
+  operate in synchronous mode, by boot strapping resistors. For POWERLINK operation,
+  the PHYs need to be configured in asynchronous mode.
+
+  To enable asynchronous operation the boot strapping resistor `R522` needs to be removed.
+  For more information refer to [Rocket boards website](http://rocketboards.org/foswiki/view/Documentation/CVSoCDevelopmentBoardRevisionInfo)
+
+  In order to avoid the modifications on the development board, the hardware design
+  is updated to choose PHY transmission modes based on the revision of the development board.
+  The board revision can be specified using the __gBoardRev__ parameter in the toplevel.vhd file.
+  By default the revision is set to __"D"__ and is tested on the same.

@@ -51,12 +51,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 /// \name Version macros
 /// \{
 #define PLK_SPEC_VERSION                                0x20                                                    ///< Ethernet POWERLINK V 2.0
-#define PLK_STACK_VERSION(ver, rev, rel)                (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | (((UINT32)(rel)) & 0xFFFF))      ///< Version in UINT32 format
-#define PLK_OBJ1018_VERSION(ver, rev, rel)              ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))    ///< Version in UINT32 format for Object 0x1018 which contains general information about a device.
-#define PLK_STRING_VERSION(ver, rev, rel)               "V" #ver "." #rev "." #rel                              ///< Version in string format
+#define PLK_STACK_VERSION(ver, rev, rel, rc)            (((((UINT32)(ver)) & 0xFF) << 24) | ((((UINT32)(rev)) & 0xFF) << 16) | ((((UINT32)(rel)) & 0xFF) << 8) | ((((UINT32)(rc)) & 0xFF) << 0))      ///< Version in UINT32 format
+#define PLK_OBJ1018_VERSION(ver, rev, rel, rc)          ((((UINT32)(ver))<<16) | (((UINT32)(rev)) & 0xFFFF))    ///< Version in UINT32 format for Object 0x1018 which contains general information about a device.
+#define PLK_STRING_VERSION(ver, rev, rel, rc)           "V" #ver "." #rev "." #rel                              ///< Version in string format
+#define PLK_STRING_VERSION_RC(ver, rev, rel, rc)        "V" #ver "." #rev "." #rel "-rc" #rc                    ///< Release candidate version in string format
 #define PLK_STACK_VER(ver)                              ((UINT32)ver & 0xFF000000) >> 24                        ///< Parses the 32 bit version number and returns the major number.
 #define PLK_STACK_REF(ver)                              ((UINT32)ver & 0x00FF0000) >> 16                        ///< Parses the 32 bit version number and returns the minor number.
-#define PLK_STACK_REL(ver)                              ((UINT32)ver & 0x0000FFFF)                              ///< Parses the 32 bit version number and returns the build number.
+#define PLK_STACK_REL(ver)                              ((UINT32)ver & 0x0000FF00) >> 8                         ///< Parses the 32 bit version number and returns the build number.
+#define PLK_STACK_RC(ver)                               ((UINT32)ver & 0x000000FF) >> 0                         ///< Parses the 32 bit version number and returns the rc number.
 /// \}
 
 //------------------------------------------------------------------------------
@@ -71,6 +73,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_KERNEL_VETH                                0x00000008      ///< Virtual ethernet module
 #define OPLK_KERNEL_PRES_FORWARD                        0x00000010      ///< PRES forwarding module (used for diagnosis)
 #define OPLK_KERNEL_RMN                                 0x00000020      ///< Redundancy MN (RMN)
+#define OPLK_KERNEL_SOC_TIME_FORWARD                    0x00000040      ///< SoC time forwarding capability
 
 /// \}
 
@@ -87,10 +90,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define C_DLL_ASND_PRIO_NMTRQST                         7                   ///< Increased ASnd request priority to be used by NMT Requests
 #define C_DLL_ASND_PRIO_STD                             0                   ///< Standard ASnd request priority
 #define C_DLL_ETHERTYPE_EPL                             0x88AB              ///< POWERLINK ethertype
-#define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data, requires C_IP_MAX_MTU
+#define C_DLL_ISOCHR_MAX_PAYL                           1490                ///< Maximum size of PReq and PRes payload data
 #define C_DLL_MAX_ASYNC_MTU                             1500                ///< Maximum asynchronous payload in bytes
 #define C_DLL_MAX_ETH_FRAME                             1514                ///< Maximum Ethernet frame in bytes without checksum
-#define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload, requires C_IP_MAX_MTU
+#define C_DLL_MIN_ETH_FRAME                             60                  ///< Minimum Ethernet frame in bytes without checksum
+#define C_DLL_MAX_PAYL_OFFSET                           1499                ///< Maximum offset of Ethernet frame payload
 #define C_DLL_MAX_RS                                    7                   ///< Maximum number of pending requests
 #define C_DLL_MIN_ASYNC_MTU                             300                 ///< Minimum asynchronous payload in bytes.
 #define C_DLL_MIN_PAYL_OFFSET                           45                  ///< Minimum offset of Ethernet frame payload
@@ -111,8 +115,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define C_IP_ADR_INVALID                                0x00000000L         ///< Invalid IP address (0.0.0.0) used to indicate no change
 #define C_IP_INVALID_MTU                                0                   ///< Invalid MTU size used to indicate no change [Byte]
-#define C_IP_MAX_MTU                                    1518                ///< Maximum size in bytes of the IP stack which must be processed [Byte]
-#define C_IP_MIN_MTU                                    300                 ///< Minimum size in bytes of the IP stack which must be processed [Byte]
 
 #define C_NMT_STATE_TOLERANCE                           5                   ///< Maximum reaction time to NMT state commands [cycles]
 #define C_NMT_STATREQ_CYCLE                             5                   ///< StatusRequest cycle time to be applied to AsyncOnly CNs [sec]

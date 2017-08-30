@@ -42,9 +42,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <dualprocshm.h>
 
-#include <stdlib.h>
-#include <string.h>
-
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -68,11 +65,11 @@ typedef struct sDualProcShmIntrReg
     UINT16    irqEnable;                                        ///< Enable IRQs
     union
     {
-        volatile UINT16     irqSet;                             ///< Set IRQ (Pcp)
-        volatile UINT16     irqAck;                             ///< Acknowledge IRQ (Host)
-        volatile UINT16     irqPending;                         ///< Pending IRQ
+        volatile UINT16    irqSet;                              ///< Set IRQ (Pcp)
+        volatile UINT16    irqAck;                              ///< Acknowledge IRQ (Host)
+        volatile UINT16    irqPending;                          ///< Pending IRQ
     } irq;
-}tDualProcShmIntrReg;
+} tDualProcShmIntrReg;
 
 /**
 \brief Interrupt instance
@@ -82,9 +79,9 @@ for the local instance.
 */
 typedef struct
 {
-    tTargetIrqCb            apfnIrqCb[TARGET_MAX_INTERRUPTS];   ///< User applications interrupt callbacks
-    tDualProcShmIntrReg*    intrReg;                            ///< Pointer to interrupt register
-}tDualProcShmIntrInst;
+    tTargetIrqCb           apfnIrqCb[TARGET_MAX_INTERRUPTS];    ///< User applications interrupt callbacks
+    tDualProcShmIntrReg*   pIntrReg;                            ///< Pointer to interrupt register
+} tDualProcShmIntrInst;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -101,7 +98,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tDualProcShmIntrInst intrInst_l;
+static tDualProcShmIntrInst    intrInst_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -124,21 +121,21 @@ interrupts.
 //------------------------------------------------------------------------------
 tDualprocReturn dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p)
 {
-    tDualProcDrv*   pDrvInst = (tDualProcDrv*) pInstance_p;
+    tDualProcDrv*   pDrvInst = (tDualProcDrv*)pInstance_p;
 
-    if (pInstance_p == NULL )
+    if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    intrInst_l.intrReg = (tDualProcShmIntrReg*)dualprocshm_getIntrMemAddr();
+    intrInst_l.pIntrReg = (tDualProcShmIntrReg*)dualprocshm_getIntrMemAddr();
 
-    if (intrInst_l.intrReg == NULL)
+    if (intrInst_l.pIntrReg == NULL)
     {
         TRACE("Error Initializing interrupt routine\n");
         return kDualprocNoResource;
     }
 
     if (pDrvInst->config.procInstance == kDualProcFirst)
-        DUALPROCSHM_MEMSET(intrInst_l.intrReg, 0, sizeof(tDualProcShmIntrReg));
+        DUALPROCSHM_MEMSET(intrInst_l.pIntrReg, 0, sizeof(tDualProcShmIntrReg));
 
     dualprocshm_regSyncIrqHdl(targetInterruptHandler, (void*)pInstance_p);
 
@@ -168,7 +165,7 @@ tDualprocReturn dualprocshm_freeInterrupts(tDualprocDrvInstance pInstance_p)
     dualprocshm_enableSyncIrq(FALSE);
     dualprocshm_regSyncIrqHdl(NULL, NULL);
 
-    intrInst_l.intrReg = NULL;
+    intrInst_l.pIntrReg = NULL;
 
     return kDualprocSuccessful;
 }
@@ -196,12 +193,12 @@ tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
     if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    if (intrInst_l.intrReg == NULL)
+    if (intrInst_l.pIntrReg == NULL)
         return kDualprocNoResource;
 
-    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.intrReg->irqEnable,
-                                        sizeof(intrInst_l.intrReg->irqEnable));
-    irqEnableVal = DPSHM_READ16(&intrInst_l.intrReg->irqEnable);
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.pIntrReg->irqEnable,
+                                        sizeof(intrInst_l.pIntrReg->irqEnable));
+    irqEnableVal = DPSHM_READ16(&intrInst_l.pIntrReg->irqEnable);
 
     if (pfnIrqHandler_p != NULL)
         irqEnableVal |= (1 << irqId_p);
@@ -210,9 +207,9 @@ tDualprocReturn dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,
 
     intrInst_l.apfnIrqCb[irqId_p] = pfnIrqHandler_p;
 
-    DPSHM_WRITE16(&intrInst_l.intrReg->irqEnable, irqEnableVal);
-    DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.intrReg->irqEnable,
-                                   sizeof(intrInst_l.intrReg->irqEnable));
+    DPSHM_WRITE16(&intrInst_l.pIntrReg->irqEnable, irqEnableVal);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.pIntrReg->irqEnable,
+                                   sizeof(intrInst_l.pIntrReg->irqEnable));
 
     return kDualprocSuccessful;
 }
@@ -240,21 +237,31 @@ tDualprocReturn dualprocshm_enableIrq(tDualprocDrvInstance pInstance_p,
     if (irqId_p >= TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    if (intrInst_l.intrReg == NULL)
+    if (intrInst_l.pIntrReg == NULL)
         return kDualprocNoResource;
 
-    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.intrReg->irqEnable,
-                                        sizeof(intrInst_l.intrReg->irqEnable));
-    irqEnableVal = DPSHM_READ16(&intrInst_l.intrReg->irqEnable);
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.pIntrReg->irqEnable,
+                                        sizeof(intrInst_l.pIntrReg->irqEnable));
+    irqEnableVal = DPSHM_READ16(&intrInst_l.pIntrReg->irqEnable);
 
     if (fEnable_p)
         irqEnableVal |= (1 << irqId_p);
     else
         irqEnableVal &= ~(1 << irqId_p);
 
-    DPSHM_WRITE16(&intrInst_l.intrReg->irqEnable, irqEnableVal);
-    DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.intrReg->irqEnable,
-                                   sizeof(intrInst_l.intrReg->irqEnable));
+    DPSHM_WRITE16(&intrInst_l.pIntrReg->irqEnable, irqEnableVal);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.pIntrReg->irqEnable,
+                                   sizeof(intrInst_l.pIntrReg->irqEnable));
+
+    // Enable host interrupt
+    if (fEnable_p)
+    {
+        DPSHM_CONNECT_SYNC_IRQ();
+    }
+    else
+    {
+        DPSHM_DISCONNECT_SYNC_IRQ();
+    }
 
     return kDualprocSuccessful;
 }
@@ -276,31 +283,31 @@ The function sets the specified interrupt.
 //------------------------------------------------------------------------------
 tDualprocReturn dualprocshm_setIrq(tDualprocDrvInstance pInstance_p, UINT8 irqId_p, BOOL fSet_p)
 {
-    UINT16      irqActive;
-    UINT16      irqEnable;
+    UINT16    irqActive;
+    UINT16    irqEnable;
 
     if (irqId_p > TARGET_MAX_INTERRUPTS || pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    if (intrInst_l.intrReg == NULL)
+    if (intrInst_l.pIntrReg == NULL)
         return kDualprocNoResource;
 
-    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.intrReg->irqEnable,
-                                        sizeof(intrInst_l.intrReg->irqEnable));
-    irqEnable = DPSHM_READ16(&intrInst_l.intrReg->irqEnable);
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.pIntrReg->irqEnable,
+                                        sizeof(intrInst_l.pIntrReg->irqEnable));
+    irqEnable = DPSHM_READ16(&intrInst_l.pIntrReg->irqEnable);
 
     if (irqEnable & (1 << irqId_p))
     {
-        irqActive = DPSHM_READ16(&intrInst_l.intrReg->irq.irqSet);
+        irqActive = DPSHM_READ16(&intrInst_l.pIntrReg->irq.irqSet);
 
         if (fSet_p)
             irqActive |= (1 << irqId_p);
         else
             irqActive &= ~(1 << irqId_p);
 
-        DPSHM_WRITE16(&intrInst_l.intrReg->irq.irqSet, irqActive);
-        DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.intrReg->irq.irqSet,
-                                       sizeof(intrInst_l.intrReg->irq.irqSet));
+        DPSHM_WRITE16(&intrInst_l.pIntrReg->irq.irqSet, irqActive);
+        DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.pIntrReg->irq.irqSet,
+                                       sizeof(intrInst_l.pIntrReg->irq.irqSet));
     }
 
     return kDualprocSuccessful;
@@ -327,18 +334,18 @@ callbacks registered with dualprocshm_registerHandler().
 //------------------------------------------------------------------------------
 static void targetInterruptHandler(void* pArg_p)
 {
-    UINT16      pendings;
-    UINT16      mask;
-    int         i;
+    UINT16    pendings;
+    UINT16    mask;
+    INT       i;
 
     UNUSED_PARAMETER(pArg_p);
 
-    if (intrInst_l.intrReg == NULL)
+    if (intrInst_l.pIntrReg == NULL)
         return;
 
-    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.intrReg->irq.irqPending,
-                                        sizeof(intrInst_l.intrReg->irq.irqPending));
-    pendings = DPSHM_READ16(&intrInst_l.intrReg->irq.irqPending);
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(&intrInst_l.pIntrReg->irq.irqPending,
+                                        sizeof(intrInst_l.pIntrReg->irq.irqPending));
+    pendings = DPSHM_READ16(&intrInst_l.pIntrReg->irq.irqPending);
 
     for (i = 0; i < TARGET_MAX_INTERRUPTS; i++)
     {
@@ -348,9 +355,9 @@ static void targetInterruptHandler(void* pArg_p)
         if (pendings & mask)
         {
             pendings &= ~mask;
-            DPSHM_WRITE16(&intrInst_l.intrReg->irq.irqAck, pendings);
-            DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.intrReg->irq.irqAck,
-                                           sizeof(intrInst_l.intrReg->irq.irqAck));
+            DPSHM_WRITE16(&intrInst_l.pIntrReg->irq.irqAck, pendings);
+            DUALPROCSHM_FLUSH_DCACHE_RANGE(&intrInst_l.pIntrReg->irq.irqAck,
+                                           sizeof(intrInst_l.pIntrReg->irq.irqAck));
         }
 
         // then try to execute the callback
@@ -359,4 +366,4 @@ static void targetInterruptHandler(void* pArg_p)
     }
 }
 
-///\}
+/// \}

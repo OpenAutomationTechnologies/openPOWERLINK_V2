@@ -1,0 +1,1273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<system name="$${FILENAME}">
+ <component
+   name="$${FILENAME}"
+   displayName="$${FILENAME}"
+   version="1.0"
+   description=""
+   tags=""
+   categories="System" />
+ <parameter name="bonusData"><![CDATA[bonusData
+{
+   element $${FILENAME}
+   {
+   }
+   element app_pio
+   {
+      datum _sortIndex
+      {
+         value = "17";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+   element cfi_flash_0
+   {
+      datum _sortIndex
+      {
+         value = "15";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element clk100
+   {
+      datum _sortIndex
+      {
+         value = "2";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element clk25
+   {
+      datum _sortIndex
+      {
+         value = "0";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element clk50
+   {
+      datum _sortIndex
+      {
+         value = "1";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element lcd.control_slave
+   {
+      datum baseAddress
+      {
+         value = "6144";
+         type = "String";
+      }
+   }
+   element sysid.control_slave
+   {
+      datum baseAddress
+      {
+         value = "4096";
+         type = "String";
+      }
+   }
+   element epcs_flash_controller.epcs_control_port
+   {
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element epcs_flash_controller
+   {
+      datum _sortIndex
+      {
+         value = "6";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{}";
+         type = "String";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element hostinterface_0.host
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "131072";
+         type = "String";
+      }
+   }
+   element host_0
+   {
+      datum _sortIndex
+      {
+         value = "11";
+         type = "int";
+      }
+   }
+   element hostinterface_0
+   {
+      datum _sortIndex
+      {
+         value = "10";
+         type = "int";
+      }
+   }
+   element lcd
+   {
+      datum _sortIndex
+      {
+         value = "13";
+         type = "int";
+      }
+      datum megawizard_uipreferences
+      {
+         value = "{output_language=VERILOG, output_directory=C:\\work\\repo\\openPOWERLINK\\fpga\\boards\\altera\\TERASIC_DE2-115\\mn_dual_nios2}";
+         type = "String";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element openmac_0.macReg
+   {
+      datum baseAddress
+      {
+         value = "16384";
+         type = "String";
+      }
+   }
+   element openmac_0.macTimer
+   {
+      datum baseAddress
+      {
+         value = "24576";
+         type = "String";
+      }
+   }
+   element node_switch_pio
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element openmac_0
+   {
+      datum _sortIndex
+      {
+         value = "9";
+         type = "int";
+      }
+   }
+   element hostinterface_0.pcp
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "2048";
+         type = "String";
+      }
+   }
+   element pcp_0
+   {
+      datum _sortIndex
+      {
+         value = "3";
+         type = "int";
+      }
+   }
+   element remote_update
+   {
+      datum _sortIndex
+      {
+         value = "7";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element app_pio.s1
+   {
+      datum baseAddress
+      {
+         value = "16";
+         type = "String";
+      }
+   }
+   element sdram_0.s1
+   {
+      datum _lockedAddress
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sdram_0
+   {
+      datum _sortIndex
+      {
+         value = "14";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sram_0
+   {
+      datum _sortIndex
+      {
+         value = "5";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sysid
+   {
+      datum _sortIndex
+      {
+         value = "4";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element tri_state_sram_0
+   {
+      datum _sortIndex
+      {
+         value = "8";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element tristate_cfi_flash_0
+   {
+      datum _sortIndex
+      {
+         value = "16";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
+   element sram_0.uas
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+      datum baseAddress
+      {
+         value = "0";
+         type = "String";
+      }
+   }
+   element cfi_flash_0.uas
+   {
+      datum _lockedAddress
+      {
+         value = "1";
+         type = "boolean";
+      }
+   }
+}
+]]></parameter>
+ <parameter name="clockCrossingAdapter" value="HANDSHAKE" />
+ <parameter name="device" value="EP4CE115F29C7" />
+ <parameter name="deviceFamily" value="Cyclone IV E" />
+ <parameter name="deviceSpeedGrade" value="7" />
+ <parameter name="fabricMode" value="QSYS" />
+ <parameter name="generateLegacySim" value="false" />
+ <parameter name="generationId" value="0" />
+ <parameter name="globalResetBus" value="false" />
+ <parameter name="hdlLanguage" value="VERILOG" />
+ <parameter name="maxAdditionalLatency" value="1" />
+ <parameter name="projectName">cn-dual-hostif-gpio.qpf</parameter>
+ <parameter name="sopcBorderPoints" value="false" />
+ <parameter name="systemHash" value="1" />
+ <parameter name="timeStamp" value="1460371993306" />
+ <parameter name="useTestBenchNamingPattern" value="false" />
+ <instanceScript></instanceScript>
+ <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
+ <interface name="clk100" internal="clk100.clk_in" type="clock" dir="end" />
+ <interface name="clk25" internal="clk25.clk_in" type="clock" dir="end" />
+ <interface name="reset" internal="clk25.clk_in_reset" type="reset" dir="end" />
+ <interface
+   name="pcp_0_benchmark_pio"
+   internal="pcp_0.benchmark_pio"
+   type="conduit"
+   dir="end" />
+ <interface name="powerlink_0_phym0" internal="pcp_0.powerlink_0_phym0" />
+ <interface name="powerlink_0_phym1" internal="pcp_0.powerlink_0_phym1" />
+ <interface name="powerlink_0_mii0" internal="pcp_0.powerlink_0_mii0" />
+ <interface name="powerlink_0_mii1" internal="pcp_0.powerlink_0_mii1" />
+ <interface
+   name="host_0_benchmark_pio"
+   internal="host_0.benchmark_pio"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="epcs_flash"
+   internal="epcs_flash_controller.external"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="tri_state_sram_0"
+   internal="tri_state_sram_0.out"
+   type="conduit"
+   dir="end" />
+ <interface name="lcd" internal="lcd.external" type="conduit" dir="end" />
+ <interface
+   name="openmac_0_mii"
+   internal="openmac_0.mii"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_smi"
+   internal="openmac_0.smi"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="pcp_0_cpu_resetrequest"
+   internal="pcp_0.cpu_resetrequest"
+   type="conduit"
+   dir="end" />
+ <interface name="sdram_0" internal="sdram_0.wire" type="conduit" dir="end" />
+ <interface
+   name="tristate_cfi_flash_0"
+   internal="tristate_cfi_flash_0.out"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="node_switch_pio"
+   internal="node_switch_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_pktactivity"
+   internal="openmac_0.pktActivity"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="app_pio"
+   internal="app_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <module kind="clock_source" version="13.0" enabled="1" name="clk50">
+  <parameter name="clockFrequency" value="50000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module
+   kind="hostinterface"
+   version="1.0.2"
+   enabled="1"
+   name="hostinterface_0">
+  <parameter name="sys_uniqueId" value="0" />
+  <parameter name="gui_sizeDynBuf0" value="2" />
+  <parameter name="gui_sizeDynBuf1" value="2" />
+  <parameter name="gui_sizeErrorCnter" value="36" />
+  <parameter name="gui_sizeTxNmtQ" value="8" />
+  <parameter name="gui_sizeTxGenQ" value="8" />
+  <parameter name="gui_sizeTxSyncQ" value="8" />
+  <parameter name="gui_sizeTxVethQ" value="2" />
+  <parameter name="gui_sizeRxVethQ" value="2" />
+  <parameter name="gui_sizeK2UQ" value="16" />
+  <parameter name="gui_sizeU2KQ" value="16" />
+  <parameter name="gui_sizePdo" value="49152" />
+  <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
+ </module>
+ <module kind="clock_source" version="13.0" enabled="1" name="clk100">
+  <parameter name="clockFrequency" value="100000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module kind="clock_source" version="13.0" enabled="1" name="clk25">
+  <parameter name="clockFrequency" value="25000000" />
+  <parameter name="clockFrequencyKnown" value="true" />
+  <parameter name="inputClockFrequency" value="0" />
+  <parameter name="resetSynchronousEdges" value="NONE" />
+ </module>
+ <module kind="cn_pcp" version="1.0" enabled="1" name="pcp_0">
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID" value="$${FILENAME}_pcp_0" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+  <parameter name="AUTO_CLK50_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="tcmemSize" value="24576" />
+ </module>
+ <module kind="cn_host" version="1.0" enabled="1" name="host_0">
+  <parameter name="AUTO_GENERATION_ID" value="0" />
+  <parameter name="AUTO_UNIQUE_ID" value="$${FILENAME}_host_0" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+  <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK50_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_CLK50_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK50_RESET_DOMAIN" value="3" />
+ </module>
+ <module
+   kind="altera_avalon_epcs_flash_controller"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="epcs_flash_controller">
+  <parameter name="autoSelectASMIAtom" value="true" />
+  <parameter name="useASMIAtom" value="false" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="deviceFamilyString" value="Cyclone IV E" />
+  <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
+ </module>
+ <module
+   kind="altera_generic_tristate_controller"
+   version="13.0"
+   enabled="1"
+   name="sram_0">
+  <parameter name="TCM_ADDRESS_W" value="21" />
+  <parameter name="TCM_DATA_W" value="16" />
+  <parameter name="TCM_BYTEENABLE_W" value="2" />
+  <parameter name="TCM_READ_WAIT" value="1" />
+  <parameter name="TCM_WRITE_WAIT" value="0" />
+  <parameter name="TCM_SETUP_WAIT" value="0" />
+  <parameter name="TCM_DATA_HOLD" value="0" />
+  <parameter name="TCM_MAX_PENDING_READ_TRANSACTIONS" value="1" />
+  <parameter name="TCM_TURNAROUND_TIME" value="1" />
+  <parameter name="TCM_TIMING_UNITS" value="1" />
+  <parameter name="TCM_READLATENCY" value="2" />
+  <parameter name="TCM_SYMBOLS_PER_WORD" value="2" />
+  <parameter name="USE_READDATA" value="1" />
+  <parameter name="USE_WRITEDATA" value="1" />
+  <parameter name="USE_READ" value="1" />
+  <parameter name="USE_WRITE" value="1" />
+  <parameter name="USE_BEGINTRANSFER" value="0" />
+  <parameter name="USE_BYTEENABLE" value="1" />
+  <parameter name="USE_CHIPSELECT" value="1" />
+  <parameter name="USE_LOCK" value="0" />
+  <parameter name="USE_ADDRESS" value="1" />
+  <parameter name="USE_WAITREQUEST" value="0" />
+  <parameter name="USE_WRITEBYTEENABLE" value="0" />
+  <parameter name="USE_OUTPUTENABLE" value="0" />
+  <parameter name="USE_RESETREQUEST" value="0" />
+  <parameter name="USE_IRQ" value="0" />
+  <parameter name="USE_RESET_OUTPUT" value="0" />
+  <parameter name="ACTIVE_LOW_READ" value="1" />
+  <parameter name="ACTIVE_LOW_LOCK" value="0" />
+  <parameter name="ACTIVE_LOW_WRITE" value="1" />
+  <parameter name="ACTIVE_LOW_CHIPSELECT" value="1" />
+  <parameter name="ACTIVE_LOW_BYTEENABLE" value="1" />
+  <parameter name="ACTIVE_LOW_OUTPUTENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WRITEBYTEENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WAITREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_BEGINTRANSFER" value="0" />
+  <parameter name="ACTIVE_LOW_RESETREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_IRQ" value="0" />
+  <parameter name="ACTIVE_LOW_RESET_OUTPUT" value="0" />
+  <parameter name="CHIPSELECT_THROUGH_READLATENCY" value="0" />
+  <parameter name="IS_MEMORY_DEVICE" value="1" />
+  <parameter name="MODULE_ASSIGNMENT_KEYS">embeddedsw.CMacro.SIZE</parameter>
+  <parameter name="MODULE_ASSIGNMENT_VALUES" value="2097152" />
+  <parameter name="INTERFACE_ASSIGNMENT_KEYS" value="" />
+  <parameter name="INTERFACE_ASSIGNMENT_VALUES" value="" />
+  <parameter name="CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="1" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="1" />
+  <parameter name="AUTO_TRISTATECONDUIT_MASTERS" value="" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+ </module>
+ <module
+   kind="altera_tristate_conduit_bridge"
+   version="13.0"
+   enabled="1"
+   name="tri_state_sram_0">
+  <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="sram_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="address" width="21" type="Output" output_name="tcm_address_out" output_enable_name="" input_name="" /><pin role="write_n" width="1" type="Output" output_name="tcm_write_n_out" output_enable_name="" input_name="" /><pin role="byteenable_n" width="2" type="Output" output_name="tcm_byteenable_n_out" output_enable_name="" input_name="" /><pin role="data" width="16" type="Bidirectional" output_name="tcm_data_out" output_enable_name="tcm_data_outen" input_name="tcm_data_in" /><pin role="read_n" width="1" type="Output" output_name="tcm_read_n_out" output_enable_name="" input_name="" /><pin role="chipselect_n" width="1" type="Output" output_name="tcm_chipselect_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_sysid_qsys"
+   version="13.0"
+   enabled="1"
+   name="sysid">
+  <parameter name="id" value="0" />
+  <parameter name="timestamp" value="0" />
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_lcd_16207"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="lcd" />
+ <module kind="openmac" version="1.0.2" enabled="1" name="openmac_0">
+  <parameter name="sys_mainClk" value="50000000" />
+  <parameter name="sys_mainClkx2" value="100000000" />
+  <parameter name="sys_dmaAddrWidth" value="21" />
+  <parameter name="gui_phyType" value="2" />
+  <parameter name="gui_phyCount" value="2" />
+  <parameter name="gui_extraSmi" value="true" />
+  <parameter name="gui_txBufLoc" value="2" />
+  <parameter name="gui_txBufSize" value="1" />
+  <parameter name="gui_txBurstSize" value="8" />
+  <parameter name="gui_rxBufLoc" value="2" />
+  <parameter name="gui_rxBufSize" value="1" />
+  <parameter name="gui_rxBurstSize" value="1" />
+  <parameter name="gui_tmrPulse" value="true" />
+  <parameter name="gui_tmrPulseEn" value="false" />
+  <parameter name="gui_tmrPulseWdt" value="10" />
+  <parameter name="gui_actEn" value="true" />
+  <parameter name="gui_sdcEn" value="true" />
+  <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
+  <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
+ </module>
+ <module
+   kind="altera_avalon_remote_update_cycloneiii"
+   version="13.0"
+   enabled="1"
+   name="remote_update">
+  <parameter name="clockFrequency" value="25000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_new_sdram_controller"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="sdram_0">
+  <parameter name="TAC" value="6.0" />
+  <parameter name="TRCD" value="20.0" />
+  <parameter name="TRFC" value="70.0" />
+  <parameter name="TRP" value="20.0" />
+  <parameter name="TWR" value="14.0" />
+  <parameter name="casLatency" value="3" />
+  <parameter name="columnWidth" value="10" />
+  <parameter name="dataWidth" value="32" />
+  <parameter name="generateSimulationModel" value="false" />
+  <parameter name="initRefreshCommands" value="2" />
+  <parameter name="model">single_Micron_MT48LC4M32B2_7_chip</parameter>
+  <parameter name="numberOfBanks" value="4" />
+  <parameter name="numberOfChipSelects" value="1" />
+  <parameter name="pinsSharedViaTriState" value="false" />
+  <parameter name="powerUpDelay" value="100.0" />
+  <parameter name="refreshPeriod" value="7.8125" />
+  <parameter name="rowWidth" value="13" />
+  <parameter name="masteredTristateBridgeSlave" value="0" />
+  <parameter name="TMRD" value="3" />
+  <parameter name="initNOPDelay" value="0.0" />
+  <parameter name="registerDataIn" value="true" />
+  <parameter name="clockRate" value="100000000" />
+  <parameter name="componentName">$${FILENAME}_sdram_0</parameter>
+ </module>
+ <module
+   kind="altera_generic_tristate_controller"
+   version="13.0"
+   enabled="1"
+   name="cfi_flash_0">
+  <parameter name="TCM_ADDRESS_W" value="23" />
+  <parameter name="TCM_DATA_W" value="8" />
+  <parameter name="TCM_BYTEENABLE_W" value="1" />
+  <parameter name="TCM_READ_WAIT" value="160" />
+  <parameter name="TCM_WRITE_WAIT" value="160" />
+  <parameter name="TCM_SETUP_WAIT" value="60" />
+  <parameter name="TCM_DATA_HOLD" value="60" />
+  <parameter name="TCM_MAX_PENDING_READ_TRANSACTIONS" value="3" />
+  <parameter name="TCM_TURNAROUND_TIME" value="2" />
+  <parameter name="TCM_TIMING_UNITS" value="0" />
+  <parameter name="TCM_READLATENCY" value="2" />
+  <parameter name="TCM_SYMBOLS_PER_WORD" value="1" />
+  <parameter name="USE_READDATA" value="1" />
+  <parameter name="USE_WRITEDATA" value="1" />
+  <parameter name="USE_READ" value="1" />
+  <parameter name="USE_WRITE" value="1" />
+  <parameter name="USE_BEGINTRANSFER" value="0" />
+  <parameter name="USE_BYTEENABLE" value="0" />
+  <parameter name="USE_CHIPSELECT" value="1" />
+  <parameter name="USE_LOCK" value="0" />
+  <parameter name="USE_ADDRESS" value="1" />
+  <parameter name="USE_WAITREQUEST" value="0" />
+  <parameter name="USE_WRITEBYTEENABLE" value="0" />
+  <parameter name="USE_OUTPUTENABLE" value="0" />
+  <parameter name="USE_RESETREQUEST" value="0" />
+  <parameter name="USE_IRQ" value="0" />
+  <parameter name="USE_RESET_OUTPUT" value="0" />
+  <parameter name="ACTIVE_LOW_READ" value="1" />
+  <parameter name="ACTIVE_LOW_LOCK" value="0" />
+  <parameter name="ACTIVE_LOW_WRITE" value="1" />
+  <parameter name="ACTIVE_LOW_CHIPSELECT" value="1" />
+  <parameter name="ACTIVE_LOW_BYTEENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_OUTPUTENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WRITEBYTEENABLE" value="0" />
+  <parameter name="ACTIVE_LOW_WAITREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_BEGINTRANSFER" value="0" />
+  <parameter name="ACTIVE_LOW_RESETREQUEST" value="0" />
+  <parameter name="ACTIVE_LOW_IRQ" value="0" />
+  <parameter name="ACTIVE_LOW_RESET_OUTPUT" value="0" />
+  <parameter name="CHIPSELECT_THROUGH_READLATENCY" value="0" />
+  <parameter name="IS_MEMORY_DEVICE" value="1" />
+  <parameter name="MODULE_ASSIGNMENT_KEYS">embeddedsw.configuration.hwClassnameDriverSupportList,embeddedsw.configuration.hwClassnameDriverSupportDefault,embeddedsw.CMacro.SETUP_VALUE,embeddedsw.CMacro.WAIT_VALUE,embeddedsw.CMacro.HOLD_VALUE,embeddedsw.CMacro.TIMING_UNITS,embeddedsw.CMacro.SIZE,embeddedsw.memoryInfo.MEM_INIT_DATA_WIDTH,embeddedsw.memoryInfo.HAS_BYTE_LANE,embeddedsw.memoryInfo.IS_FLASH,embeddedsw.memoryInfo.GENERATE_DAT_SYM,embeddedsw.memoryInfo.GENERATE_FLASH,embeddedsw.memoryInfo.DAT_SYM_INSTALL_DIR,embeddedsw.memoryInfo.FLASH_INSTALL_DIR</parameter>
+  <parameter name="MODULE_ASSIGNMENT_VALUES">altera_avalon_lan91c111:altera_avalon_cfi_flash,altera_avalon_cfi_flash,60,160,60,ns,8388608u,8,0,1,1,1,SIM_DIR,APP_DIR</parameter>
+  <parameter name="INTERFACE_ASSIGNMENT_KEYS">embeddedsw.configuration.isFlash,embeddedsw.configuration.isMemoryDevice,embeddedsw.configuration.isNonVolatileStorage</parameter>
+  <parameter name="INTERFACE_ASSIGNMENT_VALUES" value="1,1,1" />
+  <parameter name="CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_CLK_CLOCK_DOMAIN" value="3" />
+  <parameter name="AUTO_CLK_RESET_DOMAIN" value="3" />
+  <parameter name="AUTO_TRISTATECONDUIT_MASTERS" value="" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+  <parameter name="AUTO_DEVICE" value="EP4CE115F29C7" />
+ </module>
+ <module
+   kind="altera_tristate_conduit_bridge"
+   version="13.0"
+   enabled="1"
+   name="tristate_cfi_flash_0">
+  <parameter name="INTERFACE_INFO"><![CDATA[<info><slave name="tcs"><master name="cfi_flash_0.tcm"><pin role="" width="1" type="Invalid" output_name="" output_enable_name="" input_name="" /><pin role="address" width="23" type="Output" output_name="tcm_address_out" output_enable_name="" input_name="" /><pin role="write_n" width="1" type="Output" output_name="tcm_write_n_out" output_enable_name="" input_name="" /><pin role="data" width="8" type="Bidirectional" output_name="tcm_data_out" output_enable_name="tcm_data_outen" input_name="tcm_data_in" /><pin role="read_n" width="1" type="Output" output_name="tcm_read_n_out" output_enable_name="" input_name="" /><pin role="chipselect_n" width="1" type="Output" output_name="tcm_chipselect_n_out" output_enable_name="" input_name="" /></master></slave></info>]]></parameter>
+  <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
+  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="node_switch_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="Input" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="8" />
+  <parameter name="clockRate" value="50000000" />
+ </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="app_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="InOut" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+  <parameter name="clockRate" value="50000000" />
+ </module>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="hostinterface_0.r0" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="hostinterface_0.c0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="hostinterface_0.r0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="clk100.clk_in_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="clk50.clk_in_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="hostinterface_0.r0" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="clk100.clk_in_reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="pcp_0.clk50" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="pcp_0.clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="pcp_0.rst_clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="pcp_0.rst_clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="pcp_0.rst_clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="pcp_0.rst_clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="pcp_0.rst_clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="pcp_0.rst_clk100" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="host_0.clk100" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="host_0.clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="host_0.rst_clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="host_0.rst_clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="host_0.rst_clk100" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="host_0.rst_clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="host_0.rst_clk50" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="host_0.rst_clk50" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="epcs_flash_controller.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="epcs_flash_controller.reset" />
+ <connection
+   kind="tristate_conduit"
+   version="13.0"
+   start="sram_0.tcm"
+   end="tri_state_sram_0.tcs" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="tri_state_sram_0.clk" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="sram_0.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="hostinterface_0.hostBridge"
+   end="sram_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="tri_state_sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="tri_state_sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="tri_state_sram_0.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="sysid.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="sysid.control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="sysid.reset" />
+ <connection kind="reset" version="13.0" start="clk25.clk_reset" end="sysid.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="hostinterface_0.pcp">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0800" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.cpu_bridge"
+   end="sram_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="lcd.control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1800" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
+ <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="openmac_0.mainClk" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk100.clk"
+   end="openmac_0.mainClkx2" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="openmac_0.dmaClk" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macReg">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x4000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="openmac_0.macTimer">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x6000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection kind="avalon" version="13.0" start="openmac_0.dma" end="sram_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.sync_irq"
+   end="openmac_0.timerIrq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.mac_irq"
+   end="openmac_0.macIrq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.mainRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="openmac_0.dmaRst" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="sysid.control_slave">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x1000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.flash_bridge"
+   end="epcs_flash_controller.epcs_control_port">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="pcp_0.gp_irq"
+   end="epcs_flash_controller.irq">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk25.clk"
+   end="remote_update.global_signals_clock" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="remote_update.global_signals_clock_reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="remote_update.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="pcp_0.jtag_reset"
+   end="epcs_flash_controller.reset" />
+ <connection kind="clock" version="13.0" start="clk100.clk" end="sdram_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="host_0.sync_irq"
+   end="hostinterface_0.irqOut">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="cfi_flash_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="cfi_flash_0.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.flash_bridge"
+   end="cfi_flash_0.uas">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="tristate_cfi_flash_0.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="tristate_cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="host_0.jtag_reset"
+   end="tristate_cfi_flash_0.reset" />
+ <connection
+   kind="tristate_conduit"
+   version="13.0"
+   start="cfi_flash_0.tcm"
+   end="tristate_cfi_flash_0.tcs" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.cpu_bridge"
+   end="sdram_0.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="hostinterface_0.host">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x00020000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="sdram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="tristate_cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="tristate_cfi_flash_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="pcp_0.jtag_reset"
+   end="tri_state_sram_0.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="pcp_0.jtag_reset"
+   end="sram_0.reset" />
+ <connection
+   kind="clock"
+   version="13.0"
+   start="clk50.clk"
+   end="node_switch_pio.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="node_switch_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="node_switch_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="node_switch_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="node_switch_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="hostinterface_0.irqSync"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
+ </connection>
+ <connection kind="clock" version="13.0" start="clk50.clk" end="app_pio.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="app_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="host_0.slow_bridge"
+   end="app_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0010" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="app_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="app_pio.reset" />
+ <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
+ <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
+</system>

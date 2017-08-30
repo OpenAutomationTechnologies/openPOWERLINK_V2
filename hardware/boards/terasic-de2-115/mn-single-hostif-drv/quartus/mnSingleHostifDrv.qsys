@@ -234,7 +234,7 @@
  <parameter name="projectName">mn-single-hostif-drv.qpf</parameter>
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058096029" />
+ <parameter name="timeStamp" value="1460375349373" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -278,13 +278,18 @@
    dir="end" />
  <interface name="prl0" internal="prlSlave_0.prl0" type="conduit" dir="end" />
  <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
+   name="pcp_0_cpu_resetrequest"
+   internal="pcp_0.cpu_resetrequest"
    type="conduit"
    dir="end" />
  <interface
-   name="pcp_0_cpu_resetrequest"
-   internal="pcp_0.cpu_resetrequest"
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_pktactivity"
+   internal="openmac_0.pktActivity"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -307,8 +312,8 @@
   <parameter name="gui_sizeTxSyncQ" value="8" />
   <parameter name="gui_sizeTxVethQ" value="2" />
   <parameter name="gui_sizeRxVethQ" value="2" />
-  <parameter name="gui_sizeK2UQ" value="16" />
-  <parameter name="gui_sizeU2KQ" value="16" />
+  <parameter name="gui_sizeK2UQ" value="4" />
+  <parameter name="gui_sizeU2KQ" value="4" />
   <parameter name="gui_sizePdo" value="49152" />
   <parameter name="AUTO_C0_CLOCK_RATE" value="100000000" />
  </module>
@@ -335,6 +340,8 @@
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="cpu0_resetCpuBridge" value="flash_bridge" />
+  <parameter name="tcmemSize" value="20480" />
  </module>
  <module
    kind="altera_avalon_epcs_flash_controller"
@@ -436,10 +443,10 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="true" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
-  <parameter name="gui_actEn" value="false" />
+  <parameter name="gui_actEn" value="true" />
   <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
@@ -671,13 +678,6 @@
   <parameter name="irqNumber" value="0" />
  </connection>
  <connection
-   kind="interrupt"
-   version="13.0"
-   start="hostinterface_0.irqSync"
-   end="openmac_0.timerIrq">
-  <parameter name="irqNumber" value="0" />
- </connection>
- <connection
    kind="reset"
    version="13.0"
    start="clk50.clk_reset"
@@ -782,6 +782,13 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="epcs_flash_controller.reset" />
+ <connection
+   kind="interrupt"
+   version="13.0"
+   start="hostinterface_0.irqSync"
+   end="openmac_0.timerPulse">
+  <parameter name="irqNumber" value="0" />
+ </connection>
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

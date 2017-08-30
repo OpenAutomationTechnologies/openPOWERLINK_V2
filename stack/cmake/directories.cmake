@@ -29,16 +29,16 @@
 ################################################################################
 
 # Source directories
-SET(STACK_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src)
-SET(USER_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/user)
-SET(KERNEL_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel)
-SET(COMMON_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/common)
-SET(ARCH_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/arch)
-SET(EDRV_SOURCE_DIR ${OPLK_BASE_DIR}/stack/src/kernel/edrv)
+SET(STACK_SOURCE_DIR ${OPLK_STACK_DIR}/src)
+SET(USER_SOURCE_DIR ${STACK_SOURCE_DIR}/user)
+SET(KERNEL_SOURCE_DIR ${STACK_SOURCE_DIR}/kernel)
+SET(COMMON_SOURCE_DIR ${STACK_SOURCE_DIR}/common)
+SET(ARCH_SOURCE_DIR ${STACK_SOURCE_DIR}/arch)
+SET(EDRV_SOURCE_DIR ${STACK_SOURCE_DIR}/kernel/edrv)
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 
 # Include file directories
-SET(STACK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
+SET(STACK_INCLUDE_DIR ${OPLK_STACK_DIR}/include)
 
 # Other directories
 SET(OBJDICT_DIR ${OPLK_BASE_DIR}/objdicts)

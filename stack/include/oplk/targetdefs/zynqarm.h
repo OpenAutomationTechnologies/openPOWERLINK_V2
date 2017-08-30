@@ -61,6 +61,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define OPLKDLLEXPORT
 
+#define INLINE
+
+#define OPLK_FILE_HANDLE            int
+
 #define UNUSED_PARAMETER(par)       (void)par
 
 #ifndef NDEBUG

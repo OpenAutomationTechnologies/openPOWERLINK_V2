@@ -84,62 +84,83 @@ entity openmacTimer is
         iMacTime    : in    std_logic_vector(gMacTimeWidth-1 downto 0);
         --! Interrupt of first timer (level triggered)
         oIrq        : out   std_logic;
-        --! Toggle output of second timer
-        oToggle     : out   std_logic
+        --! Pulse output of second timer
+        oPulse      : out   std_logic
     );
 end openmacTimer;
 
 architecture rtl of openmacTimer is
-    signal cmp_enable           : std_logic;
-    signal tog_enable           : std_logic;
-    signal cmp_value            : std_logic_vector(iMacTime'range);
-    signal tog_value            : std_logic_vector(iMacTime'range);
-    signal tog_counter_value    : std_logic_vector(gTimerPulseRegWidth-1 downto 0);
-    signal tog_counter_preset   : std_logic_vector(gTimerPulseRegWidth-1 downto 0);
-    signal irq_s                : std_logic;
-    signal toggle_s             : std_logic;
-begin
-    oIrq <= irq_s;
-    oToggle <= toggle_s when gMacTimer_2ndTimer = TRUE else cInactivated;
+    signal irqEnable                : std_logic;
+    signal pulseEnable              : std_logic;
+    signal irqCompareValue          : std_logic_vector(iMacTime'range);
+    signal pulseCompareValue        : std_logic_vector(iMacTime'range);
+    signal pulseWidthCount          : std_logic_vector(gTimerPulseRegWidth-1 downto 0);
+    signal pulseWidthCountPreset    : std_logic_vector(gTimerPulseRegWidth-1 downto 0);
+    signal pulseWidthCountTc        : std_logic;
+    signal irq                      : std_logic;
+    signal pulse                    : std_logic;
 
-    --! This process generates the interrupt and toggle signals and handles the
+    constant cPulseWidthCountZero   : std_logic_vector(pulseWidthCount'range) := (others => cInactivated);
+begin
+    oIrq    <= irq;
+    oPulse  <= pulse when gMacTimer_2ndTimer = TRUE else cInactivated;
+
+    pulseWidthCountTc <= cActivated when pulseWidthCountPreset = cPulseWidthCountZero else
+                         cActivated when pulseWidthCount = pulseWidthCountPreset else
+                         cInactivated;
+
+    --! This process generates the interrupt and pulse signals and handles the
     --! register writes.
     REGPROC : process(iRst, iClk)
     begin
         if iRst = '1' then
-            cmp_enable <= '0';
-            cmp_value <= (others => '0');
-            irq_s <= '0';
+            irqEnable       <= cInactivated;
+            irqCompareValue <= (others => cInactivated);
+            irq             <= cInactivated;
 
             if gMacTimer_2ndTimer = TRUE then
-                tog_enable <= '0';
-                tog_value <= (others => '0');
-                toggle_s <= '0';
+                pulseEnable         <= cInactivated;
+                pulseCompareValue   <= (others => cInactivated);
+                pulse               <= cInactivated;
                 if gTimerEnablePulseWidth = TRUE then
-                    tog_counter_value <= (others => '0');
-                    tog_counter_preset <= (others => '0');
+                    pulseWidthCount         <= (others => cInactivated);
+                    pulseWidthCountPreset   <= (others => cInactivated);
                 end if;
             end if;
         elsif rising_edge(iClk) then
-            --cmp
-            if cmp_enable = '1' and iMacTime = cmp_value then
-                irq_s <= '1';
+            -- Interrupt generation (oIrq)
+            if irqEnable = cActivated and iMacTime = irqCompareValue then
+                irq <= cActivated;
             end if;
 
-            --tog
-            if tog_enable = '1' and iMacTime = tog_value and gMacTimer_2ndTimer = TRUE then
-                toggle_s <= not toggle_s;
-                if gTimerEnablePulseWidth = TRUE then
-                    tog_counter_value <= tog_counter_preset;
+            -- Pulse generation (oPulse) without pulse width control
+            --  Activates pulse only for one clock cycle (iClk)!
+            if gMacTimer_2ndTimer and not gTimerEnablePulseWidth then
+                if pulseEnable = cActivated and iMacTime = pulseCompareValue then
+                    pulse <= cActivated;
+                else
+                    pulse <= cInactivated;
                 end if;
             end if;
-            if tog_enable = '1' and toggle_s = '1'
-               and (not (tog_counter_value = std_logic_vector(to_unsigned(0, tog_counter_value'length))))
-               and gMacTimer_2ndTimer = TRUE
-               and gTimerEnablePulseWidth = TRUE then
-                tog_counter_value <= std_logic_vector(unsigned(tog_counter_value) - 1);
-                if tog_counter_value = std_logic_vector(to_unsigned(1, tog_counter_value'length)) then
-                    toggle_s <= '0';
+
+            -- Pulse generation (oPulse) with pulse width control
+            --  Pulse stays active until pulseWidthCount expires.
+            if gMacTimer_2ndTimer and gTimerEnablePulseWidth then
+                if pulseEnable = cActivated then
+                    if iMacTime = pulseCompareValue then
+                        pulse           <= cActivated;
+
+                        -- The counter starts with value 1, otherwise it would
+                        -- counter one additional cycle unnecessarily.
+                        pulseWidthCount <= (0 => cActivated, others => cInactivated);
+                    elsif pulse = cActivated and pulseWidthCountTc = cActivated then
+                        pulse           <= cInactivated;
+                    else
+                        pulseWidthCount <= std_logic_vector(unsigned(pulseWidthCount) + 1);
+                    end if;
+                else
+                    -- Pull the pulse signal back to zero since it is deactivated.
+                    pulse               <= cInactivated;
                 end if;
             end if;
 
@@ -149,19 +170,19 @@ begin
                     when "000" => -- 0x00
                         -- Enable/disable at offset 0x0
                         if iByteenable(0) = cActivated then
-                            cmp_enable <= iWritedata(0);
+                            irqEnable <= iWritedata(0);
                         end if;
 
                         -- Ack at offset 0x1
                         if iByteenable(1) = cActivated and iWritedata(8) = cActivated then
-                            irq_s <= '0';
+                            irq <= cInactivated;
                         end if;
 
                     when "001" => -- 0x04
-                        for i in cmp_value'range loop
+                        for i in irqCompareValue'range loop
                             if iByteenable(i / cByteLength) = cActivated then
-                                cmp_value(i)    <= iWritedata(i);
-                                irq_s           <= '0';
+                                irqCompareValue(i)  <= iWritedata(i);
+                                irq                 <= cInactivated;
                             end if;
                         end loop;
 
@@ -174,19 +195,24 @@ begin
                     when "100" => -- 0x10
                         if gMacTimer_2ndTimer = TRUE then
                             if iByteenable(0) = cActivated then
-                                tog_enable <= iWritedata(0);
+                                pulseEnable <= iWritedata(0);
                             end if;
                         end if;
 
                     when "101" => -- 0x14
                         if gMacTimer_2ndTimer = TRUE then
-                            tog_value <= iWritedata;
+                            for i in pulseCompareValue'range loop
+                                if iByteenable(i / cByteLength) = cActivated then
+                                    pulseCompareValue(i)    <= iWritedata(i);
+                                    pulse                   <= cInactivated;
+                                end if;
+                            end loop;
                         end if;
 
                     when "110" => -- 0x18
                         if gMacTimer_2ndTimer = TRUE then
                             if gTimerEnablePulseWidth = TRUE then
-                                tog_counter_preset <= iWritedata(gTimerPulseRegWidth-1 downto 0);
+                                pulseWidthCountPreset <= iWritedata(gTimerPulseRegWidth-1 downto 0);
                             end if;
                         end if;
 
@@ -204,8 +230,8 @@ begin
 
     ASSIGN_RD : process (
         iAddress, iMacTime,
-        irq_s, cmp_enable, cmp_value,
-        toggle_s, tog_enable, tog_value, tog_counter_preset
+        irq, irqEnable, irqCompareValue,
+        pulseEnable, pulseCompareValue, pulseWidthCountPreset
     )
     begin
         --default is all zero
@@ -213,11 +239,11 @@ begin
 
         case iAddress is
             when "000" => -- 0x00
-                oReaddata(1)    <= irq_s;
-                oReaddata(0)    <= cmp_enable;
+                oReaddata(1)    <= irq;
+                oReaddata(0)    <= irqEnable;
 
             when "001" => -- 0x04
-                oReaddata(cmp_value'range)  <= cmp_value;
+                oReaddata(irqCompareValue'range)  <= irqCompareValue;
 
             when "010" => -- 0x08
                 null;
@@ -227,18 +253,17 @@ begin
 
             when "100" => -- 0x10
                 if gMacTimer_2ndTimer = TRUE then
-                    oReaddata(1)    <= toggle_s;
-                    oReaddata(0)    <= tog_enable;
+                    oReaddata(0)    <= pulseEnable;
                 end if;
 
             when "101" => -- 0x14
                 if gMacTimer_2ndTimer = TRUE then
-                    oReaddata       <= tog_value;
+                    oReaddata       <= pulseCompareValue;
                 end if;
 
             when "110" => -- 0x18
                 if gMacTimer_2ndTimer = TRUE and gTimerEnablePulseWidth = TRUE then
-                    oReaddata(tog_counter_preset'range) <= tog_counter_preset;
+                    oReaddata(pulseWidthCountPreset'range) <= pulseWidthCountPreset;
                 end if;
 
             when "111" => -- 0x1C

@@ -68,16 +68,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#define GPIO_STATUS_LED_BIT     1
-#define GPIO_ERROR_LED_BIT      2
 
 #ifdef XPAR_NODE_SWITCHES_BASEADDR
 #define NODE_SWITCH_BASE    XPAR_NODE_SWITCHES_BASEADDR
 #endif // XPAR_NODE_SWITCHES_BASEADDR
-
-#ifdef XPAR_POWERLINK_LED_BASEADDR
-#define STATUS_LEDS_BASE XPAR_POWERLINK_LED_BASEADDR
-#endif // XPAR_POWERLINK_LED_BASEADDR
 
 #ifdef XPAR_GPIO_INPUTS_BASEADDR
 #define GPIO_INPUTS_BASE XPAR_GPIO_INPUTS_BASEADDR
@@ -94,8 +88,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
-static UINT32 plkStatusLeds_l = 0;  ///< Local copy of the state of the POWERLINK status LEDs
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -159,52 +151,6 @@ UINT8 gpio_getNodeid(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        plkStatusLeds_l |= (1 << GPIO_STATUS_LED_BIT);
-    else
-        plkStatusLeds_l &= ~(1 << GPIO_STATUS_LED_BIT);
-
-#ifdef STATUS_LEDS_BASE
-    XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
-#endif
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    if (fOn_p != FALSE)
-        plkStatusLeds_l |= (1 << GPIO_ERROR_LED_BIT);
-    else
-        plkStatusLeds_l &= ~(1 << GPIO_ERROR_LED_BIT);
-
-#ifdef STATUS_LEDS_BASE
-    XGpio_WriteReg(STATUS_LEDS_BASE, XGPIO_DATA_OFFSET, plkStatusLeds_l);
-#endif
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Gets the application input
 
 The function returns application inputs.
@@ -214,17 +160,17 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8 key;
+    UINT32 input;
 
 #ifdef GPIO_INPUTS_BASE
-    key = XGpio_ReadReg(GPIO_INPUTS_BASE, 0);
+    input = XGpio_ReadReg(GPIO_INPUTS_BASE, 0);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------

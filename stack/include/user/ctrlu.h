@@ -65,6 +65,7 @@ extern "C"
 
 tOplkError ctrlu_init(void);
 void       ctrlu_exit(void);
+tOplkError ctrlu_checkKernelStackInfo(void);
 tOplkError ctrlu_initStack(tOplkApiInitParam* pInitParam_p);
 tOplkError ctrlu_shutdownStack(void);
 tOplkError ctrlu_processStack(void);
@@ -75,6 +76,8 @@ tOplkError ctrlu_cbObdAccess(tObdCbParam MEM* pParam_p);
 UINT8*     ctrlu_getEthMacAddr(void);
 BOOL       ctrlu_stackIsInitialized(void);
 UINT32     ctrlu_getFeatureFlags(void);
+tOplkError ctrlu_writeFileChunk(tOplkApiFileChunkDesc* pDesc_p, UINT8* pBuffer_p);
+size_t     ctrlu_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus
 }

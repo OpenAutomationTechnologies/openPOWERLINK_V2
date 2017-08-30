@@ -41,7 +41,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //---------------------------------------------------------------------------
 //  definitions of basic types
 
-#ifndef _WINDEF_        // defined in WINDEF.H, included by <windows.h>
+#if !defined(_WINDEF_) && !defined(_NTDEF_)        // defined in WINDEF.H, included by <windows.h>
+                                                   // In kernel defined in NTDEF.h included by <ndis.h>
 
 // --- arithmetic types ---
 #ifndef SHORT

@@ -69,7 +69,7 @@ ENDIF()
 
 INCLUDE_DIRECTORIES(
                     ${XIL_LIB_BSP_INC}
-                    ${ARCH_SOURCE_DIR}/xilinx_microblaze
+                    ${ARCH_SOURCE_DIR}/xilinx-microblaze
                     ${CFG_COMPILE_LIB_MN_HW_LIB_DIR}/libomethlib/include
                     ${CONTRIB_SOURCE_DIR}/dualprocshm/include
                     ${CFG_COMPILE_LIB_MN_HW_LIB_DIR}/include
@@ -84,7 +84,7 @@ ADD_DEFINITIONS(-D__ZYNQ__)
 ENDIF()
 ################################################################################
 # Deactivate optimization for usleep
-SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/xilinx_microblaze/usleep.c
+SET_SOURCE_FILES_PROPERTIES(${ARCH_SOURCE_DIR}/xilinx-microblaze/usleep.c
                             PROPERTIES COMPILE_FLAGS "-O0")
 
 ########################################################################

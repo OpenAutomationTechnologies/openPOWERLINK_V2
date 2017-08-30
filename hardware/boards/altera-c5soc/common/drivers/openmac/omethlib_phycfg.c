@@ -10,7 +10,7 @@ Altera Cyclone-V development board(D)
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,6 +97,6 @@ This function configures the available phys on the cyclone-V development board.
 int omethPhyCfgUser(OMETH_H pEth_p)
 {
     // No configuration required
-    (void*)pEth_p;
+    (void)pEth_p;
     return 0;
 }

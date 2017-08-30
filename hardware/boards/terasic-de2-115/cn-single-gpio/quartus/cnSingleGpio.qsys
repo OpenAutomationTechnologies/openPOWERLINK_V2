@@ -12,6 +12,19 @@
    element $${FILENAME}
    {
    }
+   element app_pio
+   {
+      datum _sortIndex
+      {
+         value = "12";
+         type = "int";
+      }
+      datum sopceditor_expanded
+      {
+         value = "0";
+         type = "boolean";
+      }
+   }
    element clk100
    {
       datum _sortIndex
@@ -71,33 +84,7 @@
    {
       datum _sortIndex
       {
-         value = "14";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element hex_pio
-   {
-      datum _sortIndex
-      {
-         value = "11";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element key_pio
-   {
-      datum _sortIndex
-      {
-         value = "13";
+         value = "10";
          type = "int";
       }
       datum sopceditor_expanded
@@ -110,26 +97,13 @@
    {
       datum _sortIndex
       {
-         value = "10";
+         value = "9";
          type = "int";
       }
       datum megawizard_uipreferences
       {
          value = "{}";
          type = "String";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element ledr_pio
-   {
-      datum _sortIndex
-      {
-         value = "12";
-         type = "int";
       }
       datum sopceditor_expanded
       {
@@ -186,7 +160,7 @@
    {
       datum _sortIndex
       {
-         value = "15";
+         value = "11";
          type = "int";
       }
       datum sopceditor_expanded
@@ -195,43 +169,11 @@
          type = "boolean";
       }
    }
-   element status_led_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "4128";
-         type = "String";
-      }
-   }
    element node_switch_pio.s1
    {
       datum baseAddress
       {
          value = "4112";
-         type = "String";
-      }
-   }
-   element hex_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "32";
-         type = "String";
-      }
-   }
-   element key_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "8224";
-         type = "String";
-      }
-   }
-   element ledr_pio.s1
-   {
-      datum baseAddress
-      {
-         value = "48";
          type = "String";
       }
    }
@@ -248,19 +190,6 @@
       datum _sortIndex
       {
          value = "4";
-         type = "int";
-      }
-      datum sopceditor_expanded
-      {
-         value = "0";
-         type = "boolean";
-      }
-   }
-   element status_led_pio
-   {
-      datum _sortIndex
-      {
-         value = "9";
          type = "int";
       }
       datum sopceditor_expanded
@@ -310,7 +239,7 @@
  <parameter name="projectName" value="cn-single-gpio.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1423058066063" />
+ <parameter name="timeStamp" value="1460372591345" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk50" internal="clk50.clk_in" type="clock" dir="end" />
@@ -319,11 +248,6 @@
  <interface
    name="node_switch_pio"
    internal="node_switch_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="status_led_pio"
-   internal="status_led_pio.external_connection"
    type="conduit"
    dir="end" />
  <interface name="clk25" internal="clk25.clk_in" type="clock" dir="end" />
@@ -347,21 +271,6 @@
    type="conduit"
    dir="end" />
  <interface
-   name="hex_pio"
-   internal="hex_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="ledr_pio"
-   internal="ledr_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
-   name="key_pio"
-   internal="key_pio.external_connection"
-   type="conduit"
-   dir="end" />
- <interface
    name="openmac_0_mii"
    internal="openmac_0.mii"
    type="conduit"
@@ -377,13 +286,23 @@
    type="conduit"
    dir="end" />
  <interface
-   name="openmac_0_mactimerout"
-   internal="openmac_0.macTimerOut"
+   name="pcp_0_cpu_resetrequest"
+   internal="pcp_0.cpu_resetrequest"
    type="conduit"
    dir="end" />
  <interface
-   name="pcp_0_cpu_resetrequest"
-   internal="pcp_0.cpu_resetrequest"
+   name="powerlink_led"
+   internal="pcp_0.powerlink_led"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="app_pio"
+   internal="app_pio.external_connection"
+   type="conduit"
+   dir="end" />
+ <interface
+   name="openmac_0_pktactivity"
+   internal="openmac_0.pktActivity"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="13.0" enabled="1" name="clk50">
@@ -421,24 +340,6 @@
   <parameter name="width" value="8" />
   <parameter name="clockRate" value="50000000" />
  </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="status_led_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="true" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="2" />
-  <parameter name="clockRate" value="50000000" />
- </module>
  <module kind="clock_source" version="13.0" enabled="1" name="clk25">
   <parameter name="clockFrequency" value="25000000" />
   <parameter name="clockFrequencyKnown" value="true" />
@@ -456,6 +357,7 @@
   <parameter name="AUTO_CLK100_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
+  <parameter name="tcmemSize" value="24576" />
  </module>
  <module
    kind="altera_avalon_sysid_qsys"
@@ -534,60 +436,6 @@
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone IV E" />
  </module>
  <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="hex_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="32" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="ledr_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Output" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="16" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module
-   kind="altera_avalon_pio"
-   version="13.0.1.99.2"
-   enabled="1"
-   name="key_pio">
-  <parameter name="bitClearingEdgeCapReg" value="false" />
-  <parameter name="bitModifyingOutReg" value="false" />
-  <parameter name="captureEdge" value="false" />
-  <parameter name="direction" value="Input" />
-  <parameter name="edgeType" value="RISING" />
-  <parameter name="generateIRQ" value="false" />
-  <parameter name="irqType" value="LEVEL" />
-  <parameter name="resetValue" value="0" />
-  <parameter name="simDoTestBenchWiring" value="false" />
-  <parameter name="simDrivenValue" value="0" />
-  <parameter name="width" value="4" />
-  <parameter name="clockRate" value="50000000" />
- </module>
- <module
    kind="altera_avalon_remote_update_cycloneiii"
    version="13.0"
    enabled="1"
@@ -608,10 +456,10 @@
   <parameter name="gui_rxBufLoc" value="2" />
   <parameter name="gui_rxBufSize" value="1" />
   <parameter name="gui_rxBurstSize" value="1" />
-  <parameter name="gui_tmrCount" value="1" />
+  <parameter name="gui_tmrPulse" value="false" />
   <parameter name="gui_tmrPulseEn" value="false" />
   <parameter name="gui_tmrPulseWdt" value="10" />
-  <parameter name="gui_actEn" value="false" />
+  <parameter name="gui_actEn" value="true" />
   <parameter name="gui_sdcEn" value="true" />
   <parameter name="AUTO_DMACLK_CLOCK_RATE" value="100000000" />
   <parameter name="AUTO_PKTCLK_CLOCK_RATE" value="-1" />
@@ -627,17 +475,30 @@
   <parameter name="deviceFamilyString" value="Cyclone IV E" />
   <parameter name="autoInitializationFileName">$${FILENAME}_epcs_flash_controller</parameter>
  </module>
+ <module
+   kind="altera_avalon_pio"
+   version="13.0.1.99.2"
+   enabled="1"
+   name="app_pio">
+  <parameter name="bitClearingEdgeCapReg" value="false" />
+  <parameter name="bitModifyingOutReg" value="false" />
+  <parameter name="captureEdge" value="false" />
+  <parameter name="direction" value="InOut" />
+  <parameter name="edgeType" value="RISING" />
+  <parameter name="generateIRQ" value="false" />
+  <parameter name="irqType" value="LEVEL" />
+  <parameter name="resetValue" value="0" />
+  <parameter name="simDoTestBenchWiring" value="false" />
+  <parameter name="simDrivenValue" value="0" />
+  <parameter name="width" value="32" />
+  <parameter name="clockRate" value="50000000" />
+ </module>
  <connection kind="clock" version="13.0" start="clk50.clk" end="lcd.clk" />
  <connection
    kind="clock"
    version="13.0"
    start="clk50.clk"
    end="node_switch_pio.clk" />
- <connection
-   kind="clock"
-   version="13.0"
-   start="clk50.clk"
-   end="status_led_pio.clk" />
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="lcd.reset" />
  <connection kind="reset" version="13.0" start="clk100.clk_reset" end="lcd.reset" />
  <connection
@@ -650,27 +511,12 @@
    version="13.0"
    start="clk100.clk_reset"
    end="node_switch_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="status_led_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="status_led_pio.reset" />
  <connection kind="reset" version="13.0" start="clk25.clk_reset" end="lcd.reset" />
  <connection
    kind="reset"
    version="13.0"
    start="clk25.clk_reset"
    end="node_switch_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="status_led_pio.reset" />
  <connection kind="clock" version="13.0" start="clk50.clk" end="pcp_0.clk50" />
  <connection kind="clock" version="13.0" start="clk100.clk" end="pcp_0.clk100" />
  <connection
@@ -741,15 +587,6 @@
   <parameter name="baseAddress" value="0x1040" />
   <parameter name="defaultConnection" value="false" />
  </connection>
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="status_led_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x1020" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
  <connection kind="reset" version="13.0" start="clk50.clk_reset" end="sysid.reset" />
  <connection
    kind="reset"
@@ -803,81 +640,6 @@
    version="13.0"
    start="clk25.clk_reset"
    end="tri_state_0.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="hex_pio.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="hex_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2000" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="hex_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="hex_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="hex_pio.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="ledr_pio.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="ledr_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2010" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="ledr_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="ledr_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="ledr_pio.reset" />
- <connection kind="clock" version="13.0" start="clk50.clk" end="key_pio.clk" />
- <connection
-   kind="avalon"
-   version="13.0"
-   start="pcp_0.slow_bridge"
-   end="key_pio.s1">
-  <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x2020" />
-  <parameter name="defaultConnection" value="false" />
- </connection>
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk50.clk_reset"
-   end="key_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk100.clk_reset"
-   end="key_pio.reset" />
- <connection
-   kind="reset"
-   version="13.0"
-   start="clk25.clk_reset"
-   end="key_pio.reset" />
  <connection
    kind="clock"
    version="13.0"
@@ -1022,6 +784,31 @@
    version="13.0"
    start="pcp_0.jtag_reset"
    end="epcs_flash_controller.reset" />
+ <connection kind="clock" version="13.0" start="clk50.clk" end="app_pio.clk" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk50.clk_reset"
+   end="app_pio.reset" />
+ <connection
+   kind="avalon"
+   version="13.0"
+   start="pcp_0.slow_bridge"
+   end="app_pio.s1">
+  <parameter name="arbitrationPriority" value="1" />
+  <parameter name="baseAddress" value="0x0000" />
+  <parameter name="defaultConnection" value="false" />
+ </connection>
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk25.clk_reset"
+   end="app_pio.reset" />
+ <connection
+   kind="reset"
+   version="13.0"
+   start="clk100.clk_reset"
+   end="app_pio.reset" />
  <interconnectRequirement for="$system" name="qsys_mm.clockCrossingAdapter" value="HANDSHAKE" />
  <interconnectRequirement for="$system" name="qsys_mm.maxAdditionalLatency" value="1" />
 </system>

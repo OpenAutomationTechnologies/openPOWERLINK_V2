@@ -10,7 +10,7 @@ This file contains a demo CN application event handler.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -44,8 +44,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
 #include <console/console.h>
-
 #include "event.h"
+
+#include <eventlog/eventlog.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -194,15 +195,15 @@ static tOplkError processStateChangeEvent(tOplkApiEventType eventType_p,
         return kErrorGeneralError;
     }
 
+    eventlog_printStateEvent(pNmtStateChange);
+
     switch (pNmtStateChange->newNmtState)
     {
         case kNmtGsOff:
             // NMT state machine was shut down,
             ret = kErrorShutdown;
 
-            console_printlog("StateChangeEvent:kNmtGsOff originating event = 0x%X (%s)\n",
-                             pNmtStateChange->nmtEvent,
-                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+            printf("Stack received kNmtGsOff!\n");
 
             // signal that stack is off
             *pfGsOff_l = TRUE;
@@ -221,10 +222,7 @@ static tOplkError processStateChangeEvent(tOplkApiEventType eventType_p,
         case kNmtCsBasicEthernet:           // no break;
 
         default:
-            console_printlog("StateChangeEvent(0x%X) originating event = 0x%X (%s)\n",
-                             pNmtStateChange->newNmtState,
-                             pNmtStateChange->nmtEvent,
-                             debugstr_getNmtEventStr(pNmtStateChange->nmtEvent));
+            printf("Stack entered state: %s\n", debugstr_getNmtStateStr(pNmtStateChange->newNmtState));
             break;
     }
 
@@ -256,34 +254,7 @@ static tOplkError processErrorWarningEvent(tOplkApiEventType eventType_p,
     UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    console_printlog("Err/Warn: Source = %s (%02X) OplkError = %s (0x%03X)\n",
-                     debugstr_getEventSourceStr(pInternalError->eventSource),
-                     pInternalError->eventSource,
-                     debugstr_getRetValStr(pInternalError->oplkError),
-                     pInternalError->oplkError);
-
-    // check additional argument
-    switch (pInternalError->eventSource)
-    {
-        case kEventSourceEventk:
-        case kEventSourceEventu:
-            // error occurred within event processing
-            // either in kernel or in user part
-            console_printlog(" OrgSource = %s %02X\n",
-                             debugstr_getEventSourceStr(pInternalError->errorArg.eventSource),
-                             pInternalError->errorArg.eventSource);
-            break;
-
-        case kEventSourceDllk:
-            // error occurred within the data link layer (e.g. interrupt processing)
-            // the DWORD argument contains the DLL state and the NMT event
-            console_printlog(" val = %X\n", pInternalError->errorArg.uintArg);
-            break;
-
-        default:
-            console_printlog("\n");
-            break;
-    }
+    eventlog_printErrorEvent(pInternalError);
     return kErrorOk;
 }
 
@@ -314,10 +285,7 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
     UNUSED_PARAMETER(eventType_p);
     UNUSED_PARAMETER(pUserArg_p);
 
-    console_printlog("PDO change event: (%sPDO = 0x%X to node 0x%X with %d objects %s)\n",
-                     (pPdoChange->fTx ? "T" : "R"), pPdoChange->mappParamIndex,
-                     pPdoChange->nodeId, pPdoChange->mappObjectCount,
-                     (pPdoChange->fActivated ? "activated" : "deleted"));
+    eventlog_printPdoEvent(pPdoChange);
 
     for (subIndex = 1; subIndex <= pPdoChange->mappObjectCount; subIndex++)
     {
@@ -325,12 +293,12 @@ static tOplkError processPdoChangeEvent(tOplkApiEventType eventType_p,
         ret = oplk_readLocalObject(pPdoChange->mappParamIndex, subIndex, &mappObject, &varLen);
         if (ret != kErrorOk)
         {
-            console_printlog("  Reading 0x%X/%d failed with 0x%X\n\"%s\"\n",
-                             pPdoChange->mappParamIndex, subIndex, ret, debugstr_getRetValStr(ret));
+            eventlog_printMessage(kEventlogLevelError, kEventlogCategoryObjectDictionary,
+                                  "Reading 0x%X/%d failed with %s(0x%X)",
+                                  pPdoChange->mappParamIndex, subIndex, debugstr_getRetValStr(ret), ret);
             continue;
         }
-        console_printlog("  %d. mapped object 0x%X/%d\n", subIndex, mappObject & 0x00FFFFULL,
-                         (mappObject & 0xFF0000ULL) >> 16);
+        eventlog_printPdoMap(pPdoChange->mappParamIndex, subIndex, mappObject);
     }
     return kErrorOk;
 }

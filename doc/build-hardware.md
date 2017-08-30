@@ -19,7 +19,7 @@ Debug and the Release driver versions should be created.
 ## Target Xilinx Microblaze {#sect_build_stack_build_xilinx_microblaze}
 
 Execute the following steps below to generate the FPGA configuration and all
-hardware-dependant drivers.
+hardware-dependent drivers.
 -# Open a shell where the Xilinx ISE 14.7 Toolchain is configured:
   * On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
     Prompt`.
@@ -59,7 +59,7 @@ The default hardware platform installation path is:
 ## Target Xilinx Zynq ARM {#sect_build_stack_build_xilinx_zynq}
 
 Execute the following steps below to generate the FPGA configuration and all
-hardware-dependant drivers.
+hardware-dependent drivers.
 -# Open a shell where the Xilinx ISE 14.7 Toolchain is configured:
   * On a Windows host platform open the `ISE Design Suite [64,32] Bit Command
     Prompt`.

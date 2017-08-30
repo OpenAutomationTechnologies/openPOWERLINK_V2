@@ -10,7 +10,7 @@ This file contains a demo application for digital input/output data.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.
 All rights reserved.
@@ -45,6 +45,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <oplk/oplk.h>
 #include <oplk/debugstr.h>
+
+#include <eventlog/eventlog.h>
 
 #include "app.h"
 
@@ -304,8 +306,10 @@ static tOplkError initProcessImage(void)
 
     /* Allocate process image */
     printf("Initializing process image...\n");
-    printf("Size of input process image: %ld\n", sizeof(PI_IN));
-    printf("Size of output process image: %ld\n", sizeof(PI_OUT));
+    printf("Size of process image: Input = %lu Output = %lu \n", (ULONG)sizeof(PI_IN), (ULONG)sizeof(PI_OUT));
+    eventlog_printMessage(kEventlogLevelInfo, kEventlogCategoryGeneric,
+                          "Allocating process image: Input:%d Output:%d", sizeof(PI_IN), sizeof(PI_OUT));
+
     ret = oplk_allocProcessImage(sizeof(PI_IN), sizeof(PI_OUT));
     if (ret != kErrorOk)
     {

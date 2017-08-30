@@ -9,7 +9,7 @@ This header file provides specific macros for Xilinx Microblaze CPU.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -41,8 +41,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
+#include <unistd.h>
+
 #include <xil_types.h>
 #include <xil_cache.h>
 #include <xintc_l.h>
@@ -57,24 +61,32 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 
 // Memory
-#define DUALPROCSHM_MALLOC(size)    malloc(size)
-#define DUALPROCSHM_FREE(ptr)       free(ptr)
+#define DUALPROCSHM_MALLOC(size)              malloc(size)
+#define DUALPROCSHM_FREE(ptr)                 free(ptr)
+#define DUALPROCSHM_MEMCPY(dest, src, siz)    memcpy(dest, src, siz)
 
 // IO operations
-#define DPSHM_READ8(base)           Xil_In8((UINT32)base);
-#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val);
-#define DPSHM_READ16(base)          Xil_In16((UINT32)base);
-#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val);
+#define DPSHM_READ8(base)           Xil_In8((UINT32)base)
+#define DPSHM_WRITE8(base, val)     Xil_Out8((UINT32)base, val)
+#define DPSHM_READ16(base)          Xil_In16((UINT32)base)
+#define DPSHM_WRITE16(base, val)    Xil_Out16((UINT32)base, val)
+#define DPSHM_READ32(base)          Xil_In32((UINT32)base)
+#define DPSHM_WRITE32(base, val)    Xil_Out32((UINT32)base, val)
 
 // Memory barrier
+#ifdef __GNUC__
+// Note: Suppress gcc braced-group warning what is not available in ISO C.
+#define DPSHM_DMB()                 __extension__ mbar(1)
+#else
 #define DPSHM_DMB()                 mbar(1)
+#endif
 
 // Cache hadling
 #define DUALPROCSHM_FLUSH_DCACHE_RANGE(base, range) \
-    microblaze_flush_dcache_range((UINT32)base, range);
+    Xil_L1DCacheFlushRange((UINT32)(base), range)
 
 #define DUALPROCSHM_INVALIDATE_DCACHE_RANGE(base, range) \
-    microblaze_invalidate_dcache_range((UINT32)base, range);
+    Xil_L1DCacheInvalidateRange((UINT32)(base), range)
 
 #define DPSHM_REG_SYNC_INTR(callback, arg)                     \
     UINT32      intcMask;                                      \
@@ -91,6 +103,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define DPSHM_DISABLE_SYNC_INTR()                                  \
     XIntc_DisableIntr(TARGET_SYNC_IRQ_ID, TARGET_SYNC_IRQ |        \
                       Xil_In32(TARGET_IRQ_IC_BASE + XIN_IER_OFFSET))
+
+#define DPSHM_CONNECT_SYNC_IRQ()
+#define DPSHM_DISCONNECT_SYNC_IRQ()
 
 #ifndef TRACE
 #ifndef NDEBUG

@@ -90,9 +90,6 @@ static tNmtCnuInstance   nmtCnuInstance_g;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p);
-static BOOL checkNodeIdList(BYTE* pbNmtCommandDate_p);
-static tOplkError commandCb(tFrameInfo* pFrameInfo_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -102,9 +99,9 @@ static tOplkError commandCb(tFrameInfo* pFrameInfo_p);
 /**
 \brief  Init nmtcnu module
 
-The function initializes an instance of the nmtcnu module
+The function initializes an instance of the nmtcnu module.
 
-\param  nodeId_p                Node ID of the local node
+\param  nodeId_p                Node ID of the local node.
 
 \return The function returns a tOplkError error code.
 
@@ -123,9 +120,6 @@ tOplkError nmtcnu_init(UINT nodeId_p)
     // Bit offset  --> 2 ^ (nodeid AND 0b111)
     nmtCnuInstance_g.extNmtCmdByteOffset = (UINT)(nodeId_p >> 3);
     nmtCnuInstance_g.extNmtCmdBitMask = 1 << ((UINT8)nodeId_p & 7);
-
-    // register callback-function for NMT-commands
-    ret = dllucal_regAsndService(kDllAsndNmtCommand, commandCb, kDllAsndFilterLocal);
 
     return ret;
 }
@@ -189,11 +183,14 @@ The function is used to send an NMT-Request to the MN.
 tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
                                     void* pNmtCommandData_p, UINT dataSize_p)
 {
-    tOplkError      ret;
+    tOplkError      ret = kErrorOk;
     tFrameInfo      nmtRequestFrameInfo;
     tPlkFrame       nmtRequestFrame;
+    UINT            nmtCmdDataSize;
 
-    ret = kErrorOk;
+    nmtCmdDataSize = sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData);
+    if (dataSize_p > nmtCmdDataSize)
+        dataSize_p = nmtCmdDataSize; // n.b. truncate size of aCmdData[C_MAX_NMT_CMD_DATA_SIZE]
 
     // build frame
     OPLK_MEMSET(&nmtRequestFrame.aDstMac[0], 0x00, sizeof(nmtRequestFrame.aDstMac)); // set by DLL
@@ -207,20 +204,14 @@ tOplkError nmtcnu_sendNmtRequestEx(UINT nodeId_p, tNmtCommand nmtCommand_p,
     ami_setUint8Le(&nmtRequestFrame.data.asnd.payload.nmtRequestService.targetNodeId,
                    (BYTE)nodeId_p); // target for the nmt command
 
-    OPLK_MEMSET(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0], 0x00,
-                sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData));
-
     if (pNmtCommandData_p && (dataSize_p != 0))
     {
         OPLK_MEMCPY(&nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData[0],
-                    pNmtCommandData_p,
-                    min(dataSize_p,
-                        sizeof(nmtRequestFrame.data.asnd.payload.nmtRequestService.aNmtCommandData)));
+                    pNmtCommandData_p, dataSize_p);
     }
-
     // build info-structure
-    nmtRequestFrameInfo.pFrame = &nmtRequestFrame;
-    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ; // sizeof(nmtRequestFrame);
+    nmtRequestFrameInfo.frame.pBuffer = &nmtRequestFrame;
+    nmtRequestFrameInfo.frameSize = C_DLL_MINSIZE_NMTREQ + dataSize_p;
 
     // send NMT request
     ret = dllucal_sendAsyncFrame(&nmtRequestFrameInfo, kDllAsyncReqPrioNmt);
@@ -253,268 +244,5 @@ tOplkError nmtcnu_registerCheckEventCb(tNmtuCheckEventCallback pfnNmtCheckEventC
 //============================================================================//
 /// \name Private Functions
 /// \{
-
-//------------------------------------------------------------------------------
-/**
-\brief  Callback function for NMT commands
-
-The function processes NMT commands.
-
-\param  pFrameInfo_p        Pointer to frame containing the NMT command
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError commandCb(tFrameInfo* pFrameInfo_p)
-{
-    tOplkError      ret = kErrorOk;
-    tNmtCommand     nmtCommand;
-    BOOL            fNodeIdInList;
-    tNmtEvent       nmtEvent = kNmtEventNoEvent;
-
-    if (pFrameInfo_p == NULL)
-        return kErrorNmtInvalidFramePointer;
-
-    nmtCommand = getNmtCommand(pFrameInfo_p);
-    switch (nmtCommand)
-    {
-        //------------------------------------------------------------------------
-        // plain NMT state commands
-        case kNmtCmdStartNode:
-            nmtEvent = kNmtEventStartNode;
-            break;
-
-        case kNmtCmdStopNode:
-            nmtEvent = kNmtEventStopNode;
-            break;
-
-        case kNmtCmdEnterPreOperational2:
-            nmtEvent = kNmtEventEnterPreOperational2;
-            break;
-
-        case kNmtCmdEnableReadyToOperate:
-            nmtEvent = kNmtEventEnableReadyToOperate;
-            break;
-
-        case kNmtCmdResetNode:
-            nmtEvent = kNmtEventResetNode;
-            break;
-
-        case kNmtCmdResetCommunication:
-            nmtEvent = kNmtEventResetCom;
-            break;
-
-        case kNmtCmdResetConfiguration:
-            nmtEvent = kNmtEventResetConfig;
-            break;
-
-        case kNmtCmdSwReset:
-            nmtEvent = kNmtEventSwReset;
-            break;
-
-        //------------------------------------------------------------------------
-        // extended NMT state commands
-        case kNmtCmdStartNodeEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&(pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]));
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventStartNode;
-            }
-            break;
-
-        case kNmtCmdStopNodeEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventStopNode;
-            }
-            break;
-
-        case kNmtCmdEnterPreOperational2Ex:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventEnterPreOperational2;
-            }
-            break;
-
-        case kNmtCmdEnableReadyToOperateEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventEnableReadyToOperate;
-            }
-            break;
-
-        case kNmtCmdResetNodeEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventResetNode;
-            }
-            break;
-
-        case kNmtCmdResetCommunicationEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventResetCom;
-            }
-            break;
-
-        case kNmtCmdResetConfigurationEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventResetConfig;
-            }
-            break;
-
-        case kNmtCmdSwResetEx:
-            // check if own nodeid is in the POWERLINK node list
-            fNodeIdInList = checkNodeIdList(&pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService.aNmtCommandData[0]);
-            if (fNodeIdInList != FALSE)
-            {   // own nodeid in list
-                // send event to process command
-                nmtEvent = kNmtEventSwReset;
-            }
-            break;
-
-        //------------------------------------------------------------------------
-        // NMT managing commands
-        // TODO: add functions to process managing command (optional)
-        case kNmtCmdNetHostNameSet:
-            break;
-
-        case kNmtCmdFlushArpEntry:
-            break;
-
-        //------------------------------------------------------------------------
-        // NMT info services
-        // TODO: forward event with infos to the application (optional)
-        case kNmtCmdPublishConfiguredCN:
-            break;
-
-        case kNmtCmdPublishActiveCN:
-            break;
-
-        case kNmtCmdPublishPreOperational1:
-            break;
-
-        case kNmtCmdPublishPreOperational2:
-            break;
-
-        case kNmtCmdPublishReadyToOperate:
-            break;
-
-        case kNmtCmdPublishOperational:
-            break;
-
-        case kNmtCmdPublishStopped:
-            break;
-
-        case kNmtCmdPublishEmergencyNew:
-            break;
-
-        case kNmtCmdPublishTime:
-            break;
-
-        //-----------------------------------------------------------------------
-        // error from MN
-        // -> requested command not supported by MN
-        case kNmtCmdInvalidService:
-            // TODO: errorevent to application
-            break;
-
-        //------------------------------------------------------------------------
-        // default
-        default:
-            return kErrorNmtUnknownCommand;
-            break;
-    } // end of switch (nmtCommand)
-
-    if (nmtEvent != kNmtEventNoEvent)
-    {
-        if (nmtCnuInstance_g.pfnCheckEventCb != NULL)
-        {
-            ret = nmtCnuInstance_g.pfnCheckEventCb(nmtEvent);
-            if (ret == kErrorReject)
-            {
-                return kErrorOk;
-            }
-            else if (ret != kErrorOk)
-            {
-                return ret;
-            }
-        }
-        ret = nmtu_postNmtEvent(nmtEvent);
-    }
-
-    return ret;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Get NMT command
-
-The function extracts the NMT command from the frame.
-
-\param  pFrameInfo_p        Pointer to frame containing the NMT command
-
-\return The function returns the extracted NMT command
-*/
-//------------------------------------------------------------------------------
-static tNmtCommand getNmtCommand(tFrameInfo* pFrameInfo_p)
-{
-    tNmtCommand          nmtCommand;
-    tNmtCommandService*  pNmtCommandService;
-
-    pNmtCommandService = &pFrameInfo_p->pFrame->data.asnd.payload.nmtCommandService;
-    nmtCommand = (tNmtCommand)ami_getUint8Le(&pNmtCommandService->nmtCommandId);
-
-    return nmtCommand;
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Check node ID list
-
-The function checks if the own node ID is set in the node list.
-
-\param  pbNmtCommandDate_p        Pointer to the date of the NMT command.
-
-\return The function returns \b TRUE if the node is found in the node list or
-        \b FALSE if it is not found in the node list.
-*/
-//------------------------------------------------------------------------------
-static BOOL checkNodeIdList(UINT8* pbNmtCommandDate_p)
-{
-    BOOL            fNodeIdInList;
-    UINT            byteOffset = nmtCnuInstance_g.extNmtCmdByteOffset;
-    UINT8           bitMask = nmtCnuInstance_g.extNmtCmdBitMask;
-    UINT8           nodeListByte;
-
-    nodeListByte = ami_getUint8Le(&pbNmtCommandDate_p[byteOffset]);
-    if ((nodeListByte & bitMask) == 0)
-        fNodeIdInList = FALSE;
-    else
-        fNodeIdInList = TRUE;
-
-    return fNodeIdInList;
-}
 
 ///\}

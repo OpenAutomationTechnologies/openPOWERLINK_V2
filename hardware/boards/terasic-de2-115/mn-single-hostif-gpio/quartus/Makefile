@@ -2,7 +2,7 @@
 #
 # Makefile for Altera Quartus II Project with Qsys
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,8 @@ asm: smart.log $(PROJECT).asm.rpt
 sta: smart.log $(PROJECT).sta.rpt
 smart: smart.log
 
+update-mif: smart.log update_mif $(PROJECT).asm.rpt
+
 ###################################################################
 # Executable Configuration
 ###################################################################
@@ -94,6 +96,10 @@ $(PROJECT).sta.rpt: sta.chg $(PROJECT).fit.rpt
 
 smart.log: $(ASSIGNMENT_FILES)
 	quartus_sh --determine_smart_action $(PROJECT) > smart.log
+
+update_mif:
+	quartus_cdb $(PROJECT) --update_mif
+	$(STAMP) asm.chg
 
 ###################################################################
 # Project initialization

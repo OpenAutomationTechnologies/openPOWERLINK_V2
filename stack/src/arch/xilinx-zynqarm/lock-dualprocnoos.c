@@ -46,6 +46,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdlib.h>
 #include <xparameters.h>
 #include <xil_io.h>
+#include <xil_cache.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -143,14 +144,14 @@ int target_lock(void)
     // spin if id is not written to shared memory
     do
     {
-        Xil_DCacheInvalidateRange(pLock_l, 1);
+        Xil_DCacheInvalidateRange((u32)pLock_l, 1);
         val = Xil_In8((u32)pLock_l);
 
         // write local id if unlocked
         if (val == LOCK_UNLOCKED_C)
         {
             Xil_Out8((u32)pLock_l, LOCK_LOCAL_ID);
-            Xil_DCacheFlushRange(pLock_l, 1);
+            Xil_DCacheFlushRange((u32)pLock_l, 1);
             continue; // return to top of loop to check again
         }
     } while (val != LOCK_LOCAL_ID);
@@ -175,7 +176,7 @@ int target_unlock(void)
         return -1;
 
     Xil_Out8((u32)pLock_l, LOCK_UNLOCKED_C);
-    Xil_DCacheFlushRange(pLock_l, 1);
+    Xil_DCacheFlushRange((u32)pLock_l, 1);
     return 0;
 }
 

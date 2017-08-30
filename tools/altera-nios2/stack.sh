@@ -134,6 +134,7 @@ CFG_APP_CPU_NAME=
 CFG_DRV_CPU_NAME=
 CFG_OPENMAC=
 CFG_HOSTINTERFACE=
+CFG_DUALPROCSHM=
 CFG_NODE=
 CFG_BOARD_CFLAGS=
 if [ -f ${BOARD_SETTINGS_FILE} ]; then
@@ -149,11 +150,14 @@ LIB_SOURCES=
 LIB_INCLUDES=
 CFG_LIB_CFLAGS=
 CFG_LIB_ARGS=
-CFG_TCI_MEM_NAME=
+CFG_TC_MEM_NAME=
 if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
     # The bsp's cpu matches to the app part
-    CFG_TCI_MEM_NAME=${CFG_APP_TCI_MEM_NAME}
-    if [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_OPENMAC}" ]; then
+    CFG_TC_MEM_NAME=${CFG_APP_TC_MEM_NAME}
+    if [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
+        LIB_NAME=oplkcnapp-hostif
+        LIB_SOURCES=
+    elif [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_OPENMAC}" ]; then
         LIB_NAME=oplkcn
         LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
     elif [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
@@ -162,8 +166,11 @@ if [ "${CPU_NAME}" == "${CFG_APP_CPU_NAME}" ]; then
     fi
 elif [ "${CPU_NAME}" == "${CFG_DRV_CPU_NAME}" ]; then
     # The bsp's cpu matches to the drv part
-    CFG_TCI_MEM_NAME=${CFG_DRV_TCI_MEM_NAME}
-    if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
+    CFG_TC_MEM_NAME=${CFG_DRV_TC_MEM_NAME}
+    if [ "${CFG_NODE}" == "CN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
+        LIB_NAME=oplkcndrv-hostif
+        LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
+    elif [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_OPENMAC}" ] && [ -n "${CFG_HOSTINTERFACE}" ]; then
         echo "INFO: Compiling stack for Hostinterface design"
         LIB_NAME=oplkmndrv-hostif
         LIB_SOURCES=${HW_COMMON_PATH}/drivers/openmac/omethlib_phycfg.c
@@ -177,17 +184,17 @@ else
     exit 1
 fi
 
-# Set TCI memory size
-echo "INFO: Get TCI memory size ... "
+# Set TC memory size
+echo "INFO: Get TC memory size ... "
 
-TCI_MEM_SIZE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
-                            --cmd puts [get_addr_span ${CFG_TCI_MEM_NAME}] 2> /dev/null)
+TC_MEM_SIZE=$(nios2-bsp-query-settings --settings ${BSP_PATH}/settings.bsp \
+                            --cmd puts [get_addr_span ${CFG_TC_MEM_NAME}] 2> /dev/null)
 
-if [ -z "$TCI_MEM_SIZE" ]; then
-    TCI_MEM_SIZE=0
+if [ -z "$TC_MEM_SIZE" ]; then
+    TC_MEM_SIZE=0
 fi
 
-echo "      ${TCI_MEM_SIZE}"
+echo "      ${TC_MEM_SIZE}"
 
 # Let's source the stack library settings file
 LIB_SETTINGS_FILE=${OPLK_BASE_DIR}/stack/build/altera-nios2/lib${LIB_NAME}/lib.settings
@@ -210,6 +217,10 @@ if [ "${CFG_NODE}" == "MN" ] && [ -n "${CFG_DUALPROCSHM}" ]; then
         # For internal bus usage between two processors using dualprocshm interface
         LIB_SOURCES+=" ${DUALPROCSHM_DRIVER_SOURCES}"
         CFG_LIB_CFLAGS+=" -D__INT_BUS__"
+    elif [ "${CFG_DRV_BUS}" == "PCIE BUS" ]; then
+        # For PCIe bus usage between two processors using dualprocshm interface
+        LIB_SOURCES+=" ${DUALPROCSHM_PCIE_SOURCES}"
+        CFG_LIB_CFLAGS+=" -D__PCIE__"
     else
         echo "ERROR: Dualprocshm with ${CFG_DRV_BUS} interface for NIOS driver is not supported"
         exit 1
@@ -230,7 +241,7 @@ LIB_GEN_ARGS="--lib-name ${LIB_NAME} --lib-dir ${OUT_PATH} \
 --bsp-dir ${BSP_PATH} \
 --src-files ${LIB_SOURCES} \
 --set CFLAGS=${CFLAGS} ${CFG_LIB_CFLAGS} ${CFG_BOARD_CFLAGS} -D${DEBUG_MODE} -DCONFIG_${CFG_NODE} \
--DALT_TCIMEM_SIZE=${TCI_MEM_SIZE} \
+-DALT_TCMEM_SIZE=${TC_MEM_SIZE} \
 --set LIB_CFLAGS_OPTIMIZATION=${LIB_OPT_LEVEL} \
 ${CFG_LIB_ARGS} \
 "

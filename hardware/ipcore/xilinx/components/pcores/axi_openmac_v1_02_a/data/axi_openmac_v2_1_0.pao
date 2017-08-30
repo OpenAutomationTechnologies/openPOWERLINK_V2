@@ -43,9 +43,9 @@ lib axi_openmac_v1_02_a ../../../../../../common/memory/src/dpRamOpenmac-e vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/memory/src/dpRamSplx-e vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/memory/src/dpRamSplxNbe-e vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/fifo/src/asyncFifo-e vhdl
-lib axi_openmac_v1_02_a ../../../../../../common/fifo/src/asyncFifo-rtl-a vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/fifo/src/fifoRead-rtl-ea vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/fifo/src/fifoWrite-rtl-ea vhdl
+lib axi_openmac_v1_02_a ../../../../../../common/fifo/src/asyncFifo-rtl-a vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/openmac/src/openmacPkg-p vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/openmac/src/dma_handler vhdl
 lib axi_openmac_v1_02_a ../../../../../../common/openmac/src/master_handler vhdl

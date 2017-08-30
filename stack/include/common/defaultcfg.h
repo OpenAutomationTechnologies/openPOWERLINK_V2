@@ -85,6 +85,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_DLLCAL_BUFFER_SIZE_TX_VETH               32768               // Default size for virtual Ethernet Tx queue
 #endif
 
+#ifndef CONFIG_CTRL_FILE_CHUNK_SIZE
+#define CONFIG_CTRL_FILE_CHUNK_SIZE                     1024
+#endif
+
 #ifndef CONFIG_DLL_PRES_CHAINING_CN
 #define CONFIG_DLL_PRES_CHAINING_CN                     FALSE
 #endif
@@ -202,6 +206,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_OBD_USE_STORE_RESTORE                    FALSE
 #endif
 
+#ifndef CONFIG_OBD_CALC_OD_SIGNATURE
+#define CONFIG_OBD_CALC_OD_SIGNATURE                    FALSE
+#endif
+
 #ifndef CONFIG_OBD_DEF_CONCISEDCF_FILENAME
 #define CONFIG_OBD_DEF_CONCISEDCF_FILENAME              "pl_obd.cdc"
 #endif
@@ -226,6 +234,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 #endif
 
+#if defined(CONFIG_INCLUDE_IP) && !defined(CONFIG_INCLUDE_VETH)
+#error "CONFIG_INCLUDE_VETH needs to be enabled for using IP objects!"
+#endif
+
 // rough approximation of max. number of timer entries for module user/timer-generic
 #ifndef TIMERU_MAX_ENTRIES
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -245,6 +257,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #ifndef CONFIG_EDRV_AUTO_RESPONSE_DELAY
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY                 FALSE
+#endif
+
+#ifndef CONFIG_PDO_SETUP_WAIT_TIME
+#define CONFIG_PDO_SETUP_WAIT_TIME                      500
 #endif
 
 #endif /* _INC_common_defaultcfg_H_ */

@@ -51,6 +51,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <kernel/edrv.h>
 #include <kernel/eventk.h>
 #include <kernel/errhndk.h>
+#include <kernel/timesynck.h>
 #include <common/ami.h>
 #include <oplk/benchmark.h>
 
@@ -276,6 +277,9 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
     ami_setUint48Be(&aMulticastMac[0], C_DLL_MULTICAST_ASND);
     ret = edrv_clearRxMulticastMacAddr(aMulticastMac);
 
+    // Reset relative time validation flag
+    dllkInstance_g.socTime.fRelTimeValid = FALSE;
+
     return ret;
 }
 
@@ -372,7 +376,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     }
 
     // NMT request
-    frameSize = C_IP_MAX_MTU;
+    frameSize = C_DLL_MAX_ETH_FRAME;
     ret = dllkframe_createTxFrame(&handle, &frameSize, kMsgTypeAsnd, kDllAsndNmtRequest);
     if (ret != kErrorOk)
         return ret;
@@ -386,7 +390,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
     dllkInstance_g.pTxBuffer[handle].pfnTxHandler = dllkframe_processTransmittedNmtReq;
 
     // non-POWERLINK frame
-    frameSize = C_IP_MAX_MTU;
+    frameSize = C_DLL_MAX_ETH_FRAME;
     ret = dllkframe_createTxFrame(&handle, &frameSize, kMsgTypeNonPowerlink, kDllAsndNotDefined);
     if (ret != kErrorOk)
         return ret;
@@ -420,6 +424,11 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
         ret = edrv_setRxMulticastMacAddr(aMulticastMac);
     }
 #endif
+
+    ret = timesynck_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen,
+                                 dllkInstance_g.dllConfigParam.minSyncTime);
+    if (ret != kErrorOk)
+        return ret;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (NMT_IF_MN_OR_RMN(nmtState_p))
@@ -537,7 +546,7 @@ tOplkError dllknode_addNodeIsochronous(tDllkNodeInfo* pIntNodeInfo_p)
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNodeAdded;
             event.eventArgSize = sizeof(pIntNodeInfo_p->nodeId);
-            event.pEventArg = &pIntNodeInfo_p->nodeId;
+            event.eventArg.pEventArg = &pIntNodeInfo_p->nodeId;
             ret = eventk_postEvent(&event);
             if (ret != kErrorOk)
                 goto Exit;
@@ -774,7 +783,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p, BOOL fReadyFlag_p,
             ami_setUint8Le(&pTxFrame->data.preq.flag1, flag1);
 
             // process TPDO
-            FrameInfo.pFrame = pTxFrame;
+            FrameInfo.frame.pBuffer = pTxFrame;
             FrameInfo.frameSize = pTxBuffer->txFrameSize;
             ret = dllkframe_processTpdo(&FrameInfo, fReadyFlag_p);
             if (ret != kErrorOk)
@@ -873,7 +882,7 @@ tOplkError dllknode_issueLossOfPres(UINT nodeId_p)
             event.eventType = kEventTypeDllkDelNode;
             // $$$ d.k. set Event.netTime to current time
             event.eventArgSize = sizeof(nodeOpParam);
-            event.pEventArg = &nodeOpParam;
+            event.eventArg.pEventArg = &nodeOpParam;
             eventk_postEvent(&event);
         }
     }
@@ -1132,7 +1141,8 @@ static tOplkError setupLocalNodeCn(void)
 #endif
 
 #if (CONFIG_DLL_PROCESS_SYNC == DLL_PROCESS_SYNC_ON_TIMER)
-    ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen);
+    ret = synctimer_setCycleLen(dllkInstance_g.dllConfigParam.cycleLen,
+                                dllkInstance_g.dllConfigParam.minSyncTime);
     if (ret != kErrorOk)
         return ret;
 
@@ -1220,7 +1230,8 @@ static tOplkError setupLocalNodeMn(void)
     if (ret != kErrorOk)
         return ret;
 
-    ret = edrvcyclic_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen);
+    ret = edrvcyclic_setCycleTime(dllkInstance_g.dllConfigParam.cycleLen,
+                                  dllkInstance_g.dllConfigParam.minSyncTime);
     if (ret != kErrorOk)
         return ret;
 

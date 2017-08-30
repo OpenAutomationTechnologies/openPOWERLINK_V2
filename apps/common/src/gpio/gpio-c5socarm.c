@@ -86,19 +86,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HPS_LED_2_TURN_OFF                          0x00002000
 #define HPS_LED_3_TURN_OFF                          0x00001000
 
-#define FPGA_LED_ALL_BIT_MASK                       0x0000000F
-#define FPGA_LED_ALL_TURN_ON                        0x00000000
-#define FPGA_LED_ALL_TURN_OFF                       0x0000000F
-#define FPGA_LED_0_TURN_ON                          0x0000000E
-#define FPGA_LED_1_TURN_ON                          0x0000000D
-#define FPGA_LED_2_TURN_ON                          0x0000000B
-#define FPGA_LED_3_TURN_ON                          0x00000007
-
-#define FPGA_LED_0_TURN_OFF                         0x00000001
-#define FPGA_LED_1_TURN_OFF                         0x00000002
-#define FPGA_LED_2_TURN_OFF                         0x00000004
-#define FPGA_LED_3_TURN_OFF                         0x00000008
-
 #define HPS_PB_INT_ALL_BIT_MASK                     0x01E00000  // Interrupt bits for GPIO2
 
 #define HPS_PB_0_ASSERT                             0x01C00000  // GPIO[8] (HPS_PB_0)
@@ -226,11 +213,6 @@ void gpio_init(void)
 
     // will be initialized in target intialization
 
-    // clear the Leds
-#ifdef LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, FPGA_LED_ALL_TURN_OFF);
-#endif
-
     // Clear the dip switch and push button interrupt status registers
 #ifdef HOST_0_BUTTON_PIO_BASE
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_BUTTON_PIO_BASE, 0x0);
@@ -271,11 +253,6 @@ void gpio_exit(void)
     IOWR_ALTERA_AVALON_PIO_IRQ_MASK(HOST_0_DIPSW_PIO_BASE, 0x0);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_DIPSW_PIO_BASE, FPGA_DIPSW_ALL_BIT_MASK);
 #endif
-
-    // clear the Leds
-#ifdef LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, FPGA_LED_ALL_TURN_OFF);
-#endif
 }
 
 //------------------------------------------------------------------------------
@@ -308,66 +285,6 @@ UINT8 gpio_getNodeid(void)
 
 //------------------------------------------------------------------------------
 /**
-\brief  Sets the status LED
-
-The function sets the POWERLINK status LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setStatusLed(BOOL fOn_p)
-{
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    UINT32              ledStatus = 0x0;
-
-    ledStatus = alt_gpio_port_data_read(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK);
-
-    if (fOn_p)
-    {
-        ledStatus &= (UINT32)(~HPS_LED_1_TURN_OFF & HPS_LED_ALL_BIT_MASK);
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-    else
-    {
-        ledStatus |= HPS_LED_1_TURN_OFF;
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
-\brief  Sets the error LED
-
-The function sets the POWERLINK error LED.
-
-\param  fOn_p               Determines the LED state
-
-\ingroup module_app_common
-*/
-//------------------------------------------------------------------------------
-void gpio_setErrorLed(BOOL fOn_p)
-{
-    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
-    UINT32              ledStatus = 0x0;
-
-    ledStatus = alt_gpio_port_data_read(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK);
-
-    if (fOn_p)
-    {
-        ledStatus &= (UINT32)(~HPS_LED_0_TURN_OFF & HPS_LED_ALL_BIT_MASK);
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-    else
-    {
-        ledStatus |= HPS_LED_0_TURN_OFF;
-        halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ledStatus);
-    }
-}
-
-//------------------------------------------------------------------------------
-/**
 \brief  Gets the application input
 
 The function returns application inputs.
@@ -377,18 +294,18 @@ The function returns application inputs.
 \ingroup module_app_common
 */
 //------------------------------------------------------------------------------
-UINT8 gpio_getAppInput(void)
+UINT32 gpio_getAppInput(void)
 {
-    UINT8    key;
+    UINT32    input;
 
 #ifdef HOST_0_BUTTON_PIO_BASE
-    key = (UINT8)IORD_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE);
+    input = (UINT32)IORD_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE);
     IOWR_ALTERA_AVALON_PIO_EDGE_CAP(HOST_0_BUTTON_PIO_BASE, FPGA_PB_ALL_BIT_MASK);
 #else
-    key = 0;
+    input = 0;
 #endif
 
-    return key;
+    return input;
 }
 
 //------------------------------------------------------------------------------
@@ -404,9 +321,9 @@ The function sets the application outputs.
 //------------------------------------------------------------------------------
 void gpio_setAppOutputs(UINT32 val_p)
 {
-#ifdef LED_PIO_BASE
-    IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, ~val_p);
-#endif
+    ALT_STATUS_CODE     halRet = ALT_E_SUCCESS;
+
+    halRet = alt_gpio_port_data_write(ALT_GPIO_PORTB, HPS_LED_ALL_BIT_MASK, ~val_p);
 }
 
 //============================================================================//

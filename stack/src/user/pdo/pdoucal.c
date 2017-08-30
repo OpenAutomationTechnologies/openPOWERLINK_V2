@@ -90,21 +90,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The function initializes the PDO user CAL module.
 
-\param  pfnSyncCb_p             function that is called in case of sync event
-
 \return The function returns a tOplkError error code.
 
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_init(tSyncCb pfnSyncCb_p)
+tOplkError pdoucal_init(void)
 {
     tOplkError      ret;
 
-    if ((ret = pdoucal_openMem()) != kErrorOk)
-        return ret;
+    ret = pdoucal_openMem();
 
-    return pdoucal_initSync(pfnSyncCb_p);
+    return ret;
 }
 
 //------------------------------------------------------------------------------
@@ -121,7 +118,6 @@ The function cleans up the PDO user CAL module.
 tOplkError pdoucal_exit(void)
 {
     pdoucal_closeMem();
-    pdoucal_exitSync();
     return kErrorOk;
 }
 
@@ -147,7 +143,7 @@ tOplkError pdoucal_postPdokChannelAlloc(tPdoAllocationParam* pAllocationParam_p)
 
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokAlloc;
-    Event.pEventArg = pAllocationParam_p;
+    Event.eventArg.pEventArg = pAllocationParam_p;
     Event.eventArgSize = sizeof(*pAllocationParam_p);
 
     Ret = eventu_postEvent(&Event);
@@ -176,7 +172,7 @@ tOplkError pdoucal_postConfigureChannel(tPdoChannelConf* pChannelConf_p)
 
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokConfig;
-    Event.pEventArg = pChannelConf_p;
+    Event.eventArg.pEventArg = pChannelConf_p;
     Event.eventArgSize = sizeof(tPdoChannelConf);
     ret = eventu_postEvent(&Event);
 
@@ -208,7 +204,7 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p, size_t txPdoMemSiz
     pdoMemSize.txPdoMemSize = txPdoMemSize_p;
     Event.eventSink = kEventSinkPdokCal;
     Event.eventType = kEventTypePdokSetupPdoBuf;
-    Event.pEventArg = &pdoMemSize;
+    Event.eventArg.pEventArg = &pdoMemSize;
     Event.eventArgSize = sizeof(tPdoMemSize);
     Ret = eventu_postEvent(&Event);
 

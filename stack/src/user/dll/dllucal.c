@@ -260,7 +260,7 @@ tOplkError dllucal_process(tEvent* pEvent_p)
     {
         case kEventTypeAsndRx:
             // Argument pointer is frame
-            FrameInfo.pFrame = (tPlkFrame*)pEvent_p->pEventArg;
+            FrameInfo.frame.pBuffer = (tPlkFrame*)pEvent_p->eventArg.pEventArg;
             FrameInfo.frameSize = pEvent_p->eventArgSize;
             pFrameInfo = &FrameInfo;
             ret = handleRxAsyncFrame(pFrameInfo);
@@ -268,13 +268,13 @@ tOplkError dllucal_process(tEvent* pEvent_p)
 
         case kEventTypeAsndRxInfo:
             // Argument pointer is frame info
-            pFrameInfo = (tFrameInfo*)pEvent_p->pEventArg;
+            pFrameInfo = (tFrameInfo*)pEvent_p->eventArg.pEventArg;
 
             ret = handleRxAsyncFrameInfo(pFrameInfo);
             break;
 
         case kEventTypeAsndNotRx:
-            pAsndNotRx = (tDllAsndNotRx*)pEvent_p->pEventArg;
+            pAsndNotRx = (tDllAsndNotRx*)pEvent_p->eventArg.pEventArg;
             ret = handleNotRxAsndFrame(pAsndNotRx);
             break;
 
@@ -306,7 +306,7 @@ tOplkError dllucal_config(tDllConfigParam* pDllConfigParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfig;
-    event.pEventArg = pDllConfigParam_p;
+    event.eventArg.pEventArg = pDllConfigParam_p;
     event.eventArgSize = sizeof(*pDllConfigParam_p);
     ret = eventu_postEvent(&event);
 
@@ -334,7 +334,7 @@ tOplkError dllucal_setIdentity(tDllIdentParam* pDllIdentParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkIdentity;
-    event.pEventArg = pDllIdentParam_p;
+    event.eventArg.pEventArg = pDllIdentParam_p;
     event.eventArgSize = sizeof(*pDllIdentParam_p);
     ret = eventu_postEvent(&event);
     return ret;
@@ -434,7 +434,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
         case kDllAsyncReqPrioNmt:
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                         instance_l.dllCalQueueTxNmt,
-                                        (BYTE*)pFrameInfo_p->pFrame,
+                                        (BYTE*)pFrameInfo_p->frame.pBuffer,
                                         &(pFrameInfo_p->frameSize));
             break;
 
@@ -452,7 +452,7 @@ tOplkError dllucal_sendAsyncFrame(tFrameInfo* pFrameInfo_p,
     event.eventSink = kEventSinkDllk;
     event.eventType = kEventTypeDllkFillTx;
     OPLK_MEMSET(&event.netTime, 0x00, sizeof(event.netTime));
-    event.pEventArg = &priority_p;
+    event.eventArg.pEventArg = &priority_p;
     event.eventArgSize = sizeof(priority_p);
     ret = eventu_postEvent(&event);
 
@@ -494,7 +494,7 @@ tOplkError dllucal_issueRequest(tDllReqServiceId service_p, UINT nodeId_p,
             issueReq.service = service_p;
             issueReq.nodeId = nodeId_p;
             issueReq.soaFlag1 = soaFlag1_p;
-            event.pEventArg = &issueReq;
+            event.eventArg.pEventArg = &issueReq;
             event.eventArgSize = sizeof(issueReq);
             ret = eventu_postEvent(&event);
             break;
@@ -555,7 +555,7 @@ tOplkError dllucal_configNode(tDllNodeInfo* pNodeInfo_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkConfigNode;
-    event.pEventArg = pNodeInfo_p;
+    event.eventArg.pEventArg = pNodeInfo_p;
     event.eventArgSize = sizeof(*pNodeInfo_p);
 
     ret = eventu_postEvent(&event);
@@ -584,7 +584,7 @@ tOplkError dllucal_addNode(tDllNodeOpParam* pNodeOpParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkAddNode;
-    event.pEventArg = pNodeOpParam_p;
+    event.eventArg.pEventArg = pNodeOpParam_p;
     event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
@@ -613,7 +613,7 @@ tOplkError dllucal_deleteNode(tDllNodeOpParam* pNodeOpParam_p)
 
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeDllkDelNode;
-    event.pEventArg = pNodeOpParam_p;
+    event.eventArg.pEventArg = pNodeOpParam_p;
     event.eventArgSize = sizeof(*pNodeOpParam_p);
 
     ret = eventu_postEvent(&event);
@@ -652,7 +652,7 @@ static tOplkError SetAsndServiceIdFilter(tDllAsndServiceId serviceId_p,
     event.eventType = kEventTypeDllkServFilter;
     servFilter.serviceId = serviceId_p;
     servFilter.filter = filter_p;
-    event.pEventArg = &servFilter;
+    event.eventArg.pEventArg = &servFilter;
     event.eventArgSize = sizeof(servFilter);
     ret = eventu_postEvent(&event);
 
@@ -674,7 +674,7 @@ on the frame type (e.g. POWERLINK or non-POWERLINK frames).
 static tOplkError handleRxAsyncFrame(tFrameInfo* pFrameInfo_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->frame.pBuffer->etherType);
 
     switch (etherType)
     {
@@ -715,14 +715,14 @@ static tOplkError handleRxAsndFrame(tFrameInfo *pFrameInfo_p)
     unsigned int    asndServiceId;
     tOplkError      ret = kErrorOk;
 
-    msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->pFrame->messageType);
+    msgType = (tMsgType)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->messageType);
     if (msgType != kMsgTypeAsnd)
     {
         ret = kErrorInvalidOperation;
         goto Exit;
     }
 
-    asndServiceId = (unsigned int)ami_getUint8Le(&pFrameInfo_p->pFrame->data.asnd.serviceId);
+    asndServiceId = (unsigned int)ami_getUint8Le(&pFrameInfo_p->frame.pBuffer->data.asnd.serviceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
         if (instance_l.apfnDlluCbAsnd[asndServiceId] != NULL)
@@ -751,11 +751,11 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
 {
     tOplkError      ret;
     tEvent          event;
-    tPlkFrame*      pKernelBuffer = pFrameInfo_p->pFrame;
+    tPlkFrame*      pKernelBuffer = pFrameInfo_p->frame.pBuffer;
     tPlkFrame*      pAcqBuffer;
 
     // Get Rx buffer from kernel layer
-    pAcqBuffer = memmap_mapKernelBuffer(pKernelBuffer);
+    pAcqBuffer = memmap_mapKernelBuffer(pKernelBuffer, pFrameInfo_p->frameSize);
     if (pAcqBuffer == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s Getting the Rx buffer from kernel failed!\n", __func__);
@@ -763,7 +763,7 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     }
 
     // Set reference to kernel buffer for processing
-    pFrameInfo_p->pFrame = pAcqBuffer;
+    pFrameInfo_p->frame.pBuffer = pAcqBuffer;
 
     // Now handle the async frame
     ret = handleRxAsyncFrame(pFrameInfo_p);
@@ -772,13 +772,13 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     memmap_unmapKernelBuffer(pAcqBuffer);
 
     // Restore frame info for releasing Rx frame
-    pFrameInfo_p->pFrame = pKernelBuffer;
+    pFrameInfo_p->frame.pBuffer = pKernelBuffer;
 
     // call free function for Asnd frame
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;
     event.eventArgSize = sizeof(tFrameInfo);
-    event.pEventArg = pFrameInfo_p;
+    event.eventArg.pEventArg = pFrameInfo_p;
 
     eventu_postEvent(&event);
 
@@ -808,7 +808,7 @@ static tOplkError handleNotRxAsndFrame(tDllAsndNotRx* pAsndNotRx_p)
     ami_setUint8Le(&pFrame->data.asnd.serviceId, pAsndNotRx_p->serviceId);
 
     frameInfo.frameSize = DLLUCAL_NOTRX_FRAME_SIZE;
-    frameInfo.pFrame = pFrame;
+    frameInfo.frame.pBuffer = pFrame;
 
     asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
     if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
@@ -841,13 +841,13 @@ Ethernet Tx queue.
 static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->pFrame->etherType);
+    UINT16      etherType = ami_getUint16Be(&pFrameInfo_p->frame.pBuffer->etherType);
 
     if (etherType == 0 || etherType == C_DLL_ETHERTYPE_EPL)
     {
         ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxGen,
-                                    (BYTE*)pFrameInfo_p->pFrame,
+                                    (BYTE*)pFrameInfo_p->frame.pBuffer,
                                     &(pFrameInfo_p->frameSize));
     }
     else
@@ -855,7 +855,7 @@ static tOplkError sendGenericAsyncFrame(tFrameInfo* pFrameInfo_p)
 #if defined(CONFIG_INCLUDE_VETH)
         ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
                                     instance_l.dllCalQueueTxVeth,
-                                    (UINT8*)pFrameInfo_p->pFrame,
+                                    (UINT8*)pFrameInfo_p->frame.pBuffer,
                                     &(pFrameInfo_p->frameSize));
 #else
     // Return error since virtual Ethernet is not existing!

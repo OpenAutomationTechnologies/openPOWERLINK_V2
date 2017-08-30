@@ -178,7 +178,7 @@ tOplkError hrestimer_exit(void)
     {
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         hrtimer_delete(pTimerInfo->timer);
-        pTimerInfo->eventArg.timerHdl = 0;
+        pTimerInfo->eventArg.timerHdl.handle = 0;
         pTimerInfo->pfnCallback = NULL;
     }
     return kErrorOk;
@@ -230,7 +230,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
                 break;      // free structure found
         }
         if (index >= TIMER_COUNT)
@@ -238,7 +238,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__, index);
             return kErrorTimerNoTimerCreated;
         }
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(uiIndex);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(uiIndex);
     }
     else
     {
@@ -265,8 +265,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
 
     /* Increment timer handle (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     /* initialize timer info */
     pTimerInfo->eventArg.argument.value = argument_p;
@@ -299,7 +299,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 #if 0
     DEBUG_LVL_TIMERH_TRACE("hrestimer_modifyTimer() timer=%lx ",
-            pTimerInfo->eventArg.timerHdl);
+            pTimerInfo->eventArg.timerHdl.handle);
     DEBUG_LVL_TIMERH_TRACE("        timeout=%ld:%ld/%ld:%ld\n",
            relTime.it_value.tv_sec, relTime.it_value.tv_nsec,
            relTime.it_interval.tv_sec, relTime.it_interval.tv_nsec);
@@ -347,7 +347,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
             return ret;
     }
 
@@ -357,8 +357,43 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     hrtimer_settime(pTimerInfo->timer, 0, &relTime, NULL);
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
     hrtimer_setCallback(pTimerInfo->timer, (void*)pTimerInfo->pfnCallback, 0);
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
+
+This function enables/disables the external synchronization interrupt. If the
+external synchronization interrupt is not supported, the call is ignored.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_controlExtSyncIrq(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set external synchronization interrupt time
+
+This function sets the time when the external synchronization interrupt shall
+be triggered to synchronize the host processor. If the external synchronization
+interrupt is not supported, the call is ignored.
+
+\param  time_p          Time when the sync shall be triggered
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
+{
+    UNUSED_PARAMETER(time_p);
 }

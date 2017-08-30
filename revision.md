@@ -5,6 +5,274 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.4.1 {#sect_revision_v2_4_1}
+
+This is the latest release of the V2.4 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.4.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix several compiler warnings
+- Increase isochrRxMaxPayload limit
+- Remove Veth code from edrv if Veth support is disabled
+- Add findDebugfs() prototype
+- Fix openCONFORMANCE warnings in testcase 3-2-9-T2
+- Remove sync interrupt registration for Nios II in dualprocshm
+- Use Xil_L1DCache*() macros for Microblaze cache handling
+- Fix the build when no PIO are used
+- daemon PCP nios2: remove unused header
+- Add missing comment for object event forwarding
+- Fix relict in padding area of asynchronous frames
+- Fix cirbuffer return values
+- Connect atomic ipcore directly to shared memory
+- Fix circbuf locking issues with host interface CAL
+- Fix segmented read access to user specific OD
+- Fix various typos in ctrlu files
+- Enable storage attribute for PDO comm and mapp param objects
+- Force 0x1F8D/F0 object in Demo_3CN openCONFIGURATOR project
+- veth: avoid kernel header issue with musl
+- SDO read fails for VString objects
+- apps: include stdarg.h in eventlogstring.h
+- PCIe Driver: Disable Werror=date-time for kernel >= 3.14
+- Fix name of sched_priority element
+- oplkcfg.h: Remove option CONFIG_OBD_USE_LOAD_CONCISEDCF
+
+### Additions:
+- Add XDD for CiA401 slave with configuration store/restore
+- Improve user OD access comment
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.4.0 {#sect_revision_v2_4_0}
+
+This is the first release of the V2.4 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.3 series (\ref sect_revision_v2_3_2)
+
+Following is a summary of changes in V2.4.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add redundancy support for edrv-i210
+- Add dev_name command line parameter to console demos
+- Handle NMT commands in kernel layer
+- Add buffer allocation lib for edrv (8111, 8139, i210 and 82573)
+- Add support for driver firmware update in Linux PCIe design
+- Enhance openMAC Tx and Rx descriptor count
+- Add dynamic sync interrupt adjustment in openMAC edrvcyclic
+- Add hrestimer function to set timer with absolute time
+- Enable exception stack for Nios II MN driver
+- Add tightly-coupled data master to MN PCP
+- Add tightly-coupled memory size parameter to subsystems
+- Add RMN openCONFIGURATOR demo project
+
+### Fixes:
+- Fix typos in documentation
+- Fix doubled synchronization timer IRQ
+- Prevent multiple call to string object callback
+- Correct OD callbacks for restore objects
+- Improve SDO sequence layer initialization
+- Adapt sequence layer timeout to EPSG DSP 301 V1.2.0
+- Prevent overtaking SDO history frames
+- Improve transmission time for segmented SDO transfer
+- Fix C5 SoC host boot
+
+### Changes:
+- Add support for VEth interface in Windows PCIe solution
+- MN Objdict: add new dynamic channel for REAL PDO objects
+- Remove staging directory
+- Rework DE2-115 board designs
+- Replace clock crossing by pipeline bridge
+- Implement second TX queue in edrv-i210
+- Add generic time triggered flag to TX buffer structure
+- Change image of devboard terasic-de2-115
+- Add OD init parameters to stack API init parameters
+- Export the stack-internal OD callback function via the API
+- Rename OD user module to obdu
+- Split OD header into API and user part
+- Handle PDO mapping object access in the generic OD callback
+- Handle error handler object access in the generic OD callback
+- Handle CFM object access in the generic OD callback
+- Refactor OD callback in ctrlu module
+- Separation of SDO and OD
+- Add interface for user specific OD for non-existing objects handling
+- Refactor SDO sequence layer
+- Add documentation for parallel interface ipcore
+- Introduce board specific configuration header
+- Introduce Rx buffer configuration parameter
+- Enable coexistence of openMAC TTTX and auto response
+- Remove openMAC "no filter match" IRQ
+- Rename tightly-coupled memory
+- Reduce FPGA MN event queue sizes
+- Add AMI getter to target section header
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.3.2 {#sect_revision_v2_3_2}
+
+This is the latest release of the V2.3 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+For a detailed revision history refer to the Git source code history.
+
+### Known Issues:
+- Linux i210 (see 2.3.1)
+- DE2i-150 board (see 2.3.0)
+- Windows PCIe (see 2.3.0)
+- Linux PCIe (see 2.3.0)
+- NDIS intermediate driver (see 2.3.0)
+- Redundancy MN (see 2.2.1)
+
+## V2.3.1 {#sect_revision_v2_3_1}
+
+This is the latest release of the V2.3 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.3.1. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Fix Tx errors on Altera C5 SoC board
+- Fix NMT request frame size
+- Fix startup domain objects linking
+- Fix Zynq Linux MN wrong cycle time issue for large cycle times
+- Fix the distribution of the network configuration
+- Prevent race in DLL when running as MN
+- Fix startup problem with CNs using PRes Chaining
+- Fix full kernel-internal queue on FPGA MN targets
+- Call openMAC IRQ handler before handling 2nd Tx queue
+- Several fixes in xdd and OD
+- Fix Altera EPCS programming target
+- Fix filter generation issues for Windows PCIe driver
+- Fix line endings for Windows specific files
+- Fix Linux i210 CN configuration error
+- Fix different NMT state in PRes and Ident/StatusResponse
+
+### Additions:
+- Rework user stack event handling for Linux and Windows PCIe solutions
+- Add troubleshooting information for CRC error on Altera C5 SoC
+- Extend the maximum cycle time operation for Zynq Linux MN
+- Mitigate feature check at stack start
+- Cleanup stack cmake files
+- Enable EPCS in DE2-115 CN dual design for PCP
+- Enable virtual Ethernet feature in dualprocshm platforms
+
+### Known Issues:
+- Linux i210:
+    - The Linux kernel space module with i210 must be compiled for CN explicitly
+      if a CN application is used. If the kernel space module is compiled as MN,
+      the application must initialize the stack as MN (node ID 0xF0).
+- DE2i-150 board (see 2.3.0)
+- Windows PCIe (see 2.3.0)
+- Linux PCIe (see 2.3.0)
+- NDIS intermediate driver (see 2.3.0)
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
+## V2.3.0 {#sect_revision_v2_3_0}
+
+This is the first release of the V2.3 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.2 series (\ref sect_revision_v2_2_2)
+
+Following is a summary of changes in V2.3.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Introduce timesync module (replacing PDO sync implementation)
+- Add application synchronization period configuration
+- Add SoC time forwarding to application
+- Add store restore feature for OS based CN
+- Improve display of LEDs in demo_mn_qt
+- Optimize the Altera FPGA CN performance
+- Add TERASIC DE2i-150 MN design
+- Add Windows NDIS intermediate driver
+- Add Linux PCIe solution for B&R APC/PPC2100 and TERASIC DE2i-150
+
+### Fixes:
+- Fix SDO command layer dependencies
+- Fix compiler warnings
+- Avoid error in embedded demos if virtual Ethernet is disabled
+- Fix application hangs with Windows kernel drivers
+- Fix crashes happening during shutdown
+
+### Changes:
+- Improve SDO sequence layer segmented transfer
+- Update host interface IP-Core description
+- Rework openMAC second timer resources
+- Revise Zynq MN address map and remove system.xml workaround
+- Rework SDO over UDP module
+- Export benchmark pins to FMC2 on ZC702 demo
+
+### Known Issues:
+- DE2i-150 board:
+    - Programming the firmware onto the serial Flash device is not supported. Use
+      JTAG to download the FPGA bitstream and Nios II elf manually.
+- Windows PCIe:
+    - Windows network device actions such as disable, restart and enable network
+      adapter are not supported.
+- Linux PCIe:
+    - During kernel module insertion driver signing warnings are raised on systems
+      with CONFIG_MODULE_SIG enabled in the Linux kernel configuration. The
+      warnings can be ignored.
+    - High CPU load could be caused because of low POWERLINK cycle times and
+      high PDO sizes. Use the application synchronization period configuration
+      (\ref tOplkApiInitParam::minSyncTime) to reduce the frequency of
+      synchronization processing.
+- NDIS intermediate driver:
+    - In a system with multiple network adapters it is not possible to select
+      the adapter to be used. The driver is configured to automatically select
+      the first driver for network communication.
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
+## V2.3.0-rc1 {#sect_revision_v2_3_0_rc1}
+
+This is the release candidate for the upcoming 2.3.0 release.
+
+Following is a summary of changes in V2.3.0-rc1. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add late release support to dualprocshm
+- Add dual processor CN designs for TERASIC DE2-115 board
+- Add IP-Core to enable atomic exchange on Altera Nios II
+- Add Windows PCIe solution for B&R APC/PPC2100 (Platform with Altera Cyclone 4
+  FPGA and Intel Atom)
+- Enhance debugstr to print NMT node commands
+- Add eventlog library
+- Add file transfer capability
+
+### Fixes:
+- Exclude objects if IP is not supported
+
+### Changes:
+- Update stack to support heterogeneous systems (64 bit support)
+- Rework stack initialization
+- Move LED module to kernel layer
+- Rework kernel event handling for FPGA drivers
+- Use Peterson's lock for Windows PCIe solution
+
+### Known Issues:
+- Xilinx Zynq MN (see 2.1.0)
+- Redundancy MN (see 2.2.1)
+
+### Outlook:
+This release candidate is not feature complete. The following features are
+expected to be released with the final 2.3.0 revision:
+- Forward SoC time stamp to application layer
+- Configuration storage (generic implementation)
+- NDIS intermediate driver for Windows
+- Linux PCIe solution for B&R APC/PPC2100
+- Virtual Ethernet for PCIe solution
+- MN demo design on TERASIC DE2i-150 board
+
 ## V2.2.2 {#sect_revision_v2_2_2}
 
 This is the latest release of the V2.2 release series. This release is a stable

@@ -70,8 +70,8 @@ extern "C"
 void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p);
 void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p);
 
-UINT16 ami_getUint16Be(void* pAddr_p);
-UINT16 ami_getUint16Le(void* pAddr_p);
+UINT16 ami_getUint16Be(void* pAddr_p) SECTION_AMI_GETUINT16BE;
+UINT16 ami_getUint16Le(void* pAddr_p) SECTION_AMI_GETUINT16LE;
 
 // Conversion functions for datatype DWORD24
 void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p);

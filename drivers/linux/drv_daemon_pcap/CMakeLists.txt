@@ -57,8 +57,8 @@ MESSAGE(STATUS "Configuring ${EXE_NAME}")
 ###############################################################################
 # Set global directories
 ###############################################################################
-SET(OPLK_BASE_DIR ${CMAKE_SOURCE_DIR}/../../..)
-SET(DRV_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+SET(OPLK_BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
+SET(DRV_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 SET(CONTRIB_SOURCE_DIR ${OPLK_BASE_DIR}/contrib)
 SET(OPLK_INCLUDE_DIR ${OPLK_BASE_DIR}/stack/include)
 SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
@@ -66,7 +66,7 @@ SET(TOOLS_DIR ${OPLK_BASE_DIR}/tools)
 ###############################################################################
 # Include CMake Modules
 ###############################################################################
-SET(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake ${CMAKE_MODULE_PATH})
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake ${CMAKE_MODULE_PATH})
 
 # include standard cmake modules
 INCLUDE(CMakeDependentOption)
@@ -136,5 +136,5 @@ SET_PROPERTY(TARGET ${EXE_NAME} PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG;DEF_DEB
 TARGET_LINK_LIBRARIES(${EXE_NAME} ${OPLKLIB} ${ARCH_LIBRARIES})
 
 # add installation rules
-INSTALL(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${CMAKE_PROJECT_NAME})
+INSTALL(TARGETS ${EXE_NAME} RUNTIME DESTINATION ${PROJECT_NAME})
 

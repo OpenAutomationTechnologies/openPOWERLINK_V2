@@ -83,61 +83,6 @@ Data type for the enumerator \ref eDualprocReturn.
 */
 typedef UINT16 tDualprocReturn;
 
-#if (OPLK_OPTIMIZE != FALSE)
-/**
-\brief Dual processor buffer Id
-
-This is required to handle DLL circular buffers queue specially to optimize
-stack on non-OS platforms.
-
-*/
-typedef enum
-{
-    kDualprocUsertoKernelQ      = 0x0000,   ///< User-to-kernel event queue
-    kDualprocKerneltoUserQ      = 0x0001,   ///< Kernel-to-user event queue
-    kDualprocKernelIntQ         = 0x0002,   ///< Kernel internal event queue
-    kDualprocUserIntQ           = 0x0003,   ///< User internal event queue
-    kDualprocDllCalTxGenQ       = 0x0004,   ///< Queue for sending generic requests in the DLLCAL
-    kDualprocDllCalTxNmtQ       = 0x0005,   ///< Queue for sending NMT requests in the DLLCAL
-    kDualprocDllCalTxSyncQ      = 0x0006,   ///< Queue for sending sync requests in the DLLCAL
-    kDualprocDllCalCnReqNmtQ    = 0x0007,   ///< NMT request queue for MN asynchronous scheduler
-    kDualprocDllCalCnReqGenQ    = 0x0008,   ///< Generic request queue for MN asynchronous scheduler
-    kDualprocDllCalCnReqIdentQ  = 0x0009,   ///< Ident request queue for MN asynchronous scheduler
-    kDualprocDllCalCnReqStatusQ = 0x000A,   ///< Status request queue for MN asynchronous scheduler
-    kDualprocErrorHandlerBuff   = 0x000B,   ///< Error handler shared buffer
-    kDualprocPdoBuff            = 0x000C,   ///< PDO exchange buffer
-
-    kDualprocUnspecQ            = 0xFFFF    ///< Unspecified queue
-} eDualprocBuffId;
-
-/**
-\brief Buffer ID data type
-
-Data type for the enumerator \ref eDualprocBuffId.
-*/
-typedef UINT16 tDualprocBuffId;
-
-#endif
-
-/**
-\brief Processor instance
-
-The processor instance determines if the caller is the Pcp or the Host.
-*/
-typedef enum
-{
-    kDualProcFirst        = 0,              ///< Instance on first processor
-    kDualProcSecond       = 1,              ///< Instance on second processor
-    kDualProcLast         = 2,              ///< End of list flag
-} eDualProcInstance;
-
-/**
-\brief Processor instance data type
-
-Data type for the enumerator \ref eDualProcInstance.
-*/
-typedef UINT8 tDualProcInstance;
-
 /**
 \brief Driver instance configuration
 
@@ -147,7 +92,7 @@ typedef struct sDualprocConfig
 {
     tDualProcInstance       procInstance;   ///< Processor instance
     UINT16                  commonMemSize;  ///< Minimum size of common memory
-    UINT8                   procId;         ///< Processor Id
+    UINT8                   resv;           ///< Reserved
 } tDualprocConfig;
 
 /**
@@ -157,10 +102,22 @@ Holds information of a dynamic memory.
 */
 typedef struct sDualprocMemInst
 {
-    UINT16      span;                       ///< Span of the dynamic buffer
-    UINT8       lock;                       ///< Lock for memory
-    UINT8       resv;                       ///< Reserved byte;
+    UINT16          span;         ///< Span of the dynamic buffer
+    UINT16          padding1;     ///< Padding variable 1
+    tDualprocLock   lock;         ///< Lock for memory
 } tDualprocMemInst;
+
+/**
+\brief Shared memory instance
+
+Structure to hold shared memory information.
+
+*/
+typedef struct sDualprocSharedMemInst
+{
+    UINT64      baseAddr;         ///< Base address of the shared memory.
+    UINT32      span;             ///< Size of the shared memory.
+} tDualprocSharedMemInst;
 
 /**
 \brief Dual processor driver instance
@@ -189,7 +146,7 @@ register for a dynamic buffer.
 
 \return The function returns 0 if the address has been set successfully, otherwise -1.
 */
-typedef INT (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT32 addr_p);
+typedef INT (*tSetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p, UINT64 addr_p);
 
 /**
 \brief Function type to get the address of a Buffer
@@ -203,7 +160,7 @@ buffer address register.
 \return The function returns the address to the memory space referenced by the
         dynamic buffer.
 */
-typedef UINT32 (*tGetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p);
+typedef UINT8* (*tGetDynRes)(tDualprocDrvInstance pDrvInst_p, UINT16 index_p);
 
 /**
 \brief Structure for dual processor dynamic resources (buffers)
@@ -216,7 +173,7 @@ typedef struct sDualprocDynRes
     tSetDynRes          pfnSetDynAddr;              ///< This function sets the dynamic buffer base to hardware
     tGetDynRes          pfnGetDynAddr;              ///< This function gets the dynamic buffer base from hardware
     UINT8*              pBase;                      ///< Base of the dynamic buffer
-    tDualprocMemInst*   memInst;                    ///< Pointer to memory instance
+    tDualprocMemInst*   pMemInst;                   ///< Pointer to memory instance
 } tDualprocDynResConfig;
 
 /**
@@ -229,7 +186,8 @@ typedef struct sDualprocHeader
 {
     UINT16      shmMagic;                           ///< Dualprocshm interface magic field. This is used to indicate valid header data
     UINT16      shmIntfState;                       ///< Dualprocshm interface state indicator field
-    UINT32      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
+    UINT32      span;                               ///< Size of the shared memory.
+    UINT64      sharedMemBase[kDualProcLast];       ///< Shared memory addresses of both processors
 } tDualprocHeader;
 
 /**
@@ -262,7 +220,8 @@ typedef struct sDualProcDrv
 //------------------------------------------------------------------------------
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 tDualprocReturn         dualprocshm_create(tDualprocConfig* pConfig_p, tDualprocDrvInstance* ppInstance_p);
@@ -284,12 +243,11 @@ tDualprocReturn         dualprocshm_writeDataCommon(tDualprocDrvInstance pInstan
                                                     size_t Size_p, UINT8* pData_p);
 tDualprocReturn         dualprocshm_enableShmIntf(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_checkShmIntfState(tDualprocDrvInstance pInstance_p);
-tDualprocReturn         dualprocshm_getSharedMemAddr(tDualprocDrvInstance pInstance_p,
+tDualprocReturn         dualprocshm_getSharedMemInfo(tDualprocDrvInstance pInstance_p,
                                                      tDualProcInstance procInstance_p,
-                                                     UINT8* pShmBaseAddr_p);
+                                                     tDualprocSharedMemInst* pShmMemInst_p);
 tDualprocReturn         dualprocshm_acquireBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
 tDualprocReturn         dualprocshm_releaseBuffLock(tDualprocDrvInstance pInstance_p, UINT8 id_p) SECTION_DUALPROCSHM_RE_BUFF_LOCK;
-
 tDualprocReturn         dualprocshm_initInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_freeInterrupts(tDualprocDrvInstance pInstance_p);
 tDualprocReturn         dualprocshm_registerHandler(tDualprocDrvInstance pInstance_p,

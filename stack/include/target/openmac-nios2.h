@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <omethlib.h>
 
 #include <sys/alt_cache.h>
+#include <sys/alt_irq.h>
 #include <io.h>
 #include <unistd.h>
 
@@ -62,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_FLUSHDATACACHE(pMem_p, size_p)
 #define OPENMAC_INVALIDATEDATACACHE(pMem_p, size_p)
 #define OPENMAC_GETDMAOBSERVER()                            IORD_16DIRECT(OPENMAC_DOB_BASE, 0)
+#define OPENMAC_GETPENDINGIRQ()                             alt_irq_pending()
 
 #define OPENMAC_TIMER_OFFSET(timer_p)                       (timer_p << 4)
 
@@ -69,7 +71,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPENMAC_TIMERIRQENABLE(timer_p)                     IOWR_8DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_OFFSET(timer_p) + 0x0, 1)
 #define OPENMAC_TIMERIRQACK(timer_p)                        IOWR_8DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_OFFSET(timer_p) + 0x1, 1)
 #define OPENMAC_TIMERSETCOMPAREVALUE(timer_p, val_p)        IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_OFFSET(timer_p) + 0x4, val_p)
-#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidthNs_p)   IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_OFFSET(timer_p) + 0x8, OMETH_NS_2_TICKS(pulseWidthNs_p))
+
+#if (OPENMAC_TIMERPULSECONTROL != 0)
+#define OPENMAC_TIMERIRQSETPULSE(timer_p, pulseWidth_p)     IOWR_32DIRECT(OPENMAC_TIMER_BASE, OPENMAC_TIMER_OFFSET(timer_p) + 0x8, pulseWidth_p)
+#endif
+
 #define OPENMAC_TIMERGETTIMEVALUE()                         IORD_32DIRECT(OPENMAC_TIMER_BASE, 0xC)
 
 //------------------------------------------------------------------------------

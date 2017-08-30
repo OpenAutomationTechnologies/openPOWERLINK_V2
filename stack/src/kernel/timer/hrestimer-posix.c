@@ -207,7 +207,7 @@ tOplkError hrestimer_exit(void)
     {
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
         timer_delete(pTimerInfo->timer);
-        pTimerInfo->eventArg.timerHdl = 0;
+        pTimerInfo->eventArg.timerHdl.handle = 0;
         pTimerInfo->pfnCallback = NULL;
     }
 
@@ -269,7 +269,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[0];
         for (index = 0; index < TIMER_COUNT; index++, pTimerInfo++)
         {
-            if (pTimerInfo->eventArg.timerHdl == 0)
+            if (pTimerInfo->eventArg.timerHdl.handle == 0)
             {   // free structure found
                 break;
             }
@@ -279,7 +279,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
             DEBUG_LVL_ERROR_TRACE("%s() Invalid timer index:%d\n", __func__, index);
             return kErrorTimerNoTimerCreated;
         }
-        pTimerInfo->eventArg.timerHdl = HDL_INIT(index);
+        pTimerInfo->eventArg.timerHdl.handle = HDL_INIT(index);
     }
     else
     {
@@ -307,8 +307,8 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     /* increment timer handle
      * (if timer expires right after this statement, the user
      * would detect an unknown timer handle and discard it) */
-    pTimerInfo->eventArg.timerHdl = HDL_INC(pTimerInfo->eventArg.timerHdl);
-    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl;
+    pTimerInfo->eventArg.timerHdl.handle = HDL_INC(pTimerInfo->eventArg.timerHdl.handle);
+    *pTimerHdl_p = pTimerInfo->eventArg.timerHdl.handle;
 
     /* initialize timer info */
     pTimerInfo->eventArg.argument.value = argument_p;
@@ -337,7 +337,7 @@ tOplkError hrestimer_modifyTimer(tTimerHdl* pTimerHdl_p, ULONGLONG time_p,
     }
 
     DEBUG_LVL_TIMERH_TRACE("%s() timer:%lx timeout=%ld:%ld\n", __func__,
-                            pTimerInfo->eventArg.timerHdl,
+                            pTimerInfo->eventArg.timerHdl.handle,
                             RelTime.it_value.tv_sec, RelTime.it_value.tv_nsec);
 
     timer_settime(pTimerInfo->timer, 0, &RelTime, NULL);
@@ -383,7 +383,7 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
             return kErrorTimerInvalidHandle;
         }
         pTimerInfo = &hresTimerInstance_l.aTimerInfo[index];
-        if (pTimerInfo->eventArg.timerHdl != *pTimerHdl_p)
+        if (pTimerInfo->eventArg.timerHdl.handle != *pTimerHdl_p)
         {   // invalid handle
             return ret;
         }
@@ -395,10 +395,45 @@ tOplkError hrestimer_deleteTimer(tTimerHdl* pTimerHdl_p)
     timer_settime(pTimerInfo->timer, 0, &relTime, NULL);
 
     *pTimerHdl_p = 0;
-    pTimerInfo->eventArg.timerHdl = 0;
+    pTimerInfo->eventArg.timerHdl.handle = 0;
     pTimerInfo->pfnCallback = NULL;
 
     return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Control external synchronization interrupt
+
+This function enables/disables the external synchronization interrupt. If the
+external synchronization interrupt is not supported, the call is ignored.
+
+\param  fEnable_p       Flag determines if sync should be enabled or disabled.
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_controlExtSyncIrq(BOOL fEnable_p)
+{
+    UNUSED_PARAMETER(fEnable_p);
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Set external synchronization interrupt time
+
+This function sets the time when the external synchronization interrupt shall
+be triggered to synchronize the host processor. If the external synchronization
+interrupt is not supported, the call is ignored.
+
+\param  time_p          Time when the sync shall be triggered
+
+\ingroup module_hrestimer
+*/
+//------------------------------------------------------------------------------
+void hrestimer_setExtSyncIrqTime(tTimestamp time_p)
+{
+    UNUSED_PARAMETER(time_p);
 }
 
 //============================================================================//
