@@ -9,7 +9,7 @@ openPOWERLINK PCIe driver interface to PCP - Header file
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -46,6 +46,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/ctrlcal-mem.h>
 #include <common/dllcal.h>
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#include <common/timesync.h>
+#endif
+
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
@@ -74,41 +78,46 @@ typedef tOplkError (*tDrvIntfCbVeth)(const tFrameInfo* pFrameInfo_p);
 extern "C"
 {
 #endif
-tOplkError drvintf_init(void);
-void       drvintf_exit(void);
-tOplkError drvintf_executeCmd(tCtrlCmd* ctrlCmd_p);
-tOplkError drvintf_waitSyncEvent(void);
-tOplkError drvintf_readInitParam(tCtrlInitParam* pInitParam_p);
-tOplkError drvintf_storeInitParam(const tCtrlInitParam* pInitParam_p);
-tOplkError drvintf_getStatus(UINT16* pStatus_p);
-tOplkError drvintf_getHeartbeat(UINT16* pHeartbeat_p);
+tOplkError             drvintf_init(void);
+void                   drvintf_exit(void);
+tOplkError             drvintf_executeCmd(tCtrlCmd* ctrlCmd_p);
+tOplkError             drvintf_waitSyncEvent(void);
+tOplkError             drvintf_readInitParam(tCtrlInitParam* pInitParam_p);
+tOplkError             drvintf_storeInitParam(const tCtrlInitParam* pInitParam_p);
+tOplkError             drvintf_getStatus(UINT16* pStatus_p);
+tOplkError             drvintf_getHeartbeat(UINT16* pHeartbeat_p);
 #if defined(CONFIG_INCLUDE_VETH)
-tOplkError drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
-tOplkError drvintf_sendVethFrame(const tFrameInfo* pFrameInfo_p);
+tOplkError             drvintf_regVethHandler(tDrvIntfCbVeth pfnDrvIntfCbVeth_p);
+tOplkError             drvintf_sendVethFrame(const tFrameInfo* pFrameInfo_p);
 #endif
-tOplkError drvintf_sendAsyncFrame(tDllCalQueue queue_p,
-                                  size_t size_p,
-                                  const void* pData_p);
-tOplkError drvintf_writeErrorObject(UINT32 offset_p,
-                                    UINT32 errVal_p);
-tOplkError drvintf_readErrorObject(UINT32 offset_p,
-                                   UINT32* pErrVal_p);
-tOplkError drvintf_postEvent(const tEvent* pEvent_p);
-tOplkError drvintf_getEvent(tEvent* pK2UEvent_p,
-                            size_t* pSize_p);
-tOplkError drvintf_getPdoMem(void** ppPdoMem_p,
-                             size_t* pMemSize_p);
-tOplkError drvintf_freePdoMem(void** ppPdoMem_p,
-                              size_t memSize_p);
-tOplkError drvintf_getBenchmarkMem(void** ppBenchmarkMem_p);
-tOplkError drvintf_freeBenchmarkMem(void** ppBenchmarkMem_p);
-tOplkError drvintf_mapKernelMem(const void* pKernelMem_p,
-                                void** ppUserMem_p,
-                                size_t size_p);
-void       drvintf_unmapKernelMem(void** ppUserMem_p);
-tOplkError drvintf_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
-                                   const void* pBuf_p);
-ULONG      drvintf_getFileBufferSize(void);
+tOplkError             drvintf_sendAsyncFrame(tDllCalQueue queue_p,
+                                              size_t size_p,
+                                              const void* pData_p);
+tOplkError             drvintf_writeErrorObject(UINT32 offset_p,
+                                                UINT32 errVal_p);
+tOplkError             drvintf_readErrorObject(UINT32 offset_p,
+                                               UINT32* pErrVal_p);
+tOplkError             drvintf_postEvent(const tEvent* pEvent_p);
+tOplkError             drvintf_getEvent(tEvent* pK2UEvent_p,
+                                        size_t* pSize_p);
+tOplkError             drvintf_getPdoMem(void** ppPdoMem_p,
+                                         size_t* pMemSize_p);
+tOplkError             drvintf_freePdoMem(void** ppPdoMem_p,
+                                          size_t memSize_p);
+tOplkError             drvintf_getBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError             drvintf_freeBenchmarkMem(void** ppBenchmarkMem_p);
+tOplkError             drvintf_mapKernelMem(const void* pKernelMem_p,
+                                            void** ppUserMem_p,
+                                            size_t size_p);
+void                   drvintf_unmapKernelMem(void** ppUserMem_p);
+tOplkError             drvintf_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
+                                               const void* pBuf_p);
+ULONG                  drvintf_getFileBufferSize(void);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+tOplkError             drvintf_initTimesyncShm(void);
+tOplkError             drvintf_exitTimesyncShm(void);
+tTimesyncSharedMemory* drvintf_getTimesyncShm(void);
+#endif
 
 #ifdef __cplusplus
 }
