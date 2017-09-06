@@ -86,12 +86,16 @@ typedef struct
 /**
 \brief  Timesync shared memory
 
-This structure defines the timesync module shared memory. It is used to
-transfer time information from the kernel to the user layer.
+This structure defines the timesync module shared memory. These are used to
+transfer SoC time information from the kernel to the user layer and from the
+user to the kernel layer.
 */
 typedef struct
 {
-    tTimesyncSocTimeTripleBuf   socTime;    ///< Buffer to transfer SoC time
+    tTimesyncSocTimeTripleBuf   kernelToUserSocTime;    ///< Buffer to transfer SoC time information from kernel to user.
+#if defined(CONFIG_INCLUDE_NMT_MN)
+    tTimesyncSocTimeTripleBuf   userToKernelSocTime;    ///< Buffer to transfer SoC time information from user to kernel.
+#endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 } tTimesyncSharedMemory;
 
 #endif /* _INC_common_timesync_H_ */
