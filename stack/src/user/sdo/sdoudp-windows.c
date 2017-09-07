@@ -12,6 +12,7 @@ This file contains the implementation of the SDO over UDP protocol for Windows.
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,6 +43,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <common/oplkinc.h>
 #include <user/sdoudp.h>
+
+#include <winsock2.h>
+#include <windows.h>
 
 #include <errno.h>
 
@@ -81,8 +85,6 @@ typedef struct
 {
     SOCKET                      udpSocket;
     HANDLE                      threadHandle;
-    LPCRITICAL_SECTION          pCriticalSection;
-    CRITICAL_SECTION            criticalSection;
     BOOL                        fStopThread;
 } tSdoUdpSocketInstance;
 
@@ -114,20 +116,8 @@ The function initializes the SDO over UDP socket module.
 //------------------------------------------------------------------------------
 tOplkError sdoudp_initSocket(void)
 {
-    INT     error;
-    WSADATA wsa;
-
     OPLK_MEMSET(&instance_l, 0x00, sizeof(instance_l));
 
-    error = WSAStartup(MAKEWORD(2, 0), &wsa);
-    if (error != 0)
-        return kErrorSdoUdpNoSocket;
-
-    // Create critical section for access of instance variables
-    instance_l.pCriticalSection = &instance_l.criticalSection;
-    InitializeCriticalSection(instance_l.pCriticalSection);
-
-    instance_l.threadHandle = 0;
     instance_l.udpSocket = INVALID_SOCKET;
 
     return kErrorOk;
@@ -164,11 +154,21 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p)
 {
     struct sockaddr_in  addr;
     INT                 error;
-    BOOL                fTermError;
     ULONG               threadId;
+    WSADATA             wsa;
+    WORD                wVersionRequested;
 
     // Check parameter validity
     ASSERT(pSdoUdpCon_p != NULL);
+
+    wVersionRequested = MAKEWORD(2, 0);
+
+    error = WSAStartup(wVersionRequested, &wsa);
+    if (error != 0)
+    {
+        DEBUG_LVL_SDO_TRACE("%s(): WSAStartup() failed\n", __func__);
+        return kErrorSdoUdpNoSocket;
+    }
 
     instance_l.udpSocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (instance_l.udpSocket == INVALID_SOCKET)
@@ -224,7 +224,6 @@ tOplkError sdoudp_closeSocket(void)
 
     if (instance_l.threadHandle != 0)
     {   // listen thread was started -> close old thread
-
         fTermError = TerminateThread(instance_l.threadHandle, 0);
         if (fTermError == FALSE)
             return kErrorSdoUdpThreadError;
@@ -234,13 +233,12 @@ tOplkError sdoudp_closeSocket(void)
 
     if (instance_l.udpSocket != INVALID_SOCKET)
     {
-        error = close(instance_l.udpSocket);
+        error = closesocket(instance_l.udpSocket);
         instance_l.udpSocket = INVALID_SOCKET;
         if (error != 0)
             return kErrorSdoUdpSocketError;
     }
 
-    DeleteCriticalSection(instance_l.pCriticalSection);
     WSACleanup();
 
     return kErrorOk;
@@ -310,10 +308,7 @@ the SDO UDP module.
 //------------------------------------------------------------------------------
 void sdoudp_criticalSection(BOOL fEnable_p)
 {
-    if (fEnable_p)
-        EnterCriticalSection(instance_l.pCriticalSection);
-    else
-        LeaveCriticalSection(instance_l.pCriticalSection);
+    UNUSED_PARAMETER(fEnable_p);
 }
 
 //------------------------------------------------------------------------------
