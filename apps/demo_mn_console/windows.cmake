@@ -3,6 +3,7 @@
 # Windows definitions for console demo application
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Kalycito Infotech Private Limited.
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -56,6 +57,9 @@ ELSE ()
 ENDIF()
 
 SET(ARCH_LIBRARIES wpcap iphlpapi)
+
+# Windows socket function library
+SET(CMAKE_C_STANDARD_LIBRARIES "${CMAKE_C_STANDARD_LIBRARIES} ws2_32.lib")
 
 ################################################################################
 # Set architecture specific installation files
