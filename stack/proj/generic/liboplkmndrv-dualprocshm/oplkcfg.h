@@ -9,7 +9,7 @@ library without an OS which is using the dualprocshm interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2017, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -64,9 +64,7 @@ The generic defines are valid for the whole openPOWERLINK stack.
 #define CONFIG_INCLUDE_LEDK
 #define CONFIG_INCLUDE_SDO_ASND
 #define CONFIG_INCLUDE_VETH
-
-// Enable feature manually if the platform is supporting it (only C5 SoC and Zynq).
-//#define CONFIG_INCLUDE_SOC_TIME_FORWARD
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #ifndef BENCHMARK_MODULES
 #define BENCHMARK_MODULES                   (0 |\
