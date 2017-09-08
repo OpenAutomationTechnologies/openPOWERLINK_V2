@@ -10,7 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -43,6 +43,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <common/oplkinc.h>
 #include <common/target.h>
 
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+#include "time.h"
+#endif
+
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
 //============================================================================//
@@ -66,6 +70,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+#define USEC_TO_NSEC_FACTOR 1000U
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -290,6 +297,63 @@ tOplkError target_setDefaultGateway(UINT32 defaultGateway_p)
 
     return kErrorOk;
 }
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Get system time
+
+The function returns the current system time.
+
+\param[out]     pNetTime_p          Pointer to current system timestamp.
+\param[out]     pValidSystemTime_p  Pointer to flag which is set to indicate the
+                                    system time is valid or not.
+
+\return The function returns a tOplkError code.
+
+\ingroup module_target
+*/
+//------------------------------------------------------------------------------
+tOplkError target_getSystemTime(tNetTime* pNetTime_p, BOOL* pValidSystemTime_p)
+{
+    time_t        currentTime;
+    LARGE_INTEGER tickPerSecond;
+    LARGE_INTEGER tick;
+
+    if ((pNetTime_p == NULL) || (pValidSystemTime_p == NULL))
+        return kErrorNoResource;
+
+    // Get the high resolution counter's accuracy and the current time in ticks
+    if ((QueryPerformanceFrequency(&tickPerSecond) != 1) ||
+        (QueryPerformanceCounter(&tick) != 1))
+    {
+        *pValidSystemTime_p = FALSE;
+        return kErrorGeneralError;
+    }
+
+    // Get seconds component of current timestamp
+    time(&currentTime);
+
+    if (currentTime == -1)
+    {
+        *pValidSystemTime_p = FALSE;
+        DEBUG_LVL_ERROR_TRACE("%s(): Failed! Invalid time stamp.\n",
+                              __func__);
+        return kErrorGeneralError;
+    }
+
+    // Set seconds component of current timestamp
+    pNetTime_p->sec = (UINT32)currentTime;
+
+    // Windows supports microsecond level accuracy timestamps. So convert microseconds to nanoseconds
+    // Set the nanoseconds component of current timestamp
+    pNetTime_p->nsec = (UINT32)((tick.QuadPart % tickPerSecond.QuadPart) * USEC_TO_NSEC_FACTOR);
+
+    *pValidSystemTime_p = TRUE;
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
