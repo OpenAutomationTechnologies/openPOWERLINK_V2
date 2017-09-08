@@ -11,6 +11,7 @@ This file contains the hostif sync implementation for the user CAL timesync modu
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -209,7 +210,7 @@ The function returns the reference to the timesync shared memory.
 
 \return The function returns a pointer to the timesync shared memory.
 
-\ingroup module_timesynckcal
+\ingroup module_timesyncucal
 */
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesyncucal_getSharedMemory(void)
