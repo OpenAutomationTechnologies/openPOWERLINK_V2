@@ -13,7 +13,7 @@ equivalent configurations in user and kernel layers of the stack.
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronik GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -63,6 +63,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_PDO
 #define CONFIG_INCLUDE_CFM
 #define CONFIG_INCLUDE_VETH
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 
