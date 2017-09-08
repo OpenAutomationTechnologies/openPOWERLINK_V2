@@ -406,7 +406,7 @@
   <parameter name="AUTO_CLK100_CLOCK_DOMAIN" value="1" />
   <parameter name="AUTO_CLK100_RESET_DOMAIN" value="1" />
   <parameter name="cpu0_resetCpuBridge" value="flash_bridge" />
-  <parameter name="tcmemSize" value="20480" />
+  <parameter name="tcmemSize" value="21504" />
  </module>
  <module
    kind="altera_generic_tristate_controller"
