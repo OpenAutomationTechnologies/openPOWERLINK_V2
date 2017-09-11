@@ -68,7 +68,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-#define FWSTORE_READ_MODE       "r"
+#define FWSTORE_READ_MODE       "rb"
 #define FWSTORE_FILEPATH_LENGTH 256u
 
 //------------------------------------------------------------------------------

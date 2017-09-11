@@ -205,7 +205,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 // Set to true if a modular device (DS302-F) is created
-#if 0
+#if defined(CONFIG_INCLUDE_MODULAR_DEVICE)
 #define CONFIG_FF_MODULAR_DEVICE            (NMT_FEATUREFLAGS_MODULAR_DEVICE)
 #else
 #define CONFIG_FF_MODULAR_DEVICE            0

@@ -18,7 +18,7 @@ a shared memory byte for each circular buffer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -222,7 +222,7 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
         }
     }
 
-    pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
+    pInstance_p->pCircBuf = (UINT8*)pInstance_p->pCircBufHeader + sizeof(tCircBufHeader);
 
     return kCircBufOk;
 }
@@ -298,7 +298,7 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
         }
 
         pInstance_p->pCircBufHeader = (tCircBufHeader*)pBuffAddr;
-        pInstance_p->pCircBuf = ((UINT8*)pInstance_p->pCircBufHeader) + sizeof(tCircBufHeader);
+        pInstance_p->pCircBuf = (UINT8*)pInstance_p->pCircBufHeader + sizeof(tCircBufHeader);
     }
 
     return kCircBufOk;

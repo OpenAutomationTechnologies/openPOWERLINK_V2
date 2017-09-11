@@ -155,6 +155,8 @@ tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
             goto EXIT;
         }
 
+        memset(pEntry, 0, sizeof(tFirmwareInfoEntry));
+
         ret = parseLine(pStore_p, pLine, &pEntry->fwInfo);
         if (ret == kFwReturnOk)
         {
@@ -168,6 +170,15 @@ tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
         else
         {
             free(pEntry);
+
+            if (ret == kFwReturnIgnoreInfoFileLine)
+            {
+                ret = kFwReturnOk;
+            }
+            else
+            {
+                break;
+            }
         }
 
         pLine = strtok(NULL, FIRMWAREINFO_ASCII_LINE_SEPERATOR);
@@ -269,6 +280,7 @@ static tFirmwareRet parseLine(tFirmwareStoreHandle pFwStore_p, char* pLine_p,
 
     if (result != FIRMWAREINFO_NUMBER_OF_VALUES_PER_LINE)
     {
+        ret = kFwReturnIgnoreInfoFileLine;
         goto EXIT;
     }
 

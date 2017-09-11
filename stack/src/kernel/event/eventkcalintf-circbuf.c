@@ -313,7 +313,7 @@ tOplkError eventkcal_processEventCircbuf(tEventQueue eventQueue_p)
         return kErrorGeneralError;
     }
     pEvent = (tEvent*)aRxBuffer_l[eventQueue_p];
-    pEvent->eventArgSize = (readSize - sizeof(tEvent));
+    pEvent->eventArgSize = (UINT)(readSize - sizeof(tEvent));
 
     if (pEvent->eventArgSize > 0)
         pEvent->eventArg.pEventArg = &aRxBuffer_l[eventQueue_p][sizeof(tEvent)];

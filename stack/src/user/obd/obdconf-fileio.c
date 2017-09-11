@@ -13,7 +13,7 @@ store, load, restore functionality.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -46,33 +46,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <oplk/obd.h>
 #include <user/obdconf.h>
 
-#include <sys/stat.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
-
 #if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)
 
-#if (TARGET_SYSTEM == _WIN32_)
+#if (TARGET_SYSTEM == _LINUX_)
 
-#pragma warning(disable:4996)   // Disable error on strcpy
-#include <io.h>
-#include <sys/types.h>
-#include <sys/utime.h>
-#include <sys/timeb.h>
-#include <time.h>
-#include <direct.h>
-#include <string.h>
-
-#elif (TARGET_SYSTEM == _LINUX_)
-
-#include <sys/io.h>
-#include <unistd.h>
-#include <sys/vfs.h>
-#include <sys/types.h>
-#include <sys/timeb.h>
-#include <utime.h>
 #include <limits.h>
 
 #endif
@@ -87,15 +64,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #if (TARGET_SYSTEM == _WIN32_)
 
 #define MAX_PATH_LEN    _MAX_PATH
-#define flush           _commit
 
 #elif (TARGET_SYSTEM == _LINUX_)
 
-#define O_BINARY        0
 #define MAX_PATH_LEN    PATH_MAX
-#define flush           fsync
 
 #endif
+
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
@@ -124,7 +99,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    int         hBkupArchiveFile;       ///< Handle for the opened OD part archive
+    FILE*       pFdBkupArchiveFile;     ///< Handle for the opened OD part archive
     const char* pBackupPath;            ///< The parent directory for the archives
     BOOL        fOpenForWrite;          ///< Flag to indicate whether the archive is opened for a write operation
     UINT16      odDataCrc;              ///< 2 Byte CRC for the last opened archive
@@ -213,7 +188,7 @@ tOplkError obdconf_init(void)
 
     // Get current instance entry and initialize all members
     OPLK_MEMSET(pInstEntry, 0, sizeof(tObdConfInstance));
-    pInstEntry->hBkupArchiveFile = -1;
+    pInstEntry->pFdBkupArchiveFile = NULL;
     pInstEntry->curOdPart = kObdPartNo;
 
     return ret;
@@ -259,7 +234,6 @@ Existing archive is set invalid.
 tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p)
 {
     tOplkError          ret = kErrorObdStoreHwError;
-    int                 writeCount;
     char                aFilePath[MAX_PATH_LEN];
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
 
@@ -269,7 +243,7 @@ tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p)
         goto Exit;
 
     // Is the file already opened?
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
@@ -278,11 +252,10 @@ tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p)
     // Open file for writing
     pInstEntry->fOpenForWrite = TRUE;
     pInstEntry->curOdPart = odPart_p;
-    pInstEntry->hBkupArchiveFile = open(aFilePath, O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666);
-    if (pInstEntry->hBkupArchiveFile < 0)
+    pInstEntry->pFdBkupArchiveFile = fopen(aFilePath, "wb");
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         pInstEntry->curOdPart = kObdPartNo;
-        pInstEntry->hBkupArchiveFile = -1;
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
@@ -291,10 +264,11 @@ tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p)
     pInstEntry->odDataCrc = obdconf_calculateCrc16(0,
                                                    &obdConfSignature_l,
                                                    sizeof(obdConfSignature_l));
-    writeCount = write(pInstEntry->hBkupArchiveFile,
-                       &obdConfSignature_l,
-                       sizeof(obdConfSignature_l));
-    if (writeCount != (int)sizeof(obdConfSignature_l))
+    fwrite(&obdConfSignature_l,
+           sizeof(obdConfSignature_l),
+           1,
+           pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -304,10 +278,11 @@ tOplkError obdconf_createPart(tObdPart odPart_p, UINT32 odPartSignature_p)
     pInstEntry->odDataCrc = obdconf_calculateCrc16(pInstEntry->odDataCrc,
                                                    &odPartSignature_p,
                                                    sizeof(odPartSignature_p));
-    writeCount = write(pInstEntry->hBkupArchiveFile,
-                       &odPartSignature_p,
-                       sizeof(odPartSignature_p));
-    if (writeCount != (int)sizeof(odPartSignature_p))
+    fwrite(&odPartSignature_p,
+           sizeof(odPartSignature_p),
+           1,
+           pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -337,7 +312,6 @@ tOplkError obdconf_deletePart(tObdPart odPart_p)
     tOplkError          ret = kErrorObdStoreHwError;
     char                aFilePath[MAX_PATH_LEN];
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
-    int                 writeCount;
     UINT32              data = (UINT32)~0U;
 
     // Get the file path for current OD part and instance
@@ -346,25 +320,25 @@ tOplkError obdconf_deletePart(tObdPart odPart_p)
         goto Exit;
 
     // Use the local file handle to avoid race condition
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
     }
 
-    pInstEntry->hBkupArchiveFile = open(aFilePath, O_WRONLY | O_BINARY, 0666);
-    if (pInstEntry->hBkupArchiveFile < 0)
+    pInstEntry->pFdBkupArchiveFile = fopen(aFilePath, "wb");
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
 
     // Set file position to OD part signature
-    lseek(pInstEntry->hBkupArchiveFile, sizeof(obdConfSignature_l), SEEK_SET);
+    fseek(pInstEntry->pFdBkupArchiveFile, sizeof(obdConfSignature_l), SEEK_SET);
 
     // Mark the signature as invalid
-    writeCount = write(pInstEntry->hBkupArchiveFile, &data, sizeof(data));
-    if (writeCount != (int)sizeof(data))
+    fwrite(&data, sizeof(data), 1, pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -372,17 +346,14 @@ tOplkError obdconf_deletePart(tObdPart odPart_p)
 
     // $$ Ideally recalculate the CRC and write to make the file as uncorrupted
 
-    // Sync file to disc
-    flush(pInstEntry->hBkupArchiveFile);
-
     ret = kErrorOk;
 
 Exit:
     // Close archive file and set file handle invalid
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
-        close(pInstEntry->hBkupArchiveFile);
-        pInstEntry->hBkupArchiveFile = -1;
+        fclose(pInstEntry->pFdBkupArchiveFile);
+        pInstEntry->pFdBkupArchiveFile = NULL;
     }
 
     return ret;
@@ -415,7 +386,7 @@ tOplkError obdconf_openReadPart(tObdPart odPart_p)
         goto Exit;
 
     // Is the file already opened?
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
@@ -424,19 +395,18 @@ tOplkError obdconf_openReadPart(tObdPart odPart_p)
     // Open backup archive file for read
     pInstEntry->fOpenForWrite = FALSE;
     pInstEntry->curOdPart = odPart_p;
-    pInstEntry->hBkupArchiveFile = open(aFilePath, O_RDONLY | O_BINARY, 0666);
+    pInstEntry->pFdBkupArchiveFile = fopen(aFilePath, "rb");
 
-    if (pInstEntry->hBkupArchiveFile < 0)
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         // Backup archive file could not be opened
         pInstEntry->curOdPart = kObdPartNo;
-        pInstEntry->hBkupArchiveFile = -1;
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
 
     // Set file position to the object data part
-    lseek(pInstEntry->hBkupArchiveFile, 2 * sizeof(UINT32), SEEK_SET);
+    fseek(pInstEntry->pFdBkupArchiveFile, 2 * sizeof(UINT32), SEEK_SET);
 
     ret = kErrorOk;
 
@@ -465,7 +435,6 @@ archive.
 tOplkError obdconf_closePart(tObdPart odPart_p)
 {
     tOplkError          ret = kErrorOk;
-    int                 writeCount;
     UINT8               data;
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
 
@@ -476,7 +445,7 @@ tOplkError obdconf_closePart(tObdPart odPart_p)
     }
 
     // Is the file not opened?
-    if (pInstEntry->hBkupArchiveFile < 0)
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
@@ -487,22 +456,27 @@ tOplkError obdconf_closePart(tObdPart odPart_p)
     {
         // Write CRC16 to end of the file (in big endian format)
         data = (UINT8)((pInstEntry->odDataCrc >> 8) & 0xFF);
-        writeCount = write(pInstEntry->hBkupArchiveFile, (UINT8*)&data, sizeof(data));
-        data = (UINT8)((pInstEntry->odDataCrc >> 0) & 0xFF);
-        writeCount += write(pInstEntry->hBkupArchiveFile, (UINT8*)&data, sizeof(data));
-        if (writeCount != (int)(sizeof(data) * 2))
+        fwrite(&data, sizeof(data), 1, pInstEntry->pFdBkupArchiveFile);
+        if (ferror(pInstEntry->pFdBkupArchiveFile))
         {   // Save error code and close the file
             ret = kErrorObdStoreHwError;
+            goto CloseExit;
         }
 
-        // Sync file to disc
-        flush(pInstEntry->hBkupArchiveFile);
+        data = (UINT8)((pInstEntry->odDataCrc >> 0) & 0xFF);
+        fwrite(&data, sizeof(data), 1, pInstEntry->pFdBkupArchiveFile);
+        if (ferror(pInstEntry->pFdBkupArchiveFile))
+        {   // Save error code and close the file
+            ret = kErrorObdStoreHwError;
+            goto CloseExit;
+        }
     }
 
+CloseExit:
     // Close archive file and set file handle invalid
-    close(pInstEntry->hBkupArchiveFile);
+    fclose(pInstEntry->pFdBkupArchiveFile);
     pInstEntry->curOdPart = kObdPartNo;
-    pInstEntry->hBkupArchiveFile = -1;
+    pInstEntry->pFdBkupArchiveFile = NULL;
 
 Exit:
     return ret;
@@ -528,7 +502,6 @@ corresponding part archive.
 tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData_p, size_t size_p)
 {
     tOplkError          ret = kErrorObdStoreHwError;
-    int                 writeCount;
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
 
     if (odPart_p != pInstEntry->curOdPart)
@@ -538,7 +511,7 @@ tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData_p, size_t size
     }
 
     // Is the file not opened?
-    if (pInstEntry->hBkupArchiveFile < 0)
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
@@ -546,8 +519,8 @@ tOplkError obdconf_storePart(tObdPart odPart_p, const void* pData_p, size_t size
 
     // Write current OD data to the file and calculate the CRC for it
     pInstEntry->odDataCrc = obdconf_calculateCrc16(pInstEntry->odDataCrc, pData_p, size_p);
-    writeCount = write(pInstEntry->hBkupArchiveFile, pData_p, size_p);
-    if (writeCount != (int)size_p)
+    fwrite(pData_p, size_p, 1, pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -581,8 +554,8 @@ tOplkError obdconf_loadPart(tObdPart odPart_p,
                             size_t size_p)
 {
     tOplkError          ret = kErrorObdStoreHwError;
-    int                 readCount;
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
+    size_t              count;
 
     if (odPart_p != pInstEntry->curOdPart)
     {
@@ -591,21 +564,21 @@ tOplkError obdconf_loadPart(tObdPart odPart_p,
     }
 
     // Is the file not opened?
-    if (pInstEntry->hBkupArchiveFile < 0)
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
     }
 
     // Read OD data from current file position
-    readCount = read(pInstEntry->hBkupArchiveFile, pData_p, size_p);
-    if (readCount < 0)
+    count = fread(pData_p, size_p, 1, pInstEntry->pFdBkupArchiveFile);
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
 
-    if (readCount != (int)size_p)
+    if (feof(pInstEntry->pFdBkupArchiveFile))
     {
         ret = kErrorObdStoreDataLimitExceeded;
         goto Exit;
@@ -717,11 +690,10 @@ of the configuration data.
 tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature_p)
 {
     tOplkError          ret = kErrorOk;
-    int                 readCount;
     UINT32              readTargetSign;
     UINT32              readOdSign;
     UINT8               aTempBuffer[8];
-    int                 count;
+    size_t              count;
     UINT16              dataCrc;
     tObdConfInstance*   pInstEntry = &aObdConfInstance_l[0];
     char                aFilePath[MAX_PATH_LEN];
@@ -732,15 +704,15 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature
         goto Exit;
 
     // Use the local file handle to avoid race conditions
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
         ret = kErrorObdStoreInvalidState;
         goto Exit;
     }
 
     // Open backup archive file for read
-    pInstEntry->hBkupArchiveFile = open(aFilePath, O_RDONLY | O_BINARY, 0666);
-    if (pInstEntry->hBkupArchiveFile < 0)
+    pInstEntry->pFdBkupArchiveFile = fopen(aFilePath, "rb");
+    if (pInstEntry->pFdBkupArchiveFile == NULL)
     {
         // Backup archive file could not be opened
         ret = kErrorObdStoreHwError;
@@ -748,21 +720,21 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature
     }
 
     // Set file position to the begin of the file
-    lseek(pInstEntry->hBkupArchiveFile, 0, SEEK_SET);
+    fseek(pInstEntry->pFdBkupArchiveFile, 0, SEEK_SET);
 
     // Read target signature and calculate the CRC for it
-    readCount = read(pInstEntry->hBkupArchiveFile, &readTargetSign, sizeof(readTargetSign));
+    count = fread(&readTargetSign, sizeof(readTargetSign), 1, pInstEntry->pFdBkupArchiveFile);
     dataCrc = obdconf_calculateCrc16(0, &readTargetSign, sizeof(readTargetSign));
-    if (readCount != (int)sizeof(readTargetSign))
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
     }
 
     // Read OD signature and calculate the CRC for it
-    readCount = read(pInstEntry->hBkupArchiveFile, &readOdSign, sizeof(readOdSign));
+    count = fread(&readOdSign, sizeof(readOdSign), 1, pInstEntry->pFdBkupArchiveFile);
     dataCrc = obdconf_calculateCrc16(dataCrc, &readOdSign, sizeof(readOdSign));
-    if (readCount != (int)sizeof(readOdSign))
+    if (ferror(pInstEntry->pFdBkupArchiveFile) || feof(pInstEntry->pFdBkupArchiveFile) || (count == 0))
     {
         ret = kErrorObdStoreHwError;
         goto Exit;
@@ -776,11 +748,11 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature
     }
 
     // Calculate OD data CRC over all data bytes
-    for (;;)
+    while (!feof(pInstEntry->pFdBkupArchiveFile))
     {
-        count = read(pInstEntry->hBkupArchiveFile, &aTempBuffer[0], sizeof(aTempBuffer));
-        if (count > 0)
-            dataCrc = obdconf_calculateCrc16(dataCrc, &aTempBuffer[0], (size_t)count);
+        count = fread(&aTempBuffer[0], 1, sizeof(aTempBuffer), pInstEntry->pFdBkupArchiveFile);
+        if (!ferror(pInstEntry->pFdBkupArchiveFile) && (count > 0))
+            dataCrc = obdconf_calculateCrc16(dataCrc, &aTempBuffer[0], count);
         else
             break;
     }
@@ -793,10 +765,10 @@ tOplkError obdconf_getPartArchiveState(tObdPart odPart_p, UINT32 odPartSignature
     }
 
 Exit:
-    if (pInstEntry->hBkupArchiveFile >= 0)
+    if (pInstEntry->pFdBkupArchiveFile != NULL)
     {
-        close(pInstEntry->hBkupArchiveFile);
-        pInstEntry->hBkupArchiveFile = -1;
+        fclose(pInstEntry->pFdBkupArchiveFile);
+        pInstEntry->pFdBkupArchiveFile = NULL;
     }
 
     return ret;
@@ -907,4 +879,5 @@ Exit:
 }
 
 /// \}
+
 #endif // if (CONFIG_OBD_USE_STORE_RESTORE != FALSE)

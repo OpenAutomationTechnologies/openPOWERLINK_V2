@@ -8,7 +8,7 @@ This file contains the function declaration for the SDO sequence layer test.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -69,7 +69,7 @@ call the SDO command layer for the connection status.
 \return The function returns a tOplkError error code
 */
 typedef tOplkError (*sdoApiCbSeqTest)(const tAsySdoSeq* pSdoSeqData_p,
-                                      UINT dataSize_p);
+                                      size_t dataSize_p);
 
 /**
 \brief SDO command layer test callback function.
@@ -83,7 +83,7 @@ call the SDO sequence layer for the connection status.
 \return The function returns a tOplkError error code
 */
 typedef tOplkError (*sdoApiCbComTest)(const tAsySdoCom* pSdoComData_p,
-                                      UINT dataSize_p);
+                                      size_t dataSize_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

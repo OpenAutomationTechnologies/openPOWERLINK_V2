@@ -206,9 +206,9 @@ static tOplkError getMaxPdoSize(BYTE nodeId_p,
                                 UINT16* pMaxPdoSize_p,
                                 UINT32* pAbortCode_p);
 static tOplkError getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT* pChannelId_p);
-static UINT calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
-                           size_t* pRxPdoMemSize_p,
-                           size_t* pTxPdoMemSize_p);
+static size_t calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
+                             size_t* pRxPdoMemSize_p,
+                             size_t* pTxPdoMemSize_p);
 static tOplkError copyVarToPdo(BYTE* pPayload_p,
                                const tPdoMappObject* pMappObject_p,
                                UINT16 offsetInFrame_p);
@@ -1960,9 +1960,9 @@ The function calculates the size needed for the PDO memory.
 \return The function returns the size of the used PDO memory
 */
 //------------------------------------------------------------------------------
-static UINT calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
-                           size_t* pRxPdoMemSize_p,
-                           size_t* pTxPdoMemSize_p)
+static size_t calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
+                             size_t* pRxPdoMemSize_p,
+                             size_t* pTxPdoMemSize_p)
 {
     UINT                channelId;
     size_t              rxSize;

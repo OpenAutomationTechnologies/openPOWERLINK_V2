@@ -138,7 +138,7 @@ The function zeros the POWERLINK frame and builds a generic SDO command layer.
 */
 //------------------------------------------------------------------------------
 void sdocomint_initCmdFrameGeneric(tPlkFrame* pPlkFrame_p,
-                                   UINT plkFrameSize_p,
+                                   size_t plkFrameSize_p,
                                    const tSdoComCon* pSdoComCon_p,
                                    tAsySdoCom** pCommandFrame_p)
 {
@@ -172,7 +172,7 @@ void sdocomint_setCmdFrameHdrFlag(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
 
     flag = ami_getUint8Le(&pCommandFrame_p->flags);
     flag |= flag_p;
-    ami_setUint8Le(&pCommandFrame_p->flags,  flag);
+    ami_setUint8Le(&pCommandFrame_p->flags, flag);
 }
 
 //------------------------------------------------------------------------------
@@ -188,7 +188,7 @@ are overwritten.
 //------------------------------------------------------------------------------
 void sdocomint_overwriteCmdFrameHdrFlags(tAsySdoCom* pCommandFrame_p, UINT8 flag_p)
 {
-    ami_setUint8Le(&pCommandFrame_p->flags,  flag_p);
+    ami_setUint8Le(&pCommandFrame_p->flags, flag_p);
 }
 
 //------------------------------------------------------------------------------
@@ -201,9 +201,9 @@ The function sets the segment size header field of a command layer frame.
 \param[in]      size_p              Command layer segment size
 */
 //------------------------------------------------------------------------------
-void sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p, UINT size_p)
+void sdocomint_setCmdFrameHdrSegmSize(tAsySdoCom* pCommandFrame_p, size_t size_p)
 {
-    ami_setUint16Le(&pCommandFrame_p->segmentSizeLe, size_p);
+    ami_setUint16Le(&pCommandFrame_p->segmentSizeLe, (UINT16)size_p);
 }
 
 //------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ members.
 */
 //------------------------------------------------------------------------------
 void sdocomint_updateHdlTransfSize(tSdoComCon* pSdoComCon_p,
-                                   UINT tranferredBytes_p,
+                                   size_t tranferredBytes_p,
                                    BOOL fTransferComplete)
 {
     pSdoComCon_p->transferredBytes += tranferredBytes_p;
@@ -287,7 +287,7 @@ SOD sequence layer when new data is received.
 //------------------------------------------------------------------------------
 tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
                                const tAsySdoCom* pSdoCom_p,
-                               UINT dataSize_p)
+                               size_t dataSize_p)
 {
     tOplkError  ret;
 
@@ -301,9 +301,9 @@ tOplkError sdocomint_receiveCb(tSdoSeqConHdl sdoSeqConHdl_p,
 
     DEBUG_LVL_SDO_TRACE("%s(): 0x%X, First Byte of pSdoCom_p: 0x%02X, dataSize_p: 0x%04X\n",
                         __func__,
-                        sdoSeqConHdl_p,
+                        (UINT16)sdoSeqConHdl_p,
                         (UINT16)pSdoCom_p->aCommandData[0],
-                        dataSize_p);
+                        (UINT32)dataSize_p);
 
     return ret;
 }

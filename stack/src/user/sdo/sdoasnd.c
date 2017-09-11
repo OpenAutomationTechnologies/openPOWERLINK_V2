@@ -9,7 +9,7 @@ This file contains the implementation of the SDO over ASnd protocol.
 \ingroup module_sdo_asnd
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -189,7 +189,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         if (*pConnection == targetNodeId_p)
         {   // existing connection to target node found
             // save handle for higher layer
-            *pSdoConHandle_p = (count | SDO_ASND_HANDLE);
+            *pSdoConHandle_p = (tSdoConHdl)(count | SDO_ASND_HANDLE);
             return ret;
         }
         else if (*pConnection == 0)
@@ -211,7 +211,7 @@ tOplkError sdoasnd_initCon(tSdoConHdl* pSdoConHandle_p, UINT targetNodeId_p)
         pConnection = &sdoAsndInstance_l.aSdoAsndConnection[freeCon];
         *pConnection = targetNodeId_p;
         // save handle for higher layer
-        *pSdoConHandle_p = (freeCon | SDO_ASND_HANDLE);
+        *pSdoConHandle_p = (tSdoConHdl)(freeCon | SDO_ASND_HANDLE);
     }
 
     return ret;
@@ -234,13 +234,13 @@ The function sends data via an existing SDO over ASnd connection.
 //------------------------------------------------------------------------------
 tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p,
                             tPlkFrame* pSrcData_p,
-                            UINT32 dataSize_p)
+                            size_t dataSize_p)
 {
     tOplkError  ret;
     UINT        array;
     tFrameInfo  frameInfo;
 
-    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    array = ((UINT)sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
 
     if (array > CONFIG_SDO_MAX_CONNECTION_ASND)
         return kErrorSdoAsndInvalidHandle;
@@ -251,10 +251,10 @@ tOplkError sdoasnd_sendData(tSdoConHdl sdoConHandle_p,
     ami_setUint8Le(&pSrcData_p->dstNodeId, (UINT8)sdoAsndInstance_l.aSdoAsndConnection[array]);
     ami_setUint8Le(&pSrcData_p->srcNodeId, 0x00);                       // set source-nodeid (filled by DLL 0)
     // calc size (add Ethernet and ASnd header size)
-    dataSize_p += (UINT32)((UINT8*)&pSrcData_p->data.asnd.payload.sdoSequenceFrame - (UINT8*)pSrcData_p);
+    dataSize_p += (size_t)((UINT8*)&pSrcData_p->data.asnd.payload.sdoSequenceFrame - (UINT8*)pSrcData_p);
 
     // send function of DLL
-    frameInfo.frameSize = dataSize_p;
+    frameInfo.frameSize = (UINT)dataSize_p;
     frameInfo.frame.pBuffer = pSrcData_p;
 
     ret = dllucal_sendAsyncFrame(&frameInfo, kDllAsyncReqPrioGeneric);
@@ -280,7 +280,7 @@ tOplkError sdoasnd_deleteCon(tSdoConHdl sdoConHandle_p)
     tOplkError  ret = kErrorOk;
     UINT        array;
 
-    array = (sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
+    array = ((UINT)sdoConHandle_p & ~SDO_ASY_HANDLE_MASK);
     if (array > CONFIG_SDO_MAX_CONNECTION_ASND)
         return kErrorSdoAsndInvalidHandle;
 
@@ -351,7 +351,7 @@ static tOplkError sdoAsndCb(const tFrameInfo* pFrameInfo_p)
         }
     }
 
-    sdoConHdl = (count | SDO_ASND_HANDLE);
+    sdoConHdl = (tSdoConHdl)(count | SDO_ASND_HANDLE);
     sdoAsndInstance_l.pfnSdoAsySeqCb(sdoConHdl,
                                      &pFrame->data.asnd.payload.sdoSequenceFrame,
                                      (pFrameInfo_p->frameSize - 18));

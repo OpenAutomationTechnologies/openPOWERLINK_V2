@@ -289,7 +289,7 @@ tOplkError eventucal_processEventCircbuf(tEventQueue eventQueue_p)
     }
 
     pEvent = (tEvent*)aRxBuffer;
-    pEvent->eventArgSize = (readSize - sizeof(tEvent));
+    pEvent->eventArgSize = (UINT)(readSize - sizeof(tEvent));
 
     if (pEvent->eventArgSize > 0)
         pEvent->eventArg.pEventArg = &aRxBuffer[sizeof(tEvent)];

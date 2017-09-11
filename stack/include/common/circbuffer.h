@@ -7,7 +7,7 @@
 This file contains the definitions for the circular buffer library.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ typedef struct
 typedef struct
 {
     tCircBufHeader*     pCircBufHeader;             ///< Pointer to the circular buffer header
-    BYTE*               pCircBuf;                   ///< Pointer to the circular buffer
+    void*               pCircBuf;                   ///< Pointer to the circular buffer
     void*               pCircBufArchInstance;       ///< Pointer to architecture specific stuff
     UINT8               bufferId;                   ///< The id of the circular buffer
     VOIDFUNCPTR         pfnSigCb;                   ///< Pointer to the signaling callback function

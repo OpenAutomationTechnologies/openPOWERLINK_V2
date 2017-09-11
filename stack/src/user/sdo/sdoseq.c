@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Sequence Layer
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -75,7 +75,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define SEQ_NUM_MASK                    0xFC
 
-static const UINT32 SDO_SEQU_MAX_TIMEOUT_MS = (UINT32)86400000UL;   // [ms], 86400000 ms = 1 day
+static const UINT32 SDO_SEQU_MAX_TIMEOUT_MS = 86400000UL;       // [ms], 86400000 ms = 1 day
 
 //------------------------------------------------------------------------------
 // module global vars
@@ -131,7 +131,7 @@ typedef struct
     UINT8   ackIndex;       ///< Index of the next message which should become acknowledged
     UINT8   readIndex;      ///< Index between ackIndex and writeIndex to the next message for retransmission
     UINT8   aHistoryFrame[SDO_HISTORY_SIZE][SDO_SEQ_TX_HISTORY_FRAME_SIZE];    ///< Array of the history frames
-    UINT    aFrameSize[SDO_HISTORY_SIZE];           ///< Array of sizes of the history frames
+    size_t  aFrameSize[SDO_HISTORY_SIZE];           ///< Array of sizes of the history frames
     BOOL    afFrameFirstTxFailed[SDO_HISTORY_SIZE]; ///< Array of flags tagging frame as unsent
                                                     /**< Array of flags indicating that the first attempt to
                                                          forward a frame to a lower layer send function failed
@@ -212,7 +212,7 @@ static tSdoSeqInstance   sdoSeqInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError processState(UINT handle_p,
-                               UINT dataSize_p,
+                               size_t dataSize_p,
                                tPlkFrame* pData_p,
                                const tAsySdoSeq* pRecvFrame_p,
                                tSdoSeqEvent event_p);
@@ -236,36 +236,36 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
                                         tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p,
                                         const tAsySdoSeq* pRecvFrame_p,
-                                        UINT dataSize_p,
+                                        size_t dataSize_p,
                                         tPlkFrame* pData_p);
 static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                                       tSdoSeqConHdl sdoSeqConHdl_p,
                                       tSdoSeqEvent event_p,
                                       const tAsySdoSeq* pRecvFrame_p,
-                                      UINT dataSize_p);
+                                      size_t dataSize_p);
 static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p,
-                            UINT dataSize_p,
+                            size_t dataSize_p,
                             tPlkFrame* pData_p,
                             BOOL fFrameInHistory_p);
 static tOplkError sendToLowerLayer(const tSdoSeqCon* pSdoSeqCon_p,
-                                   UINT dataSize_p,
+                                   size_t dataSize_p,
                                    tPlkFrame* pFrame_p);
 static tOplkError receiveCb(tSdoConHdl conHdl_p,
                             const tAsySdoSeq* pSdoSeqData_p,
-                            UINT dataSize_p);
+                            size_t dataSize_p);
 static tOplkError initHistory(tSdoSeqCon* pSdoSeqCon_p);
 static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p,
                                     const tPlkFrame* pFrame_p,
-                                    UINT size_p,
+                                    size_t size_p,
                                     BOOL fTxFailed_p);
 static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p);
 static tOplkError deleteAckedFrameFromHistory(tSdoSeqCon* pSdoSeqCon_p,
                                               UINT8 recvSeqNumber_p);
 static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p,
                                   tPlkFrame** ppFrame_p,
-                                  UINT* pSize_p,
+                                  size_t* pSize_p,
                                   BOOL fInitRead_p);
-static UINT       getFreeHistoryEntries(const tSdoSeqCon* pSdoSeqCon_p);
+static UINT8      getFreeHistoryEntries(const tSdoSeqCon* pSdoSeqCon_p);
 static tOplkError setTimer(tSdoSeqCon* pSdoSeqCon_p, ULONG timeout_p);
 static void       processFinalTimeout(tSdoSeqCon* pSdoSeqCon_p,
                                       tSdoSeqConHdl sdoSeqConHdl_p);
@@ -421,7 +421,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
     tOplkError  ret = kErrorOk;
     UINT        count;
     UINT        freeCon;
-    tSdoConHdl  conHandle = ~0U;
+    tSdoConHdl  conHandle = (tSdoConHdl)~0U;
     tSdoSeqCon* pSdoSeqCon;
 
     // Check parameter validity
@@ -515,7 +515,7 @@ tOplkError sdoseq_initCon(tSdoSeqConHdl* pSdoSeqConHdl_p,
         }
     }
 
-    *pSdoSeqConHdl_p = (count | SDO_ASY_HANDLE);    // set handle
+    *pSdoSeqConHdl_p = (tSdoSeqConHdl)(count | SDO_ASY_HANDLE); // set handle
 
     ret = processState(count, 0, NULL, NULL, kSdoSeqEventInitCon);
 
@@ -540,13 +540,13 @@ The function sends data via an existing sequence layer connection.
 */
 //------------------------------------------------------------------------------
 tOplkError sdoseq_sendData(tSdoSeqConHdl sdoSeqConHdl_p,
-                           UINT dataSize_p,
+                           size_t dataSize_p,
                            tPlkFrame* pData_p)
 {
     tOplkError  ret;
     UINT        handle;
 
-    handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
+    handle = ((UINT)sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if connection ready
     if (sdoSeqInstance_l.aSdoSeqCon[handle].sdoSeqState == kSdoSeqStateIdle)
@@ -646,7 +646,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
     UINT            handle;
     tSdoSeqCon*     pSdoSeqCon;
 
-    handle = (sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
+    handle = ((UINT)sdoSeqConHdl_p & ~SDO_SEQ_HANDLE_MASK);
 
     // check if handle invalid
     if (handle >= CONFIG_SDO_MAX_CONNECTION_SEQ)
@@ -703,8 +703,8 @@ The function sets the sequence layer timeout.
 tOplkError sdoseq_setTimeout(UINT32 timeout_p)
 {
     // Adopt new SDO sequence layer timeout (truncated to an upper bound)
-    sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p,
-                                         SDO_SEQU_MAX_TIMEOUT_MS) / (SDO_SEQ_RETRY_COUNT + 1);
+    sdoSeqInstance_l.sdoSeqTimeout = min(timeout_p, SDO_SEQU_MAX_TIMEOUT_MS) /
+                                         (SDO_SEQ_RETRY_COUNT + 1);
 
     return kErrorOk;
 }
@@ -1186,7 +1186,7 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
                                         tSdoSeqConHdl sdoSeqConHdl_p,
                                         tSdoSeqEvent event_p,
                                         const tAsySdoSeq* pRecvFrame_p,
-                                        UINT dataSize_p,
+                                        size_t dataSize_p,
                                         tPlkFrame* pData_p)
 {
     tOplkError  ret = kErrorOk;
@@ -1419,7 +1419,7 @@ static tOplkError processStateWaitAck(tSdoSeqCon* pSdoSeqCon_p,
                                       tSdoSeqConHdl sdoSeqConHdl_p,
                                       tSdoSeqEvent event_p,
                                       const tAsySdoSeq* pRecvFrame_p,
-                                      UINT dataSize_p)
+                                      size_t dataSize_p)
 {
     tOplkError  ret = kErrorOk;
     UINT8       sendSeqNumCon;
@@ -1641,7 +1641,7 @@ The function processes the internal SDO sequence layer state machine.
 */
 //------------------------------------------------------------------------------
 static tOplkError processState(UINT handle_p,
-                               UINT dataSize_p,
+                               size_t dataSize_p,
                                tPlkFrame* pData_p,
                                const tAsySdoSeq* pRecvFrame_p,
                                tSdoSeqEvent event_p)
@@ -1655,7 +1655,7 @@ static tOplkError processState(UINT handle_p,
 #endif
 
     // get handle for higher layer
-    sdoSeqConHdl = handle_p | SDO_ASY_HANDLE;
+    sdoSeqConHdl = (tSdoSeqConHdl)(handle_p | SDO_ASY_HANDLE);
 
     // check if handle invalid
     if ((sdoSeqConHdl & ~SDO_SEQ_HANDLE_MASK) == SDO_SEQ_INVALID_HDL)
@@ -1752,7 +1752,7 @@ with information from pSdoSeqCon_p.
 */
 //------------------------------------------------------------------------------
 static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p,
-                            UINT dataSize_p,
+                            size_t dataSize_p,
                             tPlkFrame* pData_p,
                             BOOL fFrameInHistory_p)
 {
@@ -1761,8 +1761,8 @@ static tOplkError sendFrame(tSdoSeqCon* pSdoSeqCon_p,
     UINT8       aFrame[SDO_SEQ_FRAME_SIZE];
     tPlkFrame*  pFrame;
     tPlkFrame*  pFrameResend;
-    UINT        frameSizeResend;
-    UINT        freeEntries = 0;
+    size_t      frameSizeResend;
+    UINT8       freeEntries = 0;
 
     if (pData_p == NULL)
     {   // set pointer to own frame
@@ -1842,7 +1842,7 @@ The function sends an already created frame to the lower layer.
 */
 //------------------------------------------------------------------------------
 static tOplkError sendToLowerLayer(const tSdoSeqCon* pSdoSeqCon_p,
-                                   UINT dataSize_p,
+                                   size_t dataSize_p,
                                    tPlkFrame* pFrame_p)
 {
     tOplkError  ret = kErrorOk;
@@ -1892,7 +1892,7 @@ frames from the lower layer.
 //------------------------------------------------------------------------------
 static tOplkError receiveCb(tSdoConHdl conHdl_p,
                             const tAsySdoSeq* pSdoSeqData_p,
-                            UINT dataSize_p)
+                            size_t dataSize_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        count;
@@ -1992,7 +1992,7 @@ The function adds a frame to the history buffer.
 //------------------------------------------------------------------------------
 static tOplkError addFrameToHistory(tSdoSeqCon* pSdoSeqCon_p,
                                     const tPlkFrame* pFrame_p,
-                                    UINT size_p,
+                                    size_t size_p,
                                     BOOL fTxFailed_p)
 {
     tOplkError          ret = kErrorOk;
@@ -2041,7 +2041,7 @@ The function sends all frames stored in the Tx history buffer to lower layer.
 static tOplkError sendAllTxHistory(tSdoSeqCon* pSdoSeqCon_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        frameSize;
+    size_t      frameSize;
     tPlkFrame*  pFrame;
 
     ret = readFromHistory(pSdoSeqCon_p, &pFrame, &frameSize, TRUE);
@@ -2151,7 +2151,7 @@ The function reads a frame from the history buffer.
 //------------------------------------------------------------------------------
 static tOplkError readFromHistory(tSdoSeqCon* pSdoSeqCon_p,
                                   tPlkFrame** ppFrame_p,
-                                  UINT* pSize_p,
+                                  size_t* pSize_p,
                                   BOOL fInitRead_p)
 {
     tOplkError          ret = kErrorOk;
@@ -2225,13 +2225,9 @@ The function returns the number of free history entries.
 \return The function returns the number of free history entries.
 */
 //------------------------------------------------------------------------------
-static UINT getFreeHistoryEntries(const tSdoSeqCon* pSdoSeqCon_p)
+static UINT8 getFreeHistoryEntries(const tSdoSeqCon* pSdoSeqCon_p)
 {
-    UINT freeEntries;
-
-    freeEntries = (UINT)pSdoSeqCon_p->sdoSeqConHistory.freeEntries;
-
-    return freeEntries;
+    return pSdoSeqCon_p->sdoSeqConHistory.freeEntries;
 }
 
 //------------------------------------------------------------------------------
@@ -2309,7 +2305,7 @@ acknowledge from the other node.
 static tOplkError processSubTimeout(tSdoSeqCon* pSdoSeqCon_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        frameSize;
+    size_t      frameSize;
     tPlkFrame*  pFrame;
     UINT8       recvSeqNumCon;
 
@@ -2500,7 +2496,7 @@ static tOplkError sendHistoryOldestSegm(tSdoSeqCon* pSdoSeqCon_p,
                                         UINT8 recvSeqNumber_p)
 {
     tOplkError  ret = kErrorOk;
-    UINT        frameSize;
+    size_t      frameSize;
     tPlkFrame*  pFrame;
 
     // transmission on server for last segments

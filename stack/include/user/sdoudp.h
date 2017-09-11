@@ -8,7 +8,7 @@ The file contains definitions for the SDO over UDP protocol abstraction layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -49,17 +49,17 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // Size of max. UDP payload for a UDP frame transmitted over POWERLINK
 // Header for calculation: 20 (IPv4) + 8 (UDP) = 28 bytes
-#define SDO_MAX_RX_FRAME_SIZE_UDP      (C_DLL_MAX_ASYNC_MTU - 28)
+#define SDO_MAX_RX_FRAME_SIZE_UDP       (C_DLL_MAX_ASYNC_MTU - 28)
 
-#define SDOUDP_INADDR_ANY       0
+#define SDOUDP_INADDR_ANY               0
 
 //------------------------------------------------------------------------------
 // typedef
 //------------------------------------------------------------------------------
 typedef struct
 {
-    ULONG           ipAddr;     /// IP address in network byte order
-    ULONG           port;       /// Port in network byte order
+    UINT32          ipAddr;     /// IP address in network byte order
+    UINT16          port;       /// Port in network byte order
 } tSdoUdpCon;
 
 //------------------------------------------------------------------------------
@@ -73,15 +73,15 @@ extern "C"
 #if defined(CONFIG_INCLUDE_SDO_UDP)
 tOplkError sdoudp_init(tSequLayerReceiveCb pfnReceiveCb_p);
 tOplkError sdoudp_exit(void);
-tOplkError sdoudp_config(UINT32 ipAddr_p, UINT port_p);
+tOplkError sdoudp_config(UINT32 ipAddr_p, UINT16 port_p);
 tOplkError sdoudp_initCon(tSdoConHdl* pSdoConHandle_p,
                           UINT targetNodeId_p);
 tOplkError sdoudp_sendData(tSdoConHdl sdoConHandle_p,
                            tPlkFrame* pSrcData_p,
-                           UINT32 dataSize_p);
+                           size_t dataSize_p);
 void       sdoudp_receiveData(const tSdoUdpCon* pSdoUdpCon_p,
                               const tAsySdoSeq* pSdoSeqData_p,
-                              UINT dataSize_p);
+                              size_t dataSize_p);
 tOplkError sdoudp_delConnection(tSdoConHdl sdoConHandle_p);
 
 tOplkError sdoudp_initSocket(void);
@@ -90,7 +90,7 @@ tOplkError sdoudp_createSocket(tSdoUdpCon* pSdoUdpCon_p);
 tOplkError sdoudp_closeSocket(void);
 tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
                                const tPlkFrame* pSrcData_p,
-                               UINT32 dataSize_p);
+                               size_t dataSize_p);
 void       sdoudp_criticalSection(BOOL fEnable_p);
 tOplkError sdoudp_arpQuery(UINT32 remoteIpAddr_p);
 #endif

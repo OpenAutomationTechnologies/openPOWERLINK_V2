@@ -5,6 +5,30 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.6.1 {#sect_revision_v2_6_1}
+
+This is the latest release of the V2.6 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.6.1. For a detailed revision history
+refer to the Git source code history.
+
+### Changes:
+- Add documentation for Linux Zynq Hybrid design
+- Add documentation for Linux Zynq Emacps design
+- Enable activation of modular device feature flag
+
+### Fixes:
+- Fix Windows NDIS driver compilation
+- Fix fallback issue of CN from PreOp2 to PreOp1
+- Refactor obdcdc and obdconf to avoid conversion warnings
+- Fix warnings and issues with 64 bit systems
+- Fix issues in firmware manager
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.6.0 {#sect_revision_v2_6_0}
 
 This is the first release of the V2.6 release series. It contains new features

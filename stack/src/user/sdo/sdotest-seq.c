@@ -10,7 +10,7 @@ This file contains the implementation of the SDO Test Sequence Layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -78,7 +78,7 @@ typedef struct
                              UINT targetNodeId_p);                  ///< Init Connection function pointer
     tOplkError (*pfnSendData)(tSdoConHdl sdoConHandle_p,            ///< Send Data function pointer
                               tPlkFrame* pSrcData_p,
-                              UINT32 dataSize_p);                   ///< Send Data function pointer
+                              size_t dataSize_p);                   ///< Send Data function pointer
     tOplkError (*pfnDelCon)(tSdoConHdl sdoConHandle_p);             ///< Delete Connection function pointer
 } tSdoTestSeqFunc;
 
@@ -168,7 +168,7 @@ static tSdoTestSeq sdoTestSeqInst_l;
 //------------------------------------------------------------------------------
 static tOplkError conCb(tSdoConHdl sdoConHdl_p,
                         const tAsySdoSeq* pSdoSeqData_p,
-                        UINT dataSize_p);
+                        size_t dataSize_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -449,7 +449,7 @@ reception of SDO sequence layer frames.
 //------------------------------------------------------------------------------
 static tOplkError conCb(tSdoConHdl sdoConHdl_p,
                         const tAsySdoSeq* pSdoSeqData_p,
-                        UINT dataSize_p)
+                        size_t dataSize_p)
 {
     tOplkError ret;
 

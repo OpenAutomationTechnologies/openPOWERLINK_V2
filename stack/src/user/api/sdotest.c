@@ -85,8 +85,8 @@ static tOplkApiInitParam    initParam_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static tOplkError oplkCbSdoTestCom(const tAsySdoCom* asySdoCom_p, UINT dataSize_p);
-static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* asySdoSeq_p, UINT dataSize_p);
+static tOplkError oplkCbSdoTestCom(const tAsySdoCom* asySdoCom_p, size_t dataSize_p);
+static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* asySdoSeq_p, size_t dataSize_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -295,13 +295,13 @@ Callback function for SDO command layer test module.
 */
 //------------------------------------------------------------------------------
 static tOplkError oplkCbSdoTestCom(const tAsySdoCom* pAsySdoCom_p,
-                                   UINT dataSize_p)
+                                   size_t dataSize_p)
 {
     tOplkError          ret;
     tOplkApiEventArg    eventArg;
 
     eventArg.receivedSdoCom.pAsySdoCom = (tAsySdoCom*)pAsySdoCom_p;
-    eventArg.receivedSdoCom.dataSize = dataSize_p;
+    eventArg.receivedSdoCom.dataSize = (UINT)dataSize_p;
 
     ret = initParam_l.pfnCbEvent(kOplkApiEventReceivedSdoCom,
                                  &eventArg,
@@ -325,13 +325,13 @@ Callback function for SDO command layer test module.
 */
 //------------------------------------------------------------------------------
 static tOplkError oplkCbSdoTestSeq(const tAsySdoSeq* pAsySdoSeq_p,
-                                   UINT dataSize_p)
+                                   size_t dataSize_p)
 {
     tOplkError          ret = kErrorOk;
     tOplkApiEventArg    eventArg;
 
     eventArg.receivedSdoSeq.pAsySdoSeq = (tAsySdoSeq*)pAsySdoSeq_p;
-    eventArg.receivedSdoSeq.dataSize = dataSize_p;
+    eventArg.receivedSdoSeq.dataSize = (UINT)dataSize_p;
 
     ret = initParam_l.pfnCbEvent(kOplkApiEventReceivedSdoSeq,
                                  &eventArg,

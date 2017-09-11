@@ -8,7 +8,7 @@ The file contains definitions for the SDO Command Layer module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -62,10 +62,10 @@ by Index command.
 typedef struct
 {
     tSdoComConHdl       sdoComConHdl;           ///< Handle to SDO command layer connection
-    UINT                index;                  ///< Index to read/write
-    UINT                subindex;               ///< Sub-index to read/write
+    UINT16              index;                  ///< Index to read/write
+    UINT8               subindex;               ///< Sub-index to read/write
     void*               pData;                  ///< Pointer to data which should be transfered
-    UINT                dataSize;               ///< Size of data to be transfered
+    size_t              dataSize;               ///< Size of data to be transfered
     UINT                timeout;                ///< Timeout: not supported in this version of openPOWERLINK
     tSdoAccessType      sdoAccessType;          ///< The SDO access type (Read or Write) for this transfer
     tSdoFinishedCb      pfnSdoFinishedCb;       ///< Pointer to callback function which will be called when transfer is finished.
@@ -74,7 +74,7 @@ typedef struct
     UINT                multiAccCnt;            ///< Count of multiple object access array elements aggregated in one transfered by local client
     void*               pMultiBuffer;           ///< Pointer to buffer for multiple object transfer frame storage.
                                                 /**< Provided buffer has to remain unchanged until the transfer has finished. */
-    UINT                multiBufSize;           ///< Buffer size for multiple object transfer frame storage.
+    size_t              multiBufSize;           ///< Buffer size for multiple object transfer frame storage.
     void*               pUserArg;               ///< User definable argument pointer
 } tSdoComTransParamByIndex;
 

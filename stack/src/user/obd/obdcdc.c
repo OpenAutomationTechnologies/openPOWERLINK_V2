@@ -11,7 +11,7 @@ and write the configured data into the object dictionary.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -41,49 +41,15 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#define _CRT_NONSTDC_NO_WARNINGS    // for MSVC 2005 or higher
-
 #include <common/oplkinc.h>
-#include <user/obdu.h>
 #include <oplk/obdcdc.h>
+#include <user/obdu.h>
 #include <common/ami.h>
 #include <user/eventu.h>
 
 #if defined(CONFIG_INCLUDE_CFM)
 
-#include <sys/stat.h>
-#include <assert.h>
-#include <stdlib.h>
-#include <fcntl.h>
 #include <errno.h>
-
-#if (TARGET_SYSTEM == _WIN32_)
-
-#include <io.h>
-#include <sys/types.h>
-#include <sys/utime.h>
-#include <sys/timeb.h>
-#include <time.h>
-#include <direct.h>
-#include <string.h>
-
-#elif (TARGET_SYSTEM == _LINUX_)
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/timeb.h>
-#include <utime.h>
-#include <limits.h>
-
-#elif (TARGET_SYSTEM == _VXWORKS_)
-
-#include "ioLib.h"
-
-#elif (TARGET_SYSTEM == _NO_OS_)
-
-#include <unistd.h>
-
-#endif
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -109,23 +75,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
-#if (TARGET_SYSTEM == _WIN32_)
-
-#define flush                           _commit
-#define mode_t                          int
-
-#elif (TARGET_SYSTEM == _LINUX_)
-
-#define O_BINARY                        0
-#define _MAX_PATH                       PATH_MAX
-#define flush                           fsync
-
-#elif (TARGET_SYSTEM == _VXWORKS_)
-
-#define O_BINARY                        0
-
-#endif
-
 #if ((TARGET_SYSTEM == _NO_OS_) && (DEV_SYSTEM == _DEV_NIOS2_))
 #define OBDCDC_DISABLE_FILE_SUPPORT     TRUE
 #endif
@@ -136,14 +85,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if ((TARGET_SYSTEM == _NO_OS_) && ((DEV_SYSTEM == _DEV_MICROBLAZE_LITTLE_) || (DEV_SYSTEM == _DEV_MICROBLAZE_BIG_)))
 #define OBDCDC_DISABLE_FILE_SUPPORT     TRUE
-#endif
-
-#ifndef FD_TYPE
-#define FD_TYPE                         int
-#endif
-
-#ifndef IS_FD_VALID
-#define IS_FD_VALID(fd_p)               ((fd_p) >= 0)
 #endif
 
 #ifndef OBDCDC_DISABLE_FILE_SUPPORT
@@ -176,7 +117,7 @@ typedef struct
     tObdCdcType         type;
     union
     {
-        FD_TYPE         fdCdcFile;
+        FILE*           pFdCdcFile;
         const UINT8*    pNextBuffer;
     } handle;
     size_t              cdcSize;
@@ -200,7 +141,7 @@ static tObdCdcInstance         cdcInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p);
-static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize);
+static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize_p);
 static tOplkError loadCdcBuffer(const void* pCdc_p, size_t cdcSize_p);
 static tOplkError loadCdcFile(const char* pCdcFilename_p);
 
@@ -332,8 +273,9 @@ static tOplkError loadCdcFile(const char* pCdcFilename_p)
 
     OPLK_MEMSET(&cdcInfo, 0, sizeof(tObdCdcInfo));
     cdcInfo.type = kObdCdcTypeFile;
-    cdcInfo.handle.fdCdcFile = open(pCdcFilename_p, O_RDONLY | O_BINARY, 0666);
-    if (!IS_FD_VALID(cdcInfo.handle.fdCdcFile))
+    cdcInfo.handle.pFdCdcFile = fopen(pCdcFilename_p, "rb");
+
+    if (cdcInfo.handle.pFdCdcFile == NULL)
     {   // error occurred
         error = (UINT32)errno;
         DEBUG_LVL_OBD_TRACE("%s: failed to open '%s'\n", __func__, pCdcFilename_p);
@@ -341,8 +283,10 @@ static tOplkError loadCdcFile(const char* pCdcFilename_p)
         return ret;
     }
 
-    cdcInfo.cdcSize = (size_t)lseek(cdcInfo.handle.fdCdcFile, 0, SEEK_END);
-    lseek(cdcInfo.handle.fdCdcFile, 0, SEEK_SET);
+    // Get the file length
+    fseek(cdcInfo.handle.pFdCdcFile, 0, SEEK_END);
+    cdcInfo.cdcSize = (size_t)ftell(cdcInfo.handle.pFdCdcFile);
+    fseek(cdcInfo.handle.pFdCdcFile, 0, SEEK_SET);
 
     ret = processCdc(&cdcInfo);
 
@@ -353,7 +297,7 @@ static tOplkError loadCdcFile(const char* pCdcFilename_p)
         cdcInfo.bufferSize = 0;
     }
 
-    close(cdcInfo.handle.fdCdcFile);
+    fclose(cdcInfo.handle.pFdCdcFile);
 #else
     UNUSED_PARAMETER(pCdcFilename_p);
 
@@ -486,24 +430,23 @@ static tOplkError processCdc(tObdCdcInfo* pCdcInfo_p)
 The function loads the next buffer from the CDC
 
 \param[in,out]  pCdcInfo_p          Pointer to the CDC information.
-\param[in]      bufferSize          Size of the buffer.
+\param[in]      bufferSize_p        Size of the buffer.
 
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
+static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize_p)
 {
     tOplkError  ret = kErrorOk;
 #if (OBDCDC_DISABLE_FILE_SUPPORT == FALSE)
-    int         readSize;
-    UINT8*      pBuffer;
+    size_t      count;
 #endif
 
     switch (pCdcInfo_p->type)
     {
 #if (OBDCDC_DISABLE_FILE_SUPPORT == FALSE)
         case kObdCdcTypeFile:
-            if (pCdcInfo_p->bufferSize < bufferSize)
+            if (pCdcInfo_p->bufferSize < bufferSize_p)
             {
                 if (pCdcInfo_p->pCurBuffer != NULL)
                 {
@@ -512,7 +455,7 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
                     pCdcInfo_p->bufferSize = 0;
                 }
 
-                pCdcInfo_p->pCurBuffer = (UINT8*)OPLK_MALLOC(bufferSize);
+                pCdcInfo_p->pCurBuffer = (UINT8*)OPLK_MALLOC(bufferSize_p);
                 if (pCdcInfo_p->pCurBuffer == NULL)
                 {
                     ret = eventu_postError(kEventSourceObdu, kErrorObdOutOfMemory, 0, NULL);
@@ -521,29 +464,23 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
 
                     return kErrorReject;
                 }
-                pCdcInfo_p->bufferSize = bufferSize;
+                pCdcInfo_p->bufferSize = bufferSize_p;
             }
-            pBuffer = pCdcInfo_p->pCurBuffer;
 
-            do
+            count = fread(pCdcInfo_p->pCurBuffer, bufferSize_p, 1, pCdcInfo_p->handle.pFdCdcFile);
+            if (ferror(pCdcInfo_p->handle.pFdCdcFile) || feof(pCdcInfo_p->handle.pFdCdcFile) || (count == 0))
             {
-                readSize = read(pCdcInfo_p->handle.fdCdcFile, pBuffer, bufferSize);
-                if (readSize <= 0)
-                {
-                    ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
-                    if (ret != kErrorOk)
-                        return ret;
+                ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
+                if (ret != kErrorOk)
+                    return ret;
 
-                    return kErrorReject;
-                }
-                pBuffer += readSize;
-                bufferSize -= (size_t)readSize;
-                pCdcInfo_p->cdcSize -= (size_t)readSize;
-            } while (bufferSize > 0);
+                return kErrorReject;
+            }
+            pCdcInfo_p->cdcSize -= bufferSize_p;
             break;
 #endif
         case kObdCdcTypeBuffer:
-            if (pCdcInfo_p->bufferSize < bufferSize)
+            if (pCdcInfo_p->bufferSize < bufferSize_p)
             {
                 ret = eventu_postError(kEventSourceObdu, kErrorObdInvalidDcf, 0, NULL);
                 if (ret != kErrorOk)
@@ -552,8 +489,8 @@ static tOplkError loadNextBuffer(tObdCdcInfo* pCdcInfo_p, size_t bufferSize)
                 return kErrorReject;
             }
             pCdcInfo_p->pCurBuffer = (UINT8*)pCdcInfo_p->handle.pNextBuffer;
-            pCdcInfo_p->handle.pNextBuffer += bufferSize;
-            pCdcInfo_p->bufferSize -= bufferSize;
+            pCdcInfo_p->handle.pNextBuffer += bufferSize_p;
+            pCdcInfo_p->bufferSize -= bufferSize_p;
             break;
     }
 

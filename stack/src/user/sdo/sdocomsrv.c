@@ -91,17 +91,17 @@ static tOplkError initReadMultiByIndex(tSdoComCon* pSdoComCon_p,
 static tOplkError finishInitWriteByIndex(tSdoComCon* pSdoComCon_p);
 static tOplkError finishInitReadByIndex(tSdoComCon* pSdoComCon_p,
                                         tPlkFrame* pPlkFrame_p,
-                                        UINT sdoCmdDataSize_p);
+                                        size_t sdoCmdDataSize_p);
 static tOplkError finishInitWriteMultiByIndex(tSdoComCon* pSdoComCon_p);
 static tOplkError finishInitReadMultiByIndex(tSdoComCon* pSdoComCon_p,
                                              tPlkFrame* pPlkFrame_p,
-                                             UINT sdoCmdDataSize_p);
+                                             size_t sdoCmdDataSize_p);
 static tOplkError finishWriteByIndex(tSdoComCon* pSdoComCon_p);
 static tOplkError finishReadByIndex(tSdoComCon* pSdoComCon_p,
                                     tPlkFrame* pPlkFrame_p,
-                                    UINT sdoCmdDataSize_p);
+                                    size_t sdoCmdDataSize_p);
 static tOplkError processResponseWriteByIndex(tSdoComCon* pSdoComCon_p,
-const tAsySdoCom* pRecvdCmdLayer_p);
+                                              const tAsySdoCom* pRecvdCmdLayer_p);
 static tOplkError processResponseReadByIndex(tSdoComCon* pSdoComCon_p);
 static void       updateTransferAfterTx(tSdoComCon* pSdoComCon_p);
 static tOplkError obdSearchConnection(tSdoComConHdl sdoObdConHdl_p,
@@ -112,18 +112,18 @@ static void       fillCmdFrameDataSegmInit(tAsySdoCom* pCommandFrame_p,
                                            const void* pSrcData_p,
                                            size_t size_p);
 static void       setCmdFrameHdrSegmTtlSize(tAsySdoCom* pCommandFrame_p,
-                                            UINT sizeTotal_p);
+                                            size_t sizeTotal_p);
 static tOplkError sendAckResponseFrame(const tSdoComCon* pSdoComCon_p);
 static tOplkError sendResponseFrame(tSdoComCon* pSdoComCon_p,
                                     const tPlkFrame* pPlkFrame_p,
-                                    UINT sdoCmdDataSize_p);
+                                    size_t sdoCmdDataSize_p);
 static tOplkError abortTransfer(tSdoComCon* pSdoComCon_p,
                                 UINT32 abortCode_p);
 static BOOL       abortReadByIndexIfSizeInvalid(tSdoComCon* pSdoComCon_p,
-                                                UINT sdoCmdDataSize_p);
+                                                size_t sdoCmdDataSize_p);
 static tOplkError abortMultiTransfer(tSdoComCon* pSdoComCon_p,
                                      const tPlkFrame* pFrame_p,
-                                     UINT sdoCmdDataSize_p);
+                                     size_t sdoCmdDataSize_p);
 static tOplkError obdFinishCb(tSdoObdConHdl* pObdHdl_p);
 static void       setCmdFrameWriteMultiRespAbort(tAsySdoComWriteMultResp* pSubHdr_p,
                                                  UINT16 index_p,
@@ -133,8 +133,8 @@ static tOplkError setCmdFrameReadMultiRespAbort(tAsySdoComMultWriteReqReadResp* 
                                                 tAsySdoComMultWriteReqReadResp* pLastSubHdr_p,
                                                 tAsySdoComMultWriteReqReadResp** ppNextSubHdr_p,
                                                 tSdoComCon* pSdoComCon_p,
-                                                UINT32 cmdOffset_p,
-                                                UINT cmdBufSize_p);
+                                                ptrdiff_t cmdOffset_p,
+                                                size_t cmdBufSize_p);
 static UINT32     getSdoErrorCode(tOplkError errorCode_p);
 static void       assignSdoErrorCode(tOplkError errorCode_p,
                                      UINT32* pSetSdoError_p);
@@ -322,9 +322,9 @@ static tOplkError initWriteByIndex(tSdoComCon* pSdoComCon_p,
                                    const tAsySdoCom* pSdoCom_p)
 {
     tOplkError      ret = kErrorOk;
-    UINT            index;
-    UINT            subindex;
-    UINT            segmPayloadSize = 0;
+    UINT16          index;
+    UINT8           subindex;
+    size_t          segmPayloadSize = 0;
     const void*     pSrcData;
     tSdoObdConHdl   obdHdl;
 
@@ -370,8 +370,8 @@ static tOplkError initWriteByIndex(tSdoComCon* pSdoComCon_p,
     obdHdl.index = index;
     obdHdl.subIndex = subindex;
     obdHdl.pSrcData = (void*)pSrcData;
-    obdHdl.totalPendSize = pSdoComCon_p->transferSize;
-    obdHdl.dataSize = segmPayloadSize;
+    obdHdl.totalPendSize = (UINT)pSdoComCon_p->transferSize;
+    obdHdl.dataSize = (UINT)segmPayloadSize;
     obdHdl.dataOffset = 0;              // first segment
     ret = saveObdConnectionHdl(pSdoComCon_p, kSdoComConObdInitWriteByIndex);
     if (ret != kErrorOk)
@@ -419,12 +419,12 @@ static tOplkError initReadByIndex(tSdoComCon* pSdoComCon_p,
                                   const tAsySdoCom* pSdoCom_p)
 {
     tOplkError      ret = kErrorOk;
-    UINT            index;
-    UINT            subindex;
+    UINT16          index;
+    UINT8           subindex;
     tSdoObdConHdl   obdHdl;
     UINT8           aFrame[SDO_MAX_TX_FRAME_SIZE];
     tPlkFrame*      pFrame = (tPlkFrame*)&aFrame[0];
-    UINT            maxReadBuffSize = SDO_CMD_INIT_READ_SEMG_TX_MAX_SIZE;
+    size_t          maxReadBuffSize = SDO_CMD_INIT_READ_SEMG_TX_MAX_SIZE;
 
     OPLK_MEMSET(pFrame, 0x00, sizeof(aFrame));
 
@@ -448,7 +448,7 @@ static tOplkError initReadByIndex(tSdoComCon* pSdoComCon_p,
     obdHdl.subIndex = subindex;
     // shift command payload buffer artificially to the right, and relocate header later if necessary
     obdHdl.pDstData = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload.aCommandData[SDO_CMDL_HDR_VAR_SIZE];
-    obdHdl.dataSize = maxReadBuffSize;
+    obdHdl.dataSize = (UINT)maxReadBuffSize;
     obdHdl.sdoHdl = pSdoComCon_p->sdoObdConHdl;
     ret = sdoComInstance_g.pfnProcessObdRead(&obdHdl, obdFinishCb);
     assignSdoErrorCode(ret, &pSdoComCon_p->lastAbortCode);
@@ -503,9 +503,9 @@ static tOplkError initWriteMultiByIndex(tSdoComCon* pSdoComCon_p,
                                         const tAsySdoCom* pSdoCom_p)
 {
     tOplkError                      ret = kErrorOk;
-    UINT                            index;
-    UINT                            subindex;
-    const void*                     pSrcData;
+    UINT16                          index;
+    UINT8                           subindex;
+    void*                           pSrcData;
     tAsySdoComMultWriteReqReadResp* pCurSubHdr;
     tAsySdoComMultWriteReqReadResp* pNextSubHdr;
     tSdoObdConHdl                   obdHdl;
@@ -516,7 +516,7 @@ static tOplkError initWriteMultiByIndex(tSdoComCon* pSdoComCon_p,
     tPlkFrame*                  pRespFrame = (tPlkFrame*)&aFrame[0];
     tAsySdoComWriteMultResp*    pRespSubFrame = (tAsySdoComWriteMultResp*)
                                                 &pRespFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload.aCommandData[0];
-    UINT                        respCmdDataSize = 0;
+    size_t                      respCmdDataSize = 0;
 
     OPLK_MEMSET(pRespFrame, 0x00, sizeof(aFrame));
 
@@ -572,9 +572,9 @@ static tOplkError initWriteMultiByIndex(tSdoComCon* pSdoComCon_p,
         // forward command data to OD
         obdHdl.index = index;
         obdHdl.subIndex = subindex;
-        obdHdl.pSrcData = (void*)pSrcData;
-        obdHdl.totalPendSize = pSdoComCon_p->pendingTransferSize;       // only current data set size
-        obdHdl.dataSize = pSdoComCon_p->pendingTransferSize;
+        obdHdl.pSrcData = pSrcData;
+        obdHdl.totalPendSize = (UINT)pSdoComCon_p->pendingTransferSize; // only current data set size
+        obdHdl.dataSize = (UINT)pSdoComCon_p->pendingTransferSize;
         obdHdl.dataOffset = 0;                                          // first segment
 
         // deferred answer not supported for this transfer type -> callback is NULL
@@ -674,8 +674,8 @@ static tOplkError initReadMultiByIndex(tSdoComCon* pSdoComCon_p,
     tAsySdoComMultWriteReqReadResp* pRespSubFrame;
     tAsySdoComMultWriteReqReadResp* pRespLastSubFrame = NULL;
     tAsySdoComMultWriteReqReadResp* pNextRespSubFrame = NULL;
-    UINT32                          respCmdSubFrameOffset = 0;
-    UINT32                          respCmdDataBufSize = 0;
+    ptrdiff_t                       respCmdSubFrameOffset = 0;
+    size_t                          respCmdDataBufSize = 0;
 
     OPLK_MEMSET(pRespFrame, 0x00, sizeof(aFrame));
 
@@ -823,7 +823,7 @@ The function completes an initial ReadByIndex SDO command.
 //------------------------------------------------------------------------------
 static tOplkError finishInitReadByIndex(tSdoComCon* pSdoComCon_p,
                                         tPlkFrame* pPlkFrame_p,
-                                        UINT sdoCmdDataSize_p)
+                                        size_t sdoCmdDataSize_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -927,7 +927,7 @@ The function completes an initial Read Multiple Parameters by Index SDO command.
 //------------------------------------------------------------------------------
 static tOplkError finishInitReadMultiByIndex(tSdoComCon* pSdoComCon_p,
                                              tPlkFrame* pPlkFrame_p,
-                                             UINT sdoCmdDataSize_p)
+                                             size_t sdoCmdDataSize_p)
 {
     // this type of transfer has to fit in a single frame
     pSdoComCon_p->sdoTransferType = kSdoTransExpedited;
@@ -1007,7 +1007,7 @@ The function completes a non-initial segmented ReadByIndex SDO command.
 //------------------------------------------------------------------------------
 static tOplkError finishReadByIndex(tSdoComCon* pSdoComCon_p,
                                     tPlkFrame* pPlkFrame_p,
-                                    UINT sdoCmdDataSize_p)
+                                    size_t sdoCmdDataSize_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -1054,7 +1054,7 @@ static tOplkError processResponseWriteByIndex(tSdoComCon* pSdoComCon_p,
                                               const tAsySdoCom* pRecvdCmdLayer_p)
 {
     tOplkError      ret = kErrorOk;
-    UINT            size;
+    size_t          size;
     tSdoObdConHdl   obdHdl;
 
     size = ami_getUint16Le(&pRecvdCmdLayer_p->segmentSizeLe);
@@ -1072,9 +1072,9 @@ static tOplkError processResponseWriteByIndex(tSdoComCon* pSdoComCon_p,
     obdHdl.index = pSdoComCon_p->targetIndex;
     obdHdl.subIndex = pSdoComCon_p->targetSubIndex;
     obdHdl.pSrcData = (void*)&(pRecvdCmdLayer_p->aCommandData[0]);
-    obdHdl.totalPendSize = pSdoComCon_p->transferSize;
-    obdHdl.dataSize = size;
-    obdHdl.dataOffset = pSdoComCon_p->transferredBytes;
+    obdHdl.totalPendSize = (UINT)pSdoComCon_p->transferSize;
+    obdHdl.dataSize = (UINT)size;
+    obdHdl.dataOffset = (UINT)pSdoComCon_p->transferredBytes;
     // check end of transfer before forwarding to object dictionary
     if ((pRecvdCmdLayer_p->flags & SDO_CMDL_FLAG_SEGM_MASK) == SDO_CMDL_FLAG_SEGMCOMPL)
     {
@@ -1129,7 +1129,7 @@ static tOplkError processResponseReadByIndex(tSdoComCon* pSdoComCon_p)
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_TX_FRAME_SIZE];
     tPlkFrame*      pFrame = (tPlkFrame*)&aFrame[0];
-    UINT            maxReadBuffSize = SDO_CMD_SEGM_TX_MAX_SIZE;
+    size_t          maxReadBuffSize = SDO_CMD_SEGM_TX_MAX_SIZE;
     tSdoObdConHdl   obdHdl;
 
     OPLK_MEMSET(pFrame, 0x00, sizeof(aFrame));
@@ -1144,9 +1144,9 @@ static tOplkError processResponseReadByIndex(tSdoComCon* pSdoComCon_p)
     obdHdl.index = pSdoComCon_p->targetIndex;
     obdHdl.subIndex = pSdoComCon_p->targetSubIndex;
     obdHdl.pDstData = &pFrame->data.asnd.payload.sdoSequenceFrame.sdoSeqPayload.aCommandData[0];
-    obdHdl.dataSize = maxReadBuffSize;
-    obdHdl.dataOffset = pSdoComCon_p->transferredBytes;
-    obdHdl.totalPendSize = pSdoComCon_p->transferSize;
+    obdHdl.dataSize = (UINT)maxReadBuffSize;
+    obdHdl.dataOffset = (UINT)pSdoComCon_p->transferredBytes;
+    obdHdl.totalPendSize = (UINT)pSdoComCon_p->transferSize;
     obdHdl.sdoHdl = pSdoComCon_p->sdoObdConHdl;
     ret = sdoComInstance_g.pfnProcessObdRead(&obdHdl, obdFinishCb);
     assignSdoErrorCode(ret, &pSdoComCon_p->lastAbortCode);
@@ -1192,7 +1192,6 @@ happened, is used to update the connection structure.
 //------------------------------------------------------------------------------
 static void updateTransferAfterTx(tSdoComCon* pSdoComCon_p)
 {
-
     if ((pSdoComCon_p->transferSize > 0) &&
         (pSdoComCon_p->sdoServiceType == kSdoServiceReadByIndex))
     {
@@ -1334,10 +1333,10 @@ the variable header of a command layer frame.
 */
 //------------------------------------------------------------------------------
 static void setCmdFrameHdrSegmTtlSize(tAsySdoCom* pCommandFrame_p,
-                                      UINT sizeTotal_p)
+                                      size_t sizeTotal_p)
 {
     // init data size in variable header, which includes itself
-    ami_setUint32Le(&pCommandFrame_p->aCommandData[0], sizeTotal_p);
+    ami_setUint32Le(&pCommandFrame_p->aCommandData[0], (UINT32)sizeTotal_p);
 }
 
 //------------------------------------------------------------------------------
@@ -1358,7 +1357,7 @@ static tOplkError sendAckResponseFrame(const tSdoComCon* pSdoComCon_p)
     UINT8           aFrame[SDO_MAX_TX_FRAME_SIZE];
     tPlkFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
-    UINT            sizeOfCmdFrame;
+    size_t          sizeOfCmdFrame;
 
     pFrame = (tPlkFrame*)&aFrame[0];
     sdocomint_initCmdFrameGeneric(pFrame, sizeof(aFrame), pSdoComCon_p, &pCommandFrame);
@@ -1390,13 +1389,13 @@ layer payload in pPlkFrame_p.
 //------------------------------------------------------------------------------
 static tOplkError sendResponseFrame(tSdoComCon* pSdoComCon_p,
                                     const tPlkFrame* pPlkFrame_p,
-                                    UINT sdoCmdDataSize_p)
+                                    size_t sdoCmdDataSize_p)
 {
     tOplkError      ret = kErrorOk;
     UINT8           aFrame[SDO_MAX_TX_FRAME_SIZE];
     tPlkFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
-    UINT            sizeOfCmdFrame = 0;
+    size_t          sizeOfCmdFrame = 0;
 
     if (pPlkFrame_p == NULL)
     {   // only pointer to frame with little endian command layer data is provided
@@ -1511,8 +1510,8 @@ static tOplkError abortTransfer(tSdoComCon* pSdoComCon_p, UINT32 abortCode_p)
     UINT8           aFrame[SDO_MAX_TX_FRAME_SIZE];
     tPlkFrame*      pFrame;
     tAsySdoCom*     pCommandFrame;
-    UINT            sizeOfCmdFrame;
-    UINT            sizeOfCmdData;
+    size_t          sizeOfCmdFrame;
+    size_t          sizeOfCmdData;
 
     pFrame = (tPlkFrame*)&aFrame[0];
     sdocomint_initCmdFrameGeneric(pFrame, sizeof(aFrame), pSdoComCon_p, &pCommandFrame);
@@ -1550,7 +1549,7 @@ on the transfer type and aborts the transfer if it is invalid.
 */
 //------------------------------------------------------------------------------
 static BOOL abortReadByIndexIfSizeInvalid(tSdoComCon* pSdoComCon_p,
-                                          UINT sdoCmdDataSize_p)
+                                          size_t sdoCmdDataSize_p)
 {
     if ((pSdoComCon_p->sdoTransferType == kSdoTransExpedited) ||
         ((pSdoComCon_p->sdoTransferType == kSdoTransSegmented) &&
@@ -1591,7 +1590,7 @@ initial SDO server state.
 //------------------------------------------------------------------------------
 static tOplkError abortMultiTransfer(tSdoComCon* pSdoComCon_p,
                                      const tPlkFrame* pFrame_p,
-                                     UINT sdoCmdDataSize_p)
+                                     size_t sdoCmdDataSize_p)
 {
     tOplkError      ret = kErrorOk;
 
@@ -1774,13 +1773,13 @@ static tOplkError setCmdFrameReadMultiRespAbort(tAsySdoComMultWriteReqReadResp* 
                                                 tAsySdoComMultWriteReqReadResp* pLastSubHdr_p,
                                                 tAsySdoComMultWriteReqReadResp** ppNextSubHdr_p,
                                                 tSdoComCon* pSdoComCon_p,
-                                                UINT32 cmdOffset_p,
-                                                UINT cmdBufSize_p)
+                                                ptrdiff_t cmdOffset_p,
+                                                size_t cmdBufSize_p)
 {
     tOplkError      ret = kErrorOk;
-    UINT            subPayloadSize;
-    UINT            subPayloadBufSize = cmdBufSize_p - 8;   //TODO: Avoid the magic number 8 in this function!
-    UINT            nextAlignedOffset = 0;                  // offset from old to next payload start
+    size_t          subPayloadSize;
+    size_t          subPayloadBufSize = cmdBufSize_p - 8;   //TODO: Avoid the magic number 8 in this function!
+    size_t          nextAlignedOffset = 0;                  // offset from old to next payload start
     tSdoObdConHdl   obdHdl;
 
     // request command data from OD
@@ -1788,7 +1787,7 @@ static tOplkError setCmdFrameReadMultiRespAbort(tAsySdoComMultWriteReqReadResp* 
     obdHdl.index = pSdoComCon_p->targetIndex;
     obdHdl.subIndex = pSdoComCon_p->targetSubIndex;
     obdHdl.pDstData = &pSubHdr_p->aCommandData[0];
-    obdHdl.dataSize = subPayloadBufSize;
+    obdHdl.dataSize = (UINT)subPayloadBufSize;
 
     // deferred answer not supported for this transfer type -> callback is NULL
     ret = sdoComInstance_g.pfnProcessObdRead(&obdHdl, NULL);
@@ -1837,7 +1836,7 @@ static tOplkError setCmdFrameReadMultiRespAbort(tAsySdoComMultWriteReqReadResp* 
 
     if (pLastSubHdr_p != NULL)
     {   // this is the next sub-response, assign offset so it can be found in frame
-        ami_setUint32Le(&pLastSubHdr_p->byteOffsetNext, cmdOffset_p + 8);
+        ami_setUint32Le(&pLastSubHdr_p->byteOffsetNext, (UINT32)(cmdOffset_p + 8));
     }
 
     pSdoComCon_p->respSegmSize = cmdOffset_p + 8 + subPayloadSize;

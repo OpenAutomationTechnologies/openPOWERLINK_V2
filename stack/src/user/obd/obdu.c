@@ -2140,7 +2140,7 @@ static tObdSize getObjectSize(const tObdSubEntry* pSubIndexEntry_p)
         return 0;
 
     if (dataTypeSize_l[pSubIndexEntry_p->type].pfnGetObjSize == NULL)
-        return dataTypeSize_l[pSubIndexEntry_p->type].size;
+        return (tObdSize)dataTypeSize_l[pSubIndexEntry_p->type].size;
     else
         return dataTypeSize_l[pSubIndexEntry_p->type].pfnGetObjSize((tObdSubEntry*)pSubIndexEntry_p);
 }
