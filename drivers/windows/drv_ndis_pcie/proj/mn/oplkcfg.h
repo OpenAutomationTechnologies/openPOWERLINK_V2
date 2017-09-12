@@ -10,7 +10,7 @@ interface module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -50,5 +50,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #define CONFIG_INCLUDE_VETH
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #endif // _INC_oplkcfg_H_
