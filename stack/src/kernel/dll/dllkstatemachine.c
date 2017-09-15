@@ -571,6 +571,12 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
 
         case kNmtEventDllCePres:
         case kNmtEventDllCePreq:
+            // enter DLL_CS_WAIT_SOA
+            dllkInstance_g.dllState = kDllCsWaitSoa;
+            if (triggerLossOfSocEvent())
+                pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+            break;
+
         case kNmtEventDllCeSoa:
             if (nmtState_p == kNmtCsPreOperational2)
             {   // logical loss of SoC is counted always in PreOp2
@@ -625,7 +631,6 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p,
             if (triggerLossOfSocEventOnFrameTimeout())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
-            pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
 
             dllkInstance_g.dllState = kDllCsWaitSoc;
             break;
@@ -640,6 +645,9 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p,
         case kNmtEventDllCeSoa:
             // enter DLL_CS_WAIT_SOC
             dllkInstance_g.dllState = kDllCsWaitSoc;
+            // prepare new cycle -> Reset report flags!
+            dllkInstance_g.lossSocStatus.fLossReported = FALSE;
+            dllkInstance_g.lossSocStatus.fTimeoutOccurred = FALSE;
             break;
 
         case kNmtEventDllCeSoc:             // DLL_CT9
