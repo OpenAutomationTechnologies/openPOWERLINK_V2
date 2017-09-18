@@ -1,8 +1,10 @@
+#!/usr/bin/tclsh
 ################################################################################
 #
-# \file  .travis.yml
+# \file  T009-1.tcl
 #
-# \brief Configuration file for Travis continuous integration
+# \brief Comma should not be preceded by whitespace,
+#        but should be followed by one
 #
 # Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -30,57 +32,28 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
-language: c
 
-compiler:
-  - gcc
-  - clang
-
-env:
-  global:
-    - GIT_COMMIT=$TRAVIS_COMMIT
-    - VERA_ROOT=/home/travis/build/OpenAutomationTechnologies/openPOWERLINK_V2/tools/checkstyle/.vera++/
-
-addons:
-  apt:
-    packages:
-      - libpcap-dev
-      - cmake-data
-      - cmake
-      - qtbase5-dev
-      - libtcl8.5
-      - vera++
-
-before_script:
-  # Print build info that binary is compiled with
-  - echo $TRAVIS_COMMIT
-  - echo $TRAVIS_TAG
-  - echo $TRAVIS_BRANCH
-  - echo $TRAVIS_BUILD_NUMBER
-  - echo $TRAVIS_REPO_SLUG
-
-  # Execute commit message guidelines check
-  - chmod +x tools/checkstyle/checkcommit.sh
-  - ./tools/checkstyle/checkcommit.sh
-
-  # Run vera++ coding guidelines check
-  - cp -r /usr/lib/vera++ tools/checkstyle/.vera++
-  - cp /usr/bin/vera++ tools/checkstyle/.vera++/vera++
-  - chmod +x tools/checkstyle/checkoplkstyle.sh
-  - ./tools/checkstyle/checkoplkstyle.sh
-
-script:
-  - cd drivers/linux/drv_kernelmod_edrv/build/
-  - cmake ..
-  - cd ../../../../stack/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../apps/demo_mn_console/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_mn_qt/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_cn_console/build/linux
-  - cmake ../..
-  - make install
+foreach f [getSourceFileNames] {
+    foreach t [getTokens $f 1 0 -1 -1 {comma}] {
+        set line [lindex $t 1]
+        set column [lindex $t 2]
+        set preceding [getTokens $f $line 0 $line $column {}]
+        if {$preceding == {}} {
+            report $f $line "comma should not be preceded by whitespace"
+        } else {
+            set lastPreceding [lindex [lindex $preceding end] 3]
+            set lastCol [lindex [lindex $preceding end] 2]
+            if {$lastPreceding == "space" && $lastCol != 0} {
+                report $f $line "comma should not be preceded by whitespace"
+            }
+        }
+        set following [getTokens $f $line [expr $column + 1] [expr $line + 1] -1 {}]
+        if {$following != {}} {
+            set firstFollowing [lindex [lindex $following 0] 3]
+            if {$firstFollowing != "space" && $firstFollowing != "newline" &&
+                !($lastPreceding == "operator" && $firstFollowing == "leftparen")} {
+                report $f $line "comma should be followed by whitespace"
+            }
+        }
+    }
+}

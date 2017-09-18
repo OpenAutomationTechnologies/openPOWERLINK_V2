@@ -1,8 +1,9 @@
+#!/usr/bin/tclsh
 ################################################################################
 #
-# \file  .travis.yml
+# \file  T011-1.tcl
 #
-# \brief Configuration file for Travis continuous integration
+# \brief This profile includes all the rules provided by vera++
 #
 # Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -30,57 +31,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
-language: c
 
-compiler:
-  - gcc
-  - clang
-
-env:
-  global:
-    - GIT_COMMIT=$TRAVIS_COMMIT
-    - VERA_ROOT=/home/travis/build/OpenAutomationTechnologies/openPOWERLINK_V2/tools/checkstyle/.vera++/
-
-addons:
-  apt:
-    packages:
-      - libpcap-dev
-      - cmake-data
-      - cmake
-      - qtbase5-dev
-      - libtcl8.5
-      - vera++
-
-before_script:
-  # Print build info that binary is compiled with
-  - echo $TRAVIS_COMMIT
-  - echo $TRAVIS_TAG
-  - echo $TRAVIS_BRANCH
-  - echo $TRAVIS_BUILD_NUMBER
-  - echo $TRAVIS_REPO_SLUG
-
-  # Execute commit message guidelines check
-  - chmod +x tools/checkstyle/checkcommit.sh
-  - ./tools/checkstyle/checkcommit.sh
-
-  # Run vera++ coding guidelines check
-  - cp -r /usr/lib/vera++ tools/checkstyle/.vera++
-  - cp /usr/bin/vera++ tools/checkstyle/.vera++/vera++
-  - chmod +x tools/checkstyle/checkoplkstyle.sh
-  - ./tools/checkstyle/checkoplkstyle.sh
-
-script:
-  - cd drivers/linux/drv_kernelmod_edrv/build/
-  - cmake ..
-  - cd ../../../../stack/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../apps/demo_mn_console/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_mn_qt/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_cn_console/build/linux
-  - cmake ../..
-  - make install
+set rules {
+  F001
+  L001
+  L005
+  L006
+  T001
+  T005
+  T006
+  T007-1
+  T008
+  T009-1
+  T010
+  T011-1
+  T030
+}

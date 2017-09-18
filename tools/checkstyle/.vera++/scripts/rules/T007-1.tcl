@@ -1,8 +1,10 @@
+#!/usr/bin/tclsh
 ################################################################################
 #
-# \file  .travis.yml
+# \file  T007-1.tcl
 #
-# \brief Configuration file for Travis continuous integration
+# \brief Semicolons should not be isolated by spaces or comments
+#        from the rest of the code
 #
 # Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -30,57 +32,27 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
-language: c
 
-compiler:
-  - gcc
-  - clang
-
-env:
-  global:
-    - GIT_COMMIT=$TRAVIS_COMMIT
-    - VERA_ROOT=/home/travis/build/OpenAutomationTechnologies/openPOWERLINK_V2/tools/checkstyle/.vera++/
-
-addons:
-  apt:
-    packages:
-      - libpcap-dev
-      - cmake-data
-      - cmake
-      - qtbase5-dev
-      - libtcl8.5
-      - vera++
-
-before_script:
-  # Print build info that binary is compiled with
-  - echo $TRAVIS_COMMIT
-  - echo $TRAVIS_TAG
-  - echo $TRAVIS_BRANCH
-  - echo $TRAVIS_BUILD_NUMBER
-  - echo $TRAVIS_REPO_SLUG
-
-  # Execute commit message guidelines check
-  - chmod +x tools/checkstyle/checkcommit.sh
-  - ./tools/checkstyle/checkcommit.sh
-
-  # Run vera++ coding guidelines check
-  - cp -r /usr/lib/vera++ tools/checkstyle/.vera++
-  - cp /usr/bin/vera++ tools/checkstyle/.vera++/vera++
-  - chmod +x tools/checkstyle/checkoplkstyle.sh
-  - ./tools/checkstyle/checkoplkstyle.sh
-
-script:
-  - cd drivers/linux/drv_kernelmod_edrv/build/
-  - cmake ..
-  - cd ../../../../stack/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../apps/demo_mn_console/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_mn_qt/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_cn_console/build/linux
-  - cmake ../..
-  - make install
+foreach f [getSourceFileNames] {
+    foreach t [getTokens $f 1 0 -1 -1 {semicolon}] {
+        set line [lindex $t 1]
+        set column [lindex $t 2]
+        set previousTokens [getTokens $f $line 0 $line $column {}]
+        if {$previousTokens == {}} {
+            report $f $line "semicolon is isolated from other tokens"
+        } else {
+            set lastToken [lindex $previousTokens end]
+            set lastName [lindex $lastToken 3]
+            set lastCol [lindex $lastToken 2]
+            if {[lsearch {space} $lastName] != -1 && $lastCol == 0} {
+            } else {
+                if {[lsearch {space ccomment} $lastName] != -1} {
+                    set forTokens [getTokens $f $line 0 $line $column {for leftparen}]
+                    if {[list [lindex [lindex $forTokens 0] 3] [lindex [lindex $forTokens 1] 3]] != {for leftparen}} {
+                        report $f $line "semicolon is isolated from other tokens"
+                    }
+                }
+            }
+        }
+    }
+}

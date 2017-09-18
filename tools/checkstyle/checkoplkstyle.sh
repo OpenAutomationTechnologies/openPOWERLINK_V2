@@ -1,8 +1,9 @@
+#!/bin/bash
 ################################################################################
 #
-# \file  .travis.yml
+# \file  checkoplkstyle.sh
 #
-# \brief Configuration file for Travis continuous integration
+# \brief Check oplk formating style of all files in a commit
 #
 # Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
@@ -30,57 +31,19 @@
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 ################################################################################
-language: c
 
-compiler:
-  - gcc
-  - clang
+files=`git diff-tree --no-commit-id --diff-filter=AMCR --name-only --relative -r $TRAVIS_COMMIT | grep -E "\.[h|c]$"`
+parameters="-P max-file-length=6000 -P max-line-length=160"
 
-env:
-  global:
-    - GIT_COMMIT=$TRAVIS_COMMIT
-    - VERA_ROOT=/home/travis/build/OpenAutomationTechnologies/openPOWERLINK_V2/tools/checkstyle/.vera++/
+# Filter files and directories which should not be checked
+for i in $files; do
+    if [[ ! $i =~ ^contrib.* && ! $i =~ ^staging.* && ! $i =~ ^hardware.* && ! $i =~ ^unittests.*  && ! $i =~ .*xap\.h.* ]]; then
+        filtered="$filtered $i"
+    fi
+done
 
-addons:
-  apt:
-    packages:
-      - libpcap-dev
-      - cmake-data
-      - cmake
-      - qtbase5-dev
-      - libtcl8.5
-      - vera++
-
-before_script:
-  # Print build info that binary is compiled with
-  - echo $TRAVIS_COMMIT
-  - echo $TRAVIS_TAG
-  - echo $TRAVIS_BRANCH
-  - echo $TRAVIS_BUILD_NUMBER
-  - echo $TRAVIS_REPO_SLUG
-
-  # Execute commit message guidelines check
-  - chmod +x tools/checkstyle/checkcommit.sh
-  - ./tools/checkstyle/checkcommit.sh
-
-  # Run vera++ coding guidelines check
-  - cp -r /usr/lib/vera++ tools/checkstyle/.vera++
-  - cp /usr/bin/vera++ tools/checkstyle/.vera++/vera++
-  - chmod +x tools/checkstyle/checkoplkstyle.sh
-  - ./tools/checkstyle/checkoplkstyle.sh
-
-script:
-  - cd drivers/linux/drv_kernelmod_edrv/build/
-  - cmake ..
-  - cd ../../../../stack/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../apps/demo_mn_console/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_mn_qt/build/linux
-  - cmake ../..
-  - make install
-  - cd ../../../demo_cn_console/build/linux
-  - cmake ../..
-  - make install
+if [[ $filtered != "" ]]; then
+    tools/checkstyle/.vera++/vera++ --profile oplk $parameters -e -s $filtered
+else
+    echo Nothing to be checked!
+fi
