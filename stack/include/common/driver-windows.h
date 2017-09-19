@@ -9,7 +9,7 @@ Windows kernel driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -86,6 +86,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                                 CTL_CODE(PLK_IO_TYPE, 0x913, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE \
                                 CTL_CODE(PLK_IO_TYPE, 0x914, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#define PLK_CMD_SOC_GET_MEM     CTL_CODE(PLK_IO_TYPE, 0x915, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#endif
 
 //------------------------------------------------------------------------------
 // typedef
