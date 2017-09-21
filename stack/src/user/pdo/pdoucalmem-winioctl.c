@@ -18,7 +18,7 @@ module using the offset acquired from the kernel driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -154,7 +154,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     tPdoMem     inPdoMem;
     tPdoMem     outPdoMem;
     tOplkError  ret;
-    UINT8*      pPdoMem = NULL;
+    void*       pPdoMem = NULL;
     BOOL        fIoctlRet;
 
     // Check parameter validity
