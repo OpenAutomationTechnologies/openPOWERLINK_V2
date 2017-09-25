@@ -2,7 +2,7 @@
 #
 # CMake file of openPOWERLINK application MN library with kernelspace interface
 #
-# Copyright (c) 2015, Kalycito Infotech Private Limited
+# Copyright (c) 2017, Kalycito Infotech Private Limited
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
@@ -44,6 +44,7 @@ ENDIF()
 SET (LIB_SOURCES
      ${USER_SOURCES}
      ${USER_MN_SOURCES}
+     ${SDO_WINDOWS_SOURCES}
      ${CTRL_UCAL_WINDOWSIOCTL_SOURCES}
      ${DLL_UCAL_WINDOWSIOCTL_SOURCES}
      ${ERRHND_UCAL_WINDOWSIOCTL_SOURCES}
