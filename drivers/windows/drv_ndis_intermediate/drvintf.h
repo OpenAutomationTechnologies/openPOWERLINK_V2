@@ -85,7 +85,7 @@ tOplkError drv_writeErrorObject(const tErrHndIoctl* pWriteObject_p);
 tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p);
 tOplkError drv_mapPdoMem(void** ppKernelMem_p,
                          void** ppUserMem_p,
-                         size_t* pMemSize_p);
+                         UINT32* pMemSize_p);
 void       drv_unMapPdoMem(void* pMem_p,
                            size_t memSize_p);
 

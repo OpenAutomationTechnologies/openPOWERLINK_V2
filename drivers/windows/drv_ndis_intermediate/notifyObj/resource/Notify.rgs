@@ -4,13 +4,10 @@ HKCR
     {
         ForceRemove {B31E902A-23E9-40B7-ADE3-FDA2962DAE8F} = s 'Notify Class'
         {
-            ForceRemove Programmable
             InprocServer32 = s '%MODULE%'
             {
-                val ThreadingModel = s 'Apartment'
+                val ThreadingModel = s 'Both'
             }
-            TypeLib = s '{1983623C-B22D-4703-A40C-4BA063488678}'
-            Version = s '1.0'
         }
     }
 }
