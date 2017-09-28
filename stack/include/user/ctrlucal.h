@@ -10,6 +10,7 @@ This file contains the definitions for the user ctrl CAL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,9 +74,9 @@ tOplkError       ctrlucal_writeFileBuffer(const tOplkApiFileChunkDesc* pDesc_p,
                                           const void* pBuffer_p);
 size_t           ctrlucal_getFileBufferSize(void);
 OPLK_FILE_HANDLE ctrlucal_getFd(void);
-tOplkError       ctrlucal_getMappedMem(UINT32 kernelOffs_p,
-                                       UINT32 size_p,
-                                       UINT8** ppUserMem_p);
+tOplkError       ctrlucal_getMappedMem(size_t kernelOffs_p,
+                                       size_t size_p,
+                                       void** ppUserMem_p);
 #ifdef __cplusplus
 }
 #endif

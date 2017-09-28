@@ -16,7 +16,7 @@ direct access for specific shared memory regions to the user application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -67,10 +67,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-#define DUALPROCSHM_BUFF_ID_ERRHDLR 12
-#define DUALPROCSHM_BUFF_ID_PDO     13
-#define BENCHMARK_OFFSET            0x00001000  //TODO: Get this value from PCIe header files
-#define DPSHM_ENABLE_TIMEOUT_SEC    10          // wait for dpshm interface enable time out
+#define DUALPROCSHM_BUFF_ID_ERRHDLR  12
+#define DUALPROCSHM_BUFF_ID_PDO      13
+#define BENCHMARK_OFFSET             0x00001000  //TODO: Get this value from PCIe header files
+#define DPSHM_ENABLE_TIMEOUT_SEC     10          // wait for dpshm interface enable time out
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#define DUALPROCSHM_BUFF_ID_TIMESYNC 14
+#endif
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -939,6 +942,61 @@ size_t drv_getFileBufferSize(void)
 {
     return CONFIG_CTRL_FILE_CHUNK_SIZE;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync memory offset
+
+Retrieves the SoC memory offset from the dualprocshm library and shares it
+with user application.
+
+\param[out]     pSocMemOffs_p       Pointer to SoC memory offset value.
+\param[in]      socMemSize_p        Size of the SoC memory.
+
+\return The function returns a tOplkError error code.
+
+\ingroup module_driver_ndispcie
+*/
+//------------------------------------------------------------------------------
+tOplkError drv_getTimesyncMem(ptrdiff_t* pSocMemOffs_p,
+                              size_t socMemSize_p)
+{
+    void*           pMem;
+    void*           pBar0;
+    tDualprocReturn dualRet = kDualprocSuccessful;
+
+    pBar0 = ndis_getBarAddr(OPLK_PCIEBAR_SHM);
+
+    if (!drvInstance_l.fDriverActive || (pBar0 == NULL) || (pSocMemOffs_p == NULL))
+        return kErrorNoResource;
+
+    dualRet = dualprocshm_getMemory(drvInstance_l.pDualProcDrvInst,
+                                    DUALPROCSHM_BUFF_ID_TIMESYNC,
+                                    &pMem,
+                                    &socMemSize_p,
+                                    FALSE);
+
+    if (dualRet != kDualprocSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't allocate SoC buffer (0x%X)\n",
+                              __func__,
+                              dualRet);
+        return kErrorNoResource;
+    }
+
+    *pSocMemOffs_p = (UINT8*)pMem - (UINT8*)pBar0;
+    if (*pSocMemOffs_p == 0)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Timesync shared memory offset is invalid\n", __func__);
+        return kErrorNoResource;
+    }
+
+    DEBUG_LVL_ALWAYS_TRACE("%s() Timesync shared memory offset is %x\n", __func__, *pSocMemOffs_p);
+
+    return kErrorOk;
+}
+#endif
 
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //

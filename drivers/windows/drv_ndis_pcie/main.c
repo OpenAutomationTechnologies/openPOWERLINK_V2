@@ -11,7 +11,7 @@ implementation for PCIe device.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -636,6 +636,22 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p,
             status = STATUS_SUCCESS;
             break;
         }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+       case PLK_CMD_SOC_GET_MEM:
+        {
+            tSocMem* pSocMem = (tSocMem*)pIrp_p->AssociatedIrp.SystemBuffer;
+
+            oplkRet = drv_getTimesyncMem((void*)&pSocMem->socMemOffset, pSocMem->socMemSize);
+            if (oplkRet != kErrorOk)
+                pIrp_p->IoStatus.Information = 0; // return size zero to indicate failure
+            else
+                pIrp_p->IoStatus.Information = sizeof(tSocMem);
+
+            status = STATUS_SUCCESS;
+            break;
+        }
+#endif
 
         default:
             DEBUG_LVL_ERROR_TRACE("PLK: - Invalid cmd (cmd=%d)\n",
