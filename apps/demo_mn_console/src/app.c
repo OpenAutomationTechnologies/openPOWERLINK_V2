@@ -265,7 +265,7 @@ static tOplkError initProcessImage(void)
     tOplkError  ret = kErrorOk;
     UINT        errorIndex = 0;
 
-    printf("Initializing process image...\n");
+    printf("Initializing process image...TEST\n");
     printf("Size of process image: Input = %lu Output = %lu\n",
            (ULONG)sizeof(PI_IN),
            (ULONG)sizeof(PI_OUT));
