@@ -9,7 +9,7 @@ Driver interface for the kernel daemon - Header file
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -85,13 +85,13 @@ tOplkError drv_readErrorObject(tErrHndIoctl* pReadObject_p);
 tOplkError drv_postEvent(const void* pEvent_p);
 tOplkError drv_getEvent(void* pEvent_p,
                         size_t* pSize_p);
-tOplkError drv_getPdoMem(UINT32* pPdoMemOffs_p,
+tOplkError drv_getPdoMem(size_t* pPdoMemOffs_p,
                          size_t memSize_p);
 tOplkError drv_getBenchmarkMem(void** ppBenchmarkMem_p);
 void       drv_freeBenchmarkMem(void* pBenchmarkMem_p);
 tOplkError drv_mapKernelMem(void** ppKernelMem_p,
                             void** ppUserMem_p,
-                            UINT32* pSize_p);
+                            size_t* pSize_p);
 void       drv_unmapKernelMem(void* pUserMem_p);
 tOplkError drv_writeFileBuffer(const tIoctlFileChunk* pIoctlFileChunk_p);
 size_t     drv_getFileBufferSize(void);

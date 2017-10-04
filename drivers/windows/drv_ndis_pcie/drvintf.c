@@ -16,7 +16,7 @@ direct access for specific shared memory regions to the user application.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -145,7 +145,7 @@ static void       unmapMemory(tMemInfo* pMemInfo_p);
 #if defined(CONFIG_INCLUDE_VETH)
 static tOplkError getMemory(const void* pPCIeBuf_p,
                             void** ppKernelMem_p,
-                            UINT32 size_p);
+                            size_t size_p);
 static tOplkError nonPlkFrameSendCb(void* pBuffer_p,
                                     size_t size_p);
 static tOplkError receiveNonPlkFrame(void* pEvent_p);
@@ -658,7 +658,7 @@ with user application.
 \ingroup module_driver_ndispcie
 */
 //------------------------------------------------------------------------------
-tOplkError drv_getPdoMem(UINT32* pPdoMemOffs_p,
+tOplkError drv_getPdoMem(size_t* pPdoMemOffs_p,
                          size_t memSize_p)
 {
     tDualprocReturn dualRet;
@@ -684,7 +684,7 @@ tOplkError drv_getPdoMem(UINT32* pPdoMemOffs_p,
 
     offset = (UINT8*)pMem - pBar0;
 
-    *pPdoMemOffs_p = (UINT32)offset;
+    *pPdoMemOffs_p = (size_t)offset;
 
     DEBUG_LVL_ALWAYS_TRACE("%s() PDO memory offset is %x\n", __func__, offset);
     return kErrorOk;
@@ -783,7 +783,7 @@ the driver.
 //------------------------------------------------------------------------------
 tOplkError drv_mapKernelMem(void** ppKernelMem_p,
                             void** ppUserMem_p,
-                            UINT32* pSize_p)
+                            size_t* pSize_p)
 {
     tDualprocReturn         dualRet;
     tMemInfo*               pKernel2UserMemInfo = &drvInstance_l.kernel2UserMem;
@@ -1369,7 +1369,7 @@ the corresponding base address for the buffer in kernel virtual memory.
 //------------------------------------------------------------------------------
 static tOplkError getMemory(const void* pPCIeBuf_p,
                             void** ppKernelMem_p,
-                            UINT32 size_p)
+                            size_t size_p)
 {
     tMemInfo*   pKernel2UserMemInfo = &drvInstance_l.kernel2UserMem;
     ptrdiff_t   buffOffset;
