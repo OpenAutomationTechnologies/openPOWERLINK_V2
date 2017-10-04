@@ -163,7 +163,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     if (hFileHandle_l == NULL)
         return kErrorNoResource;
 
-    inPdoMem.memSize = (UINT)memSize_p;
+    inPdoMem.memSize = memSize_p;
 
     fIoctlRet = DeviceIoControl(hFileHandle_l,
                                 PLK_CMD_PDO_GET_MEM,
