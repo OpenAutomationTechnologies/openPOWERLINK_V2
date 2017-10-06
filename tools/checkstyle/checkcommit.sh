@@ -37,7 +37,7 @@ set -e
 #
 # verify commit message line length
 #
-len=`git log -n 1 --format=%B $GIT_COMMIT | awk '{ if (length > L) {L=length} }END{ print L}'`
+len=`git log -n 1 --format=%B $GIT_COMMIT | wc -L`
 if [[ "$len" -gt "72" ]]; then
 	echo "ERROR: Maximum line length of commit message ($len) is bigger than 72 characters!"
 	exit 1
@@ -46,6 +46,19 @@ fi
 #
 # Verify if first line begins with [FIX], [TASK] or [FEATURE]
 #
+
+TAGS="MERGE FIX TASK FEATURE"
+for i in $TAGS;
+do
+	tmp='\[$i\]'
+	result=`git log -n 1 --format=%s $GIT_COMMIT | grep $tmp`
+	if [ -z "$result" ]; then
+		echo "INFO: Is not $i tag ($result)!"
+	else
+		echo "INFO: Is $i tag ($result)!"
+	fi
+done
+
 tag=`git log -n 1 --format=%B $GIT_COMMIT | awk -F" " 'NR == 1 { print $1 }'`
 
 if [[ "$tag" != "[MERGE]"  && "$tag" != "[FIX]"  && "$tag" != "[TASK]" && "$tag" != "[FEATURE]" ]]; then
