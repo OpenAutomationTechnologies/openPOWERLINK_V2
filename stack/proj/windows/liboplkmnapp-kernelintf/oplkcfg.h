@@ -11,7 +11,7 @@ application library on Windows which is using the kernelspace interface.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -67,6 +67,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_PRES_FORWARD
 #define CONFIG_INCLUDE_VETH
 #define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #define CONFIG_VETH_SET_DEFAULT_GATEWAY                 FALSE
 
