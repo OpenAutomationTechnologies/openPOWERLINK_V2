@@ -736,9 +736,9 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
                                    tSdoSeqEvent event_p,
                                    const tAsySdoSeq* pRecvFrame_p)
 {
-    UNUSED_PARAMETER(sdoSeqConHdl_p);
-
     tOplkError  ret = kErrorOk;
+
+    UNUSED_PARAMETER(sdoSeqConHdl_p);
 
     switch (event_p)
     {

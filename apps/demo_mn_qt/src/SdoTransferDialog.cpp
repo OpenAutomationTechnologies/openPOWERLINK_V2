@@ -143,7 +143,7 @@ void SdoTransferDialog::startRead()
 
     // Resize the data buffer according to the data type
     eObdType obdType = this->ui.pDatatype->itemData(this->ui.pDatatype->currentIndex()).value<eObdType>();
-    this->data.resize(SdoTransferDialog::getSizeOfObdType(obdType));
+    this->data.resize(static_cast<int>(SdoTransferDialog::getSizeOfObdType(obdType)));
 
     // Trigger the read (send a request to the event thread of the stack)
     tOplkError ret = oplk_postUserEvent(this->ui.pReadButton);
@@ -233,7 +233,7 @@ void SdoTransferDialog::startWrite()
             }
 
             // Resize the data buffer according to the data type
-            this->data.resize(SdoTransferDialog::getSizeOfObdType(obdType));
+            this->data.resize(static_cast<int>(SdoTransferDialog::getSizeOfObdType(obdType)));
     }
 
     // Trigger the write (send a request to the event thread of the stack)
@@ -405,7 +405,7 @@ void SdoTransferDialog::userDefEvent(void* pUserArg_p)
         }
         else if (ret == kErrorOk)
         {   // local OD access
-            this->data.resize(obdSize);
+            this->data.resize(static_cast<int>(obdSize));
 
             emit sigUpdateData(QString("Successfully read from local OD"));
         }
@@ -434,7 +434,7 @@ void SdoTransferDialog::userDefEvent(void* pUserArg_p)
         }
         else if (ret == kErrorOk)
         {   // local OD access
-            this->data.resize(obdSize);
+            this->data.resize(static_cast<int>(obdSize));
 
             emit sigUpdateData(QString("Successfully written to local OD"));
         }
@@ -461,7 +461,7 @@ void SdoTransferDialog::sdoFinished(tSdoComFinished sdoInfo_p)
     switch (sdoInfo_p.sdoComConState)
     {
         case kSdoComTransferFinished:
-            this->data.resize(sdoInfo_p.transferredBytes);
+            this->data.resize(static_cast<int>(sdoInfo_p.transferredBytes));
 
             emit sigUpdateData(QString("Successfully %1 data")
                                        .arg((sdoInfo_p.sdoAccessType == kSdoAccessTypeWrite ? "written" : "read")));
