@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library for PCP.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,7 +103,7 @@ static tHostifReturn controlBridge(tHostif* pHostif_p, BOOL fEnable_p);
 
 This function creates the PCP-specific host interface instance.
 
-\param[in]      pHostif_p           The host interface instance for PCP.
+\param[in,out]  pHostif_p           The host interface instance for PCP.
 
 \return The function returns a tHostifReturn error code.
 \retval kHostifSuccessful           The host interface is configured successfully
@@ -118,7 +118,7 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostifBufDesc  aInitVec[] = HOSTIF_INIT_VEC;
-    int             i;
+    UINT8           i;
 
     // Allocate init parameter memory
     pHostif_p->pInitParam = (tHostifInitParam*)HOSTIF_UNCACHED_MALLOC(sizeof(tHostifInitParam));
@@ -142,7 +142,7 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     for (i = 0; i < kHostifInstIdLast; i++)
     {
         pHostif_p->aBufMap[i].span = aInitVec[i + HOSTIF_DYNBUF_COUNT].span;
-        pHostif_p->aBufMap[i].pBase = (UINT8*)HOSTIF_UNCACHED_MALLOC(pHostif_p->aBufMap[i].span);
+        pHostif_p->aBufMap[i].pBase = (void*)HOSTIF_UNCACHED_MALLOC(pHostif_p->aBufMap[i].span);
 
         if (pHostif_p->aBufMap[i].pBase == NULL)
         {
@@ -182,7 +182,7 @@ This function deletes a host interface instance.
 tHostifReturn hostif_deleteInt(tHostif* pHostif_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
-    int             i;
+    UINT8           i;
 
     // deactivate bridge (ignore ret)
     ret = controlBridge(pHostif_p, FALSE);
@@ -221,7 +221,8 @@ This function reads and verifies the version from the host interface.
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_checkVersion(const UINT8* pBase_p, const tHostifVersion* pSwVersion_p)
+tHostifReturn hostif_checkVersion(const void* pBase_p,
+                                  const tHostifVersion* pSwVersion_p)
 {
     tHostifReturn           ret = kHostifSuccessful;
     UINT32                  versionField = hostif_readVersion(pBase_p);
@@ -261,7 +262,8 @@ This function enables an IRQ source from the PCP side.
 */
 //------------------------------------------------------------------------------
 tHostifReturn hostif_irqSourceEnable(tHostifInstance pInstance_p,
-                                     tHostifIrqSrc irqSrc_p, BOOL fEnable_p)
+                                     tHostifIrqSrc irqSrc_p,
+                                     BOOL fEnable_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif*      pHostif = (tHostif*)pInstance_p;
@@ -315,7 +317,7 @@ tHostifReturn hostif_setState(tHostifInstance pInstance_p, tHostifState sta_p)
         goto Exit;
     }
 
-    hostif_writeState(pHostif->pBase, sta_p);
+    hostif_writeState(pHostif->pBase, (UINT16)sta_p);
 
 Exit:
     return ret;
@@ -371,7 +373,7 @@ This function returns the user part of the initialization parameters.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p)
+tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, void** ppBase_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = (tHostif*)pInstance_p;

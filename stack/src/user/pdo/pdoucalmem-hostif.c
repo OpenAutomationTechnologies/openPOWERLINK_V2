@@ -13,7 +13,7 @@ kernel layer are separated by the host interface IP-Core.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -76,8 +76,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 typedef struct
 {
-    UINT8*  pBase;
-    UINT    span;
+    void*   pBase;
+    size_t  span;
 } tLimInstance;
 
 //------------------------------------------------------------------------------
@@ -179,7 +179,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
         return kErrorNoResource;
     }
 
-    *ppPdoMem_p = limPdo_l.pBase;
+    *ppPdoMem_p = (UINT8*)limPdo_l.pBase;
 
     return kErrorOk;
 }

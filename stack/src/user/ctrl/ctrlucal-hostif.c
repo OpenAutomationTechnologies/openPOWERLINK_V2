@@ -100,8 +100,8 @@ static tCtrluCalInstance    instance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static UINT8* getDynBuff(UINT32 pcpBase_p);
-static void   freeDynBuff(UINT8* pDynBufBase_p);
+static void*  getDynBuff(UINT32 pcpBase_p);
+static void   freeDynBuff(const void* pDynBufBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -391,8 +391,8 @@ can be accessed by the kernel stack.
 void ctrlucal_storeInitParam(const tCtrlInitParam* pInitParam_p)
 {
     tHostifReturn   hifret;
-    UINT8*          pInitBase;
-    UINT8*          pDst;
+    void*           pInitBase;
+    void*           pDst;
 
     // Check parameter validity
     ASSERT(pInitParam_p != NULL);
@@ -429,8 +429,8 @@ tOplkError ctrlucal_readInitParam(tCtrlInitParam* pInitParam_p)
 {
     tOplkError      ret = kErrorOk;
     tHostifReturn   hifret;
-    UINT8*          pInitBase;
-    UINT8*          pSrc;
+    void*           pInitBase;
+    void*           pSrc;
 
     // Check parameter validity
     ASSERT(pInitParam_p != NULL);
@@ -555,16 +555,16 @@ tOplkError ctrlucal_getMappedMem(size_t kernelOffs_p,
 
 This function sets a dynamic buffer to the provided PCP memory buffer.
 
-\param[in]      pcpBase_p           Address to buffer in PCP's memory environment
+\param[in]      pcpBase_p           Address of buffer in PCP's memory environment
 
 \return The function returns the acquired dynamic buffer.
 \retval NULL                        The dynamic buffer allocation failed.
 */
 //------------------------------------------------------------------------------
-static UINT8* getDynBuff(UINT32 pcpBase_p)
+static void* getDynBuff(UINT32 pcpBase_p)
 {
     tHostifReturn   hifret;
-    UINT8*          pDynBufBase;
+    void*           pDynBufBase;
 
     hifret = hostif_dynBufAcquire(instance_l.hifInstance, pcpBase_p, &pDynBufBase);
     if (hifret != kHostifSuccessful)
@@ -584,10 +584,10 @@ static UINT8* getDynBuff(UINT32 pcpBase_p)
 
 This function frees a dynamic buffer previously acquired.
 
-\param  pDynBufBase_p   Address to buffer in PCP's memory environment
+\param  pDynBufBase_p   Pointer to the acquired dynamic buffer
 */
 //------------------------------------------------------------------------------
-static void freeDynBuff(UINT8* pDynBufBase_p)
+static void freeDynBuff(const void* pDynBufBase_p)
 {
     tHostifReturn   hifret;
 

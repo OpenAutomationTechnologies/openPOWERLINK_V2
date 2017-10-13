@@ -9,7 +9,7 @@ This is the internal driver header.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -70,7 +70,7 @@ This structure is used to store the buffer descriptors
 typedef struct sHostifBufDesc
 {
     UINT32  offset;     ///< Buffer offset within hostif
-    UINT    span;       ///< Buffer span [byte]
+    UINT32  span;       ///< Buffer span [byte]
 } tHostifBufDesc;
 
 /**
@@ -80,8 +80,8 @@ This structure is used to store the buffer base address and size.
 */
 typedef struct sHostifBufMap
 {
-    UINT8*  pBase;  ///< Buffer base address
-    UINT    span;   ///< Buffer span [byte]
+    void*   pBase;  ///< Buffer base address
+    UINT32  span;   ///< Buffer span [byte]
 } tHostifBufMap;
 
 /**
@@ -104,11 +104,11 @@ Holds the configuration passed to the instance at creation.
 typedef struct sHostif
 {
     tHostifConfig       config;                       ///< copy of configuration
-    UINT8*              pBase;                        ///< base address of host interface
+    void*               pBase;                        ///< base address of host interface
     tHostifIrqCb        apfnIrqCb[kHostifIrqSrcLast]; ///< table that stores the IRQ callbacks
     tHostifBufMap       aBufMap[kHostifInstIdLast];   ///< Table storing buffer mapping
     tHostifInitParam*   pInitParam;                   ///< Initialization parameter
-    UINT8*              apDynBuf[HOSTIF_DYNBUF_COUNT];
+    UINT32              aDynBuf[HOSTIF_DYNBUF_COUNT]; ///< Offset of dynamic buffers in PCP address space
 } tHostif;
 
 //------------------------------------------------------------------------------
@@ -121,7 +121,8 @@ extern "C" {
 
 tHostifReturn hostif_createInt(tHostif* pHostif_p);
 tHostifReturn hostif_deleteInt(tHostif* pHostif_p);
-tHostifReturn hostif_checkVersion(const UINT8* pBase_p, const tHostifVersion* pSwVersion_p);
+tHostifReturn hostif_checkVersion(const void* pBase_p,
+                                  const tHostifVersion* pSwVersion_p);
 
 #if (CONFIG_HOSTIF_PCP == FALSE)
 // Host processor target specific functions

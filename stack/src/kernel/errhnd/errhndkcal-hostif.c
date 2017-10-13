@@ -11,7 +11,7 @@ This implementation uses the host interface IP-Core from the kernel side.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -105,8 +105,8 @@ tOplkError errhndkcal_initMemory(void)
     tHostifInstance pHostifInstance = hostif_getInstance(0);
     tOplkError      ret = kErrorOk;
     tHostifReturn   hifRet;
-    UINT8*          pBase;
-    UINT            span;
+    void*           pBase;
+    size_t          span;
 
     if (pHostifInstance == NULL)
     {

@@ -260,8 +260,8 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
     {   // Queue must use host interface
         tHostifReturn           ret;
         tHostifInstance         pHostif = (tHostifInstance*)pInstance_p->pCircBufArchInstance;
-        UINT8*                  pBufBase;
-        UINT                    bufSize;
+        void*                   pBufBase;
+        size_t                  bufSize;
         tCircBufHostiBuffer*    pHostifBuffer;
 
         // Get buffer for queue
@@ -277,8 +277,8 @@ tCircBufError circbuf_allocBuffer(tCircBufInstance* pInstance_p, size_t* pSize_p
         // Check if there is enough memory available
         if (size > bufSize)
         {
-            DEBUG_LVL_ERROR_TRACE("%s Hostif buffer (id=%d) only provides %d byte instead of %d byte!\n",
-                                  __func__, pInstance_p->bufferId, bufSize, size);
+            DEBUG_LVL_ERROR_TRACE("%s Hostif buffer (id=%d) only provides %lu Bytes instead of %lu Bytes!\n",
+                                  __func__, pInstance_p->bufferId, (ULONG)bufSize, (ULONG)size);
             return kCircBufNoResource;
         }
 
@@ -339,8 +339,8 @@ tCircBufError circbuf_connectBuffer(tCircBufInstance* pInstance_p)
     {   // Queue must use host interface
         tHostifReturn           ret;
         tHostifInstance         pHostif = (tHostifInstance*)pInstance_p->pCircBufArchInstance;
-        UINT8*                  pBufBase;
-        UINT                    bufSize;
+        void*                   pBufBase;
+        size_t                  bufSize;
         tCircBufHostiBuffer*    pHostifBuffer;
 
         // Get buffer for queue

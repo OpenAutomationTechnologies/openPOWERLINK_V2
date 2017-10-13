@@ -63,39 +63,39 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-UINT32  hostif_readMagic(const UINT8* pHostifScBase_p);
-UINT32  hostif_readVersion(const UINT8* pHostifScBase_p);
-UINT32  hostif_readBootBase(const UINT8* pHostifScBase_p);
-void    hostif_writeBootBase(UINT8* pHostifScBase_p, UINT32 val_p);
-UINT32  hostif_readInitBase(const UINT8* pHostifScBase_p);
-void    hostif_writeInitBase(UINT8* pHostifScBase_p, UINT32 val_p);
+UINT32  hostif_readMagic(const void* pHostifScBase_p);
+UINT32  hostif_readVersion(const void* pHostifScBase_p);
+UINT32  hostif_readBootBase(const void* pHostifScBase_p);
+void    hostif_writeBootBase(void* pHostifScBase_p, UINT32 val_p);
+UINT32  hostif_readInitBase(const void* pHostifScBase_p);
+void    hostif_writeInitBase(void* pHostifScBase_p, UINT32 val_p);
 
-UINT16  hostif_readBridgeEnable(const UINT8* pHostifScBase_p);
-void    hostif_writeBridgeEnable(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readCommand(const UINT8* pHostifScBase_p);
-void    hostif_writeCommand(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readState(const UINT8* pHostifScBase_p);
-void    hostif_writeState(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readReturn(const UINT8* pHostifScBase_p);
-void    hostif_writeReturn(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readHeartbeat(const UINT8* pHostifScBase_p);
-void    hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readBridgeEnable(const void* pHostifScBase_p);
+void    hostif_writeBridgeEnable(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readCommand(const void* pHostifScBase_p);
+void    hostif_writeCommand(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readState(const void* pHostifScBase_p);
+void    hostif_writeState(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readReturn(const void* pHostifScBase_p);
+void    hostif_writeReturn(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readHeartbeat(const void* pHostifScBase_p);
+void    hostif_writeHeartbeat(void* pHostifScBase_p, UINT16 val_p);
 
-UINT16  hostif_readIrqEnable(const UINT8* pHostifScBase_p);
-void    hostif_writeIrqEnable(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readIrqPending(const UINT8* pHostifScBase_p);
-UINT16  hostif_readIrqMasterEnable(const UINT8* pHostifScBase_p);
-void    hostif_writeIrqMasterEnable(UINT8* pHostifScBase_p, UINT16 val_p);
-void    hostif_ackIrq(UINT8* pHostifScBase_p, UINT16 val_p);
-void    hostif_setIrq(UINT8* pHostifScBase_p, UINT16 val_p);
-UINT16  hostif_readSyncConfig(const UINT8* pHostifScBase_p);
-void    hostif_writeSyncConfig(UINT8* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readIrqEnable(const void* pHostifScBase_p);
+void    hostif_writeIrqEnable(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readIrqPending(const void* pHostifScBase_p);
+UINT16  hostif_readIrqMasterEnable(const void* pHostifScBase_p);
+void    hostif_writeIrqMasterEnable(void* pHostifScBase_p, UINT16 val_p);
+void    hostif_ackIrq(void* pHostifScBase_p, UINT16 val_p);
+void    hostif_setIrq(void* pHostifScBase_p, UINT16 val_p);
+UINT16  hostif_readSyncConfig(const void* pHostifScBase_p);
+void    hostif_writeSyncConfig(void* pHostifScBase_p, UINT16 val_p);
 
-UINT32  hostif_readDynBufHost(const UINT8* pHostifScBase_p, UINT8 num_p);
-void    hostif_writeDynBufHost(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
+UINT32  hostif_readDynBufHost(const void* pHostifScBase_p, UINT8 num_p);
+void    hostif_writeDynBufHost(void* pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
 
-UINT32  hostif_readBufPcp(const UINT8* pHostifScBase_p, UINT8 num_p);
-void    hostif_writeBufPcp(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
+UINT32  hostif_readBufPcp(const void* pHostifScBase_p, UINT8 num_p);
+void    hostif_writeBufPcp(void* pHostifScBase_p, UINT8 num_p, UINT32 addr_p);
 
 #ifdef __cplusplus
 }

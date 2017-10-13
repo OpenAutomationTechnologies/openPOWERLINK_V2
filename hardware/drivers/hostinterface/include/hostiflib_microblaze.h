@@ -10,7 +10,7 @@ This header file provides specific macros for Xilinx Microblaze CPU.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014 Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_SYNC_DCACHE      FALSE
 #endif
 
-#define HOSTIF_MAKE_NONCACHEABLE(ptr)       (void*) ptr
+#define HOSTIF_MAKE_NONCACHEABLE(ptr)       (void*)ptr
 
 #define HOSTIF_UNCACHED_MALLOC(size)        malloc(size)
 #define HOSTIF_UNCACHED_FREE(ptr)           free(ptr)

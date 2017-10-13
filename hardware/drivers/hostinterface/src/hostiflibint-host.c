@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library for Host.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -132,7 +132,7 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     hostif_writeDynBufHost(pHostif_p->pBase, 0, pcpAddr);
 
     // Point to address after status control registers (=dyn buf 0)
-    pInitParam = (const tHostifInitParam*)(pHostif_p->pBase + HOSTIF_STCTRL_SPAN);
+    pInitParam = (const tHostifInitParam*)((const UINT8*)pHostif_p->pBase + HOSTIF_STCTRL_SPAN);
 
     // Check if mem length is correct, otherwise version mismatch!
     if (pInitParam->initMemLength != HOSTIF_DYNBUF_COUNT + HOSTIF_BUF_COUNT)
@@ -144,12 +144,12 @@ tHostifReturn hostif_createInt(tHostif* pHostif_p)
     // And now, get the stuff
     for (i = 0; i < pInitParam->initMemLength; i++)
     {
-        pHostif_p->aBufMap[i].pBase = pHostif_p->pBase + pInitParam->aInitMem[i].offset;
+        pHostif_p->aBufMap[i].pBase = (UINT8*)pHostif_p->pBase + pInitParam->aInitMem[i].offset;
         pHostif_p->aBufMap[i].span = pInitParam->aInitMem[i].span;
     }
 
     // register isr in system
-    if ((ret = hostif_sysIrqRegHandler(hostifIrqHandler, (void*)pHostif_p)) != kHostifSuccessful)
+    if ((ret = hostif_sysIrqRegHandler(hostifIrqHandler, pHostif_p)) != kHostifSuccessful)
     {
         goto Exit;
     }
@@ -200,7 +200,8 @@ This function reads and verifies the version from the host interface.
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_checkVersion(const UINT8* pBase_p, const tHostifVersion* pSwVersion_p)
+tHostifReturn hostif_checkVersion(const void* pBase_p,
+                                  const tHostifVersion* pSwVersion_p)
 {
     tHostifReturn           ret = kHostifSuccessful;
     UINT32                  versionField = hostif_readVersion(pBase_p);
@@ -239,7 +240,8 @@ If the provided callback is NULL, then the IRQ source is disabled.
 */
 //------------------------------------------------------------------------------
 tHostifReturn hostif_irqRegHdl(tHostifInstance pInstance_p,
-                               tHostifIrqSrc irqSrc_p, tHostifIrqCb pfnCb_p)
+                               tHostifIrqSrc irqSrc_p,
+                               tHostifIrqCb pfnCb_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif*      pHostif = (tHostif*)pInstance_p;
@@ -331,7 +333,7 @@ tHostifReturn hostif_getState(tHostifInstance pInstance_p, tHostifState* pSta_p)
         goto Exit;
     }
 
-    *pSta_p = hostif_readState(pHostif->pBase);
+    *pSta_p = (tHostifState)hostif_readState(pHostif->pBase);
 
 Exit:
     return ret;
@@ -362,7 +364,7 @@ tHostifReturn hostif_getError(tHostifInstance pInstance_p, tHostifError* pErr_p)
         goto Exit;
     }
 
-    *pErr_p = hostif_readReturn(pHostif->pBase);
+    *pErr_p = (tHostifError)hostif_readReturn(pHostif->pBase);
 
 Exit:
     return ret;
@@ -416,8 +418,9 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_dynBufAcquire(tHostifInstance pInstance_p, UINT32 pcpBaseAddr_p,
-                                   UINT8** ppBufBase_p)
+tHostifReturn hostif_dynBufAcquire(tHostifInstance pInstance_p,
+                                   UINT32 pcpBaseAddr_p,
+                                   void** ppBufBase_p)
 {
     tHostifReturn ret;
     tHostif*      pHostif = (tHostif*)pInstance_p;
@@ -439,10 +442,10 @@ tHostifReturn hostif_dynBufAcquire(tHostifInstance pInstance_p, UINT32 pcpBaseAd
 
     for (i = 0; i < HOSTIF_DYNBUF_COUNT; i++)
     {
-        if (pHostif->apDynBuf[i] == NULL)
+        if (pHostif->aDynBuf[i] == 0x00000000UL)
         {
             // handle base address in pcp memory space
-            pHostif->apDynBuf[i] = (UINT8*)pcpBaseAddr_p;
+            pHostif->aDynBuf[i] = pcpBaseAddr_p;
 
             hostif_writeDynBufHost(pHostif->pBase, i, pcpBaseAddr_p);
 
@@ -473,11 +476,11 @@ Exit:
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, const UINT8* pBufBase_p)
+tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, const void* pBufBase_p)
 {
     tHostifReturn ret = kHostifSuccessful;
     tHostif*      pHostif = (tHostif*)pInstance_p;
-    UINT          i;
+    UINT8         i;
 
     if (pInstance_p == NULL)
     {
@@ -490,7 +493,7 @@ tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, const UINT8* pBufBa
         if (pHostif->aBufMap[i].pBase == pBufBase_p)
         {
             // Found dynamic buffer, free it
-            pHostif->apDynBuf[i] = NULL;
+            pHostif->aDynBuf[i] = 0x00000000UL;
 
             ret = kHostifSuccessful;
             break;
@@ -498,7 +501,7 @@ tHostifReturn hostif_dynBufFree(tHostifInstance pInstance_p, const UINT8* pBufBa
     }
 
     if (ret == kHostifSuccessful)
-        hostif_writeDynBufHost(pHostif->pBase, (UINT8)i, 0);
+        hostif_writeDynBufHost(pHostif->pBase, i, 0x00000000UL);
 
 Exit:
     return ret;
@@ -520,7 +523,7 @@ This function returns the user part of the initialization parameters.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p)
+tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, void** ppBase_p)
 {
     tHostifReturn   ret = kHostifSuccessful;
     const tHostif*  pHostif = (const tHostif*)pInstance_p;
@@ -531,7 +534,7 @@ tHostifReturn hostif_getInitParam(tHostifInstance pInstance_p, UINT8** ppBase_p)
         goto Exit;
     }
 
-    *ppBase_p = (UINT8*)(((tHostifInitParam*)hostif_readInitBase(pHostif->pBase))->aUser);
+    *ppBase_p = ((tHostifInitParam*)hostif_readInitBase(pHostif->pBase))->aUser;
 
 Exit:
     return ret;

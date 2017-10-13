@@ -11,7 +11,7 @@ register structures.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -182,10 +182,10 @@ typedef union sScDynB
 // local function prototypes
 //------------------------------------------------------------------------------
 
-static inline UINT32 hostifRead32(const UINT8* pAddr_p, UINT offset_p);
-static inline UINT16 hostifRead16(const UINT8* pAddr_p, UINT offset_p);
-static inline void hostifWrite32(UINT8* pAddr_p, UINT offset_p, UINT32 val_p);
-static inline void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p);
+static inline UINT32 hostifRead32(const void* pAddr_p, size_t offset_p);
+static inline UINT16 hostifRead16(const void* pAddr_p, size_t offset_p);
+static inline void hostifWrite32(void* pAddr_p, size_t offset_p, UINT32 val_p);
+static inline void hostifWrite16(void* pAddr_p, size_t offset_p, UINT16 val_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -202,9 +202,9 @@ static inline void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p);
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readMagic(const UINT8* pHostifScBase_p)
+UINT32 hostif_readMagic(const void* pHostifScBase_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                         offsetof(tScInfo, magic));
 }
 
@@ -219,9 +219,9 @@ UINT32 hostif_readMagic(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readVersion(const UINT8* pHostifScBase_p)
+UINT32 hostif_readVersion(const void* pHostifScBase_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                         offsetof(tScInfo, version));
 }
 
@@ -236,9 +236,9 @@ UINT32 hostif_readVersion(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readBootBase(const UINT8* pHostifScBase_p)
+UINT32 hostif_readBootBase(const void* pHostifScBase_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                         offsetof(tScInfo, bootBase));
 }
 
@@ -252,9 +252,9 @@ UINT32 hostif_readBootBase(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeBootBase(UINT8* pHostifScBase_p, UINT32 val_p)
+void hostif_writeBootBase(void* pHostifScBase_p, UINT32 val_p)
 {
-    hostifWrite32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    hostifWrite32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                   offsetof(tScInfo, bootBase), val_p);
 }
 
@@ -269,9 +269,9 @@ void hostif_writeBootBase(UINT8* pHostifScBase_p, UINT32 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readInitBase(const UINT8* pHostifScBase_p)
+UINT32 hostif_readInitBase(const void* pHostifScBase_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                         offsetof(tScInfo, initBase));
 }
 
@@ -285,9 +285,9 @@ UINT32 hostif_readInitBase(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeInitBase(UINT8* pHostifScBase_p, UINT32 val_p)
+void hostif_writeInitBase(void* pHostifScBase_p, UINT32 val_p)
 {
-    hostifWrite32(pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
+    hostifWrite32((UINT8*)pHostifScBase_p + HOSTIF_SC_INFO_OFFS,
                   offsetof(tScInfo, initBase), val_p);
 }
 
@@ -302,9 +302,9 @@ void hostif_writeInitBase(UINT8* pHostifScBase_p, UINT32 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readBridgeEnable(const UINT8* pHostifScBase_p)
+UINT16 hostif_readBridgeEnable(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                         offsetof(tScCont, bridgeEnable));
 }
 
@@ -318,9 +318,9 @@ UINT16 hostif_readBridgeEnable(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeBridgeEnable(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeBridgeEnable(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                   offsetof(tScCont, bridgeEnable), val_p);
 }
 
@@ -335,9 +335,9 @@ void hostif_writeBridgeEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readCommand(const UINT8* pHostifScBase_p)
+UINT16 hostif_readCommand(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                         offsetof(tScCont, command));
 }
 
@@ -351,9 +351,9 @@ UINT16 hostif_readCommand(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeCommand(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeCommand(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                   offsetof(tScCont, command), val_p);
 }
 
@@ -368,9 +368,9 @@ void hostif_writeCommand(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readState(const UINT8* pHostifScBase_p)
+UINT16 hostif_readState(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                         offsetof(tScCont, state));
 }
 
@@ -384,9 +384,9 @@ UINT16 hostif_readState(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeState(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeState(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                   offsetof(tScCont, state), val_p);
 }
 
@@ -401,9 +401,9 @@ void hostif_writeState(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readReturn(const UINT8* pHostifScBase_p)
+UINT16 hostif_readReturn(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                         offsetof(tScCont, ret));
 }
 
@@ -417,9 +417,9 @@ UINT16 hostif_readReturn(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeReturn(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeReturn(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                   offsetof(tScCont, ret), val_p);
 }
 
@@ -434,9 +434,9 @@ void hostif_writeReturn(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readHeartbeat(const UINT8* pHostifScBase_p)
+UINT16 hostif_readHeartbeat(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                         offsetof(tScCont, heartbeat));
 }
 
@@ -450,9 +450,9 @@ UINT16 hostif_readHeartbeat(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeHeartbeat(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_CONT_OFFS,
                   offsetof(tScCont, heartbeat), val_p);
 }
 
@@ -467,9 +467,9 @@ void hostif_writeHeartbeat(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqEnable(const UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqEnable(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                         offsetof(tScSync, irqEnable));
 }
 
@@ -483,9 +483,9 @@ UINT16 hostif_readIrqEnable(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeIrqEnable(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeIrqEnable(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                   offsetof(tScSync, irqEnable), val_p);
 }
 
@@ -500,9 +500,9 @@ void hostif_writeIrqEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqPending(const UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqPending(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                         offsetof(tScSync, irqPending));
 }
 
@@ -517,9 +517,9 @@ UINT16 hostif_readIrqPending(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readIrqMasterEnable(const UINT8* pHostifScBase_p)
+UINT16 hostif_readIrqMasterEnable(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                         offsetof(tScSync, irqMasterEnable));
 }
 
@@ -533,9 +533,9 @@ UINT16 hostif_readIrqMasterEnable(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeIrqMasterEnable(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeIrqMasterEnable(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                   offsetof(tScSync, irqMasterEnable), val_p);
 }
 
@@ -549,9 +549,9 @@ void hostif_writeIrqMasterEnable(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_ackIrq(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_ackIrq(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                   offsetof(tScSync, irq.ack), val_p);
 }
 
@@ -565,9 +565,9 @@ void hostif_ackIrq(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_setIrq(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_setIrq(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                   offsetof(tScSync, irq.set), val_p);
 }
 
@@ -582,9 +582,9 @@ void hostif_setIrq(UINT8* pHostifScBase_p, UINT16 val_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT16 hostif_readSyncConfig(const UINT8* pHostifScBase_p)
+UINT16 hostif_readSyncConfig(const void* pHostifScBase_p)
 {
-    return hostifRead16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    return hostifRead16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                         offsetof(tScSync, syncConfig));
 }
 
@@ -598,9 +598,9 @@ UINT16 hostif_readSyncConfig(const UINT8* pHostifScBase_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeSyncConfig(UINT8* pHostifScBase_p, UINT16 val_p)
+void hostif_writeSyncConfig(void* pHostifScBase_p, UINT16 val_p)
 {
-    hostifWrite16(pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
+    hostifWrite16((UINT8*)pHostifScBase_p + HOSTIF_SC_SYNC_OFFS,
                   offsetof(tScSync, syncConfig), val_p);
 }
 
@@ -617,9 +617,9 @@ address is limited by the address width of the bridge master.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readDynBufHost(const UINT8* pHostifScBase_p, UINT8 num_p)
+UINT32 hostif_readDynBufHost(const void* pHostifScBase_p, UINT8 num_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
                         offsetof(tScDynB, Host.aDynBuf[num_p]));
 }
 
@@ -634,9 +634,9 @@ UINT32 hostif_readDynBufHost(const UINT8* pHostifScBase_p, UINT8 num_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeDynBufHost(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
+void hostif_writeDynBufHost(void* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 {
-    hostifWrite32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+    hostifWrite32((UINT8*)pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
                   offsetof(tScDynB, Host.aDynBuf[num_p]), addr_p);
 }
 
@@ -653,9 +653,9 @@ address is limited by the address width of the bridge master.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-UINT32 hostif_readBufPcp(const UINT8* pHostifScBase_p, UINT8 num_p)
+UINT32 hostif_readBufPcp(const void* pHostifScBase_p, UINT8 num_p)
 {
-    return hostifRead32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+    return hostifRead32((UINT8*)pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
                         offsetof(tScDynB, Pcp.aBuf[num_p]));
 }
 
@@ -670,9 +670,9 @@ UINT32 hostif_readBufPcp(const UINT8* pHostifScBase_p, UINT8 num_p)
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-void hostif_writeBufPcp(UINT8* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
+void hostif_writeBufPcp(void* pHostifScBase_p, UINT8 num_p, UINT32 addr_p)
 {
-    hostifWrite32(pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
+    hostifWrite32((UINT8*)pHostifScBase_p + HOSTIF_SC_DYNB_OFFS,
                   offsetof(tScDynB, Pcp.aBuf[num_p]), addr_p);
 }
 
@@ -695,11 +695,11 @@ The function reads from the given base address plus the provided offset the
 \return The function returns the read value.
 */
 //------------------------------------------------------------------------------
-static UINT32 hostifRead32(const UINT8* pAddr_p, UINT offset_p)
+static UINT32 hostifRead32(const void* pAddr_p, size_t offset_p)
 {
-    HOSTIF_DCACHE_INVALIDATE(pAddr_p + offset_p, sizeof(UINT32));
+    HOSTIF_DCACHE_INVALIDATE((UINT8*)pAddr_p + offset_p, sizeof(UINT32));
 
-    return HOSTIF_RD32(pAddr_p + offset_p);
+    return HOSTIF_RD32((UINT8*)pAddr_p + offset_p);
 }
 
 //------------------------------------------------------------------------------
@@ -715,11 +715,11 @@ The function reads from the given base address plus the provided offset the
 \return The function returns the read value.
 */
 //------------------------------------------------------------------------------
-static UINT16 hostifRead16(const UINT8* pAddr_p, UINT offset_p)
+static UINT16 hostifRead16(const void* pAddr_p, size_t offset_p)
 {
-    HOSTIF_DCACHE_INVALIDATE(pAddr_p + offset_p, sizeof(UINT16));
+    HOSTIF_DCACHE_INVALIDATE((UINT8*)pAddr_p + offset_p, sizeof(UINT16));
 
-    return HOSTIF_RD16(pAddr_p + offset_p);
+    return HOSTIF_RD16((UINT8*)pAddr_p + offset_p);
 }
 
 //------------------------------------------------------------------------------
@@ -734,11 +734,11 @@ The function writes to the given base address plus the provided offset the given
 \param[in]      val_p               Value to be written to the given base plus offset
 */
 //------------------------------------------------------------------------------
-static void hostifWrite32(UINT8* pAddr_p, UINT offset_p, UINT32 val_p)
+static void hostifWrite32(void* pAddr_p, size_t offset_p, UINT32 val_p)
 {
-    HOSTIF_WR32(pAddr_p + offset_p, val_p);
+    HOSTIF_WR32((UINT8*)pAddr_p + offset_p, val_p);
 
-    HOSTIF_DCACHE_FLUSH(pAddr_p + offset_p, sizeof(UINT32));
+    HOSTIF_DCACHE_FLUSH((UINT8*)pAddr_p + offset_p, sizeof(UINT32));
 }
 
 //------------------------------------------------------------------------------
@@ -753,11 +753,11 @@ The function writes to the given base address plus the provided offset the given
 \param[in]      val_p               Value to be written to the given base plus offset
 */
 //------------------------------------------------------------------------------
-static void hostifWrite16(UINT8* pAddr_p, UINT offset_p, UINT16 val_p)
+static void hostifWrite16(void* pAddr_p, size_t offset_p, UINT16 val_p)
 {
-    HOSTIF_WR16(pAddr_p + offset_p, val_p);
+    HOSTIF_WR16((UINT8*)pAddr_p + offset_p, val_p);
 
-    HOSTIF_DCACHE_FLUSH(pAddr_p + offset_p, sizeof(UINT16));
+    HOSTIF_DCACHE_FLUSH((UINT8*)pAddr_p + offset_p, sizeof(UINT16));
 }
 
 /// \}

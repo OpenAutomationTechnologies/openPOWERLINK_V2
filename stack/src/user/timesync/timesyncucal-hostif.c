@@ -10,7 +10,7 @@ This file contains the hostif sync implementation for the user CAL timesync modu
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2017, Kalycito Infotech Private Limited.
 All rights reserved.
 
@@ -255,8 +255,8 @@ static void hostifIrqSyncCb(void* pArg_p)
 static void* getSharedMemory(tHostifInstance pHifInstance_p)
 {
     tHostifReturn   hifRet;
-    UINT8*          pBase;
-    UINT            span;
+    void*           pBase;
+    size_t          span;
 
     hifRet = hostif_getBuf(pHifInstance_p, kHostifInstIdTimesync, &pBase, &span);
     if (hifRet != kHostifSuccessful)
@@ -275,7 +275,7 @@ static void* getSharedMemory(tHostifInstance pHifInstance_p)
         return NULL;
     }
 
-    return (void*)pBase;
+    return pBase;
 }
 #endif
 

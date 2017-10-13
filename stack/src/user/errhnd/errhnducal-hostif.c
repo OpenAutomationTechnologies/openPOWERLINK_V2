@@ -11,7 +11,7 @@ This implementation uses the host interface ipcore from the user side.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -82,7 +82,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local vars
 //------------------------------------------------------------------------------
 static tErrHndObjects*  pLocalObjects_l;    ///< Pointer to user error objects
-static UINT8*           pHostifMem_l;       ///< Pointer to hostinterface memory
+static void*            pHostifMem_l;       ///< Pointer to hostinterface memory
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -112,8 +112,8 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
     tHostifInstance pHostifInstance = hostif_getInstance(0);
     tOplkError      ret = kErrorOk;
     tHostifReturn   hostifRet;
-    UINT8*          pBase;
-    UINT            span;
+    void*           pBase;
+    size_t          span;
 
     if (pHostifInstance == NULL)
     {
@@ -186,7 +186,7 @@ tOplkError errhnducal_writeErrorObject(UINT index_p,
     ASSERT(pParam_p != NULL);
 
     offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
-    OPLK_MEMCPY(pHostifMem_l + offset, pParam_p, sizeof(*pParam_p));
+    OPLK_MEMCPY((UINT8*)pHostifMem_l + offset, pParam_p, sizeof(*pParam_p));
 
     return kErrorOk;
 }
@@ -218,7 +218,7 @@ tOplkError errhnducal_readErrorObject(UINT index_p,
     ASSERT(pParam_p != NULL);
 
     offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
-    OPLK_MEMCPY(pParam_p, pHostifMem_l + offset, sizeof(*pParam_p));
+    OPLK_MEMCPY(pParam_p, (UINT8*)pHostifMem_l + offset, sizeof(*pParam_p));
 
     return kErrorOk;
 }

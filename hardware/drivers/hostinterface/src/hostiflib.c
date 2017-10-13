@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -102,7 +102,7 @@ static tHostif* paHostifInstance_l[HOSTIF_INSTANCE_COUNT] =
 // local function prototypes
 //------------------------------------------------------------------------------
 /* Local functions for PCP and Host */
-static tHostifReturn checkMagic(const UINT8* pBase_p);
+static tHostifReturn checkMagic(const void* pBase_p);
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -139,7 +139,7 @@ tHostifReturn hostif_create(const tHostifConfig* pConfig_p,
 {
     tHostifReturn   ret = kHostifSuccessful;
     tHostif*        pHostif = NULL;
-    UINT8*          pBase_p;
+    void*           pBase_p;
     int             i;
 
     if ((pConfig_p == NULL) || (ppInstance_p == NULL))
@@ -320,7 +320,7 @@ tHostifReturn hostif_setCommand(tHostifInstance pInstance_p, tHostifCommand cmd_
         goto Exit;
     }
 
-    hostif_writeCommand(pHostif->pBase, cmd_p);
+    hostif_writeCommand(pHostif->pBase, (UINT16)cmd_p);
 
 Exit:
     return ret;
@@ -351,7 +351,7 @@ tHostifReturn hostif_getCommand(tHostifInstance pInstance_p, tHostifCommand* pCm
         goto Exit;
     }
 
-    *pCmd_p = hostif_readCommand(pHostif->pBase);
+    *pCmd_p = (tHostifCommand)hostif_readCommand(pHostif->pBase);
 
 Exit:
     return ret;
@@ -384,7 +384,7 @@ tHostifReturn hostif_setError(tHostifInstance pInstance_p, tHostifError err_p)
         goto Exit;
     }
 
-    hostif_writeReturn(pHostif->pBase, err_p);
+    hostif_writeReturn(pHostif->pBase, (UINT16)err_p);
 
 Exit:
     return ret;
@@ -408,13 +408,17 @@ This function gets the buffer base and size of the addressed instance.
 \ingroup module_hostiflib
 */
 //------------------------------------------------------------------------------
-tHostifReturn hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instId_p,
-                            UINT8** ppBufBase_p, UINT* pBufSize_p)
+tHostifReturn hostif_getBuf(tHostifInstance pInstance_p,
+                            tHostifInstanceId instId_p,
+                            void** ppBufBase_p,
+                            size_t* pBufSize_p)
 {
     tHostifReturn  ret = kHostifSuccessful;
     const tHostif* pHostif = (const tHostif*)pInstance_p;
 
-    if ((pInstance_p == NULL) || (ppBufBase_p == NULL) || (pBufSize_p == NULL) ||
+    if ((pInstance_p == NULL) ||
+        (ppBufBase_p == NULL) ||
+        (pBufSize_p == NULL) ||
         !(instId_p < kHostifInstIdLast))
     {
         ret = kHostifInvalidParameter;
@@ -422,7 +426,7 @@ tHostifReturn hostif_getBuf(tHostifInstance pInstance_p, tHostifInstanceId instI
     }
 
     *ppBufBase_p = pHostif->aBufMap[instId_p].pBase;
-    *pBufSize_p = pHostif->aBufMap[instId_p].span;
+    *pBufSize_p = (size_t)pHostif->aBufMap[instId_p].span;
 
 Exit:
     return ret;
@@ -443,7 +447,7 @@ This function reads and verifies the magic word from the host interface.
 \return The function returns a tHostifReturn error code.
 */
 //------------------------------------------------------------------------------
-static tHostifReturn checkMagic(const UINT8* pBase_p)
+static tHostifReturn checkMagic(const void* pBase_p)
 {
     if (hostif_readMagic(pBase_p) == HOSTIF_MAGIC)
         return kHostifSuccessful;
