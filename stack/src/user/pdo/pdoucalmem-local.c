@@ -13,7 +13,7 @@ kernel layer run in the same domain and can both access the local memory.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,7 +57,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // module global vars
 //------------------------------------------------------------------------------
-extern UINT8*   pdokcalmem_pPdo_g;
+extern void*   pdokcalmem_pPdo_g;
 
 //------------------------------------------------------------------------------
 // global function prototypes
@@ -140,7 +140,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_allocateMem(size_t memSize_p,
-                               UINT8** ppPdoMem_p)
+                               void** ppPdoMem_p)
 {
     UNUSED_PARAMETER(memSize_p);
 
@@ -171,7 +171,7 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(void* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);

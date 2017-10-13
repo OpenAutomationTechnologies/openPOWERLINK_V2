@@ -66,24 +66,23 @@ tOplkError pdokcal_process(const tEvent* pEvent_p) SECTION_PDOKCAL_PROCESS;
 // PDO memory functions
 tOplkError pdokcal_openMem(void);
 tOplkError pdokcal_closeMem(void);
-tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** pPdoMem_p);
-tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p);
+tOplkError pdokcal_allocateMem(size_t memSize_p, void** pPdoMem_p);
+tOplkError pdokcal_freeMem(void* pMem_p, size_t memSize_p);
 
 // PDO buffer functions
 tOplkError pdokcal_initPdoMem(const tPdoChannelSetup* pPdoChannels,
                               size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdokcal_cleanupPdoMem(void);
-tOplkError pdokcal_getPdoMemRegion(UINT8** ppPdoMemBase, size_t* pPdoMemSize_p);
-tOplkError pdokcal_writeRxPdo(UINT channelId_p,
-                              const UINT8* pPayload_p,
+tOplkError pdokcal_getPdoMemRegion(void** ppPdoMemBase, size_t* pPdoMemSize_p);
+tOplkError pdokcal_writeRxPdo(UINT8 channelId_p,
+                              const void* pPayload_p,
                               UINT16 pdoSize_p)
                               SECTION_PDOKCAL_WRITE_RPDO;
-tOplkError pdokcal_readTxPdo(UINT channelId_p,
-                             UINT8* pPayload_p,
+tOplkError pdokcal_readTxPdo(UINT8 channelId_p,
+                             void* pPayload_p,
                              UINT16 pdoSize_p)
                              SECTION_PDOKCAL_READ_TPDO;
-BYTE*      pdokcal_getPdoPointer(BOOL fTxPdo_p, UINT offset_p, UINT16 pdoSize_p);
 
 #ifdef __cplusplus
 }

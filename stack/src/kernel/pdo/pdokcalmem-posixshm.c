@@ -12,7 +12,7 @@ between user and kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -81,7 +81,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int                  fd_l;
+static int  fd_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -149,7 +149,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, void** ppPdoMem_p)
 {
     // Check parameter validity
     ASSERT(ppPdoMem_p != NULL);
@@ -159,7 +159,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     if (ftruncate(fd_l, memSize_p) < 0)
         return kErrorNoResource;
 
-    *ppPdoMem_p = (UINT8*)mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
+    *ppPdoMem_p = mmap(NULL, memSize_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
     if (*ppPdoMem_p == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap failed!\n", __func__);
@@ -190,7 +190,7 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(void* pMem_p, size_t memSize_p)
 {
     // Check parameter validity
     ASSERT(pMem_p != NULL);

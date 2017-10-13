@@ -401,11 +401,11 @@ The function processes a received RxPDO.
 tOplkError pdok_processRxPdo(const tPlkFrame* pFrame_p, UINT frameSize_p)
 {
     tOplkError      ret = kErrorOk;
-    BYTE            frameData;
+    UINT8           frameData;
     UINT            nodeId;
     tMsgType        msgType;
     tPdoChannel*    pPdoChannel;
-    UINT            channelId;
+    UINT8           channelId;
     UINT8           index;
     UINT16          pdoPayloadSize;
 
@@ -581,11 +581,11 @@ This function copies a PDO into the specified frame.
 static tOplkError copyTxPdo(tPlkFrame* pFrame_p, UINT frameSize_p, BOOL fReadyFlag_p)
 {
     tOplkError          ret = kErrorOk;
-    BYTE                flag1;
+    UINT8               flag1;
     UINT                nodeId;
     tMsgType            msgType;
     tPdoChannel*        pPdoChannel;
-    UINT                channelId;
+    UINT8               channelId;
     UINT16              pdoSize;
     UINT                index;
 

@@ -141,8 +141,8 @@ The following structure defines the instance variable of the user PDO module.
 */
 typedef struct
 {
-    BYTE                    aPdoIdToChannelIdRx[(PDOU_PDO_ID_MASK + 1)]; ///< RXPDO to channel ID conversion table
-    BYTE                    aPdoIdToChannelIdTx[(PDOU_PDO_ID_MASK + 1)]; ///< TXPDO to channel ID conversion table
+    UINT8                   aPdoIdToChannelIdRx[(PDOU_PDO_ID_MASK + 1)]; ///< RXPDO to channel ID conversion table
+    UINT8                   aPdoIdToChannelIdTx[(PDOU_PDO_ID_MASK + 1)]; ///< TXPDO to channel ID conversion table
     tPdoChannelSetup        pdoChannels;                ///< PDO channel setup
     tPdoMappObject*         paRxObject;                 ///< Pointer to RX channel objects
     tPdoMappObject*         paTxObject;                 ///< Pointer to TX channel objects
@@ -166,27 +166,27 @@ static tOplkError callPdoChangeCb(BOOL fActivated_p,
                                   UINT mappParamIndex_p,
                                   UINT8 mappObjectCount_p,
                                   BOOL fTx_p);
-static tOplkError setupRxPdoChannelTables(BYTE abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
+static tOplkError setupRxPdoChannelTables(UINT8 abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
                                           UINT* pCountChannelIdRx_p);
-static tOplkError setupTxPdoChannelTables(BYTE abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
+static tOplkError setupTxPdoChannelTables(UINT8 abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
                                           UINT* pCountChannelIdTx_p);
 static tOplkError allocatePdoChannels(const tPdoAllocationParam* pAllocationParam_p);
 static tOplkError freePdoChannels(void);
 static tOplkError configureAllPdos(void);
 static tOplkError checkAndConfigurePdos(UINT16 mappParamIndex_p,
                                         UINT channelCount_p,
-                                        const BYTE* pChannelToPdoTable_p,
+                                        const UINT8* pChannelToPdoTable_p,
                                         UINT32* pAbortCode_p);
 static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
                                        UINT8 mappObjectCount_p,
                                        UINT32* pAbortCode_p);
 static tOplkError checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p);
-static void decodeObjectMapping(QWORD objectMapping_p,
+static void decodeObjectMapping(UINT64 objectMapping_p,
                                 UINT* pIndex_p,
                                 UINT* pSubIndex_p,
                                 UINT* pBitOffset_p,
                                 UINT* pBitSize_p);
-static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
+static tOplkError checkAndSetObjectMapping(UINT64 objectMapping_p,
                                            tObdAccess neededAccessType_p,
                                            tPdoMappObject* pMappObject_p,
                                            UINT32* pAbortCode_p,
@@ -194,25 +194,25 @@ static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
                                            UINT* pNextObjectOffset_p);
 static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT mappParamIndex_p,
-                                      BYTE mappObjectCount_p,
+                                      UINT8 mappObjectCount_p,
                                       UINT16 maxPdoSize_p,
                                       UINT32* pAbortCode_p,
                                       UINT16* pOffset_p,
                                       UINT16* pNextChannelOffset_p,
                                       UINT16* pCount_p);
 static tOplkError configurePdoChannel(const tPdoChannelConf* pChannelConf_p);
-static tOplkError getMaxPdoSize(BYTE nodeId_p,
+static tOplkError getMaxPdoSize(UINT8 nodeId_p,
                                 BOOL fTxPdo_p,
                                 UINT16* pMaxPdoSize_p,
                                 UINT32* pAbortCode_p);
-static tOplkError getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT* pChannelId_p);
+static tOplkError getPdoChannelId(UINT pdoId_p, BOOL fTxPdo_p, UINT8* pChannelId_p);
 static size_t calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
                              size_t* pRxPdoMemSize_p,
                              size_t* pTxPdoMemSize_p);
-static tOplkError copyVarToPdo(BYTE* pPayload_p,
+static tOplkError copyVarToPdo(void* pPayload_p,
                                const tPdoMappObject* pMappObject_p,
                                UINT16 offsetInFrame_p);
-static tOplkError copyVarFromPdo(const BYTE* pPayload_p,
+static tOplkError copyVarFromPdo(const void* pPayload_p,
                                  const tPdoMappObject* pMappObject_p,
                                  UINT16 offsetInFrame_p);
 
@@ -389,7 +389,7 @@ tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        indexType;
-    BYTE        mappObjectCount;
+    UINT8       mappObjectCount;
     UINT        offset;
     UINT        nextObjectOffset;
     tObdAccess  neededAccessType;
@@ -435,7 +435,7 @@ tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p)
     if (pParam_p->subIndex == 0)
     {   // object mapping count accessed
         // PDO is enabled or disabled
-        mappObjectCount = *((BYTE*)pParam_p->pArg);
+        mappObjectCount = *((UINT8*)pParam_p->pArg);
         ret = checkAndConfigurePdo(pParam_p->index, mappObjectCount,
                                    &pParam_p->abortCode);
         if (ret != kErrorOk)
@@ -445,7 +445,7 @@ tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p)
     {
         // ObjectMapping
         tPdoMappObject  mappObject;     // temporary object for check
-        QWORD           objectMapping;
+        UINT64          objectMapping;
 
         ret = checkPdoValidity(pParam_p->index, &pParam_p->abortCode);
         if (ret != kErrorOk)
@@ -454,7 +454,7 @@ tOplkError pdou_cbObdAccess(tObdCbParam* pParam_p)
         }
 
         // check existence of object and validity of object length
-        objectMapping = *((QWORD*)pParam_p->pArg);
+        objectMapping = *((UINT64*)pParam_p->pArg);
         ret = checkAndSetObjectMapping(objectMapping,
                                        neededAccessType,
                                        &mappObject,
@@ -483,8 +483,8 @@ tOplkError pdou_copyRxPdoToPi(void)
     UINT                    mappObjectCount;
     const tPdoChannel*      pPdoChannel;
     const tPdoMappObject*   pMappObject;
-    UINT                    channelId;
-    UINT8*                  pPdo;
+    UINT8                   channelId;
+    void*                   pPdo;
 
     if (target_lockMutex(pdouInstance_g.lockMutex) != kErrorOk)
         return kErrorIllegalInstance;
@@ -556,8 +556,8 @@ tOplkError pdou_copyTxPdoFromPi(void)
     UINT                    mappObjectCount;
     const tPdoChannel*      pPdoChannel;
     const tPdoMappObject*   pMappObject;
-    UINT                    channelId;
-    BYTE*                   pPdo;
+    UINT8                   channelId;
+    void*                   pPdo;
 
     //TRACE_FUNC_ENTRY;
     if (target_lockMutex(pdouInstance_g.lockMutex) != kErrorOk)
@@ -710,12 +710,12 @@ memory to store the mapping information.
 **/
 //------------------------------------------------------------------------------
 static tOplkError setupRxPdoChannelTables(
-                      BYTE abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
+                      UINT8 abChannelIdToPdoIdRx_p[D_PDO_RPDOChannels_U16],
                       UINT* pCountChannelIdRx_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
-    BYTE        nodeId;
+    UINT8       nodeId;
     UINT        pdoId;
     UINT        commParamIndex;
     UINT        channelCount = 0;
@@ -745,8 +745,8 @@ static tOplkError setupRxPdoChannelTables(
                 if (channelCount > D_PDO_RPDOChannels_U16)
                     return kErrorPdoTooManyPdos;
 
-                pdouInstance_g.aPdoIdToChannelIdRx[pdoId] = (BYTE)channelCount - 1;
-                abChannelIdToPdoIdRx_p[channelCount - 1] = (BYTE)pdoId;
+                pdouInstance_g.aPdoIdToChannelIdRx[pdoId] = (UINT8)channelCount - 1;
+                abChannelIdToPdoIdRx_p[channelCount - 1] = (UINT8)pdoId;
                 break;
 
             default:
@@ -779,12 +779,12 @@ memory to store the mapping information.
 **/
 //------------------------------------------------------------------------------
 static tOplkError setupTxPdoChannelTables(
-                      BYTE abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
+                      UINT8 abChannelIdToPdoIdTx_p[D_PDO_TPDOChannels_U16],
                       UINT* pCountChannelIdTx_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
-    BYTE        bNodeId;
+    UINT8       nodeId;
     UINT        pdoId;
     UINT        commParamIndex;
     UINT        channelCount = 0;
@@ -800,9 +800,9 @@ static tOplkError setupTxPdoChannelTables(
          pdoId < PDOU_MAX_PDO_OBJECTS;
          pdoId++, commParamIndex++)
     {
-        obdSize = (tObdSize)sizeof(bNodeId);
+        obdSize = (tObdSize)sizeof(nodeId);
         // read node ID from OD (ID:0x18XX Sub:1)
-        ret = obdu_readEntry(commParamIndex, 0x01, &bNodeId, &obdSize);
+        ret = obdu_readEntry(commParamIndex, 0x01, &nodeId, &obdSize);
         switch (ret)
         {
             case kErrorObdIndexNotExist:
@@ -816,8 +816,8 @@ static tOplkError setupTxPdoChannelTables(
                 if (channelCount > D_PDO_TPDOChannels_U16)
                     return kErrorPdoTooManyTxPdos;
 
-                pdouInstance_g.aPdoIdToChannelIdTx[pdoId] = (BYTE)channelCount - 1;
-                abChannelIdToPdoIdTx_p[channelCount - 1] = (BYTE)pdoId;
+                pdouInstance_g.aPdoIdToChannelIdTx[pdoId] = (UINT8)channelCount - 1;
+                abChannelIdToPdoIdTx_p[channelCount - 1] = (UINT8)pdoId;
                 break;
 
             default:
@@ -993,8 +993,8 @@ The function configures the whole PDO mapping information in the pdok module.
 static tOplkError configureAllPdos(void)
 {
     tOplkError          ret = kErrorOk;
-    BYTE                aChannelIdToPdoIdRx[D_PDO_RPDOChannels_U16];
-    BYTE                aChannelIdToPdoIdTx[D_PDO_TPDOChannels_U16];
+    UINT8               aChannelIdToPdoIdRx[D_PDO_RPDOChannels_U16];
+    UINT8               aChannelIdToPdoIdTx[D_PDO_TPDOChannels_U16];
     tPdoAllocationParam allocParam;
     UINT32              abortCode = 0;
     size_t              txPdoMemSize;
@@ -1063,13 +1063,13 @@ The functions checks and configures all PDOs for a single direction.
 //------------------------------------------------------------------------------
 static tOplkError checkAndConfigurePdos(UINT16 mappParamIndex_p,
                                         UINT channelCount_p,
-                                        const BYTE* pChannelToPdoTable_p,
+                                        const UINT8* pChannelToPdoTable_p,
                                         UINT32* pAbortCode_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        index;
     tObdSize    obdSize;
-    BYTE        mappObjectCount;
+    UINT8       mappObjectCount;
     UINT        mappParamIndex;
 
     for (index = 0; index < channelCount_p; index++)
@@ -1112,8 +1112,8 @@ static tOplkError checkAndConfigurePdo(UINT16 mappParamIndex_p,
     UINT16          pdoId;
     UINT16          commParamIndex;
     tObdSize        obdSize;
-    BYTE            nodeId;
-    WORD            maxPdoSize;
+    UINT8           nodeId;
+    UINT16          maxPdoSize;
     tPdoChannelConf pdoChannelConf;
     BOOL            fTxPdo;
     tPdoMappObject* pMappObject;
@@ -1309,14 +1309,14 @@ read.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError getMaxPdoSize(BYTE nodeId_p,
+static tOplkError getMaxPdoSize(UINT8 nodeId_p,
                                 BOOL fTxPdo_p,
                                 UINT16* pMaxPdoSize_p,
                                 UINT32* pAbortCode_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
-    WORD        maxPdoSize;
+    UINT16      maxPdoSize;
     UINT        payloadLimitIndex;
     UINT        payloadLimitSubIndex;
     UINT8       subIndexCount;
@@ -1407,7 +1407,7 @@ The function converts RPDO-ID (i.e. lower part of object index) to channel IDs.
 //------------------------------------------------------------------------------
 static tOplkError getPdoChannelId(UINT pdoId_p,
                                   BOOL fTxPdo_p,
-                                  UINT* pChannelId_p)
+                                  UINT8* pChannelId_p)
 {
     tOplkError  ret = kErrorOk;
 
@@ -1442,7 +1442,7 @@ static tOplkError checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
-    BYTE        mappObjectCount;
+    UINT8       mappObjectCount;
 
     if (pdouInstance_g.fRunning)
     {
@@ -1487,7 +1487,7 @@ static tOplkError checkPdoValidity(UINT mappParamIndex_p, UINT32* pAbortCode_p)
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-static tOplkError checkAndSetObjectMapping(QWORD objectMapping_p,
+static tOplkError checkAndSetObjectMapping(UINT64 objectMapping_p,
                                            tObdAccess neededAccessType_p,
                                            tPdoMappObject* pMappObject_p,
                                            UINT32* pAbortCode_p,
@@ -1645,7 +1645,7 @@ The function sets up the mapping objects of a PDO channel.
 //------------------------------------------------------------------------------
 static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
                                       UINT mappParamIndex_p,
-                                      BYTE mappObjectCount_p,
+                                      UINT8 mappObjectCount_p,
                                       UINT16 maxPdoSize_p,
                                       UINT32* pAbortCode_p,
                                       UINT16* pOffset_p,
@@ -1654,9 +1654,9 @@ static tOplkError setupMappingObjects(tPdoMappObject* pMappObject_p,
 {
     tOplkError  ret = kErrorOk;
     tObdSize    obdSize;
-    QWORD       objectMapping;
+    UINT64      objectMapping;
     UINT        count = 0;
-    BYTE        mappSubindex;
+    UINT8       mappSubindex;
     UINT        offset;
     UINT        nextObjectOffset;
     UINT16      calcNextObjectOffset = 0;
@@ -1733,7 +1733,7 @@ bit offset and bit size.
 \param[out]     pBitSize_p          Pointer to store bit size.
 */
 //------------------------------------------------------------------------------
-static void decodeObjectMapping(QWORD objectMapping_p,
+static void decodeObjectMapping(UINT64 objectMapping_p,
                                 UINT* pIndex_p,
                                 UINT* pSubIndex_p,
                                 UINT* pBitOffset_p,
@@ -1759,7 +1759,7 @@ payload.
 \return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tOplkError copyVarToPdo(BYTE* pPayload_p,
+static tOplkError copyVarToPdo(void* pPayload_p,
                                const tPdoMappObject* pMappObject_p,
                                UINT16 offsetInFrame_p)
 {
@@ -1768,7 +1768,7 @@ static tOplkError copyVarToPdo(BYTE* pPayload_p,
     void*       pVar;
 
     byteOffset = PDO_MAPPOBJECT_GET_BITOFFSET(pMappObject_p) >> 3;
-    pPayload_p = pPayload_p + byteOffset - offsetInFrame_p;
+    pPayload_p = (UINT8*)pPayload_p + byteOffset - offsetInFrame_p;
     pVar = PDO_MAPPOBJECT_GET_VAR(pMappObject_p);
 
     switch (PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
@@ -1860,7 +1860,7 @@ payload.
 \return The function returns a tOplkError error code.
 **/
 //------------------------------------------------------------------------------
-static tOplkError copyVarFromPdo(const BYTE* pPayload_p,
+static tOplkError copyVarFromPdo(const void* pPayload_p,
                                  const tPdoMappObject* pMappObject_p,
                                  UINT16 offsetInFrame_p)
 {
@@ -1869,7 +1869,7 @@ static tOplkError copyVarFromPdo(const BYTE* pPayload_p,
     void*       pVar;
 
     byteOffset = PDO_MAPPOBJECT_GET_BITOFFSET(pMappObject_p) >> 3;
-    pPayload_p = pPayload_p + byteOffset - offsetInFrame_p;
+    pPayload_p = (const UINT8*)pPayload_p + byteOffset - offsetInFrame_p;
     pVar = PDO_MAPPOBJECT_GET_VAR(pMappObject_p);
 
     switch (PDO_MAPPOBJECT_GET_TYPE(pMappObject_p))
@@ -1964,7 +1964,7 @@ static size_t calcPdoMemSize(const tPdoChannelSetup* pPdoChannels_p,
                              size_t* pRxPdoMemSize_p,
                              size_t* pTxPdoMemSize_p)
 {
-    UINT                channelId;
+    UINT8               channelId;
     size_t              rxSize;
     size_t              txSize;
     const tPdoChannel*  pPdoChannel;

@@ -12,7 +12,7 @@ the mmap device operation.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -138,7 +138,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, void** ppPdoMem_p)
 {
     ULONG   order;
 
@@ -146,7 +146,7 @@ tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     ASSERT(ppPdoMem_p != NULL);
 
     order = get_order(memSize_p);
-    *ppPdoMem_p = (UINT8*)__get_free_pages(GFP_KERNEL, order);
+    *ppPdoMem_p = (void*)__get_free_pages(GFP_KERNEL, order);
     if (*ppPdoMem_p == NULL)
     {
         return kErrorNoResource;
@@ -176,7 +176,7 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(void* pMem_p, size_t memSize_p)
 {
     ULONG   order;
 

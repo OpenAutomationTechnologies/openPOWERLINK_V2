@@ -11,7 +11,7 @@ used for fast searching of PDO channels for a specific node.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -97,10 +97,10 @@ The function clears the PDO lookup table.
 \ingroup module_pdoklut
 **/
 //------------------------------------------------------------------------------
-void pdoklut_clear(tPdoklutEntry* pLut_p, UINT32 numEntries_p)
+void pdoklut_clear(tPdoklutEntry* pLut_p, size_t numEntries_p)
 {
-    UINT32      i;
-    UINT32      j;
+    size_t  i;
+    size_t  j;
 
     // Check parameter validity
     ASSERT(pLut_p != NULL);
@@ -132,7 +132,7 @@ This function adds a new PDO channel to the lookup table.
 //------------------------------------------------------------------------------
 tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p,
                               const tPdoChannel* pPdoChannel_p,
-                              UINT channelId_p)
+                              UINT8 channelId_p)
 {
     tOplkError      ret = kErrorIllegalInstance;
     int             i;
@@ -177,7 +177,7 @@ PDO lookup table of node \p nodeId_p.
 \ingroup module_pdoklut
 **/
 //------------------------------------------------------------------------------
-UINT pdoklut_getChannel(const tPdoklutEntry* pLut_p, UINT8 index_p, UINT8 nodeId_p)
+UINT8 pdoklut_getChannel(const tPdoklutEntry* pLut_p, UINT8 index_p, UINT8 nodeId_p)
 {
     // Check parameter validity
     ASSERT(pLut_p != NULL);

@@ -567,7 +567,7 @@ The function implements openPOWERLINK kernel module mmap function.
 static int powerlinkMmap(struct file* pFile_p,
                          struct vm_area_struct* pVmArea_p)
 {
-    BYTE*                        pPdoMem;
+    void*                        pPdoMem;
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
     tTimesyncSharedMemory*       pSocTimeMem;
 #endif

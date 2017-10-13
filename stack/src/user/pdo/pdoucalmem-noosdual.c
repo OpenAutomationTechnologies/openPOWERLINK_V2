@@ -15,7 +15,7 @@ a common memory.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -164,7 +164,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, void** ppPdoMem_p)
 {
     tDualprocReturn dualRet;
     INT             loopCount = 0;
@@ -176,7 +176,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
     {
         dualRet = dualprocshm_getMemory(memPdo_l.pDrvInstance,
                                         DUALPROCSHM_BUFF_ID_PDO,
-                                        (void**)ppPdoMem_p,
+                                        ppPdoMem_p,
                                         &memSize_p,
                                         FALSE);
         if (dualRet == kDualprocSuccessful)
@@ -211,7 +211,7 @@ transferring the PDOs.
 \ingroup module_pdoucal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(void* pMem_p, size_t memSize_p)
 {
     tDualprocReturn dualRet;
 

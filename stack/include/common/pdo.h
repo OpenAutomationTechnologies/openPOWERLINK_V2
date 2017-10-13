@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,8 +93,9 @@ PDO channel information between the user and the kernel layer.
 */
 typedef struct
 {
-    UINT                channelId;              ///< ID of the PDO channel
+    UINT8               channelId;              ///< ID of the PDO channel
     BOOL                fTx;                    ///< Flag determines the direction. TRUE = TPDO, FALSE = RPDO
+    UINT8               aPadding[2];            ///< Padding for 32 bit alignment
     tPdoChannel         pdoChannel;             ///< The PDO channel itself
 } tPdoChannelConf;
 

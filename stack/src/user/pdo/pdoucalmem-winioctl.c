@@ -19,7 +19,7 @@ module using the offset acquired from the kernel driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -148,7 +148,7 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
+tOplkError pdoucal_allocateMem(size_t memSize_p, void** ppPdoMem_p)
 {
     ULONG       bytesReturned;
     tPdoMem     inPdoMem;
@@ -206,7 +206,7 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(void* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);

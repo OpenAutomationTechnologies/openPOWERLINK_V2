@@ -367,7 +367,7 @@ tOplkError drv_mapPdoMem(void** ppKernelMem_p,
     tOplkError  ret;
 
     // Get PDO memory
-    ret = pdokcal_getPdoMemRegion((void*)&pdoMemInfo_l.pKernelVa,
+    ret = pdokcal_getPdoMemRegion(&pdoMemInfo_l.pKernelVa,
                                   &pdoMemInfo_l.memSize);
 
     if ((ret != kErrorOk) ||

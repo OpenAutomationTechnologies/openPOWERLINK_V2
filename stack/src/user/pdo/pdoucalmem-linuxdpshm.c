@@ -12,7 +12,7 @@ operations.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -158,7 +158,7 @@ The function allocates shared memory for the user needed to transfer the PDOs.
 */
 //------------------------------------------------------------------------------
 tOplkError pdoucal_allocateMem(size_t memSize_p,
-                               UINT8** ppPdoMem_p)
+                               void** ppPdoMem_p)
 {
     int ret;
 
@@ -185,7 +185,7 @@ tOplkError pdoucal_allocateMem(size_t memSize_p,
         return kErrorNoResource;
     }
     else
-        *ppPdoMem_p += pdoMemOffset_l;
+        *ppPdoMem_p = (UINT8*)*ppPdoMem_p + pdoMemOffset_l;
 
     return kErrorOk;
 }
@@ -205,12 +205,12 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdoucal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdoucal_freeMem(void* pMem_p, size_t memSize_p)
 {
     // Check parameter validity
     ASSERT(pMem_p != NULL);
 
-    pMem_p -= pdoMemOffset_l;
+    pMem_p = (UINT8*)pMem_p - pdoMemOffset_l;
     if (munmap(pMem_p, memSize_p + getpagesize()) != 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() munmap failed (%s)\n",

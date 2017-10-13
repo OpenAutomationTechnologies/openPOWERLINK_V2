@@ -8,7 +8,7 @@
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -71,8 +71,8 @@ tOplkError pdoucal_postSetupPdoBuffers(size_t rxPdoMemSize_p,
 tOplkError pdoucal_openMem(void);
 tOplkError pdoucal_closeMem(void);
 tOplkError pdoucal_allocateMem(size_t memSize_p,
-                               UINT8** pPdoMem_p);
-tOplkError pdoucal_freeMem(UINT8* pMem_p,
+                               void** pPdoMem_p);
+tOplkError pdoucal_freeMem(void* pMem_p,
                            size_t memSize_p);
 
 //PDO buffer functions
@@ -80,13 +80,13 @@ tOplkError pdoucal_initPdoMem(const tPdoChannelSetup* pPdoChannels_p,
                               size_t rxPdoMemSize_p,
                               size_t txPdoMemSize_p);
 void       pdoucal_cleanupPdoMem(void);
-UINT8*     pdoucal_getTxPdoAdrs(UINT channelId_p);
-tOplkError pdoucal_setTxPdo(UINT channelId_p,
-                            UINT8* pPdo_p,
-                            WORD pdoSize_p);
-tOplkError pdoucal_getRxPdo(UINT8** ppPdo_p,
-                            UINT channelId_p,
-                            WORD pdoSize_p);
+void*      pdoucal_getTxPdoAdrs(UINT8 channelId_p);
+tOplkError pdoucal_setTxPdo(UINT8 channelId_p,
+                            void* pPdo_p,
+                            size_t pdoSize_p);
+tOplkError pdoucal_getRxPdo(void** ppPdo_p,
+                            UINT8 channelId_p,
+                            size_t pdoSize_p);
 
 #ifdef __cplusplus
 }

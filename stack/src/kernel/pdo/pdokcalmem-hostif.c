@@ -162,7 +162,7 @@ The function allocates shared memory for the kernel needed to transfer the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
+tOplkError pdokcal_allocateMem(size_t memSize_p, void** ppPdoMem_p)
 {
     // Check parameter validity
     ASSERT(ppPdoMem_p != NULL);
@@ -196,7 +196,7 @@ transferring the PDOs.
 \ingroup module_pdokcal
 */
 //------------------------------------------------------------------------------
-tOplkError pdokcal_freeMem(UINT8* pMem_p, size_t memSize_p)
+tOplkError pdokcal_freeMem(void* pMem_p, size_t memSize_p)
 {
     UNUSED_PARAMETER(pMem_p);
     UNUSED_PARAMETER(memSize_p);
