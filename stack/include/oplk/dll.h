@@ -179,8 +179,8 @@ This struct provides information about the unreceived Asnd frame.
 */
 typedef struct
 {
-    BYTE    nodeId;         ///< Source node ID of missed Asnd frame
-    BYTE    serviceId;      ///< Service ID of missed Asnd frame
+    UINT8   nodeId;         ///< Source node ID of missed Asnd frame
+    UINT8   serviceId;      ///< Service ID of missed Asnd frame
 } tDllAsndNotRx;
 
 /**
@@ -191,26 +191,28 @@ the data link layer (DLL).
 */
 typedef struct
 {
-    UINT                sizeOfStruct;               ///< Size of the structure
+    UINT32              sizeOfStruct;               ///< Size of the structure
     BOOL                fAsyncOnly;                 ///< Async only node, does not need to register PRes-Frame
-    UINT                nodeId;                     ///< Local node ID
+    UINT8               nodeId;                     ///< Local node ID
+    UINT8               padding0[3];                ///< Padding to 32 bit boundary
     UINT32              featureFlags;               ///< 0x1F82: NMT_FeatureFlags_U32
     UINT32              cycleLen;                   ///< Cycle Length (0x1006: NMT_CycleLen_U32) in [us], required for error detection
-    UINT                isochrTxMaxPayload;         ///< 0x1F98.1: IsochrTxMaxPayload_U16
-    UINT                isochrRxMaxPayload;         ///< 0x1F98.2: IsochrRxMaxPayload_U16
+    UINT16              isochrTxMaxPayload;         ///< 0x1F98.1: IsochrTxMaxPayload_U16
+    UINT16              isochrRxMaxPayload;         ///< 0x1F98.2: IsochrRxMaxPayload_U16
     UINT32              presMaxLatency;             ///< 0x1F98.3: PResMaxLatency_U32 in [ns], only required for IdentRes
-    UINT                preqActPayloadLimit;        ///< 0x1F98.4: PReqActPayloadLimit_U16, required for initialization (+24 bytes)
-    UINT                presActPayloadLimit;        ///< 0x1F98.5: PResActPayloadLimit_U16, required for initialization of Pres frame (+24 bytes)
+    UINT16              preqActPayloadLimit;        ///< 0x1F98.4: PReqActPayloadLimit_U16, required for initialization (+24 bytes)
+    UINT16              presActPayloadLimit;        ///< 0x1F98.5: PResActPayloadLimit_U16, required for initialization of Pres frame (+24 bytes)
     UINT32              asndMaxLatency;             ///< 0x1F98.6: ASndMaxLatency_U32 in [ns], only required for IdentRes
-    UINT                multipleCycleCnt;           ///< 0x1F98.7: MultiplCycleCnt_U8, required for error detection
-    UINT                asyncMtu;                   ///< 0x1F98.8: AsyncMTU_U16, required to set up max frame size
-    UINT                prescaler;                  ///< 0x1F98.9: Prescaler_U16, configures the toggle rate of the SoC PS flag
+    UINT8               multipleCycleCnt;           ///< 0x1F98.7: MultiplCycleCnt_U8, required for error detection
+    UINT8               padding1[3];                ///< Padding to 32 bit boundary
+    UINT16              asyncMtu;                   ///< 0x1F98.8: AsyncMTU_U16, required to set up max frame size
+    UINT16              prescaler;                  ///< 0x1F98.9: Prescaler_U16, configures the toggle rate of the SoC PS flag
     // $$$ Multiplexed Slot
     UINT32              lossOfFrameTolerance;       ///< 0x1C14: DLL_LossOfFrameTolerance_U32 in [ns]
     UINT32              waitSocPreq;                ///< 0x1F8A.1: WaitSoCPReq_U32 in [ns]
     UINT32              asyncSlotTimeout;           ///< 0x1F8A.2: AsyncSlotTimeout_U32 in [ns]
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in [ns]
-    UINT                syncNodeId;                 ///< Synchronization trigger (AppCbSync, cycle preparation) after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
+    UINT32              syncNodeId;                 ///< Synchronization trigger (AppCbSync, cycle preparation) after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
     BOOL                fSyncOnPrcNode;             ///< TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     UINT32              switchOverTimeMn;           ///< Switch over time when CS_OPERATIONAL in [us]
@@ -228,7 +230,7 @@ node on the network.
 */
 typedef struct
 {
-    UINT                sizeOfStruct;                   ///< Size of the structure
+    UINT32              sizeOfStruct;                   ///< Size of the structure
     UINT32              deviceType;                     ///< NMT_DeviceType_U32
     UINT32              vendorId;                       ///< NMT_IdentityObject_REC.VendorId_U32
     UINT32              productCode;                    ///< NMT_IdentityObject_REC.ProductCode_U32

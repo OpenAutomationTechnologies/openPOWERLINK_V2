@@ -10,7 +10,7 @@ This file contains the user DLL CAL module.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -431,8 +431,8 @@ tOplkError dllucal_sendAsyncFrame(const tFrameInfo* pFrameInfo_p,
         case kDllAsyncReqPrioNmt:
             ret = instance_l.pTxNmtFuncs->pfnInsertDataBlock(
                                               instance_l.dllCalQueueTxNmt,
-                                              (const UINT8*)pFrameInfo_p->frame.pBuffer,
-                                              pFrameInfo_p->frameSize);
+                                              pFrameInfo_p->frame.pBuffer,
+                                              (size_t)pFrameInfo_p->frameSize);
             break;
 
         default:
@@ -530,8 +530,8 @@ tOplkError dllucal_issueSyncRequest(const tDllSyncRequest* pSyncRequest_p,
     ASSERT(pSyncRequest_p != NULL);
 
     ret = instance_l.pTxSyncFuncs->pfnInsertDataBlock(instance_l.dllCalQueueTxSync,
-                                                      (const UINT8*)pSyncRequest_p,
-                                                      (UINT)size_p);
+                                                      pSyncRequest_p,
+                                                      size_p);
 
     return ret;
 }
@@ -792,7 +792,7 @@ static tOplkError handleRxAsyncFrameInfo(tFrameInfo* pFrameInfo_p)
     event.eventSink = kEventSinkDllkCal;
     event.eventType = kEventTypeReleaseRxFrame;
     event.eventArgSize = sizeof(tFrameInfo);
-    event.eventArg.pEventArg = (void*)pFrameInfo_p;
+    event.eventArg.pEventArg = pFrameInfo_p;
 
     eventu_postEvent(&event);
 
@@ -861,16 +861,16 @@ static tOplkError sendGenericAsyncFrame(const tFrameInfo* pFrameInfo_p)
     {
         ret = instance_l.pTxGenFuncs->pfnInsertDataBlock(
                                           instance_l.dllCalQueueTxGen,
-                                          (const UINT8*)pFrameInfo_p->frame.pBuffer,
-                                          pFrameInfo_p->frameSize);
+                                          pFrameInfo_p->frame.pBuffer,
+                                          (size_t)pFrameInfo_p->frameSize);
     }
     else
     {
 #if defined(CONFIG_INCLUDE_VETH)
         ret = instance_l.pTxVethFuncs->pfnInsertDataBlock(
                                            instance_l.dllCalQueueTxVeth,
-                                           (const UINT8*)pFrameInfo_p->frame.pBuffer,
-                                           pFrameInfo_p->frameSize);
+                                           pFrameInfo_p->frame.pBuffer,
+                                           (size_t)pFrameInfo_p->frameSize);
 #else
     // Return error since virtual Ethernet is not existing!
     ret = kErrorIllegalInstance;

@@ -260,8 +260,8 @@ tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p)
         // because we are in state DLL_GS_INIT
         OPLK_MEMCPY(&dllkInstance_g.dllConfigParam,
                     pDllConfigParam_p,
-                    (pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
-                        pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
+                    ((size_t)pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
+                        (size_t)pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
 #if (EDRV_USE_TTTX != FALSE)
         // Time triggered sending requires sync on SOC
         dllkInstance_g.dllConfigParam.syncNodeId = C_ADR_SYNC_ON_SOC;
@@ -314,8 +314,8 @@ tOplkError dllk_setIdentity(const tDllIdentParam* pDllIdentParam_p)
 
     OPLK_MEMCPY(&dllkInstance_g.dllIdentParam,
                 pDllIdentParam_p,
-                (pDllIdentParam_p->sizeOfStruct < sizeof(tDllIdentParam) ?
-                    pDllIdentParam_p->sizeOfStruct : sizeof(tDllIdentParam)));
+                ((size_t)pDllIdentParam_p->sizeOfStruct < sizeof(tDllIdentParam) ?
+                    (size_t)pDllIdentParam_p->sizeOfStruct : sizeof(tDllIdentParam)));
 
     // $$$ if IdentResponse frame exists, update it
     return kErrorOk;
@@ -547,14 +547,14 @@ tOplkError dllk_configNode(const tDllNodeInfo* pNodeInfo_p)
 
     // copy node configuration
     if (pNodeInfo_p->presPayloadLimit > dllkInstance_g.dllConfigParam.isochrRxMaxPayload)
-        pIntNodeInfo->presPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrRxMaxPayload;
+        pIntNodeInfo->presPayloadLimit = dllkInstance_g.dllConfigParam.isochrRxMaxPayload;
     else
         pIntNodeInfo->presPayloadLimit = pNodeInfo_p->presPayloadLimit;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     pIntNodeInfo->presTimeoutNs = pNodeInfo_p->presTimeoutNs;
     if (pNodeInfo_p->preqPayloadLimit > dllkInstance_g.dllConfigParam.isochrTxMaxPayload)
-        pIntNodeInfo->preqPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrTxMaxPayload;
+        pIntNodeInfo->preqPayloadLimit = dllkInstance_g.dllConfigParam.isochrTxMaxPayload;
     else
         pIntNodeInfo->preqPayloadLimit = pNodeInfo_p->preqPayloadLimit;
 
@@ -752,18 +752,18 @@ tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p)
 The function returns the first info structure of the first node in the isochronous
 phase. It is only useful for the kernel error handler module.
 
-\param[out]     ppbCnNodeIdList_p   Pointer to array of bytes with node-ID list.
+\param[out]     ppCnNodeIdList_p    Pointer to array of bytes with node-ID list.
                                     Array is terminated by value 0.
 
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-void dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p)
+void dllk_getCurrentCnNodeIdList(UINT8** ppCnNodeIdList_p)
 {
     // Check parameter validity
-    ASSERT(ppbCnNodeIdList_p != NULL);
+    ASSERT(ppCnNodeIdList_p != NULL);
 
-    *ppbCnNodeIdList_p = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle ^ 1][0];
+    *ppCnNodeIdList_p = &dllkInstance_g.aCnNodeIdList[dllkInstance_g.curTxBufferOffsetCycle ^ 1][0];
 }
 
 //------------------------------------------------------------------------------
@@ -782,7 +782,7 @@ The function returns the MAC address of the specified node.
 \ingroup module_dllk
 */
 //------------------------------------------------------------------------------
-tOplkError dllk_getCnMacAddress(UINT nodeId_p, BYTE* pCnMacAddress_p)
+tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p)
 {
     tDllkNodeInfo*   pNodeInfo;
 

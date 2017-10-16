@@ -11,7 +11,7 @@ Linux ioctl for communication with the kernel layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -103,8 +103,8 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
                               tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  const UINT8* pData_p,
-                                  UINT dataSize_p);
+                                  const void* pData_p,
+                                  size_t dataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -222,8 +222,8 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  const UINT8* pData_p,
-                                  UINT dataSize_p)
+                                  const void* pData_p,
+                                  size_t dataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tDllCalIoctlInstance*   pInstance = (tDllCalIoctlInstance*)pDllCalQueue_p;
@@ -239,7 +239,7 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    DEBUG_LVL_DLL_TRACE("%s() send async frame: size:%d\n", __func__, dataSize_p);
+    DEBUG_LVL_DLL_TRACE("%s() send async frame: size:%lu\n", __func__, (ULONG)dataSize_p);
 
     ioctlAsyncFrame.size = dataSize_p;
     ioctlAsyncFrame.queue = pInstance->dllCalQueue;

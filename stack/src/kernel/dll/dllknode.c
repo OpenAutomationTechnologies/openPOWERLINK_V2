@@ -139,7 +139,7 @@ up all stuff for the local node.
 tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
 {
     tOplkError  ret;
-    BYTE        aMulticastMac[6];
+    UINT8       aMulticastMac[6];
 #if (NMT_MAX_NODE_ID > 0)
     UINT        index;
 #endif
@@ -249,7 +249,7 @@ tOplkError dllknode_cleanupLocalNode(tNmtState oldNmtState_p)
         if (ret != kErrorOk)
             return ret;
 
-        for (index = 0; index < tabentries (dllkInstance_g.aNodeInfo); index++)
+        for (index = 0; index < tabentries(dllkInstance_g.aNodeInfo); index++)
         {
             if (dllkInstance_g.aNodeInfo[index].pPreqTxBuffer != NULL)
             {
@@ -772,13 +772,13 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
                                    UINT* pIndex_p)
 {
     tOplkError      ret = kErrorOk;
-    BYTE*           pCnNodeId;
+    UINT8*          pCnNodeId;
     UINT32          accFrameLenNs = 0;
     tPlkFrame*      pTxFrame;
     tEdrvTxBuffer*  pTxBuffer;
     tFrameInfo      frameInfo;
     tDllkNodeInfo*  pIntNodeInfo;
-    BYTE            flag1;
+    UINT8           flag1;
 
     // calculate WaitSoCPReq delay
     if (dllkInstance_g.dllConfigParam.waitSocPreq != 0)
@@ -824,7 +824,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
             if (pTxBuffer == &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + nextTxBufferOffset_p])
             {   // PRes of MN will be sent
                 // update NMT state
-                ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
+                ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState_p);
 
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
                 {
@@ -833,7 +833,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
                     pIntPrcNodeInfo = dllkInstance_g.pFirstPrcNodeInfo;
                     while (pIntPrcNodeInfo != NULL)
                     {
-                        *pCnNodeId = (BYTE)pIntPrcNodeInfo->nodeId;
+                        *pCnNodeId = (UINT8)pIntPrcNodeInfo->nodeId;
                         pCnNodeId++;
                         *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
                         pIntPrcNodeInfo = pIntPrcNodeInfo->pNextNodeInfo;
@@ -845,7 +845,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
             }
             else
             {   // PReq to CN
-                *pCnNodeId = (BYTE)pIntNodeInfo->nodeId;
+                *pCnNodeId = (UINT8)pIntNodeInfo->nodeId;
                 pCnNodeId++;
                 *pNextTimeOffsetNs_p = pIntNodeInfo->presTimeoutNs;
             }

@@ -179,8 +179,8 @@ forward requested PRes frames to the application (e.g. for diagnosis).
 */
 typedef struct
 {
-    UINT16                      nodeId;         ///< Node ID of the received PRes frame
-    UINT16                      frameSize;      ///< Size of the received PRes frame
+    UINT                        nodeId;         ///< Node ID of the received PRes frame
+    size_t                      frameSize;      ///< Size of the received PRes frame
     tPlkFrame*                  pFrame;         ///< Pointer to the received PRes frame
 } tOplkApiEventReceivedPres;
 

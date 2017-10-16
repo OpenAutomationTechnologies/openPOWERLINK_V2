@@ -11,7 +11,7 @@ This file contains the event handling functions of the kernel DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -106,7 +106,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 static tOplkError controlTimeSync(BOOL fEnable_p);
 
-static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState OldNmtState_p, tNmtEvent nmtEvent_p);
+static tOplkError processNmtStateChange(tNmtState newNmtState_p, tNmtState oldNmtState_p, tNmtEvent nmtEvent_p);
 static tOplkError processNmtEvent(const tEvent* pEvent_p);
 static tOplkError processCycleFinish(tNmtState nmtState_p) SECTION_DLLK_PROCESS_CYCFIN;
 static tOplkError processSync(tNmtState nmtState_p) SECTION_DLLK_PROCESS_SYNC;
@@ -698,7 +698,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
     tOplkError          ret = kErrorOk;
     tPlkFrame *         pTxFrame;
     tEdrvTxBuffer*      pTxBuffer;
-    UINT                frameSize;
+    size_t              frameSize;
     UINT                frameCount;
     UINT                nextTxBufferOffset;
     tDllkTxBufState*    pTxBufferState = NULL;
@@ -742,7 +742,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
             if (ret == kErrorOk)
             {
                 pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
-                ret = dllkframe_checkFrame(pTxFrame, frameSize);
+                ret = dllkframe_checkFrame(pTxFrame, (size_t)frameSize);
                 if (ret != kErrorOk)
                     goto Exit;
 
@@ -758,7 +758,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     frameSize = C_DLL_MIN_ETH_FRAME;
                 }
 
-                pTxBuffer->txFrameSize = frameSize;    // set buffer valid
+                pTxBuffer->txFrameSize = (UINT)frameSize;    // set buffer valid
                 *pTxBufferState = kDllkTxBufReady;
 
 #if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)

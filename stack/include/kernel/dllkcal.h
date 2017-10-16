@@ -7,7 +7,7 @@
 This file contains definitions for the kernel DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -59,12 +59,12 @@ Communication Abstraction Layer kernel module.
 */
 typedef struct
 {
-    ULONG       curTxFrameCountGen;                         ///< Number of frames in the generic TX queue
-    ULONG       curTxFrameCountNmt;                         ///< Number of frames in the NMT TX queue
-    ULONG       curRxFrameCount;                            ///< Number of frames in the RX queue
-    ULONG       maxTxFrameCountGen;                         ///< Max number of frames in the generic TX queue
-    ULONG       maxTxFrameCountNmt;                         ///< Max number of frames in the NMT TX queue
-    ULONG       maxRxFrameCount;                            ///< Max number of frames in the RX queue
+    UINT        curTxFrameCountGen;                         ///< Number of frames in the generic TX queue
+    UINT        curTxFrameCountNmt;                         ///< Number of frames in the NMT TX queue
+    UINT        curRxFrameCount;                            ///< Number of frames in the RX queue
+    UINT        maxTxFrameCountGen;                         ///< Max number of frames in the generic TX queue
+    UINT        maxTxFrameCountNmt;                         ///< Max number of frames in the NMT TX queue
+    UINT        maxRxFrameCount;                            ///< Max number of frames in the RX queue
 } tDllkCalStatistics;
 
 //------------------------------------------------------------------------------
@@ -80,14 +80,14 @@ tOplkError dllkcal_exit(void);
 tOplkError dllkcal_getAsyncTxCount(tDllAsyncReqPriority* pPriority_p,
                                    UINT* pCount_p);
 tOplkError dllkcal_getAsyncTxFrame(void* pFrame_p,
-                                   UINT* pFrameSize_p,
+                                   size_t* pFrameSize_p,
                                    tDllAsyncReqPriority priority_p);
 
 // only frames with registered AsndServiceIds are passed to CAL
 tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p) SECTION_DLLKCAL_ASYNCRX;
 tOplkError dllkcal_nmtCmdReceived(const tNmtCommandService* pNmtCommand_p);
 tOplkError dllkcal_sendAsyncFrame(tFrameInfo* pFrameInfo_p, tDllAsyncReqPriority priority_p);
-tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue);
+tOplkError dllkcal_writeAsyncFrame(tFrameInfo* pFrameInfo_p, tDllCalQueue dllQueue_p);
 tOplkError dllkcal_clearAsyncBuffer(void);
 tOplkError dllkcal_getStatistics(tDllkCalStatistics** ppStatistics);
 tOplkError dllkcal_process(const tEvent* pEvent_p);
@@ -96,7 +96,7 @@ tOplkError dllkcal_process(const tEvent* pEvent_p);
 tOplkError dllkcal_clearAsyncQueues(void);
 tOplkError dllkcal_issueRequest(tDllReqServiceId service_p,
                                 UINT nodeId_p,
-                                BYTE soaFlag1_p);
+                                UINT8 soaFlag1_p);
 tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
                                  UINT* pNodeId_p,
                                  tSoaPayload* pSoaPayload_p)

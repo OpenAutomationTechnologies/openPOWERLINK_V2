@@ -225,7 +225,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
                         tPlkFrame* pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
 
                         // update frame (NMT state, RD, RS, PR, MS, EN flags)
-                        ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE)nmtState);
+                        ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState);
                         ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
                         if (nmtState != kNmtCsOperational)
                         {   // mark PDO as invalid in NMT state Op
@@ -627,7 +627,7 @@ tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p,
     pTxFrame = (tPlkFrame*)pTxBuffer_p->pBuffer;
 
     // update frame (NMT state, RD, RS, PR, MS, EN flags)
-    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (BYTE) nmtState_p);
+    ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState_p);
     ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
 
     // get RD flag
@@ -724,7 +724,7 @@ It sets fields in the Ethernet and POWERLINK header parts.
 \return The function returns a tOplkError error code.
 */
 //------------------------------------------------------------------------------
-tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
+tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, size_t frameSize_p)
 {
     tOplkError  ret = kErrorOk;
     tMsgType    msgType;
@@ -752,7 +752,7 @@ tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, UINT frameSize_p)
         if (etherType == C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
-            ami_setUint8Le(&pFrame_p->srcNodeId, (UINT8)dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pFrame_p->srcNodeId, dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
             msgType = (tMsgType)ami_getUint8Le(&pFrame_p->messageType);
@@ -931,7 +931,7 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is a POWERLINK frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
-            ami_setUint8Le(&pTxFrame->srcNodeId, (UINT8)dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pTxFrame->srcNodeId, dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], edrv_getMacAddr(), 6);
 
             switch (msgType_p)
@@ -948,11 +948,11 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.featureFlagsLe,
                                             dllkInstance_g.dllConfigParam.featureFlags);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.mtuLe,
-                                            (UINT16)dllkInstance_g.dllConfigParam.asyncMtu);
+                                            dllkInstance_g.dllConfigParam.asyncMtu);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollInSizeLe,
-                                            (UINT16)dllkInstance_g.dllConfigParam.preqActPayloadLimit);
+                                            dllkInstance_g.dllConfigParam.preqActPayloadLimit);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollOutSizeLe,
-                                            (UINT16)dllkInstance_g.dllConfigParam.presActPayloadLimit);
+                                            dllkInstance_g.dllConfigParam.presActPayloadLimit);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.responseTimeLe,
                                             dllkInstance_g.dllConfigParam.presMaxLatency);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.deviceTypeLe,
@@ -1434,7 +1434,7 @@ tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
         {   // asynchronous phase will be assigned to one node
             if (dllkInstance_g.aLastTargetNodeId[curReq_p] == C_ADR_INVALID)
             {
-                int             selectTxBuffer;
+                UINT            selectTxBuffer;
                 tEdrvTxBuffer*  pTxBuffer;
 
                 // exchange invalid node ID with local node ID
@@ -1550,12 +1550,12 @@ tOplkError dllkframe_asyncFrameNotReceived(tDllReqServiceId reqServiceId_p,
             // ASnd service registered?
             if (dllkInstance_g.aAsndFilter[reqServiceId_p] == kDllAsndFilterAny)
             {   // ASnd service ID is registered
-                asndNotRx.nodeId = (BYTE)nodeId_p;
-                asndNotRx.serviceId = (BYTE)reqServiceId_p;
+                asndNotRx.nodeId = (UINT8)nodeId_p;
+                asndNotRx.serviceId = (UINT8)reqServiceId_p;
 
                 event.eventSink = kEventSinkDlluCal;
                 event.eventType = kEventTypeAsndNotRx;
-                event.eventArg.pEventArg = (void*)&asndNotRx;
+                event.eventArg.pEventArg = &asndNotRx;
                 event.eventArgSize = sizeof(tDllAsndNotRx);
 
                 // Post event with dummy frame
@@ -1695,7 +1695,7 @@ tOplkError dllkframe_presChainingDisable(void)
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[14],
                        kMsgTypePreq);
         ami_setUint8Be(&dllkInstance_g.aFilter[DLLK_FILTER_PREQ].aFilterValue[15],
-                       (UINT8)dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
+                       dllkInstance_g.dllConfigParam.nodeId); // Set Dst Node ID
 
         // disable auto-response delay
         dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES].timeOffsetNs = 0;
@@ -1775,7 +1775,7 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p,
 {
     tOplkError  ret = kErrorOk;
     tPlkFrame*  pFrame;
-    BYTE        bFlag1;
+    UINT8       flag1;
 
     pFrame = pFrameInfo_p->frame.pBuffer;
 
@@ -1808,11 +1808,11 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p,
 #endif
 
         // update only EA and MS flag
-        bFlag1 = ami_getUint8Le(&pFrame->data.preq.flag1);
+        flag1 = ami_getUint8Le(&pFrame->data.preq.flag1);
 
         dllkInstance_g.mnFlag1 = (dllkInstance_g.mnFlag1 &
                                       ~(PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_MS)) |             // preserve all flags except EA and MS
-                                      (bFlag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_MS));     // set EA and MS flag
+                                      (flag1 & (PLK_FRAME_FLAG1_EA | PLK_FRAME_FLAG1_MS));      // set EA and MS flag
 
         // inform PDO module
 #if defined(CONFIG_INCLUDE_PDO)
@@ -1951,8 +1951,8 @@ static tOplkError processReceivedPres(const tFrameInfo* pFrameInfo_p,
 
         OPLK_MEMSET(&presEvent, 0x00, sizeof(presEvent));
 
-        presEvent.nodeId = nodeId;
-        presEvent.frameSize = pFrameInfo_p->frameSize;
+        presEvent.nodeId = (UINT16)nodeId;
+        presEvent.frameSize = (UINT16)pFrameInfo_p->frameSize;
 
         // If Presp frames are received which are larger than the buffer, they are cut off
         // (the application will most probably just be interested in the frame-header anyway).
@@ -2324,7 +2324,7 @@ static tOplkError processReceivedSoa(const tEdrvRxBuffer* pRxBuffer_p,
     tDllkTxBufState*    pTxBufferState = NULL;
 #endif
     tDllReqServiceId    reqServiceId;
-    UINT                nodeId;
+    UINT8               nodeId;
     UINT8               flag1;
 
     pFrame = (const tPlkFrame*)pRxBuffer_p->pBuffer;
@@ -2644,7 +2644,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
 {
     tOplkError          ret = kErrorOk;
     const tPlkFrame*    pFrame;
-    UINT                asndServiceId;
+    tDllAsndServiceId   asndServiceId;
     UINT                nodeId;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
@@ -2659,24 +2659,24 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
     pFrame = pFrameInfo_p->frame.pBuffer;
 
     // ASnd service registered?
-    asndServiceId = (UINT)ami_getUint8Le(&pFrame->data.asnd.serviceId);
+    asndServiceId = (tDllAsndServiceId)ami_getUint8Le(&pFrame->data.asnd.serviceId);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     if (dllkInstance_g.dllState >= kDllMsNonCyclic)
     {
-        switch ((tDllAsndServiceId)asndServiceId)
+        switch (asndServiceId)
         {
             case kDllAsndStatusResponse:
             case kDllAsndIdentResponse:
             case kDllAsndSyncResponse:
                 nodeId = ami_getUint8Le(&pFrame->srcNodeId);
-                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == ((tDllReqServiceId)asndServiceId)) &&
+                if ((dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] == asndServiceId) &&
                     (nodeId == dllkInstance_g.aLastTargetNodeId[dllkInstance_g.curLastSoaReq]))
                 {   // mark request as responded
                     dllkInstance_g.aLastReqServiceId[dllkInstance_g.curLastSoaReq] = kDllReqServiceNo;
                 }
 
-                if (((tDllAsndServiceId)asndServiceId) == kDllAsndIdentResponse)
+                if (asndServiceId == kDllAsndIdentResponse)
                 {   // save MAC address of CN for PReq
                     tDllkNodeInfo*   pIntNodeInfo;
 
@@ -2691,11 +2691,11 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
                         OPLK_MEMCPY(pIntNodeInfo->aMacAddr, pFrame->aSrcMac, 6);
                     }
                 }
-                if (((tDllAsndServiceId)asndServiceId) == kDllAsndStatusResponse)
+                if (asndServiceId == kDllAsndStatusResponse)
                 {
                     handleErrorSignaling(pFrame, nodeId);
                 }
-                else if (((tDllAsndServiceId)asndServiceId) == kDllAsndSyncResponse)
+                else if (asndServiceId == kDllAsndSyncResponse)
                 {
                     break;
                 }
@@ -2716,7 +2716,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
     }
 #endif
 
-    if (asndServiceId < DLL_MAX_ASND_SERVICE_ID)
+    if ((UINT)asndServiceId < DLL_MAX_ASND_SERVICE_ID)
     {   // ASnd service ID is valid
 
 #if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
@@ -2777,7 +2777,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
             }
         }
 
-        if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterAny)
+        if (dllkInstance_g.aAsndFilter[(UINT)asndServiceId] == kDllAsndFilterAny)
         {   // ASnd service ID is registered
             // forward frame via async receive FIFO to userspace
             ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
@@ -2789,7 +2789,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
             else if (ret != kErrorOk)
                 goto Exit;
         }
-        else if (dllkInstance_g.aAsndFilter[asndServiceId] == kDllAsndFilterLocal)
+        else if (dllkInstance_g.aAsndFilter[(UINT)asndServiceId] == kDllAsndFilterLocal)
         {   // ASnd service ID is registered, but only local node ID or broadcasts
             // shall be forwarded
             if ((nodeId == dllkInstance_g.dllConfigParam.nodeId) || (nodeId == C_ADR_BROADCAST))

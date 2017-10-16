@@ -7,7 +7,7 @@
 The file contains definitions for the DLL CAL module
 
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ typedef struct
 {
     tDllReqServiceId        service;
     UINT                    nodeId;
-    BYTE                    soaFlag1;
+    UINT8                   soaFlag1;
 } tDllCalIssueRequest;
 
 /**
@@ -125,10 +125,10 @@ typedef struct
 {
     tOplkError (*pfnAddInstance)(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
     tOplkError (*pfnDelInstance)(tDllCalQueueInstance pDllCalQueue_p);
-    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
-    tOplkError (*pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
-    tOplkError (*pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
-    tOplkError (*pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+    tOplkError (*pfnInsertDataBlock)(tDllCalQueueInstance pDllCalQueue_p, const void* pData_p, size_t dataSize_p);
+    tOplkError (*pfnGetDataBlock)(tDllCalQueueInstance pDllCalQueue_p, void* pData_p, size_t* pDataSize_p);
+    tOplkError (*pfnGetDataBlockCount)(tDllCalQueueInstance pDllCalQueue_p, UINT* pDataBlockCount_p);
+    tOplkError (*pfnResetDataBlockQueue)(tDllCalQueueInstance pDllCalQueue_p);
 } tDllCalFuncIntf;
 
 //------------------------------------------------------------------------------
@@ -140,7 +140,6 @@ extern "C"
 #endif
 
 tDllCalFuncIntf* dllcaldirect_getInterface(void);
-tDllCalFuncIntf* dllcalshb_getInterface(void);
 tDllCalFuncIntf* dllcalioctl_getInterface(void);
 tDllCalFuncIntf* dllucalcircbuf_getInterface(void);
 tDllCalFuncIntf* dllkcalcircbuf_getInterface(void);

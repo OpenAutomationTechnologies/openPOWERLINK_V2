@@ -85,9 +85,9 @@ tOplkError dllknode_issueLossOfPres(UINT nodeId_p);
 #endif
 
 #if (NMT_MAX_NODE_ID > 0)
-tDllkNodeInfo* dllknode_getNodeInfo(UINT uiNodeId_p) SECTION_DLLK_GETNODEINFO;
+tDllkNodeInfo* dllknode_getNodeInfo(UINT nodeId_p) SECTION_DLLK_GETNODEINFO;
 tOplkError     dllknode_addNodeFilter(tDllkNodeInfo* pIntNodeInfo_p,
-                                      tDllNodeOpType NodeOpType_p,
+                                      tDllNodeOpType nodeOpType_p,
                                       BOOL fUpdateEdrv_p);
 tOplkError     dllknode_deleteNodeFilter(tDllkNodeInfo* pIntNodeInfo_p,
                                          tDllNodeOpType nodeOpType_p,

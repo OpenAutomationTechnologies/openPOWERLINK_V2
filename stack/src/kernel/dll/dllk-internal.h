@@ -241,7 +241,7 @@ typedef struct
 #endif
 #endif
 
-    UINT                    prescaleCycleCount;                     ///< Cycle counter for toggling PS bit in MN SOC
+    UINT16                  prescaleCycleCount;                     ///< Cycle counter for toggling PS bit in MN SOC
     UINT                    cycleCount;                             ///< Cycle counter (needed for multiplexed cycle support)
     UINT64                  frameTimeout;                           ///< Frame timeout (cycle length + loss of frame tolerance)
 

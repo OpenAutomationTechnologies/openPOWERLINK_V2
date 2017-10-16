@@ -162,7 +162,7 @@ tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p);
 tOplkError dllk_setIdentity(const tDllIdentParam* pDllIdentParam_p);
 tOplkError dllk_regAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
 tOplkError dllk_deregAsyncHandler(tDllkCbAsync pfnDllkCbAsync_p);
-tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter Filter_p);
+tOplkError dllk_setAsndServiceIdFilter(tDllAsndServiceId ServiceId_p, tDllAsndFilter filter_p);
 void       dllk_regRpdoHandler(tDllkCbProcessRpdo pfnDllkCbProcessRpdo_p);
 void       dllk_regTpdoHandler(tDllkCbProcessTpdo pfnDllkCbProcessTpdo_p);
 tSyncCb    dllk_regSyncHandler(tSyncCb pfnCbSync_p);
@@ -173,7 +173,7 @@ tOplkError dllk_cbCyclicError(tOplkError errorCode_p, const tEdrvTxBuffer* pTxBu
 
 #if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC != FALSE) || \
      (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE))
-tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT uiFrameSize_p);
+tOplkError dllk_releaseRxFrame(tPlkFrame* pFrame_p, UINT frameSize_p);
 #endif
 
 #if (NMT_MAX_NODE_ID > 0)
@@ -184,7 +184,7 @@ tOplkError dllk_deleteNode(const tDllNodeOpParam* pNodeOpParam_p);
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 tOplkError dllk_setFlag1OfNode(UINT nodeId_p, UINT8 soaFlag1_p);
-void       dllk_getCurrentCnNodeIdList(BYTE** ppbCnNodeIdList_p);
+void       dllk_getCurrentCnNodeIdList(UINT8** ppCnNodeIdList_p);
 tOplkError dllk_getCnMacAddress(UINT nodeId_p, UINT8* pCnMacAddress_p);
 #endif /* defined(CONFIG_INCLUDE_NMT_MN) */
 

@@ -16,7 +16,7 @@ layer running on the external PCIe card.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -100,8 +100,8 @@ static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p,
                               tDllCalQueue dllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  const UINT8* pData_p,
-                                  UINT dataSize_p);
+                                  const void* pData_p,
+                                  size_t dataSize_p);
 
 /* define external function interface */
 static tDllCalFuncIntf    funcIntf_l =
@@ -214,15 +214,15 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  const UINT8* pData_p,
-                                  UINT dataSize_p)
+                                  const void* pData_p,
+                                  size_t dataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tDllCalIoctlInstance*   pInstance = (tDllCalIoctlInstance*)pDllCalQueue_p;
-    UINT8*                  pIoctlAsyncBuf;
+    void*                   pIoctlAsyncBuf;
     tIoctlDllCalAsync       ioctlAsyncFrame;
     BOOL                    fIoctlRet;
-    ULONG                   bytesReturned;
+    DWORD                   bytesReturned;
 
     // Check parameter validity
     ASSERT(pData_p != NULL);
@@ -242,12 +242,12 @@ static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
     ioctlAsyncFrame.pData = NULL;
 
     OPLK_MEMCPY(pIoctlAsyncBuf, &ioctlAsyncFrame, sizeof(tIoctlDllCalAsync));
-    OPLK_MEMCPY((pIoctlAsyncBuf + sizeof(tIoctlDllCalAsync)), pData_p, dataSize_p);
+    OPLK_MEMCPY((UINT8*)pIoctlAsyncBuf + sizeof(tIoctlDllCalAsync), pData_p, dataSize_p);
 
     fIoctlRet = DeviceIoControl(pInstance->hFileHandle,
                                 PLK_CMD_DLLCAL_ASYNCSEND,
                                 pIoctlAsyncBuf,
-                                (sizeof(tIoctlDllCalAsync) + dataSize_p),
+                                (DWORD)(sizeof(tIoctlDllCalAsync) + dataSize_p),
                                 0,
                                 0,
                                 &bytesReturned,

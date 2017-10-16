@@ -9,7 +9,7 @@ This file contains the DLL CAL queue implementation using circular buffers.
 \ingroup module_dllkcal
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -93,10 +93,10 @@ typedef struct
 //------------------------------------------------------------------------------
 static tOplkError addInstance(tDllCalQueueInstance* ppDllCalQueue_p, tDllCalQueue DllCalQueue_p);
 static tOplkError delInstance(tDllCalQueueInstance pDllCalQueue_p);
-static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, const UINT8* pData_p, UINT dataSize_p);
-static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, UINT8* pData_p, UINT* pDataSize_p);
-static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, ULONG* pDataBlockCount_p);
-static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p, ULONG timeOutMs_p);
+static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p, const void* pData_p, size_t dataSize_p);
+static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p, void* pData_p, size_t* pDataSize_p);
+static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p, UINT* pDataBlockCount_p);
+static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p);
 
 /* define external function interface */
 static tDllCalFuncIntf funcintf_l =
@@ -257,8 +257,8 @@ Inserts a data block into the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError insertDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                                  const UINT8* pData_p,
-                                  UINT dataSize_p)
+                                  const void* pData_p,
+                                  size_t dataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tCircBufError           error;
@@ -308,8 +308,8 @@ Gets a data block from the DLL CAL queue.
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
-                               UINT8* pData_p,
-                               UINT* pDataSize_p)
+                               void* pData_p,
+                               size_t* pDataSize_p)
 {
     tOplkError              ret = kErrorOk;
     tCircBufError           error;
@@ -325,7 +325,7 @@ static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
 
     error = circbuf_readData(pDllCalCircBufInstance->pCircBufInstance,
                              pData_p,
-                             (size_t)*pDataSize_p,
+                             *pDataSize_p,
                              &actualDataSize);
     if (error != kCircBufOk)
     {
@@ -337,7 +337,7 @@ static tOplkError getDataBlock(tDllCalQueueInstance pDllCalQueue_p,
         goto Exit;
     }
 
-    *pDataSize_p = (UINT)actualDataSize;
+    *pDataSize_p = actualDataSize;
 
 Exit:
     return ret;
@@ -358,7 +358,7 @@ Returns the data block counter.
 */
 //------------------------------------------------------------------------------
 static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
-                                    ULONG* pDataBlockCount_p)
+                                    UINT* pDataBlockCount_p)
 {
     const tDllCalCircBufInstance*   pDllCalCircBufInstance =
                                         (const tDllCalCircBufInstance*)pDllCalQueue_p;
@@ -366,7 +366,7 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
     if (pDllCalCircBufInstance == NULL)
         return kErrorInvalidInstanceParam;
 
-    *pDataBlockCount_p = circbuf_getDataCount(pDllCalCircBufInstance->pCircBufInstance);
+    *pDataBlockCount_p = (UINT)circbuf_getDataCount(pDllCalCircBufInstance->pCircBufInstance);
 
     return kErrorOk;
 }
@@ -378,20 +378,16 @@ static tOplkError getDataBlockCount(tDllCalQueueInstance pDllCalQueue_p,
 Resets the DLL CAL queue instance after a given timeout.
 
 \param[in]      pDllCalQueue_p      Pointer to DllCal Queue instance.
-\param[in]      timeOutMs_p         Timeout before buffer reset is done.
 
 \return The function returns a tOplkError error code.
 \retval kErrorOk                    Function executes correctly
 \retval other                       Error
 */
 //------------------------------------------------------------------------------
-static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p,
-                                      ULONG timeOutMs_p)
+static tOplkError resetDataBlockQueue(tDllCalQueueInstance pDllCalQueue_p)
 {
     tDllCalCircBufInstance* pDllCalCircBufInstance =
                                 (tDllCalCircBufInstance*)pDllCalQueue_p;
-
-    UNUSED_PARAMETER(timeOutMs_p);
 
     if (pDllCalCircBufInstance == NULL)
         return kErrorInvalidInstanceParam;

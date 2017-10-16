@@ -1242,8 +1242,8 @@ static tOplkError processUserEvent(const tEvent* pEvent_p)
                 pApiData = &apiEventArg.receivedPres;
                 pDllData = (const tDllEventReceivedPres*)pEvent_p->eventArg.pEventArg;
 
-                pApiData->nodeId = pDllData->nodeId;
-                pApiData->frameSize = pDllData->frameSize;
+                pApiData->nodeId = (UINT)pDllData->nodeId;
+                pApiData->frameSize = (size_t)pDllData->frameSize;
                 pApiData->pFrame = (tPlkFrame*)pDllData->frameBuf;
 
                 eventType = kOplkApiEventReceivedPres;
@@ -1280,8 +1280,8 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
     tDllConfigParam dllConfigParam;
     tDllIdentParam  dllIdentParam;
     tObdSize        obdSize;
-    UINT16          wTemp;
-    UINT8           bTemp;
+    UINT16          wordValue;
+    UINT8           byteValue;
 
     // configure Dll
     OPLK_MEMSET(&dllConfigParam, 0, sizeof(dllConfigParam));
@@ -1310,17 +1310,17 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
 
     // 0x1F98: NMT_CycleTiming_REC, 0x1F98.1: IsochrTxMaxPayload_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 1, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 1, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.isochrTxMaxPayload = wTemp;
+    dllConfigParam.isochrTxMaxPayload = wordValue;
 
     // 0x1F98.2: IsochrRxMaxPayload_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 2, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 2, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.isochrRxMaxPayload = wTemp;
+    dllConfigParam.isochrRxMaxPayload = wordValue;
 
     // 0x1F98.3: PResMaxLatency_U32
     obdSize = 4;
@@ -1330,17 +1330,17 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
 
     // 0x1F98.4: PReqActPayloadLimit_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 4, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 4, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.preqActPayloadLimit = wTemp;
+    dllConfigParam.preqActPayloadLimit = wordValue;
 
     // 0x1F98.5: PResActPayloadLimit_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 5, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 5, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.presActPayloadLimit = wTemp;
+    dllConfigParam.presActPayloadLimit = wordValue;
 
     // 0x1F98.6: ASndMaxLatency_U32
     obdSize = 4;
@@ -1350,25 +1350,25 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
 
     // 0x1F98.7: MultiplCycleCnt_U8
     obdSize = 1;
-    ret = obdu_readEntry(0x1F98, 7, &bTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 7, &byteValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.multipleCycleCnt = bTemp;
+    dllConfigParam.multipleCycleCnt = byteValue;
 
     // 0x1F98.8: AsyncMTU_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 8, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 8, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
-    dllConfigParam.asyncMtu = wTemp;
+    dllConfigParam.asyncMtu = wordValue;
 
     // 0x1F98.9: Prescaler_U16
     obdSize = 2;
-    ret = obdu_readEntry(0x1F98, 9, &wTemp, &obdSize);
+    ret = obdu_readEntry(0x1F98, 9, &wordValue, &obdSize);
     if (ret != kErrorOk)
         return ret;
     //User value passed from application will already be updated by now in updateObd
-    dllConfigParam.prescaler = wTemp;
+    dllConfigParam.prescaler = wordValue;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     // 0x1F8A.1: WaitSoCPReq_U32 in [ns]
@@ -1429,7 +1429,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
     dllConfigParam.syncNodeId = pInitParam_p->syncNodeId;
     dllConfigParam.minSyncTime = pInitParam_p->minSyncTime;
 
-    dllConfigParam.sizeOfStruct = sizeof(dllConfigParam);
+    dllConfigParam.sizeOfStruct = (UINT32)sizeof(dllConfigParam);
     ret = dllucal_config(&dllConfigParam);
     if (ret != kErrorOk)
         return ret;
@@ -1480,7 +1480,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
         ret = target_setIpAdrs(PLK_VETH_NAME,
                                dllIdentParam.ipAddress,
                                dllIdentParam.subnetMask,
-                               (UINT16)dllConfigParam.asyncMtu);
+                               dllConfigParam.asyncMtu);
         if (ret != kErrorOk)
             return ret;
 
@@ -1516,7 +1516,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
                     &pInitParam_p->aVendorSpecificExt2[0],
                     sizeof(dllIdentParam.aVendorSpecificExt2));
 
-        dllIdentParam.sizeOfStruct = sizeof(dllIdentParam);
+        dllIdentParam.sizeOfStruct = (UINT32)sizeof(dllIdentParam);
         ret = dllucal_setIdentity(&dllIdentParam);
         if (ret != kErrorOk)
             return ret;
@@ -1570,8 +1570,8 @@ static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
                             BOOL fDisableUpdateStoredConf_p)
 {
     tOplkError  ret = kErrorOk;
-    WORD        wTemp;
-    BYTE        bTemp;
+    UINT16      wordValue;
+    UINT8       byteValue;
 
     // set node id in OD
     ret = obdu_setNodeId(pInitParam_p->nodeId,      // node id
@@ -1579,61 +1579,61 @@ static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
     if (ret != kErrorOk)
         return ret;
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->cycleLen != UINT_MAX))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->cycleLen != UINT_MAX))
         obdu_writeEntry(0x1006, 0, &pInitParam_p->cycleLen, 4);
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->lossOfFrameTolerance != UINT_MAX))
         obdu_writeEntry(0x1C14, 0, &pInitParam_p->lossOfFrameTolerance, 4);
 
     // d.k. There is no dependence between FeatureFlags and async-only CN.
     if (pInitParam_p->featureFlags != UINT_MAX)
         obdu_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
 
-    wTemp = (WORD)pInitParam_p->isochrTxMaxPayload;
-    obdu_writeEntry(0x1F98, 1, &wTemp, 2);
+    wordValue = (UINT16)pInitParam_p->isochrTxMaxPayload;
+    obdu_writeEntry(0x1F98, 1, &wordValue, 2);
 
-    wTemp = (WORD)pInitParam_p->isochrRxMaxPayload;
-    obdu_writeEntry(0x1F98, 2, &wTemp, 2);
+    wordValue = (UINT16)pInitParam_p->isochrRxMaxPayload;
+    obdu_writeEntry(0x1F98, 2, &wordValue, 2);
 
     obdu_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
-    if (((!fDisableUpdateStoredConf_p) && pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
-        wTemp = (WORD)pInitParam_p->preqActPayloadLimit;
-        obdu_writeEntry(0x1F98, 4, &wTemp, 2);
+        wordValue = (UINT16)pInitParam_p->preqActPayloadLimit;
+        obdu_writeEntry(0x1F98, 4, &wordValue, 2);
     }
 
-    if (((!fDisableUpdateStoredConf_p) && pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
-        wTemp = (WORD)pInitParam_p->presActPayloadLimit;
-        obdu_writeEntry(0x1F98, 5, &wTemp, 2);
+        wordValue = (UINT16)pInitParam_p->presActPayloadLimit;
+        obdu_writeEntry(0x1F98, 5, &wordValue, 2);
     }
 
     obdu_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->multiplCylceCnt <= 0xFF))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->multiplCylceCnt <= 0xFF))
     {
-        bTemp = (BYTE)pInitParam_p->multiplCylceCnt;
-        obdu_writeEntry(0x1F98, 7, &bTemp, 1);
+        byteValue = (UINT8)pInitParam_p->multiplCylceCnt;
+        obdu_writeEntry(0x1F98, 7, &byteValue, 1);
     }
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
     {
-        wTemp = (WORD)pInitParam_p->asyncMtu;
-        obdu_writeEntry(0x1F98, 8, &wTemp, 2);
+        wordValue = (UINT16)pInitParam_p->asyncMtu;
+        obdu_writeEntry(0x1F98, 8, &wordValue, 2);
     }
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->prescaler <= 1000))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->prescaler <= 1000))
     {
-        wTemp = (WORD)pInitParam_p->prescaler;
-        obdu_writeEntry(0x1F98, 9, &wTemp, 2);
+        wordValue = (UINT16)pInitParam_p->prescaler;
+        obdu_writeEntry(0x1F98, 9, &wordValue, 2);
     }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->waitSocPreq != UINT_MAX))
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->waitSocPreq != UINT_MAX))
         obdu_writeEntry(0x1F8A, 1, &pInitParam_p->waitSocPreq, 4);
 
-    if ((!fDisableUpdateStoredConf_p) && (pInitParam_p->asyncSlotTimeout != 0) &&
+    if (!fDisableUpdateStoredConf_p && (pInitParam_p->asyncSlotTimeout != 0) &&
         (pInitParam_p->asyncSlotTimeout != UINT_MAX))
         obdu_writeEntry(0x1F8A, 2, &pInitParam_p->asyncSlotTimeout, 4);
 #endif
