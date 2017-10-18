@@ -1577,11 +1577,9 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     int                     loopCount;
     tCommandBlock*          pCmdBlock;
     tRxDescCmdBlock*        pRxDescCmdBlock;
-    UINT16                  value; //FIXME: Give me a meaningful name, now!
-    UINT32                  dwordTemp; //FIXME: Give me a meaningful name, now!
-    UINT8                   byteTemp; //FIXME: Give me a meaningful name, now!
-    UINT16                  wordTemp; //FIXME: Give me a meaningful name, now!
-    UINT                    temp; //FIXME: Give me a meaningful name, now!
+    UINT16                  wordValue;
+    UINT32                  dwordValue;
+    UINT8                   byteValue;
 
     if (edrvInstance_l.pPciDev != NULL)
     { // Edrv is already connected to a PCI device
@@ -1598,17 +1596,17 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         goto Exit;
     }
 
-    wordTemp = 0;
-    pci_read_config_word(pPciDev_p, PCI_VENDOR_ID, &wordTemp);
-    printk("Vendor ID : %d\n", wordTemp);
+    wordValue = 0;
+    pci_read_config_word(pPciDev_p, PCI_VENDOR_ID, &wordValue);
+    printk("Vendor ID : %d\n", wordValue);
 
-    wordTemp = 0;
-    pci_read_config_word(pPciDev_p, PCI_DEVICE_ID, &wordTemp);
-    printk("Device ID : %d\n", wordTemp);
+    wordValue = 0;
+    pci_read_config_word(pPciDev_p, PCI_DEVICE_ID, &wordValue);
+    printk("Device ID : %d\n", wordValue);
 
-    byteTemp = 0;
-    pci_read_config_byte(pPciDev_p, PCI_REVISION_ID, &byteTemp);
-    printk("Revision ID : %d\n", byteTemp);
+    byteValue = 0;
+    pci_read_config_byte(pPciDev_p, PCI_REVISION_ID, &byteValue);
+    printk("Revision ID : %d\n", byteValue);
 
     edrvInstance_l.pPciDev = pPciDev_p;
 
@@ -1636,9 +1634,9 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     // reset chip code - start
     /* clear pending interrupts */
-    temp = ioread16((UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
+    wordValue = ioread16((UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
     udelay(DELAY_CLEAR_INT);
-    iowrite16(temp, (UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
+    iowrite16(wordValue, (UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
 
     /* write a reset command into PORT register */
     iowrite32(PORT_SOFTRESET, (UINT8*)edrvInstance_l.pIoAddr + PORT);
@@ -1725,9 +1723,9 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     }
 
     //acknowledge pended interrupts and clear interrupt mask
-    temp = ioread16((UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
+    wordValue = ioread16((UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
     udelay(5);
-    iowrite16(temp, (UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
+    iowrite16(wordValue, (UINT8*)edrvInstance_l.pIoAddr + SCBSTAT);
     iowrite8(0x2C, (UINT8*)edrvInstance_l.pIoAddr + SCBCMD + 1);
 
     // install interrupt handler
@@ -1757,16 +1755,16 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
         (edrvInstance_l.initParam.aMacAddr[4] != 0) ||
         (edrvInstance_l.initParam.aMacAddr[5] != 0))
     { // write specified MAC address to controller
-        dwordTemp = 0;
+        dwordValue = 0;
 
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[0] << 0;
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[1] << 8;
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[2] << 16;
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[3] << 24;
-        dwordTemp = 0;
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[4] << 0;
-        dwordTemp |= edrvInstance_l.initParam.aMacAddr[5] << 8;
-     // dwordTemp |= EDRV_REGDW_RAH_AV;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[0] << 0;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[1] << 8;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[2] << 16;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[3] << 24;
+        dwordValue = 0;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[4] << 0;
+        dwordValue |= edrvInstance_l.initParam.aMacAddr[5] << 8;
+     // dwordValue |= EDRV_REGDW_RAH_AV;
     }
     else
     //Read from EEPROM
@@ -1775,9 +1773,9 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
         for (loopCount = 0; loopCount < 6; loopCount += 2)
         {
-            value = readEeprom(loopCount / 2);
-            edrvInstance_l.initParam.aMacAddr[loopCount] = (UINT8)value;
-            edrvInstance_l.initParam.aMacAddr[loopCount+1] = (UINT8)(value >> 8);
+            wordValue = readEeprom(loopCount / 2);
+            edrvInstance_l.initParam.aMacAddr[loopCount] = (UINT8)wordValue;
+            edrvInstance_l.initParam.aMacAddr[loopCount+1] = (UINT8)(wordValue >> 8);
         }
     }
     // fill RFDs for which memory has been allocated - end
