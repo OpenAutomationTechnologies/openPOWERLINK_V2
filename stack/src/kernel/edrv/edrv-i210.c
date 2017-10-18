@@ -395,7 +395,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define EDRV_REGDW_READ(reg)            readl((UINT8*)edrvInstance_l.pIoAddr + reg)
 #define EDRV_REGDW_WRITE(reg, val)      writel(val, (UINT8*)edrvInstance_l.pIoAddr + reg)
-#define EDRV_REGB_READ(reg)             readb(edrvInstance_l.pIoAddr + reg)
+#define EDRV_REGB_READ(reg)             readb((UINT8*)edrvInstance_l.pIoAddr + reg)
 
 // TracePoint support for realtime-debugging
 #ifdef _DBG_TRACE_POINTS_
@@ -521,7 +521,7 @@ bookkeeping the DMA address and length.
 typedef struct
 {
     dma_addr_t          dmaAddr;                            ///< DMA address
-    UINT8*              pVirtAddr;                          ///< Virtual address
+    void*               pVirtAddr;                          ///< Virtual address
     UINT                len;                                ///< Length of the buffer
 } tEdrvPktBuff;
 
@@ -533,14 +533,14 @@ This structure describes an Ethernet driver queue.
 typedef struct
 {
     tEdrvQVector*       pQvector;                           ///< Pointer to the vector structure for this queue
-    INT                 index;                              ///< Queue index
+    int                 index;                              ///< Queue index
     dma_addr_t          descDma;                            ///< DMA address for descriptor queue
     void*               pDescVirt;                          ///< Virtual address for descriptor queue
     tEdrvTxBuffer*      apTxBuffer[EDRV_MAX_TX_DESCRIPTOR]; ///< TX buffer array
-    BYTE __iomem*       pBuf;                               ///< Pointer to buffer for the queue
+    void __iomem*       pBuf;                               ///< Pointer to buffer for the queue
     tEdrvPktBuff*       pPktBuff;                           ///< Bookkeeping structure
-    INT                 nextDesc;                           ///< Next descriptor to be used
-    INT                 nextWb;                             ///< Next descriptor to be written back
+    int                 nextDesc;                           ///< Next descriptor to be used
+    int                 nextWb;                             ///< Next descriptor to be written back
 } tEdrvQueue;
 
 /**
@@ -561,7 +561,7 @@ typedef struct
     UINT                rxMaxQueue;                         ///< Max number of RX queues
     UINT                numQVectors;                        ///< Number of queue vectors (Total = numQvectors + 1)
 
-    UINT8*              pTxBuf;                             ///< Pointer to the TX buffer
+    void*               pTxBuf;                             ///< Pointer to the TX buffer
     BOOL                afTxBufUsed[EDRV_MAX_TX_BUFFERS];   ///< Array indicating the use of a specific TX buffer
 
     struct msix_entry*  pMsixEntry;                         ///< Pointer to the MSI-X structure
@@ -576,8 +576,8 @@ typedef struct
 //---------------------------------------------------------------------------
 // local function prototypes
 //---------------------------------------------------------------------------
-static irqreturn_t edrvTimerInterrupt(INT irqNum_p, void* ppDevInstData_p);
-static irqreturn_t edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
+static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p);
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* pDevInstData_p);
 static UINT32 readSystimRegister(struct timespec* psTime_p);
 static void writeSystimRegister(const struct timespec* psTime_p);
 static void releaseHwSemaphoreGeneric(void);
@@ -585,8 +585,8 @@ static tOplkError acquireHwSemaphore(void);
 static void releaseHwSemaphore(void);
 static tOplkError acquireSwFwSync(UINT16 mask_p);
 static void releaseSwFwSync(UINT16 mask_p);
-static void writeMdioPhyReg(UINT phyreg_p, USHORT value_p);
-static UINT16 readMdioPhyReg(INT phyreg_p);
+static void writeMdioPhyReg(UINT phyreg_p, UINT16 value_p);
+static UINT16 readMdioPhyReg(UINT phyreg_p);
 static void freeTxBuffersOfQueue(const tEdrvQueue* pTxQueue_p);
 static void freeTxBuffers(void);
 static void freeTxQueues(void);
@@ -599,9 +599,9 @@ static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p);
 static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p);
 static void configureRxQueue(const tEdrvQueue* pRxQueue_p);
 static void initQavMode(void);
-static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p);
-static INT requestMsixIrq(void);
-static INT initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
+static void writeIvarRegister(int vector_p, int index_p, int offset_p);
+static int requestMsixIrq(void);
+static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* pId_p);
 static void removeOnePciDev(struct pci_dev* pPciDev_p);
 static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p);
 
@@ -652,7 +652,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError      ret = kErrorOk;
     int             result;
-    INT             index;
+    int             index;
     tBufData        bufData;
 
     // Check parameter validity
@@ -675,14 +675,14 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     result = pci_register_driver(&edrvDriver_l);
     if (result != 0)
     {
-        printk("%s pci_register_driver failed with %d\n", __FUNCTION__, result);
+        printk("%s pci_register_driver failed with %d\n", __func__, result);
         ret = kErrorNoResource;
         goto Exit;
     }
 
     if (edrvInstance_l.pPciDev == NULL)
     {
-        printk("%s pPciDev=NULL\n", __FUNCTION__);
+        printk("%s pPciDev=NULL\n", __func__);
         edrv_exit();
         ret = kErrorNoResource;
         goto Exit;
@@ -698,13 +698,13 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
     for (index = 0; index < EDRV_MAX_TX_BUFFERS; index++)
     {
         bufData.bufferNumber = index;
-        bufData.pBuffer = edrvInstance_l.pTxBuf + (index * EDRV_MAX_FRAME_SIZE);
+        bufData.pBuffer = (UINT8*)edrvInstance_l.pTxBuf + (index * EDRV_MAX_FRAME_SIZE);
 
         bufalloc_addBuffer(pBufAlloc_l, &bufData);
     }
 
     // local MAC address might have been changed in EdrvInitOne
-    printk("%s local MAC = ", __FUNCTION__);
+    printk("%s local MAC = ", __func__);
     for (index = 0; index < 6; index++)
     {
         printk("%02X ", (UINT)edrvInstance_l.initParam.aMacAddr[index]);
@@ -730,7 +730,7 @@ tOplkError edrv_exit(void)
 {
     if (edrvDriver_l.name != NULL)
     {
-        printk("%s calling pci_unregister_driver()\n", __FUNCTION__);
+        printk("%s calling pci_unregister_driver()\n", __func__);
         pci_unregister_driver (&edrvDriver_l);
         // clear buffer allocation
         bufalloc_exit(pBufAlloc_l);
@@ -740,7 +740,7 @@ tOplkError edrv_exit(void)
     }
     else
     {
-        printk("%s PCI driver for openPOWERLINK already unregistered\n", __FUNCTION__);
+        printk("%s PCI driver for openPOWERLINK already unregistered\n", __func__);
     }
 
     return kErrorOk;
@@ -779,7 +779,7 @@ tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError      ret = kErrorOk;
     UINT32          data;
-    INT             index;
+    int             index;
 
     // Check parameter validity
     ASSERT(pMacAddr_p != NULL);
@@ -796,7 +796,7 @@ tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
 
     if (index == 16)
     {   // no free entry found
-        printk("%s Implementation of Multicast Table Array support required\n", __FUNCTION__);
+        printk("%s Implementation of Multicast Table Array support required\n", __func__);
         ret = kErrorEdrvInit;
         goto Exit;
     }
@@ -838,7 +838,7 @@ tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
 {
     tOplkError          ret = kErrorOk;
     UINT32              data;
-    INT                 index;
+    int                 index;
     UINT32              addrLow;
     UINT32              addrHigh;
 
@@ -936,7 +936,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     if (edrvInstance_l.pTxBuf == NULL)
     {
-        printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
+        printk("%s Tx buffers currently not allocated\n", __func__);
         ret = kErrorEdrvNoFreeBufEntry;
         goto Exit;
     }
@@ -1113,7 +1113,7 @@ tOplkError edrv_startTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 
 
     if ((pTimerHdl_p == NULL) || (index_p >= EDRV_MAX_TIMER_COUNT))
     {
-        printk("%s() Invalid parameters for the timer\n", __FUNCTION__);
+        printk("%s() Invalid parameters for the timer\n", __func__);
         return kErrorTimerInvalidHandle;
     }
 
@@ -1315,7 +1315,7 @@ static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p)
 {
     UINT32          status;
     UINT32          reg;
-    INT             handled = IRQ_HANDLED;
+    irqreturn_t     handled = IRQ_HANDLED;
     UINT32          index;
 
     UNUSED_PARAMETER(irqNum_p);
@@ -1350,7 +1350,7 @@ static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p)
         index = 0;
 #if (EDRV_USE_TTTX != FALSE)
     // Call timer CallBack
-    if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
+    if ((edrvInstance_l.hresTimerCb != NULL) && (edrvInstance_l.aTimerHdl[index] != 0))
     {
         edrvInstance_l.hresTimerCb(&edrvInstance_l.aTimerHdl[index]);
     }
@@ -1363,7 +1363,7 @@ static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p)
         index = 1;
 #if (EDRV_USE_TTTX != FALSE)
     // Call timer CallBack
-    if (edrvInstance_l.hresTimerCb != NULL && edrvInstance_l.aTimerHdl[index] != 0)
+    if ((edrvInstance_l.hresTimerCb != NULL) && (edrvInstance_l.aTimerHdl[index] != 0))
     {
         edrvInstance_l.hresTimerCb(&edrvInstance_l.aTimerHdl[index]);
     }
@@ -1381,17 +1381,17 @@ Exit:
 This function is the interrupt service routine for the Ethernet driver.
 
 \param[in]      irqNum_p            IRQ number
-\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in,out]  pDevInstData_p      Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* pDevInstData_p)
 {
-    DWORD           reg;
-    INT             handled = IRQ_HANDLED;
-    INT             index;
-    tEdrvQVector*   pQVector = (tEdrvQVector*)ppDevInstData_p;
+    UINT32          reg;
+    irqreturn_t     handled = IRQ_HANDLED;
+    int             index;
+    tEdrvQVector*   pQVector = (tEdrvQVector*)pDevInstData_p;
     tEdrvQueue*     pTxQueue;
     tEdrvQueue*     pRxQueue;
 
@@ -1443,7 +1443,7 @@ static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
                 rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
                 rcvLen = (0x0000FFFF & pAdvRxDesc->sWb.lenVlanTag);
                 rxBuffer.rxFrameSize = rcvLen;
-                rxBuffer.pBuffer = (BYTE*)pRxQueue->pPktBuff[index].pVirtAddr;
+                rxBuffer.pBuffer = pRxQueue->pPktBuff[index].pVirtAddr;
 
                 EDRV_COUNT_RX;
 
@@ -1663,8 +1663,8 @@ static tOplkError acquireHwSemaphore(void)
 {
     UINT32          swsm;
     tOplkError      result = kErrorOk;
-    INT             timeout;
-    INT             index = 0;
+    int             timeout;
+    int             index = 0;
 
     timeout = EDRV_PHY_SEMPHORE_TIMEOUT;
     // Get the FW semaphore.
@@ -1719,8 +1719,8 @@ static tOplkError acquireSwFwSync(UINT16 mask_p)
     UINT32      swmask = mask_p;
     UINT32      fwmask = mask_p << 16;
     tOplkError  result = kErrorOk;
-    INT         index = 0;
-    INT         timeout = 200;
+    int         index = 0;
+    int         timeout = 200;
 
     while (index < timeout)
     {
@@ -1783,7 +1783,7 @@ The function write into a PHY register via the MDIO interface.
 \param[in]      value_p             Value to write into register.
 */
 //------------------------------------------------------------------------------
-static void writeMdioPhyReg(UINT phyreg_p, USHORT value_p)
+static void writeMdioPhyReg(UINT phyreg_p, UINT16 value_p)
 {
     UINT32      regVal = 0;
     UINT32      mdicRd;
@@ -1815,7 +1815,7 @@ The function reads from a PHY register via the MDIO interface.
 \retval The function returns the read register value.
 */
 //------------------------------------------------------------------------------
-static UINT16 readMdioPhyReg(INT phyreg_p)
+static UINT16 readMdioPhyReg(UINT phyreg_p)
 {
     UINT32      regVal = 0;
     UINT16      value = 0;
@@ -1851,7 +1851,7 @@ The function frees the buffers of a TX queue.
 //------------------------------------------------------------------------------
 static void freeTxBuffersOfQueue(const tEdrvQueue* pTxQueue_p)
 {
-    INT         index;
+    int         index;
 
     for (index = 0; index < EDRV_MAX_RX_DESCRIPTOR; index++)
     {
@@ -1875,7 +1875,7 @@ The function frees all TX buffers.
 //------------------------------------------------------------------------------
 static void freeTxBuffers(void)
 {
-    INT         index;
+    int         index;
 
     for (index = 0; index < edrvInstance_l.txMaxQueue; index++)
     {
@@ -1934,10 +1934,10 @@ the TX descriptors.
 //------------------------------------------------------------------------------
 static tOplkError initTxQueue(tEdrvQueue* pTxQueue_p)
 {
-    INT         descSize;
+    int         descSize;
 
     // Allocate Tx Descriptor
-    printk("{%s}:Allocating Tx Desc %p\n", __FUNCTION__, pTxQueue_p);
+    printk("{%s}:Allocating Tx Desc %p\n", __func__, pTxQueue_p);
     descSize = ALIGN(EDRV_TX_DESCS_SIZE, 4096);
     pTxQueue_p->pDescVirt = dma_alloc_coherent(&edrvInstance_l.pPciDev->dev,
                                                descSize, &pTxQueue_p->descDma, GFP_KERNEL);
@@ -1975,8 +1975,8 @@ static void configureTxQueue(const tEdrvQueue* pTxQueue_p)
 {
     UINT64      txDescDma;
     UINT32      reg;
-    INT         queue = pTxQueue_p->index;
-    INT         index;
+    int         queue = pTxQueue_p->index;
+    int         index;
 
     printk("Configure Tx Queue %d", queue);
     EDRV_REGDW_WRITE(EDRV_TXDCTL(queue), 0);        // Disable the queue
@@ -2066,7 +2066,7 @@ The function frees the buffers of a RX queue.
 //------------------------------------------------------------------------------
 static void freeRxBuffersOfQueue(const tEdrvQueue* pRxQueue_p)
 {
-    INT index;
+    int index;
 
     for (index = 0; index < EDRV_MAX_RX_DESCRIPTOR; index++)
     {
@@ -2086,7 +2086,7 @@ The function frees all RX buffers.
 //------------------------------------------------------------------------------
 static void freeRxBuffers(void)
 {
-    INT     index;
+    int     index;
 
     for (index = 0; index < edrvInstance_l.rxMaxQueue; index++)
     {
@@ -2108,10 +2108,10 @@ The function initializes the Rx queue with descriptors and memory resources.
 static tOplkError initRxQueue(tEdrvQueue* pRxQueue_p)
 {
     tOplkError      ret = kErrorOk;
-    INT             descSize;
+    int             descSize;
 
     // Allocate Tx Descriptor
-    printk("{%s}:Allocating Rx Desc %p\n", __FUNCTION__, pRxQueue_p);
+    printk("{%s}:Allocating Rx Desc %p\n", __func__, pRxQueue_p);
     descSize = ALIGN(EDRV_RX_DESCS_SIZE, 4096);
     pRxQueue_p->pDescVirt = dma_alloc_coherent(&edrvInstance_l.pPciDev->dev,
                                                descSize, &pRxQueue_p->descDma, GFP_KERNEL);
@@ -2156,7 +2156,7 @@ descriptors.
 //------------------------------------------------------------------------------
 static tOplkError allocateRxBuffer(tEdrvQueue* pRxQueue_p)
 {
-    INT                 index;
+    int                 index;
     dma_addr_t          rxDma;
     tOplkError          ret = kErrorOk;
     tEdrvAdvRxDesc*     rxDesc;
@@ -2195,8 +2195,8 @@ static void configureRxQueue(const tEdrvQueue* pRxQueue_p)
 {
     UINT64      rxDescDma;
     UINT32      reg;
-    INT         queue = pRxQueue_p->index;
-    INT         index;
+    int         queue = pRxQueue_p->index;
+    int         index;
 
     printk("Configure Rx Queue %d", queue);
     // Disable the Queue
@@ -2302,12 +2302,12 @@ of Tx-Rx causes.
 \param[in]      offset_p            Offset for the queue.
  */
 //------------------------------------------------------------------------------
-static void writeIvarRegister(INT vector_p, INT index_p, INT offset_p)
+static void writeIvarRegister(int vector_p, int index_p, int offset_p)
 {
     UINT32 ivar = EDRV_REGDW_READ((EDRV_IVAR0_REG + (index_p << 2)));
 
     // clear any bits that are currently set
-    ivar &= ~((u32) 0xFF << offset_p);
+    ivar &= ~(0x000000FFUL << offset_p);
 
     // write vector and valid bit
     ivar |= (vector_p | EDRV_IVAR_VALID) << offset_p;
@@ -2325,12 +2325,12 @@ It enables MSI-X and sets up the interrupt vectors.
 \return The function returns the error code returned by request_irq().
 */
 //------------------------------------------------------------------------------
-static INT requestMsixIrq(void)
+static int requestMsixIrq(void)
 {
     UINT            vector = 0;
     UINT            index = 0;
     UINT32          reg;
-    INT             ret = 0;
+    int             ret = 0;
     UINT            txQueue;
     UINT            rxQueue;
     tEdrvQVector*   pQvector;
@@ -2392,8 +2392,8 @@ static tOplkError sendNormalBuffer(tEdrvTxBuffer* pBuffer_p)
     tOplkError          ret = kErrorOk;
     tEdrvAdvTxDesc*     pTxDesc;
     tEdrvQueue*         pTxQueue;
-    INT                 queue = 1;
-    INT                 index = 0;
+    int                 queue = 1;
+    int                 index = 0;
     dma_addr_t          txDma;
 
     pTxQueue = edrvInstance_l.pTxQueue[queue];
@@ -2464,8 +2464,8 @@ static tOplkError sendTimeTrigBuffer(tEdrvTxBuffer* pBuffer_p)
     UINT64          launchTime;
     UINT64          curTime;
     tEdrvQueue*     pTxQueue;
-    INT             queue = 0;
-    INT             index = 0;
+    int             queue = 0;
+    int             index = 0;
     dma_addr_t      txDma;
 
     pTxQueue = edrvInstance_l.pTxQueue[queue];
@@ -2554,14 +2554,14 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     tEdrvQueue*     pQueue;
     tEdrvQVector*   pVector;
     UINT32          reg;
-    INT             index;
-    INT             numVectors;
+    int             index;
+    int             numVectors;
     struct timespec sysTime;
 
     if (edrvInstance_l.pPciDev != NULL)
     {
         // Perform a sanity check to avoid insertion of module again
-        printk("%s device %s discarded\n", __FUNCTION__, pci_name(pPciDev_p));
+        printk("%s device %s discarded\n", __func__, pci_name(pPciDev_p));
         result = -ENODEV;
         goto Exit;
     }
@@ -2577,7 +2577,7 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     if (edrvInstance_l.pPciDev == NULL)
     {
-        printk("%s pPciDev==NULL\n", __FUNCTION__);
+        printk("%s pPciDev==NULL\n", __func__);
         result = -1;
         goto Exit;
     }
@@ -2960,7 +2960,7 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
     EDRV_REGDW_WRITE(EDRV_INTR_EIAC, reg);
 
-    printk("%s waiting for link up...", __FUNCTION__);
+    printk("%s waiting for link up...", __func__);
     for (index = EDRV_LINK_UP_TIMEOUT; index > 0; index -= 100)
     {
         if ((EDRV_REGDW_READ(EDRV_STATUS_REG) & EDRV_STATUS_LU))
@@ -2987,7 +2987,7 @@ ExitFail:
     removeOnePciDev(pPciDev_p);
 
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, result);
+    printk("%s finished with %d\n", __func__, result);
     return result;
 }
 
@@ -3003,9 +3003,9 @@ This function removes one PCI device.
 static void removeOnePciDev(struct pci_dev* pPciDev_p)
 {
     UINT32          reg;
-    INT             index;
+    int             index;
     UINT16          wReg;
-    INT             vector;
+    int             vector;
     tEdrvQVector*   pVector;
 
     edrvInstance_l.fInitialized = FALSE;

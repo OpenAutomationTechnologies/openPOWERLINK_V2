@@ -305,7 +305,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
         return kErrorEdrvNoFreeBufEntry;
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
         return kErrorEdrvNoFreeBufEntry;
 
@@ -329,7 +329,7 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT8* pBuffer;
+    void*   pBuffer;
 
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
@@ -450,7 +450,7 @@ static void packetHandler(u_char* pParam_p,
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = pHeader_p->caplen;
-        rxBuffer.pBuffer = (UINT8*)pPktData_p;
+        rxBuffer.pBuffer = (void*)pPktData_p;
 
         pInstance->initParam.pfnRxHandler(&rxBuffer);
     }
@@ -488,32 +488,32 @@ static void packetHandler(u_char* pParam_p,
                 {
                     TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
                           __func__,
-                          (UINT)pPktData_p[0],
-                          (UINT)pPktData_p[1],
-                          (UINT)pPktData_p[2],
-                          (UINT)pPktData_p[3],
-                          (UINT)pPktData_p[4],
-                          (UINT)pPktData_p[5]);
+                          (UINT)((UINT8*)pPktData_p)[0],
+                          (UINT)((UINT8*)pPktData_p)[1],
+                          (UINT)((UINT8*)pPktData_p)[2],
+                          (UINT)((UINT8*)pPktData_p)[3],
+                          (UINT)((UINT8*)pPktData_p)[4],
+                          (UINT)((UINT8*)pPktData_p)[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
                           (void*)pTxBuffer,
-                          (UINT)pTxBuffer->pBuffer[0],
-                          (UINT)pTxBuffer->pBuffer[1],
-                          (UINT)pTxBuffer->pBuffer[2],
-                          (UINT)pTxBuffer->pBuffer[3],
-                          (UINT)pTxBuffer->pBuffer[4],
-                          (UINT)pTxBuffer->pBuffer[5]);
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[0],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[1],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[2],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[3],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[4],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[5]);
                 }
             }
         }
         else
         {
             TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__,
-                  pPktData_p[0],
-                  pPktData_p[1],
-                  pPktData_p[2],
-                  pPktData_p[3],
-                  pPktData_p[4],
-                  pPktData_p[5]);
+                  ((UINT8*)pPktData_p)[0],
+                  ((UINT8*)pPktData_p)[1],
+                  ((UINT8*)pPktData_p)[2],
+                  ((UINT8*)pPktData_p)[3],
+                  ((UINT8*)pPktData_p)[4],
+                  ((UINT8*)pPktData_p)[5]);
         }
     }
 }

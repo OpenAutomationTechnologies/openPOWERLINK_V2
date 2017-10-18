@@ -751,7 +751,7 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
                     // Zero the frame buffer until minimum frame size to avoid
                     // relicts in padding area. The async Tx buffers are always
                     // allocated with maximum size, so we can zero safely.
-                    OPLK_MEMSET(((UINT8*)pTxFrame) + frameSize,
+                    OPLK_MEMSET((UINT8*)pTxFrame + frameSize,
                                 0,
                                 C_DLL_MIN_ETH_FRAME - frameSize);
 
@@ -1000,7 +1000,7 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p)
             fReadyFlag_p = FALSE;
 
         frameInfo.frame.pBuffer = pTxFrame;
-        frameInfo.frameSize = pTxBuffer->txFrameSize;
+        frameInfo.frameSize = (UINT)pTxBuffer->txFrameSize;
         ret = dllkframe_processTpdo(&frameInfo, fReadyFlag_p);
         if (ret != kErrorOk)
             return ret;

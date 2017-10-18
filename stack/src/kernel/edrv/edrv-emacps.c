@@ -12,7 +12,7 @@ the EMACPS Gigabit Ethernet Controller (GEM) on the Xilinx Zynq SoC.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -202,12 +202,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #define DRV_NAME                            "plk_edrv"
 
-#define EDRV_READ_REG(dwOffset)                         __raw_readl(edrvInstance_l.pIoAddr + dwOffset)
-#define EDRV_WRITE_REG(dwOffset, dwVal)                 __raw_writel(dwVal, edrvInstance_l.pIoAddr + dwOffset)
+#define EDRV_READ_REG(offset)                       __raw_readl((UINT8*)edrvInstance_l.pIoAddr + offset)
+#define EDRV_WRITE_REG(offset, val)                 __raw_writel(val, (UINT8*)edrvInstance_l.pIoAddr + offset)
 
 //Reading and writing to descriptor memory
-#define EDRV_DESC_WRITE(dwDescBase, dwOffset, dwVal)    __raw_writel(dwVal, ((u8*)dwDescBase + dwOffset))
-#define EDRV_DESC_READ(dwDescBase, dwOffset)            __raw_readl((u8*)dwDescBase + dwOffset)
+#define EDRV_DESC_WRITE(descBase, offset, val)      __raw_writel(val, ((u8*)descBase + offset))
+#define EDRV_DESC_READ(descBase, offset)            __raw_readl((u8*)descBase + offset)
 
 //------------------------------------------------------------------------------
 // local types
@@ -268,7 +268,7 @@ typedef struct
     UINT8                   aMacAddr[6];    ///< MAC address for the device
     BOOL                    afTxBufUsed[EDRV_MAX_TX_BUFFERS];       ///< Array to hold status of used transmit buffers
     tEdrvTxBuffer*          apTxBuffer[EDRV_MAX_TX_DESCRIPTOR];     ///< Array of pointers to the transmit buffers
-    UINT8*                  apRxBufInDesc[EDRV_MAX_RX_DESCRIPTOR];  ///< Array to hold the receive buffer pointers
+    void*                   apRxBufInDesc[EDRV_MAX_RX_DESCRIPTOR];  ///< Array to hold the receive buffer pointers
     UINT32                  txDescHead;     ///< Transmit Descriptor head marker
     UINT32                  txDescTail;     ///< Transmit Descriptor tail marker
     void*                   pTxDescVirt;    ///< Virtual address of transmit descriptor
@@ -289,13 +289,13 @@ tEdrvInstance    edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static irqreturn_t  edrvIrqHandler(INT irqNum_p, void* ppDevInstData_p);
+static irqreturn_t  edrvIrqHandler(int irqNum_p, void* pDevInstData_p);
 static int          initOnePlatformDev(struct platform_device* pDev_p);
-static int          removeOnePlatformDev(struct platform_device*pDev_p);
+static int          removeOnePlatformDev(struct platform_device* pDev_p);
 static UINT32       getBitFromMac(const UINT8* pMac_p, UINT32 bitPos_p);
 static UINT32       calculateHashAddr(const UINT8* pMac_p);
-static void         mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p);
-static UINT16       mdioPhyRead(INT phyId_p, INT regAddr_p);
+static void         mdioPhyWrite(int phyId_p, int regAddr_p, UINT16 value_p);
+static UINT16       mdioPhyRead(int phyId_p, int regAddr_p);
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
@@ -345,8 +345,8 @@ This function initializes the Ethernet driver.
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError      ret = kErrorOk;
-    INT             result;
-    INT             loop;
+    int             result;
+    int             loop;
 
     // Check parameter validity
     ASSERT(pEdrvInitParam_p != NULL);
@@ -391,7 +391,7 @@ This function shuts down the Ethernet driver.
 //------------------------------------------------------------------------------
 tOplkError edrv_exit(void)
 {
-    printk("%s calling platform_driver_unregister()\n", __FUNCTION__);
+    printk("%s calling platform_driver_unregister()\n", __func__);
     platform_driver_unregister(&edrvDriver_l);
 
     return kErrorOk;
@@ -548,7 +548,7 @@ This function allocates a Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    INT    channel;
+    int    channel;
 
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
@@ -560,7 +560,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     if (edrvInstance_l.pTxBuffer == NULL)
     {
-        printk("%s Tx buffers currently not allocated\n", __FUNCTION__);
+        printk("%s Tx buffers currently not allocated\n", __func__);
         return kErrorEdrvNoFreeBufEntry;
     }
 
@@ -572,7 +572,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
             // free channel found
             edrvInstance_l.afTxBufUsed[channel] = TRUE;
             pBuffer_p->txBufferNumber.value = channel;
-            pBuffer_p->pBuffer = edrvInstance_l.pTxBuffer +
+            pBuffer_p->pBuffer = (UINT8*)edrvInstance_l.pTxBuffer +
                                  (channel * EDRV_MAX_FRAME_SIZE);
             pBuffer_p->maxBufferSize = EDRV_MAX_FRAME_SIZE;
             break;
@@ -706,12 +706,12 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 This function is the interrupt service routine for the Ethernet driver.
 
 \param[in]      irqNum_p            IRQ number
-\param[in,out]  ppDevInstData_p     Pointer to private data provided by request_irq
+\param[in,out]  pDevInstData_p      Pointer to private data provided by request_irq
 
 \return The function returns an IRQ handled code.
 */
 //------------------------------------------------------------------------------
-static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
+static irqreturn_t edrvIrqHandler(int irqNum_p, void* pDevInstData_p)
 {
     UINT32              isrStatus;
     UINT32              stat = 0;
@@ -721,7 +721,7 @@ static irqreturn_t edrvIrqHandler(int irqNum_p, void* ppDevInstData_p)
     tEdrvRxDesc*        pRxDesc;
 
     UNUSED_PARAMETER(irqNum_p);
-    UNUSED_PARAMETER(ppDevInstData_p);
+    UNUSED_PARAMETER(pDevInstData_p);
 
     isrStatus = EDRV_READ_REG(EDRV_INTR_STATUS_REG);
     // not a shared handler, yet!
@@ -865,8 +865,8 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
 {
     struct resource*    pResMem;
     struct resource*    pResIrq;
-    INT                 result = 0;
-    INT                 loop = 0;
+    int                 result = 0;
+    int                 loop = 0;
     UINT32              reg = 0;
     LONG                rate;
     UINT32              macLAddr;
@@ -911,7 +911,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     }
     printk("Done \n");
 
-    /* Local instance copy to clear mem*/
+    /* Local instance copy to clear mem */
     edrvInstance_l.resMemAddr = pResMem->start;
     edrvInstance_l.resMemSize = (pResMem->end - pResMem->start + 1);
 
@@ -1080,7 +1080,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
         goto Exit;
     }
     printk("Done \n");
-    edrvInstance_l.pRxDescAddr = (tEdrvRxDesc*) edrvInstance_l.pRxDescVirt;
+    edrvInstance_l.pRxDescAddr = (tEdrvRxDesc*)edrvInstance_l.pRxDescVirt;
 
     printk("Allocation of Rx Buffers ...");
     edrvInstance_l.pRxBuffer = kzalloc(EDRV_RX_BUFFER_SIZE, GFP_KERNEL);
@@ -1095,7 +1095,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     for (loop = 0; loop < EDRV_MAX_RX_DESCRIPTOR; loop++)
     {
         rxDmaAddr = dma_map_single(&pDev_p->dev,
-                                   (edrvInstance_l.pRxBuffer + (loop * EDRV_MAX_FRAME_SIZE)),
+                                   (UINT8*)edrvInstance_l.pRxBuffer + (loop * EDRV_MAX_FRAME_SIZE),
                                    EDRV_MAX_FRAME_SIZE,
                                    DMA_FROM_DEVICE);
         if (!rxDmaAddr)
@@ -1104,8 +1104,8 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
             result = -EIO;
             goto Exit;
         }
-        edrvInstance_l.apRxBufInDesc[loop] = (edrvInstance_l.pRxBuffer +
-                                              (loop * EDRV_MAX_FRAME_SIZE));
+        edrvInstance_l.apRxBufInDesc[loop] = (UINT8*)edrvInstance_l.pRxBuffer +
+                                              (loop * EDRV_MAX_FRAME_SIZE);
         edrvInstance_l.pRxDescAddr[loop].bufferAddr = rxDmaAddr;
         edrvInstance_l.pRxDescAddr[loop].bufferAddr &= EDRV_RXBUF_CLEAR_USED_MASK;
 
@@ -1134,7 +1134,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
     // set the RxQptr
     EDRV_WRITE_REG(EDRV_RXQBASE_REG, edrvInstance_l.rxDescDma);
 
-    edrvInstance_l.pTxDescAddr = (tEdrvTxDesc*) edrvInstance_l.pTxDescVirt;
+    edrvInstance_l.pTxDescAddr = (tEdrvTxDesc*)edrvInstance_l.pTxDescVirt;
 
     for (loop = 0; loop < EDRV_MAX_TX_DESCRIPTOR; loop++)
     {
@@ -1184,7 +1184,7 @@ static int initOnePlatformDev(struct platform_device* pDev_p)
                    ));
 
 Exit:
-    printk("%s finished with %d\n", __FUNCTION__, result);
+    printk("%s finished with %d\n", __func__, result);
     return result;
 }
 
@@ -1202,7 +1202,7 @@ This function removes one platform device.
 //------------------------------------------------------------------------------
 static int removeOnePlatformDev(struct platform_device* pDev_p)
 {
-    INT    loop;
+    int    loop;
 
     // disble interrupts
     EDRV_WRITE_REG(EDRV_INTR_DIS_REG, ~0x0);
@@ -1304,7 +1304,7 @@ used to create the index table.
 static UINT32 calculateHashAddr(const UINT8* pMac_p)
 {
     UINT32      hashIndex = 0;
-    INT         loop;
+    int         loop;
 
     for (loop = 0; loop <= 5; loop++)
     {
@@ -1332,7 +1332,7 @@ using the MDIO interface.
 \param[in]      value_p             Value to write
 */
 //------------------------------------------------------------------------------
-static void mdioPhyWrite(INT phyId_p, INT regAddr_p, UINT16 value_p)
+static void mdioPhyWrite(int phyId_p, int regAddr_p, UINT16 value_p)
 {
     UINT32              regVal = 0;
     volatile UINT32     phyIdleState;
@@ -1366,7 +1366,7 @@ using the MDIO interface.
 \return Returns the read value.
 */
 //------------------------------------------------------------------------------
-static UINT16 mdioPhyRead(INT phyId_p, INT regAddr_p)
+static UINT16 mdioPhyRead(int phyId_p, int regAddr_p)
 {
     UINT32              regVal = 0;
     UINT16              value = 0;

@@ -321,7 +321,7 @@ tOplkError dllknode_setupLocalNode(tNmtState nmtState_p)
 {
     tOplkError  ret = kErrorOk;
     UINT        handle;
-    UINT        frameSize;
+    size_t      frameSize;
     UINT8       aMulticastMac[6];
 
 #if !defined(CONFIG_INCLUDE_NMT_MN)
@@ -812,7 +812,7 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
 
             // process TPDO
             frameInfo.frame.pBuffer = pTxFrame;
-            frameInfo.frameSize = pTxBuffer->txFrameSize;
+            frameInfo.frameSize = (UINT)pTxBuffer->txFrameSize;
             ret = dllkframe_processTpdo(&frameInfo, fReadyFlag_p);
             if (ret != kErrorOk)
                 return ret;
@@ -852,8 +852,8 @@ tOplkError dllknode_setupSyncPhase(tNmtState nmtState_p,
 
             if (*pNextTimeOffsetNs_p == 0)
             {   // add SoC frame length
-                accFrameLenNs += C_DLL_T_PREAMBLE +
-                                     (pTxBuffer->txFrameSize * C_DLL_T_BITTIME) + C_DLL_T_IFG;
+                accFrameLenNs += (UINT32)(C_DLL_T_PREAMBLE +
+                                     (pTxBuffer->txFrameSize * C_DLL_T_BITTIME) + C_DLL_T_IFG);
             }
             else
             {
@@ -1213,7 +1213,7 @@ static tOplkError setupLocalNodeMn(void)
     tOplkError      ret = kErrorOk;
     UINT            handle;
     size_t          index;
-    UINT            frameSize;
+    size_t          frameSize;
     UINT            count = 0;
     tDllkNodeInfo*  pIntNodeInfo;
 

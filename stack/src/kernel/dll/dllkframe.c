@@ -253,7 +253,7 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
 #endif
 
     frameInfo.frame.pBuffer = pFrame;
-    frameInfo.frameSize = pRxBuffer_p->rxFrameSize;
+    frameInfo.frameSize = (UINT)pRxBuffer_p->rxFrameSize;
 
     if (ami_getUint16Be(&pFrame->etherType) != C_DLL_ETHERTYPE_EPL)
     {   // non-POWERLINK frame
@@ -410,7 +410,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
         {   // post event directly to NmtMnu module
             event.eventSink = kEventSinkNmtMnu;
             event.eventType = kEventTypeNmtMnuNmtCmdSent;
-            event.eventArgSize = pTxBuffer_p->txFrameSize;
+            event.eventArgSize = (UINT)pTxBuffer_p->txFrameSize;
             event.eventArg.pEventArg = pTxFrame;
             //PRINTF("%s TxB=%p, TxF=%p, s=%u\n", __func__, pTxBuffer_p, event.eventArg, event.eventArgSize);
             ret = eventk_postEvent(&event);
@@ -797,7 +797,7 @@ driver.
 */
 //------------------------------------------------------------------------------
 tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
-                                   UINT* pFrameSize_p,
+                                   size_t* pFrameSize_p,
                                    tMsgType msgType_p,
                                    tDllAsndServiceId serviceId_p)
 {

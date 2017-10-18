@@ -10,7 +10,7 @@ This file contains the implementation of the VxWorks MUX Ethernet driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -109,7 +109,7 @@ typedef struct
 
     NET_POOL_ID         dataPoolId;                         ///< Data pool to allocate packet buffers
     PROTO_COOKIE        pCookie;                            ///< Handle of the MUX interface used for POWERLINK
-    INT                 txTaskId;                           ///< ID of the TX handler task
+    int                 txTaskId;                           ///< ID of the TX handler task
     SEM_ID              txWakeupSem;                        ///< Semaphore to wake up the TX sender task
     BOOL                fStopTxTask;                        ///< Flag indicating whether the TX sender task shall be stopped
 
@@ -268,7 +268,7 @@ tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
                                              0,
                                              EPL_TASK_STACK_SIZE,
                                              txTask,
-                                             (INT)&edrvInstance_l,
+                                             (int)&edrvInstance_l,
                                              0, 0, 0, 0, 0, 0, 0, 0, 0))
                                 == ERROR)
     {
@@ -352,7 +352,7 @@ This function sends the Tx buffer.
 tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
     tOplkError  ret = kErrorOk;
-    INT         muxRet;
+    int         muxRet;
     M_BLK_ID    pPacket;
 
     // Check parameter validity
@@ -436,7 +436,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
     }
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
     {
         ret = kErrorEdrvNoFreeBufEntry;
@@ -464,7 +464,7 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT8* pBuffer;
+    void*   pBuffer;
 
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
@@ -622,7 +622,7 @@ static BOOL packetHandler(void* pCookie_p,
     {
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = netMblkToBufCopy(pPkt_p, aBuffer, NULL);
-        rxBuffer.pBuffer = (unsigned char*)aBuffer;
+        rxBuffer.pBuffer = (void*)aBuffer;
 
         pInstance->initParam.pfnRxHandler(&rxBuffer);
         netMblkClChainFree(pPkt_p);
@@ -760,13 +760,13 @@ static int txTask(int arg_p)
                 else
                 {
                     logMsg("%s() pTxBuffer->pBuffer == NULL\n",
-                           (INT)__func__, 0, 0, 0, 0, 0);
+                           (int)__func__, 0, 0, 0, 0, 0);
                 }
             }
             else
             {
                 logMsg("%s() pTransmittedTxBufferFirstEntry == NULL\n",
-                       (INT)__func__, 0, 0, 0, 0, 0);
+                       (int)__func__, 0, 0, 0, 0, 0);
             }
         }
     }

@@ -20,7 +20,7 @@ are registered with NDIS.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -339,7 +339,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     if ((pTxBuffer != NULL) && (pBuffer_p->txBufferNumber.pArg != NULL))
     {
-        pBuffer_p->pBuffer = (UINT8*)pTxBuffer;
+        pBuffer_p->pBuffer = pTxBuffer;
     }
     else
     {

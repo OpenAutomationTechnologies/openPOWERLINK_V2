@@ -117,9 +117,9 @@ static tEdrvInstance edrvInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
-static void     packetHandler(u_char* pParam_p,
+static void     packetHandler(void* pParam_p,
                               const int frameSize_p,
-                              const u_char* pPktData_p);
+                              void* pPktData_p);
 static void*    workerThread(void* pArgument_p);
 static void     getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p);
 static BOOL     getLinkStatus(const char* pIfName_p);
@@ -370,7 +370,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         }
         pthread_mutex_unlock(&edrvInstance_l.mutex);
 
-        sockRet = send(edrvInstance_l.sock, (unsigned char *)pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize, 0);
+        sockRet = send(edrvInstance_l.sock, (u_char*)pBuffer_p->pBuffer, (int)pBuffer_p->txFrameSize, 0);
         if (sockRet < 0)
         {
             DEBUG_LVL_EDRV_TRACE("%s() send() returned %d\n", __func__, sockRet);
@@ -378,7 +378,7 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
         }
         else
         {
-            packetHandler((u_char*)&edrvInstance_l, sockRet, (u_char *)pBuffer_p->pBuffer);
+            packetHandler((u_char*)&edrvInstance_l, sockRet, pBuffer_p->pBuffer);
         }
     }
 
@@ -407,7 +407,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
         return kErrorEdrvNoFreeBufEntry;
 
     // allocate buffer with malloc
-    pBuffer_p->pBuffer = (UINT8*)OPLK_MALLOC(pBuffer_p->maxBufferSize);
+    pBuffer_p->pBuffer = OPLK_MALLOC(pBuffer_p->maxBufferSize);
     if (pBuffer_p->pBuffer == NULL)
         return kErrorEdrvNoFreeBufEntry;
 
@@ -431,7 +431,7 @@ This function releases the Tx buffer.
 //------------------------------------------------------------------------------
 tOplkError edrv_freeTxBuffer(tEdrvTxBuffer* pBuffer_p)
 {
-    UINT8* pBuffer;
+    void*   pBuffer;
 
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
@@ -541,18 +541,18 @@ This function is the packet handler forwarding the frames to the dllk.
 \param[in]      pPktData_p          Packet buffer
 */
 //------------------------------------------------------------------------------
-static void packetHandler(u_char* pParam_p,
+static void packetHandler(void* pParam_p,
                           const int frameSize_p,
-                          const u_char* pPktData_p)
+                          void* pPktData_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pParam_p;
     tEdrvRxBuffer   rxBuffer;
 
-    if (OPLK_MEMCMP(pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
+    if (OPLK_MEMCMP((UINT8*)pPktData_p + 6, pInstance->initParam.aMacAddr, 6) != 0)
     {   // filter out self generated traffic
         rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
         rxBuffer.rxFrameSize = frameSize_p;
-        rxBuffer.pBuffer = (UINT8*)pPktData_p;
+        rxBuffer.pBuffer = pPktData_p;
 
         FTRACE_MARKER("%s RX", __func__);
         pInstance->initParam.pfnRxHandler(&rxBuffer);
@@ -588,32 +588,32 @@ static void packetHandler(u_char* pParam_p,
                 {
                     TRACE("%s: no matching TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n",
                           __func__,
-                          (UINT)pPktData_p[0],
-                          (UINT)pPktData_p[1],
-                          (UINT)pPktData_p[2],
-                          (UINT)pPktData_p[3],
-                          (UINT)pPktData_p[4],
-                          (UINT)pPktData_p[5]);
+                          (UINT)((UINT8*)pPktData_p)[0],
+                          (UINT)((UINT8*)pPktData_p)[1],
+                          (UINT)((UINT8*)pPktData_p)[2],
+                          (UINT)((UINT8*)pPktData_p)[3],
+                          (UINT)((UINT8*)pPktData_p)[4],
+                          (UINT)((UINT8*)pPktData_p)[5]);
                     TRACE("   current TxB %p: DstMAC=%02X%02X%02X%02X%02X%02X\n",
                           (void*)pTxBuffer,
-                          (UINT)pTxBuffer->pBuffer[0],
-                          (UINT)pTxBuffer->pBuffer[1],
-                          (UINT)pTxBuffer->pBuffer[2],
-                          (UINT)pTxBuffer->pBuffer[3],
-                          (UINT)pTxBuffer->pBuffer[4],
-                          (UINT)pTxBuffer->pBuffer[5]);
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[0],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[1],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[2],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[3],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[4],
+                          (UINT)((UINT8*)(pTxBuffer->pBuffer))[5]);
                 }
             }
         }
         else
         {
             TRACE("%s: no TxB: DstMAC=%02X%02X%02X%02X%02X%02X\n", __func__,
-                  pPktData_p[0],
-                  pPktData_p[1],
-                  pPktData_p[2],
-                  pPktData_p[3],
-                  pPktData_p[4],
-                  pPktData_p[5]);
+                  ((UINT8*)pPktData_p)[0],
+                  ((UINT8*)pPktData_p)[1],
+                  ((UINT8*)pPktData_p)[2],
+                  ((UINT8*)pPktData_p)[3],
+                  ((UINT8*)pPktData_p)[4],
+                  ((UINT8*)pPktData_p)[5]);
         }
     }
 }
@@ -632,7 +632,7 @@ This function implements the edrv worker thread. It is responsible to receive fr
 static void* workerThread(void* pArgument_p)
 {
     tEdrvInstance*  pInstance = (tEdrvInstance*)pArgument_p;
-    INT             rawSockRet;
+    int             rawSockRet;
     u_char          aBuffer[EDRV_MAX_FRAME_SIZE];
 
     DEBUG_LVL_EDRV_TRACE("%s(): ThreadId:%ld\n", __func__, syscall(SYS_gettid));
@@ -645,14 +645,13 @@ static void* workerThread(void* pArgument_p)
         rawSockRet = recvfrom(edrvInstance_l.sock, aBuffer, EDRV_MAX_FRAME_SIZE, 0, 0, 0);
         if (rawSockRet > 0)
         {
-            packetHandler((u_char*)pInstance, rawSockRet, aBuffer);
+            packetHandler(pInstance, rawSockRet, aBuffer);
         }
     }
     edrvInstance_l.fThreadIsExited = TRUE;
 
     return NULL;
 }
-
 
 //------------------------------------------------------------------------------
 /**
@@ -666,7 +665,7 @@ This function gets the interface's MAC address.
 //------------------------------------------------------------------------------
 static void getMacAdrs(const char* pIfName_p, UINT8* pMacAddr_p)
 {
-    INT             fd;
+    int             fd;
     struct ifreq    ifr;
 
     fd = socket(AF_INET, SOCK_DGRAM, 0);

@@ -81,7 +81,8 @@ tOplkError dllkframe_updateFrameStatusRes(tEdrvTxBuffer* pTxBuffer_p, tNmtState 
 tOplkError dllkframe_updateFrameAsyncRes(tNmtState nmtState_p);
 tOplkError dllkframe_updateFramePres(tEdrvTxBuffer* pTxBuffer_p, tNmtState nmtState_p);
 tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, size_t frameSize_p);
-tOplkError dllkframe_createTxFrame(UINT* pHandle_p, UINT* pFrameSize_p,
+tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
+                                   size_t* pFrameSize_p,
                                    tMsgType msgType_p,
                                    tDllAsndServiceId serviceId_p);
 tOplkError dllkframe_deleteTxFrame(UINT handle_p);

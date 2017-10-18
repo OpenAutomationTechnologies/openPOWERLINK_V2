@@ -11,7 +11,7 @@ This file contains the implementation of the openMAC Ethernet driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -140,8 +140,8 @@ typedef struct
 #if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     //additional tx queue
     tEdrv2ndTxQueue     txQueue[CONFIG_EDRV_MAX_TX2_BUFFERS];   ///< Array of buffers for the second TX queue
-    INT                 txQueueWriteIndex;                      ///< Current index in the queue for writes
-    INT                 txQueueReadIndex;                       ///< Current index in the queue for reads
+    int                 txQueueWriteIndex;                      ///< Current index in the queue for writes
+    int                 txQueueReadIndex;                       ///< Current index in the queue for reads
 #endif
 #if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     OMETH_HOOK_H        pRxAsndHookInst;                        ///< Pointer to the ASnd receive hook
@@ -157,10 +157,10 @@ typedef struct
     UINT                unknownBufFreedCount;                   ///< Number of unidentified buffers released to openMAC
     UINT                asyncBufAcquiredCount;                  ///< Number of ASync buffers acquired from openMAC for processing
     UINT                vethBufAcquiredCount;                   ///< Number of VEth buffers acquired from openMAC for processing
-    BYTE*               apASyncBufAddr[CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS];   ///< Pointer array to hold the addresses of ASync buffers acquired from openMAC
-    BYTE*               apVEthBufAddr[CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS];    ///< Pointer array to hold the addresses of VEth buffers acquired from openMAC
-    INT                 asyncBufIdx;                            ///< Index pointing to the next location to store ASync buffer address
-    INT                 vethBufIdx;                             ///< Index pointing to the next location to store VEth buffer address
+    void*               apASyncBufAddr[CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS];   ///< Pointer array to hold the addresses of ASync buffers acquired from openMAC
+    void*               apVEthBufAddr[CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS];    ///< Pointer array to hold the addresses of VEth buffers acquired from openMAC
+    int                 asyncBufIdx;                            ///< Index pointing to the next location to store ASync buffer address
+    int                 vethBufIdx;                             ///< Index pointing to the next location to store VEth buffer address
 #endif
 } tEdrvInstance;
 
@@ -181,12 +181,12 @@ static void freeTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p);
 
 // Diagnostic functions
 #if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
-static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p);
+static void diagnoseAcquiredAsndFrame(int openMacFilterId_p, void* pAsndFrame_p);
 static void diagnoseReleasedAsndFrame(void* pAsndFrame_p);
 #endif
 
 // RX Hook function
-static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p) SECTION_EDRVOPENMAC_RX_HOOK;
+static int rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p) SECTION_EDRVOPENMAC_RX_HOOK;
 static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p);
 static void irqHandler(void* pArg_p) SECTION_EDRVOPENMAC_IRQ_HDL;
 
@@ -210,7 +210,7 @@ This function initializes the Ethernet driver.
 tOplkError edrv_init(const tEdrvInitParam* pEdrvInitParam_p)
 {
     tOplkError  ret = kErrorOk;
-    INT         i;
+    int         i;
 
     // Check parameter validity
     ASSERT(pEdrvInitParam_p != NULL);
@@ -356,16 +356,16 @@ tOplkError edrv_exit(void)
         {
             DEBUG_LVL_EDRV_TRACE(" --- omethStatistics ---\n");
             DEBUG_LVL_EDRV_TRACE(" ----  RX           ----\n");
-            DEBUG_LVL_EDRV_TRACE("  CRC ERROR = %i\n", (INT)pMacStat->rxCrcError);
-            DEBUG_LVL_EDRV_TRACE("  HOOK DISABLED = %i\n", (INT)pMacStat->rxHookDisabled);
-            DEBUG_LVL_EDRV_TRACE("  HOOK OVERFLOW = %i\n", (INT)pMacStat->rxHookOverflow);
-            DEBUG_LVL_EDRV_TRACE("  LOST = %i\n", (INT)pMacStat->rxLost);
-            DEBUG_LVL_EDRV_TRACE("  OK = %i\n", (INT)pMacStat->rxOk);
-            DEBUG_LVL_EDRV_TRACE("  OVERSIZE = %i\n", (INT)pMacStat->rxOversize);
+            DEBUG_LVL_EDRV_TRACE("  CRC ERROR = %i\n", (int)pMacStat->rxCrcError);
+            DEBUG_LVL_EDRV_TRACE("  HOOK DISABLED = %i\n", (int)pMacStat->rxHookDisabled);
+            DEBUG_LVL_EDRV_TRACE("  HOOK OVERFLOW = %i\n", (int)pMacStat->rxHookOverflow);
+            DEBUG_LVL_EDRV_TRACE("  LOST = %i\n", (int)pMacStat->rxLost);
+            DEBUG_LVL_EDRV_TRACE("  OK = %i\n", (int)pMacStat->rxOk);
+            DEBUG_LVL_EDRV_TRACE("  OVERSIZE = %i\n", (int)pMacStat->rxOversize);
             DEBUG_LVL_EDRV_TRACE(" ----  TX           ----\n");
-            DEBUG_LVL_EDRV_TRACE("  COLLISION = %i\n", (INT)pMacStat->txCollision);
-            DEBUG_LVL_EDRV_TRACE("  DONE = %i\n", (INT)pMacStat->txDone[0]);
-            DEBUG_LVL_EDRV_TRACE("  SPURIOUS IRQ = %i\n", (INT)pMacStat->txSpuriousInt);
+            DEBUG_LVL_EDRV_TRACE("  COLLISION = %i\n", (int)pMacStat->txCollision);
+            DEBUG_LVL_EDRV_TRACE("  DONE = %i\n", (int)pMacStat->txDone[0]);
+            DEBUG_LVL_EDRV_TRACE("  SPURIOUS IRQ = %i\n", (int)pMacStat->txSpuriousInt);
         }
         DEBUG_LVL_EDRV_TRACE("\n");
     }
@@ -454,8 +454,8 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
     pPacket = allocTxMsgBufferIntern(pBuffer_p);
 #else
-    DEBUG_LVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (INT)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
-    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc((size_t)pBuffer_p->maxBufferSize + sizeof(pPacket->length));
+    DEBUG_LVL_EDRV_TRACE("%s() allocate %i bytes\n", __func__, (int)(pBuffer_p->maxBufferSize + sizeof(pPacket->length)));
+    pPacket = (ometh_packet_typ*)openmac_uncachedMalloc(pBuffer_p->maxBufferSize + sizeof(pPacket->length));
 #endif
 
     if (pPacket == NULL)
@@ -465,11 +465,11 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    pPacket->length = pBuffer_p->maxBufferSize;
+    pPacket->length = (unsigned long)pBuffer_p->maxBufferSize;
 
     pBuffer_p->txBufferNumber.value = EDRV_MAX_FILTERS;
 
-    pBuffer_p->pBuffer = (UINT8*)&pPacket->data;
+    pBuffer_p->pBuffer = &pPacket->data;
 
 Exit:
     return ret;
@@ -557,10 +557,10 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
-    pPacket->length = pBuffer_p->txFrameSize;
+    pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
 
     // Flush data cache before handing over the packet buffer to openMAC.
-    OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
+    OPENMAC_FLUSHDATACACHE(pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     // Update auto-response buffer
     edrvInstance_l.apTxBuffer[pBuffer_p->txBufferNumber.value] = pBuffer_p;
@@ -605,17 +605,17 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     ASSERT(pBuffer_p != NULL);
 
     // Flush data cache before sending the frame to the network
-    OPENMAC_FLUSHDATACACHE((UINT8*)pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
+    OPENMAC_FLUSHDATACACHE(pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
-    pPacket->length = pBuffer_p->txFrameSize;
+    pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
 #if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     if (pBuffer_p->fLaunchTimeValid)
     {
         //free tx descriptors available
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
-                        txAckCb, pBuffer_p, pBuffer_p->launchTime.ticks);
+                                     txAckCb, pBuffer_p, pBuffer_p->launchTime.ticks);
 
         if (txLength == 0)
         {
@@ -938,10 +938,10 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     ASSERT(pRxBuffer_p != NULL);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
-    pPacket->length = pRxBuffer_p->rxFrameSize;
+    pPacket->length = (unsigned long)pRxBuffer_p->rxFrameSize;
 
 #if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
-    diagnoseReleasedAsndFrame((void*)pPacket);
+    diagnoseReleasedAsndFrame(pPacket);
 #endif
 
     if (pPacket->length != 0)
@@ -1098,7 +1098,7 @@ This function allocates local memory for the Tx buffer descriptor pBuffer_p.
 static ometh_packet_typ* allocTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p)
 {
     ometh_packet_typ*   pPacket;
-    UINT                bufferSize;
+    size_t              bufferSize;
     void*               pBufferBase = OPENMAC_MEMUNCACHED((void*)OPENMAC_PKT_BASE, OPENMAC_PKT_SPAN);
 
     // Initialize if no buffer is allocated
@@ -1132,10 +1132,10 @@ static ometh_packet_typ* allocTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p)
     }
 
     // Set allocated buffer to zeros
-    OPLK_MEMSET((void*)pPacket, 0, bufferSize);
+    OPLK_MEMSET(pPacket, 0, bufferSize);
 
     // Calculate next buffer address for next allocation
-    edrvInstance_l.pNextBufferBase = (void*)((UINT32)pPacket + bufferSize);
+    edrvInstance_l.pNextBufferBase = (UINT8*)pPacket + bufferSize;
 
     // New buffer added
     edrvInstance_l.txBufferCount++;
@@ -1160,7 +1160,7 @@ This function frees local memory for the Tx buffer descriptor pBuffer_p.
 //------------------------------------------------------------------------------
 static void freeTxMsgBufferIntern(const tEdrvTxBuffer* pBuffer_p)
 {
-    INT bufferSize = pBuffer_p->maxBufferSize + sizeof(((ometh_packet_typ*)0)->length);
+    size_t  bufferSize = pBuffer_p->maxBufferSize + sizeof(((ometh_packet_typ*)0)->length);
 
     // Align the buffer size to 4 byte alignment
     bufferSize += 0x3U;
@@ -1187,19 +1187,20 @@ and updates the corresponding diagnostic information.
 \param[in,out]  pAsndFrame_p        Pointer to the acquired ASnd frame.
 */
 //------------------------------------------------------------------------------
-static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p)
+static void diagnoseAcquiredAsndFrame(int openMacFilterId_p, void* pAsndFrame_p)
 {
     // Store packet address in an array
-    if (DLLK_FILTER_ASND == (INT)openMacFilterId_p)
+    if (DLLK_FILTER_ASND == openMacFilterId_p)
     {
-        if (edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx] != 0)
+        if (edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx] != NULL)
         {
             edrvInstance_l.asyncFrameLostCount++;
             DEBUG_LVL_EDRV_TRACE("The previous ASync buffer(0x%08X) @index %d is not freed!!\n",
-            edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx], edrvInstance_l.asyncBufIdx);
+                                 (UINT32)edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx],
+                                 edrvInstance_l.asyncBufIdx);
         }
 
-        edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx++] = (BYTE*)pAsndFrame_p;
+        edrvInstance_l.apASyncBufAddr[edrvInstance_l.asyncBufIdx++] = pAsndFrame_p;
         edrvInstance_l.asyncBufAcquiredCount++;
         if (edrvInstance_l.asyncBufIdx >= CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS)
         {
@@ -1208,16 +1209,17 @@ static void diagnoseAcquiredAsndFrame(INT openMacFilterId_p, void* pAsndFrame_p)
     }
     else
     {
-        if ((DLLK_FILTER_VETH_BROADCAST == (INT)openMacFilterId_p) || (DLLK_FILTER_VETH_UNICAST == (INT)openMacFilterId_p))
+        if ((DLLK_FILTER_VETH_BROADCAST == openMacFilterId_p) || (DLLK_FILTER_VETH_UNICAST == openMacFilterId_p))
         {
-            if (edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx] != 0)
+            if (edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx] != NULL)
             {
                 edrvInstance_l.vethFrameLostCount++;
                 DEBUG_LVL_EDRV_TRACE("The previous VEth buffer(0x%08X) @index %d is not freed!!\n",
-                edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx], edrvInstance_l.vethBufIdx);
+                                     (UINT32)edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx],
+                                     edrvInstance_l.vethBufIdx);
             }
 
-            edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx++] = (BYTE*)pAsndFrame_p;
+            edrvInstance_l.apVEthBufAddr[edrvInstance_l.vethBufIdx++] = pAsndFrame_p;
             edrvInstance_l.vethBufAcquiredCount++;
             if (edrvInstance_l.vethBufIdx >= CONFIG_EDRV_VETH_DEFERRED_RX_BUFFERS)
             {
@@ -1244,14 +1246,14 @@ corresponding diagnostic information.
 //------------------------------------------------------------------------------
 static void diagnoseReleasedAsndFrame(void* pAsndFrame_p)
 {
-    INT         i = 0;
+    int         i = 0;
 
     for (i = 0; i < CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS; i++)
     {
         if (edrvInstance_l.apASyncBufAddr[i] == pAsndFrame_p)
         {
             edrvInstance_l.asyncBufFreedCount++;
-            edrvInstance_l.apASyncBufAddr[i] = 0;
+            edrvInstance_l.apASyncBufAddr[i] = NULL;
             break;
         }
     }
@@ -1263,7 +1265,7 @@ static void diagnoseReleasedAsndFrame(void* pAsndFrame_p)
             if (edrvInstance_l.apVEthBufAddr[i] == pAsndFrame_p)
             {
                 edrvInstance_l.vethBufFreedCount++;
-                edrvInstance_l.apVEthBufAddr[i] = 0;
+                edrvInstance_l.apVEthBufAddr[i] = NULL;
                 break;
             }
         }
@@ -1316,15 +1318,14 @@ static void irqHandler(void* pArg_p)
     while ((edrvInstance_l.txQueueWriteIndex - edrvInstance_l.txQueueReadIndex) &&
            (omethTransmitPending(edrvInstance_l.pMacInst) < 16U))
     {
-        tEdrvTxBuffer*      pBuffer_p;
         ometh_packet_typ*   pPacket;
         ULONG               txLength = 0U;
         tEdrv2ndTxQueue*    pTxqueue = &edrvInstance_l.txQueue[edrvInstance_l.txQueueReadIndex & (CONFIG_EDRV_MAX_TX2_BUFFERS-1)];
-        pBuffer_p = pTxqueue->pBuffer;
+        tEdrvTxBuffer*      pBuffer_p = pTxqueue->pBuffer;
 
         pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
-        pPacket->length = pBuffer_p->txFrameSize;
+        pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
 
         //offset is the openMAC time tick (no conversion needed)
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
@@ -1360,7 +1361,7 @@ This function is called by omethlib in Tx interrupt context.
 //------------------------------------------------------------------------------
 static void txAckCb(ometh_packet_typ* pPacket_p, void* pArg_p, ULONG time_p)
 {
-    tEdrvTxBuffer* pTxBuffer = pArg_p;
+    tEdrvTxBuffer* pTxBuffer = (tEdrvTxBuffer*)pArg_p;
 
     UNUSED_PARAMETER(pPacket_p);
     UNUSED_PARAMETER(time_p);
@@ -1386,9 +1387,9 @@ This function is called by omethlib in Rx interrupt context.
 \retval -1          Packet buffer \p pPacket_p can be freed immediately
 */
 //------------------------------------------------------------------------------
-static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p)
+static int rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT* pfnFree_p)
 {
-    INT                     ret;
+    int                     ret;
     tEdrvRxBuffer           rxBuffer;
     tEdrvReleaseRxBuffer    releaseRxBuffer;
     tTimestamp              timeStamp;
@@ -1400,21 +1401,21 @@ static INT rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
     UNUSED_PARAMETER(pfnFree_p);
 
     rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
-    rxBuffer.pBuffer = (UINT8*)&pPacket_p->data;
+    rxBuffer.pBuffer = &pPacket_p->data;
     rxBuffer.rxFrameSize = pPacket_p->length;
     timeStamp.timeStamp = omethGetTimestamp(pPacket_p);
     rxBuffer.pRxTimeStamp = &timeStamp;
 
     // Before handing over the Rx packet to the stack invalidate the packet's
     // memory range.
-    OPENMAC_INVALIDATEDATACACHE((UINT8*)rxBuffer.pBuffer, rxBuffer.rxFrameSize);
+    OPENMAC_INVALIDATEDATACACHE(rxBuffer.pBuffer, rxBuffer.rxFrameSize);
 
     releaseRxBuffer = edrvInstance_l.initParam.pfnRxHandler(&rxBuffer); //pass frame to Powerlink Stack
 
     if (releaseRxBuffer == kEdrvReleaseRxBufferLater)
     {
 #if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
-        diagnoseAcquiredAsndFrame((INT)pArg_p, (void*)pPacket_p);
+        diagnoseAcquiredAsndFrame((int)pArg_p, pPacket_p);
 #endif
         ret = 0; // Packet is deferred, openMAC may not use this buffer!
     }
