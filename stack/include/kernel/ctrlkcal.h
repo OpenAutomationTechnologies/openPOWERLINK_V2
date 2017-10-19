@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -71,7 +71,7 @@ tOplkError        ctrlkcal_readInitParam(tCtrlInitParam* pInitParam_p);
 void              ctrlkcal_storeInitParam(const tCtrlInitParam* pInitParam_p);
 tOplkError        ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                          size_t bufferSize_p,
-                                         UINT8* pBuffer_p);
+                                         void* pBuffer_p);
 size_t            ctrlkcal_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus

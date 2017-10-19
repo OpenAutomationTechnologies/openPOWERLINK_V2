@@ -12,7 +12,7 @@ stack. Additionally, it provides status information to the user part.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -400,7 +400,7 @@ chunk. The maximum chunk size can be obtained by calling
 //------------------------------------------------------------------------------
 tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                size_t bufferSize_p,
-                               UINT8* pBuffer_p)
+                               void* pBuffer_p)
 {
     if ((pDesc_p == NULL) || (bufferSize_p == 0) || (pBuffer_p == NULL))
         return kErrorInvalidInstanceParam;

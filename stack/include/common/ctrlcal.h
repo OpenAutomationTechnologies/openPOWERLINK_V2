@@ -9,7 +9,7 @@ This file contains the definitions for the ctrl CAL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -58,13 +58,13 @@ extern "C"
 {
 #endif
 
-tOplkError ctrlcal_init(UINT size_p);
+tOplkError ctrlcal_init(size_t size_p);
 tOplkError ctrlcal_exit(void);
-void       ctrlcal_writeData(UINT offset_p,
+void       ctrlcal_writeData(size_t offset_p,
                              const void* pSrc_p,
                              size_t length_p);
 tOplkError ctrlcal_readData(void* pDest_p,
-                            UINT offset_p,
+                            size_t offset_p,
                             size_t length_p);
 
 #ifdef __cplusplus

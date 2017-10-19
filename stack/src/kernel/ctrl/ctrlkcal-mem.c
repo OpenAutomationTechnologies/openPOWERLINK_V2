@@ -11,7 +11,7 @@ a shared memory block for communication with the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -318,7 +318,7 @@ buffer.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                   size_t bufferSize_p,
-                                  UINT8* pBuffer_p)
+                                  void* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(bufferSize_p);

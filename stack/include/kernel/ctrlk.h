@@ -9,7 +9,7 @@ This file contains the definitions for the kernel ctrl module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,7 +88,7 @@ void       ctrlk_updateHeartbeat(void);
 UINT16     ctrlk_getHeartbeat(void);
 tOplkError ctrlk_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                size_t size_p,
-                               UINT8* pBuffer_p);
+                               void* pBuffer_p);
 size_t     ctrlk_getMaxFileChunkSize(void);
 
 #ifdef __cplusplus

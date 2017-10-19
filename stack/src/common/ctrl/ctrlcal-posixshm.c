@@ -11,7 +11,7 @@ memory block control CAL modules.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,14 +77,24 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief Control module instance
+
+The control module instance stores the local parameters used by the
+control CAL module during runtime
+*/
+typedef struct
+{
+    int                     fd;             ///< File descriptor
+    void*                   pCtrlMem;       ///< Pointer to control memory
+    size_t                  size;           ///< Size of the control memory
+    BOOL                    fCreator;       ///< Flag indicating the creator of the memory
+} tCtrlCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static int          fd_l;
-static UINT8*       pCtrlMem_l;
-static int          size_l;
-static BOOL         fCreator_l;
+static tCtrlCalInstance     instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -107,50 +117,50 @@ The function initializes the control CAL module.
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlcal_init(UINT size_p)
+tOplkError ctrlcal_init(size_t size_p)
 {
     struct stat stat;
 
-    fd_l = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0);
-    if (fd_l < 0)
+    instance_l.fd = shm_open(CTRL_SHM_NAME, O_RDWR | O_CREAT, 0);
+    if (instance_l.fd < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kErrorNoResource;
     }
 
-    if (fstat(fd_l, &stat) != 0)
+    if (fstat(instance_l.fd, &stat) != 0)
     {
-        close(fd_l);
+        close(instance_l.fd);
         return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
     {
-        if (ftruncate(fd_l, size_p) == -1)
+        if (ftruncate(instance_l.fd, size_p) == -1)
         {
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
-            close(fd_l);
+            close(instance_l.fd);
             shm_unlink(CTRL_SHM_NAME);
             return kErrorNoResource;
         }
-        fCreator_l = TRUE;
+        instance_l.fCreator = TRUE;
     }
 
-    pCtrlMem_l = mmap(NULL, size_p, PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
-    if (pCtrlMem_l == MAP_FAILED)
+    instance_l.pCtrlMem = mmap(NULL, size_p, PROT_READ | PROT_WRITE, MAP_SHARED, instance_l.fd, 0);
+    if (instance_l.pCtrlMem == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
-        close(fd_l);
-        if (fCreator_l)
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(CTRL_SHM_NAME);
         return kErrorNoResource;
     }
 
-    if (fCreator_l)
+    if (instance_l.fCreator)
     {
-        OPLK_MEMSET(pCtrlMem_l, 0, size_p);
+        OPLK_MEMSET(instance_l.pCtrlMem, 0, size_p);
     }
-    size_l = size_p;
+    instance_l.size = size_p;
 
     return kErrorOk;
 }
@@ -170,15 +180,15 @@ tOplkError ctrlcal_exit(void)
 {
     tOplkError  ret = kErrorOk;
 
-    if (pCtrlMem_l != NULL)
+    if (instance_l.pCtrlMem != NULL)
     {
-        munmap(pCtrlMem_l, size_l);
-        close(fd_l);
-        if (fCreator_l)
+        munmap(instance_l.pCtrlMem, instance_l.size);
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(CTRL_SHM_NAME);
-        fd_l = 0;
-        pCtrlMem_l = 0;
-        size_l = 0;
+        instance_l.fd = 0;
+        instance_l.pCtrlMem = NULL;
+        instance_l.size = 0;
     }
 
     return ret;
@@ -197,20 +207,20 @@ The function writes data to the control block.
 \ingroup module_ctrlcal
 */
 //------------------------------------------------------------------------------
-void ctrlcal_writeData(UINT offset_p,
+void ctrlcal_writeData(size_t offset_p,
                        const void* pSrc_p,
                        size_t length_p)
 {
     // Check parameter validity
     ASSERT(pSrc_p != NULL);
 
-    if (pCtrlMem_l == NULL)
+    if (instance_l.pCtrlMem == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s() instance == NULL!\n", __func__);
         return;
     }
 
-    OPLK_MEMCPY(pCtrlMem_l + offset_p, pSrc_p, length_p);
+    OPLK_MEMCPY((UINT8*)instance_l.pCtrlMem + offset_p, pSrc_p, length_p);
 }
 
 //------------------------------------------------------------------------------
@@ -229,19 +239,19 @@ The function reads data from the control block.
 */
 //------------------------------------------------------------------------------
 tOplkError ctrlcal_readData(void* pDest_p,
-                            UINT offset_p,
+                            size_t offset_p,
                             size_t length_p)
 {
     // Check parameter validity
     ASSERT(pDest_p != NULL);
 
-    if (pCtrlMem_l == NULL)
+    if (instance_l.pCtrlMem == NULL)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() pCtrlMem_l == NULL!\n", __func__);
+        DEBUG_LVL_ERROR_TRACE("%s() instance_l.pCtrlMem == NULL!\n", __func__);
         return kErrorGeneralError;
     }
 
-    OPLK_MEMCPY(pDest_p, pCtrlMem_l + offset_p, length_p);
+    OPLK_MEMCPY(pDest_p, (UINT8*)instance_l.pCtrlMem + offset_p, length_p);
 
     return kErrorOk;
 }

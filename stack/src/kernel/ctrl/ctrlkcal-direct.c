@@ -299,7 +299,7 @@ buffer.
 //------------------------------------------------------------------------------
 tOplkError ctrlkcal_readFileChunk(tOplkApiFileChunkDesc* pDesc_p,
                                   size_t bufferSize_p,
-                                  UINT8* pBuffer_p)
+                                  void* pBuffer_p)
 {
     UNUSED_PARAMETER(pDesc_p);
     UNUSED_PARAMETER(bufferSize_p);
