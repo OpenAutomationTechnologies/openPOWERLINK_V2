@@ -12,7 +12,7 @@ between user and kernel part.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -75,17 +75,28 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+/**
+\brief Kernel error handler instance type
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
+The structure contains all necessary information needed by the kernel error
+handler module.
+*/
+typedef struct
+{
+    tErrHndObjects*  pErrHndObjects;                ///< Pointer to the error handler objects
+    int              fd;                            ///< File descriptor
+    BOOL             fCreator;                      ///< Flag indicating the creator of the instance
+} tErrhndkCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrHndObjects*  pErrHndObjects_l = NULL;
-static int              fd_l;
-static BOOL             fCreator_l;
+static tErrhndkCalInstance  instance_l =
+{
+    NULL,
+    0,
+    FALSE
+};                                                  ///< Instance variable of kernel error handler CAL module
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -110,47 +121,47 @@ tOplkError errhndkcal_initMemory(void)
 {
     struct stat     stat;
 
-    if (pErrHndObjects_l != NULL)
+    if (instance_l.pErrHndObjects != NULL)
         return kErrorNoFreeInstance;
 
-    fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0);
-    if (fd_l < 0)
+    instance_l.fd = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0);
+    if (instance_l.fd < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kErrorNoResource;
     }
 
-    if (fstat(fd_l, &stat) != 0)
+    if (fstat(instance_l.fd, &stat) != 0)
     {
-        close(fd_l);
+        close(instance_l.fd);
         return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
     {
-        if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
+        if (ftruncate(instance_l.fd, sizeof(tErrHndObjects)) == -1)
         {
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
-            close(fd_l);
+            close(instance_l.fd);
             shm_unlink(ERRHND_SHM_NAME);
             return kErrorNoResource;
         }
-        fCreator_l = TRUE;
+        instance_l.fCreator = TRUE;
     }
 
-    pErrHndObjects_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
-    if (pErrHndObjects_l == MAP_FAILED)
+    instance_l.pErrHndObjects = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, instance_l.fd, 0);
+    if (instance_l.pErrHndObjects == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap header failed!\n", __func__);
-        close(fd_l);
-        if (fCreator_l)
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(ERRHND_SHM_NAME);
         return kErrorNoResource;
     }
 
-    if (fCreator_l)
+    if (instance_l.fCreator)
     {
-        OPLK_MEMSET(pErrHndObjects_l, 0, sizeof(tErrHndObjects));
+        OPLK_MEMSET(instance_l.pErrHndObjects, 0, sizeof(tErrHndObjects));
     }
 
     return kErrorOk;
@@ -167,15 +178,15 @@ The function is used to de-initialize the kernel layer error handler memory.
 //------------------------------------------------------------------------------
 void errhndkcal_deinitMemory(void)
 {
-    if (pErrHndObjects_l != NULL)
+    if (instance_l.pErrHndObjects != NULL)
     {
-        munmap(pErrHndObjects_l, sizeof(tErrHndObjects));
-        close(fd_l);
-        if (fCreator_l)
+        munmap(instance_l.pErrHndObjects, sizeof(tErrHndObjects));
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(ERRHND_SHM_NAME);
 
-        fd_l = 0;
-        pErrHndObjects_l = NULL;
+        instance_l.fd = 0;
+        instance_l.pErrHndObjects = NULL;
     }
 }
 
@@ -193,7 +204,7 @@ objects are stored.
 //------------------------------------------------------------------------------
 tErrHndObjects* errhndkcal_getMemPtr(void)
 {
-    return pErrHndObjects_l;
+    return instance_l.pErrHndObjects;
 }
 
 //============================================================================//

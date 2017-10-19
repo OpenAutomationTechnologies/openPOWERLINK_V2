@@ -11,7 +11,7 @@ between user and kernel part.
 \ingroup module_errhnducal
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -82,14 +82,30 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
+/**
+\brief User error handler instance type
+
+The structure contains all necessary information needed by the user error
+handler module.
+*/
+typedef struct
+{
+    tErrHndObjects* pLocalObjects;              ///< Pointer to user error objects
+    int             fd;                         ///< File descriptor
+    BOOL            fCreator;                   ///< Flag indicating the creator of the instance
+    void*           pErrHndMem;                 ///< Pointer to the error handler shared memory
+} tErrhnduCalInstance;
 
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tErrHndObjects*          pLocalObjects_l;       ///< Pointer to user error objects
-static int                      fd_l;
-static BYTE*                    pErrHndMem_l;
-static BOOL                     fCreator_l;
+static tErrhnduCalInstance  instance_l =
+{
+    NULL,
+    0,
+    FALSE,
+    NULL
+};                                              ///< Instance variable of user error handler CAL module
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -116,49 +132,49 @@ tOplkError errhnducal_init(tErrHndObjects* pLocalObjects_p)
 {
     struct stat stat;
 
-    pLocalObjects_l = pLocalObjects_p;
+    instance_l.pLocalObjects = pLocalObjects_p;
 
-    if (pErrHndMem_l != NULL)
+    if (instance_l.pErrHndMem != NULL)
         return kErrorNoFreeInstance;
 
-    fd_l = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0);
-    if (fd_l < 0)
+    instance_l.fd = shm_open(ERRHND_SHM_NAME, O_RDWR | O_CREAT, 0);
+    if (instance_l.fd < 0)
     {
         DEBUG_LVL_ERROR_TRACE("%s() shm_open failed!\n", __func__);
         return kErrorNoResource;
     }
 
-    if (fstat(fd_l, &stat) != 0)
+    if (fstat(instance_l.fd, &stat) != 0)
     {
-        close(fd_l);
+        close(instance_l.fd);
         return kErrorNoResource;
     }
 
     if (stat.st_size == 0)
     {
-        if (ftruncate(fd_l, sizeof(tErrHndObjects)) == -1)
+        if (ftruncate(instance_l.fd, sizeof(tErrHndObjects)) == -1)
         {
             DEBUG_LVL_ERROR_TRACE("%s() ftruncate failed!\n", __func__);
-            close(fd_l);
+            close(instance_l.fd);
             shm_unlink(ERRHND_SHM_NAME);
             return kErrorNoResource;
         }
-        fCreator_l = TRUE;
+        instance_l.fCreator = TRUE;
     }
 
-    pErrHndMem_l = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, fd_l, 0);
-    if (pErrHndMem_l == MAP_FAILED)
+    instance_l.pErrHndMem = mmap(NULL, sizeof(tErrHndObjects), PROT_READ | PROT_WRITE, MAP_SHARED, instance_l.fd, 0);
+    if (instance_l.pErrHndMem == MAP_FAILED)
     {
         DEBUG_LVL_ERROR_TRACE("%s() mmap error handler objects failed!\n", __func__);
-        close(fd_l);
-        if (fCreator_l)
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(ERRHND_SHM_NAME);
         return kErrorNoResource;
     }
 
-    if (fCreator_l)
+    if (instance_l.fCreator)
     {
-        OPLK_MEMSET(pErrHndMem_l, 0, sizeof(tErrHndObjects));
+        OPLK_MEMSET(instance_l.pErrHndMem, 0, sizeof(tErrHndObjects));
     }
 
     return kErrorOk;
@@ -176,14 +192,14 @@ the error handler.
 //------------------------------------------------------------------------------
 void errhnducal_exit(void)
 {
-    if (pErrHndMem_l != NULL)
+    if (instance_l.pErrHndMem != NULL)
     {
-        munmap(pErrHndMem_l, sizeof(tErrHndObjects));
-        close(fd_l);
-        if (fCreator_l)
+        munmap(instance_l.pErrHndMem, sizeof(tErrHndObjects));
+        close(instance_l.fd);
+        if (instance_l.fCreator)
             shm_unlink(ERRHND_SHM_NAME);
-        fd_l = 0;
-        pErrHndMem_l = 0;
+        instance_l.fd = 0;
+        instance_l.pErrHndMem = NULL;
     }
 }
 
@@ -215,8 +231,8 @@ tOplkError errhnducal_writeErrorObject(UINT index_p,
     // Check parameter validity
     ASSERT(pParam_p != NULL);
 
-    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
-    *(UINT32*)(pErrHndMem_l + offset) = *pParam_p;
+    offset = (UINT8*)pParam_p - (UINT8*)instance_l.pLocalObjects;
+    *(UINT32*)((UINT8*)instance_l.pErrHndMem + offset) = *pParam_p;
 
     return kErrorOk;
 }
@@ -249,8 +265,8 @@ tOplkError errhnducal_readErrorObject(UINT index_p,
     // Check parameter validity
     ASSERT(pParam_p != NULL);
 
-    offset = (UINT8*)pParam_p - (UINT8*)pLocalObjects_l;
-    *pParam_p = *(UINT32*)(pErrHndMem_l + offset);
+    offset = (UINT8*)pParam_p - (UINT8*)instance_l.pLocalObjects;
+    *pParam_p = *(UINT32*)((UINT8*)instance_l.pErrHndMem + offset);
 
     return kErrorOk;
 }
