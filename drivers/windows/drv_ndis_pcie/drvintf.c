@@ -17,7 +17,7 @@ direct access for specific shared memory regions to the user application.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -667,7 +667,7 @@ tOplkError drv_getPdoMem(size_t* pPdoMemOffs_p,
     tDualprocReturn dualRet;
     ptrdiff_t       offset;
     void*           pMem = NULL;
-    UINT8*          pBar0 = (UINT8*)ndis_getBarAddr(OPLK_PCIEBAR_SHM);
+    void*           pBar0 = ndis_getBarAddr(OPLK_PCIEBAR_SHM);
 
     if (!drvInstance_l.fDriverActive)
         return kErrorNoResource;
@@ -685,7 +685,7 @@ tOplkError drv_getPdoMem(size_t* pPdoMemOffs_p,
         return kErrorNoResource;
     }
 
-    offset = (UINT8*)pMem - pBar0;
+    offset = (UINT8*)pMem - (UINT8*)pBar0;
 
     *pPdoMemOffs_p = (size_t)offset;
 
@@ -709,7 +709,7 @@ address space for providing access to user layer.
 //------------------------------------------------------------------------------
 tOplkError drv_getBenchmarkMem(void** ppBenchmarkMem_p)
 {
-    UINT8*      pMem;
+    void*       pMem;
     tMemInfo*   pBenchmarkMemInfo = &drvInstance_l.benchmarkMem;
 
     if (!drvInstance_l.fDriverActive)
@@ -719,12 +719,12 @@ tOplkError drv_getBenchmarkMem(void** ppBenchmarkMem_p)
     if (pBenchmarkMemInfo->pUserVa != NULL)
         goto Exit;
 
-    pMem = (UINT8*)ndis_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
+    pMem = ndis_getBarAddr(OPLK_PCIEBAR_COMM_MEM);
 
     if (pMem == NULL)
         return kErrorNoResource;
 
-    pBenchmarkMemInfo->pKernelVa = pMem + BENCHMARK_OFFSET;
+    pBenchmarkMemInfo->pKernelVa = (UINT8*)pMem + BENCHMARK_OFFSET;
     pBenchmarkMemInfo->memSize = 4;
 
     if (mapMemory(pBenchmarkMemInfo) != kErrorOk)

@@ -832,7 +832,7 @@ static int postEventFromUser(unsigned long arg_p)
 {
     tOplkError  ret = kErrorOk;
     tEvent      event;
-    UINT8*      pArg = NULL;
+    void*       pArg = NULL;
     INT         order = 0;
 
     if (copy_from_user(&event, (const void __user*)arg_p, sizeof(tEvent)))
@@ -841,9 +841,9 @@ static int postEventFromUser(unsigned long arg_p)
     if (event.eventArgSize != 0)
     {
         order = get_order(event.eventArgSize);
-        pArg = (UINT8*)__get_free_pages(GFP_KERNEL, order);
+        pArg = (void*)__get_free_pages(GFP_KERNEL, order);
 
-        if (!pArg)
+        if (pArg == NULL)
             return -EIO;
 
         if (copy_from_user(pArg, (const void __user*)event.eventArg.pEventArg, event.eventArgSize))
@@ -852,7 +852,7 @@ static int postEventFromUser(unsigned long arg_p)
             return -EFAULT;
         }
 
-        event.eventArg.pEventArg = (void*)pArg;
+        event.eventArg.pEventArg = pArg;
     }
 
     switch (event.eventSink)
