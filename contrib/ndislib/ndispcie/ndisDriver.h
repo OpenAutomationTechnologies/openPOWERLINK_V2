@@ -141,19 +141,23 @@ typedef struct
 //------------------------------------------------------------------------------
 // global defines
 //------------------------------------------------------------------------------
-extern tNdisDriverInstance                 driverInstance_g;
-extern tVEthInstance                       vethInstance_g;
+extern tNdisDriverInstance          driverInstance_g;
+extern tVEthInstance                vethInstance_g;
 
 //------------------------------------------------------------------------------
 // Macros
 //------------------------------------------------------------------------------
 #ifndef NDEBUG
-#define TRACE(...)    DbgPrint(__VA_ARGS__)
+#define TRACE(...)                  DbgPrint(__VA_ARGS__)
 #else
 #define TRACE(...)
 #endif
 
-#define VETHINFO_FROM_NBL(_NBL)    ((tVEthRxBufInfo*)((_NBL)->MiniportReserved[0]))
+#if !defined(__func__)
+#define __func__                    __FUNCTION__            // VS2012 or older
+#endif
+
+#define VETHINFO_FROM_NBL(_NBL)     ((tVEthRxBufInfo*)((_NBL)->MiniportReserved[0]))
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -181,7 +185,7 @@ MINIPORT_SHUTDOWN                   miniportShutdown;
 MINIPORT_CANCEL_OID_REQUEST         miniportCancelOidRequest;
 MINIPORT_CHECK_FOR_HANG             miniportCheckForHang;
 MINIPORT_RESET                      miniportReset;
-NDIS_STATUS                         miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p);
+NDIS_STATUS                         miniport_handleReceive(void* pDataBuff_p, size_t size_p);
 void                                miniport_setAdapterState(ULONG state_p);
 
 #ifdef __cplusplus

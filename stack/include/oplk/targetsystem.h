@@ -9,7 +9,7 @@ and including the suitable target specific definitions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2016, Kalycito Infotech Private Limited
 All rights reserved.
@@ -160,8 +160,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #error 'ERROR: TARGET_SYSTEM / DEV_SYSTEM not found!'
 #endif
 
-#define __func__            __FUNCTION__
 #define OPLK_DEPRECATED     __declspec(deprecated)
+
+#if !defined(__func__)
+#define __func__            __FUNCTION__                    // VS2012 or older
+#endif
 
 #endif /* defined(_MSC_VER) */
 

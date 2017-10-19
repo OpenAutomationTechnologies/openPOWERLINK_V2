@@ -158,7 +158,7 @@ NDIS_STATUS ndis_initDriver(PDRIVER_OBJECT pDriverObject_p,
                                              &driverInstance_g.hMiniportHandle);
     if (ndisStatus != NDIS_STATUS_SUCCESS)
     {
-        TRACE("%s() Miniport driver registration failed 0x%X\n", __FUNCTION__, ndisStatus);
+        TRACE("%s() Miniport driver registration failed 0x%X\n", __func__, ndisStatus);
         return ndisStatus;
     }
 
@@ -193,7 +193,7 @@ NDIS_STATUS ndis_initDriver(PDRIVER_OBJECT pDriverObject_p,
 
     if (ndisStatus != NDIS_STATUS_SUCCESS)
     {
-        TRACE("%s() Protocol driver registration failed 0x%X\n", __FUNCTION__, ndisStatus);
+        TRACE("%s() Protocol driver registration failed 0x%X\n", __func__, ndisStatus);
         NdisMDeregisterMiniportDriver(driverInstance_g.hMiniportHandle);
         return ndisStatus;
     }

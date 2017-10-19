@@ -167,7 +167,7 @@ the received frames to the protocol drivers enabled on this miniport.
 \ingroup module_ndis
 */
 //------------------------------------------------------------------------------
-NDIS_STATUS miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p)
+NDIS_STATUS miniport_handleReceive(void* pDataBuff_p, size_t size_p)
 {
     PLIST_ENTRY        pRxLink;
     tVEthRcvBufInfo*   pVethRxInfo = NULL;
@@ -259,7 +259,7 @@ NDIS_STATUS miniportInitialize(NDIS_HANDLE adapterHandle_p,
 
     UNREFERENCED_PARAMETER(driverContext_p);
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
 
     if (fInitialize_l)
         return NDIS_STATUS_SUCCESS;
@@ -381,7 +381,7 @@ NDIS_STATUS miniportInitialize(NDIS_HANDLE adapterHandle_p,
 
     if (status != NDIS_STATUS_SUCCESS)
     {
-        TRACE("%s() Unable to allocate VEth resources\n", __FUNCTION__);
+        TRACE("%s() Unable to allocate VEth resources\n", __func__);
         goto Exit;
     }
 
@@ -423,7 +423,7 @@ Exit:
     // We set the event even if initialization fails, the error will be identified using NULL check.
     NdisSetEvent(&pVEthInstance->miniportInitEvent);
 
-    TRACE("%s() - OK \n", __FUNCTION__);
+    TRACE("%s() - OK \n", __func__);
 
     return status;
 }
@@ -491,7 +491,7 @@ VOID miniportHalt(NDIS_HANDLE adapterContext_p, NDIS_HALT_ACTION haltAction_p)
 
     UNREFERENCED_PARAMETER(haltAction_p);
 
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
 
     pVEthInstance->fMiniportHalting = TRUE;
 
@@ -528,7 +528,7 @@ VOID miniportHalt(NDIS_HANDLE adapterContext_p, NDIS_HALT_ACTION haltAction_p)
 
     protocol_freeVEthInstance(pVEthInstance);
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -582,7 +582,7 @@ This handler is used to unload the miniport during the uninstallation.
 //------------------------------------------------------------------------------
 VOID miniportUnload(PDRIVER_OBJECT driverObject_p)
 {
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
     UNREFERENCED_PARAMETER(driverObject_p);
     if (driverInstance_g.hProtocolHandle != NULL)
     {
@@ -590,7 +590,7 @@ VOID miniportUnload(PDRIVER_OBJECT driverObject_p)
     }
 
     NdisMDeregisterMiniportDriver(driverInstance_g.hMiniportHandle);
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -618,12 +618,12 @@ NDIS_STATUS miniportPause(NDIS_HANDLE adapterContext_p,
 
     UNREFERENCED_PARAMETER(pauseParams_p);
 
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
     NdisAcquireSpinLock(&pVEthInstance->pauseLock);
     pVEthInstance->fMiniportPaused = TRUE;
     NdisReleaseSpinLock(&pVEthInstance->pauseLock);
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
     return status;
 }
 
@@ -649,11 +649,11 @@ NDIS_STATUS miniportRestart(NDIS_HANDLE adapterContext_p,
 
     UNREFERENCED_PARAMETER(restartParams_p);
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
     NdisAcquireSpinLock(&pVEthInstance->pauseLock);
     pVEthInstance->fMiniportPaused = FALSE;
     NdisReleaseSpinLock(&pVEthInstance->pauseLock);
-    TRACE("%s() - OK \n", __FUNCTION__);
+    TRACE("%s() - OK \n", __func__);
     return status;
 }
 
@@ -719,7 +719,7 @@ VOID miniportSendNetBufferLists(NDIS_HANDLE adapterContext_p,
 
     if (pVethTxBuff == NULL)
     {
-        TRACE("%s() Failed to allocate memory for VEth Tx frame ", __FUNCTION__);
+        TRACE("%s() Failed to allocate memory for VEth Tx frame ", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -928,7 +928,7 @@ NDIS_STATUS miniportAllocateVEthRxBuff(tVEthInstance* pVEthInstance_p)
                                                                     &poolParameters);
     if (pVEthInstance_p->hReceiveNblPool == NULL)
     {
-        TRACE("%s(): failed to alloc send net buffer list pool\n", __FUNCTION__);
+        TRACE("%s(): failed to alloc send net buffer list pool\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -939,7 +939,7 @@ NDIS_STATUS miniportAllocateVEthRxBuff(tVEthInstance* pVEthInstance_p)
                                                                      OPLK_MEM_TAG, NormalPoolPriority);
     if (pVEthInstance_p->pReceiveBuf == NULL)
     {
-        TRACE("%s() Failed to allocate VETH Rx buffers\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate VETH Rx buffers\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -949,7 +949,7 @@ NDIS_STATUS miniportAllocateVEthRxBuff(tVEthInstance* pVEthInstance_p)
                                                                          OPLK_MEM_TAG, NormalPoolPriority);
     if (pVEthInstance_p->pReceiveBufInfo == NULL)
     {
-        TRACE("%s() Failed to allocate VETH Rx buffers info\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate VETH Rx buffers info\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -972,7 +972,7 @@ NDIS_STATUS miniportAllocateVEthRxBuff(tVEthInstance* pVEthInstance_p)
 
             if (pVethRxInfo->pMdl == NULL)
             {
-                TRACE("%s() Error Allocating MDL\n", __FUNCTION__);
+                TRACE("%s() Error Allocating MDL\n", __func__);
                 status = NDIS_STATUS_RESOURCES;
                 goto Exit;
             }
@@ -983,7 +983,7 @@ NDIS_STATUS miniportAllocateVEthRxBuff(tVEthInstance* pVEthInstance_p)
 
             if (pVethRxInfo->pNbl == NULL)
             {
-                TRACE("%s() Failed to allocate Tx NBL\n", __FUNCTION__);
+                TRACE("%s() Failed to allocate Tx NBL\n", __func__);
                 status = NDIS_STATUS_RESOURCES;
                 goto Exit;
             }

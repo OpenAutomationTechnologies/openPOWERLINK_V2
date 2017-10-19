@@ -211,7 +211,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
                                                                    &poolParameters);
     if (protocolInstance_l.hSendNblPool == NULL)
     {
-        TRACE("%s(): Failed to alloc send net buffer list pool\n", __FUNCTION__);
+        TRACE("%s(): Failed to alloc send net buffer list pool\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -223,7 +223,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
 
     if (protocolInstance_l.pTransmitBuf == NULL)
     {
-        TRACE("%s() Failed to allocate Tx buffers\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate Tx buffers\n", __func__);
         return NDIS_STATUS_RESOURCES;
     }
 
@@ -233,7 +233,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
 
     if (protocolInstance_l.pTxBuffInfo == NULL)
     {
-        TRACE("%s() Failed to allocate Tx buffers info\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate Tx buffers info\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -254,7 +254,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
 
             if (pTxInfo->pMdl == NULL)
             {
-                TRACE("%s() Error Allocating MDL\n", __FUNCTION__);
+                TRACE("%s() Error Allocating MDL\n", __func__);
                 status = NDIS_STATUS_RESOURCES;
                 goto Exit;
             }
@@ -265,7 +265,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
 
             if (pTxInfo->pNbl == NULL)
             {
-                TRACE("%s() Failed to allocate Tx NBL\n", __FUNCTION__);
+                TRACE("%s() Failed to allocate Tx NBL\n", __func__);
                 status = NDIS_STATUS_RESOURCES;
                 goto Exit;
             }
@@ -284,7 +284,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
                                                                        OPLK_MEM_TAG, NormalPoolPriority);
     if (protocolInstance_l.pReceiveBuf == NULL)
     {
-        TRACE("%s() Failed to allocate Rx buffers\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate Rx buffers\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -294,7 +294,7 @@ NDIS_STATUS protocol_allocateTxRxBuf(ULONG txBufCount_p, ULONG rxBufCount_p)
                                                                            OPLK_MEM_TAG, NormalPoolPriority);
     if (protocolInstance_l.pReceiveBufInfo == NULL)
     {
-        TRACE("%s() Failed to allocate Rx Info buffers\n", __FUNCTION__);
+        TRACE("%s() Failed to allocate Rx Info buffers\n", __func__);
         status = NDIS_STATUS_RESOURCES;
         goto Exit;
     }
@@ -665,7 +665,7 @@ NDIS_STATUS protocolBindAdapter(NDIS_HANDLE protocolDriverContext_p,
 
     UNREFERENCED_PARAMETER(protocolDriverContext_p);
 
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
 
     if (fBinding_l != FALSE)
     {
@@ -765,7 +765,7 @@ ExitFail:
     }
 
 Exit:
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
     return status;
 }
 
@@ -784,10 +784,10 @@ Unblock the caller to mark completion.
 VOID protocolOpenAdapterComplete(NDIS_HANDLE protocolBindingContext_p, NDIS_STATUS status_p)
 {
     tProtocolInstance*   protInstance = (tProtocolInstance*)protocolBindingContext_p;
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
     protInstance->adapterInitStatus = status_p;
     NdisSetEvent(&protInstance->adapterEvent);
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -814,7 +814,7 @@ NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
     UNREFERENCED_PARAMETER(protocolBindingContext_p);
     UNREFERENCED_PARAMETER(unbindContext_p);
 
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
 
     if (protocolInstance_l.pVEthInstance != NULL)
     {
@@ -837,7 +837,7 @@ NDIS_STATUS protocolUnbindAdapter(NDIS_HANDLE unbindContext_p,
 
     fBinding_l = FALSE;
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
     return status;
 }
 
@@ -855,9 +855,9 @@ VOID protocolCloseAdapterComplete(NDIS_HANDLE protocolBindingContext_p)
 {
     UNREFERENCED_PARAMETER(protocolBindingContext_p);
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
     NdisSetEvent(&protocolInstance_l.adapterEvent);
-    TRACE("%s() - OK \n", __FUNCTION__);
+    TRACE("%s() - OK \n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -922,7 +922,7 @@ VOID protocolStatus(NDIS_HANDLE protocolBindingContext_p,
 
     UNREFERENCED_PARAMETER(protocolBindingContext_p);
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
 
     if (pVEthinstance == NULL)
     {
@@ -966,7 +966,7 @@ VOID protocolStatus(NDIS_HANDLE protocolBindingContext_p,
 
     NdisMIndicateStatusEx(pVEthinstance->hMiniportAdapterHandle, &newStatusIndication);
 
-    TRACE("%s() - OK \n", __FUNCTION__);
+    TRACE("%s() - OK \n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -991,7 +991,7 @@ NDIS_STATUS protocolPnpHandler(NDIS_HANDLE protocolBindingContext_p,
 
     UNREFERENCED_PARAMETER(protocolBindingContext_p);
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
 
     switch (pNetPnpEventNotification_p->NetPnPEvent.NetEvent)
     {
@@ -1045,7 +1045,7 @@ NDIS_STATUS protocolPnpHandler(NDIS_HANDLE protocolBindingContext_p,
             break;
     }
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
     return status;
 }
 
@@ -1243,7 +1243,7 @@ static void closeBinding(void)
     NDIS_STATUS    status;
     NDIS_EVENT     oidCompleteEvent;
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
 
     protocolInstance_l.bindingState = kNdisBindingPausing;
 
@@ -1276,7 +1276,7 @@ static void closeBinding(void)
     // Binding closed
     protocolInstance_l.hBindingHandle = NULL;
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
 }
 
 //------------------------------------------------------------------------------
@@ -1303,7 +1303,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING pInstanceName_p)
     PWSTR                            devName;
     NDIS_CONFIGURATION_OBJECT        configObject;
 
-    TRACE("%s()...\n", __FUNCTION__);
+    TRACE("%s()...\n", __func__);
 
     if (protocolInstance_l.hBindingHandle == NULL)
     {
@@ -1324,7 +1324,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING pInstanceName_p)
     if (status != NDIS_STATUS_SUCCESS)
     {
         adapterConfigHandle = NULL;
-        TRACE("%s() Failed to open adapter configuration\n", __FUNCTION__);
+        TRACE("%s() Failed to open adapter configuration\n", __func__);
         return NDIS_STATUS_OPEN_FAILED;
     }
 
@@ -1363,7 +1363,7 @@ static NDIS_STATUS startVEth(PNDIS_STRING pInstanceName_p)
                                                                   length, OPLK_MEM_TAG, NormalPoolPriority);
                 if (pVEthInstance == NULL)
                 {
-                    TRACE("%s() Failed to allocate memory for VEth instance length %x\n", __FUNCTION__, length);
+                    TRACE("%s() Failed to allocate memory for VEth instance length %x\n", __func__, length);
                     goto ExitFail;
                 }
 
@@ -1442,7 +1442,7 @@ ExitFail:
     }
 
 Exit:
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
     return status;
 }
 
@@ -1481,7 +1481,7 @@ static void stopVEth(tVEthInstance* pVEthInstance_p)
     NDIS_STATUS    status;
     BOOLEAN        fMiniportInitCancelled = FALSE;
 
-    TRACE("%s()... \n", __FUNCTION__);
+    TRACE("%s()... \n", __func__);
 
     NdisAcquireSpinLock(&pVEthInstance_p->miniportLock);
 
@@ -1527,7 +1527,7 @@ static void stopVEth(tVEthInstance* pVEthInstance_p)
         }
     }
 
-    TRACE("%s() - OK\n", __FUNCTION__);
+    TRACE("%s() - OK\n", __func__);
 }
 
 /// \}

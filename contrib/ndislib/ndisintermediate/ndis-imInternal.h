@@ -218,19 +218,23 @@ typedef struct
 //------------------------------------------------------------------------------
 // global defines
 //------------------------------------------------------------------------------
-extern tNdisDriverInstance    driverInstance_g;
+extern tNdisDriverInstance          driverInstance_g;
 
 //------------------------------------------------------------------------------
 // macros
 //------------------------------------------------------------------------------
 #ifndef NDEBUG
-#define TRACE(...)    DbgPrint(__VA_ARGS__)
+#define TRACE(...)                  DbgPrint(__VA_ARGS__)
 #else
 #define TRACE(...)
 #endif
 
-#define TXINFO_FROM_NBL(_NBL)    ((tTxBufInfo*)((_NBL)->ProtocolReserved[0]))
-#define VETHINFO_FROM_NBL(_NBL)    ((tVEthRcvBufInfo*)((_NBL)->MiniportReserved[0]))
+#if !defined(__func__)
+#define __func__                    __FUNCTION__        // VS2012 or older
+#endif
+
+#define TXINFO_FROM_NBL(_NBL)       ((tTxBufInfo*)((_NBL)->ProtocolReserved[0]))
+#define VETHINFO_FROM_NBL(_NBL)     ((tVEthRcvBufInfo*)((_NBL)->MiniportReserved[0]))
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -284,7 +288,7 @@ NDIS_STATUS protocol_sendOidRequest(NDIS_REQUEST_TYPE requestType_p, NDIS_OID oi
 NDIS_STATUS protocol_sendPacket(void* pToken_p, size_t size_p, void* pTxLink_p);
 UCHAR*      protocol_getCurrentMac(void);
 void        protocol_registerVEthHandler(tVEthSendCb pfnTxCallback_p);
-NDIS_STATUS miniport_handleReceive(UINT8* pDataBuff_p, size_t size_p);
+NDIS_STATUS miniport_handleReceive(void* pDataBuff_p, size_t size_p);
 
 #ifdef __cplusplus
 }

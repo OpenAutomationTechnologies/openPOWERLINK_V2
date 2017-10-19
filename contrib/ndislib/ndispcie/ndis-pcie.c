@@ -146,7 +146,7 @@ NDIS_STATUS ndis_initDriver(PDRIVER_OBJECT pDriverObject_p, PUNICODE_STRING pReg
                                              &miniportChars, &driverInstance_g.pMiniportHandle);
     if (ndisStatus != NDIS_STATUS_SUCCESS)
     {
-        TRACE("%s() Miniport driver registration failed 0x%X\n", __FUNCTION__, ndisStatus);
+        TRACE("%s() Miniport driver registration failed 0x%X\n", __func__, ndisStatus);
     }
 
     return ndisStatus;

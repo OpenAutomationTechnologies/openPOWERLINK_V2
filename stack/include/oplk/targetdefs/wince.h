@@ -8,7 +8,7 @@ This file contains target specific definitions for Windows CE systems.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -52,8 +52,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OPLK_FILE_HANDLE        HANDLE
 
 #define UNUSED_PARAMETER(par)   (void)par
-
-#define __func__ __FUNCTION__
 
 void trace (const char* fmt, ...);
 #define PRINTF(...)             TRACE(__VA_ARGS__)
