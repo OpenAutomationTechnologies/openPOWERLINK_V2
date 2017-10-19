@@ -148,7 +148,7 @@ The function maps a kernel buffer address.
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, size_t bufferSize_p)
 {
     tHostifReturn       ret;
     tHostifInstance*    pHif = memMapInstance_l.pHifInstance;

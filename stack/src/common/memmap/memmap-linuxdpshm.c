@@ -12,7 +12,7 @@ for Linux systems using openPOWERLINK PCIe driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited.
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -86,9 +86,9 @@ size and byte offset of mapped buffer in the mapped region.
 */
 typedef struct
 {
-    UINT32      memSize;    ///< Size of the last mapped buffer.
-    ULONG       offset;     ///< Offset of the mapped buffer inside the vma.
-    UINT8*      pKernelBuf; ///< PCP address corresponding to the last mapped vma start address.
+    size_t      memSize;    ///< Size of the last mapped buffer.
+    size_t      offset;     ///< Offset of the mapped buffer inside the vma.
+    void*       pKernelBuf; ///< PCP address corresponding to the last mapped vma start address.
     void*       pUserBuf;   ///< Start address of the last mapped vma.
 } tMemmapInstance;
 
@@ -158,7 +158,7 @@ virtual address space which is of the size specified by \p bufferSize_p.
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, size_t bufferSize_p)
 {
     void* pMappedBuffer = NULL;
 
@@ -169,10 +169,9 @@ void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
 
     // Find the page aligned address before the buffer to be remapped and store
     // the byte offset of the buffer from the page boundary.
-    memmapInstance_l.pKernelBuf = (UINT8*)((ULONG)pKernelBuffer_p &
+    memmapInstance_l.pKernelBuf = (void*)((ULONG)pKernelBuffer_p &
                                            ~(sysconf(_SC_PAGE_SIZE) - 1));
-    memmapInstance_l.offset = (ULONG)pKernelBuffer_p &
-                              (sysconf(_SC_PAGE_SIZE) - 1);
+    memmapInstance_l.offset = (size_t)((ULONG)pKernelBuffer_p & (sysconf(_SC_PAGE_SIZE) - 1));
 
     memmapInstance_l.pUserBuf = mmap(NULL,                       // Map at any address in vma
                                      memmapInstance_l.memSize + 2 * sysconf(_SC_PAGE_SIZE),
@@ -188,8 +187,7 @@ void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
     else
     {
         // Add the byte offset of the buffer back to the mapped page
-        pMappedBuffer = (void*)((ULONG)memmapInstance_l.pUserBuf +
-                                 memmapInstance_l.offset);
+        pMappedBuffer = (UINT8*)memmapInstance_l.pUserBuf + memmapInstance_l.offset;
     }
 
     return pMappedBuffer;
@@ -211,8 +209,7 @@ void memmap_unmapKernelBuffer(const void* pBuffer_p)
     // Check parameter validity
     ASSERT(pBuffer_p != NULL);
 
-    if ((ULONG)memmapInstance_l.pUserBuf +
-        memmapInstance_l.offset != (ULONG)pBuffer_p)
+    if ((UINT8*)memmapInstance_l.pUserBuf + memmapInstance_l.offset != (UINT8*)pBuffer_p)
     {
         DEBUG_LVL_ERROR_TRACE("%s() called with unknown memory address\n",
                               __func__);

@@ -18,7 +18,7 @@ user space by the kernel driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -88,8 +88,6 @@ Structure to hold all local parameters used by memory mapping module.
 */
 typedef struct
 {
-    UINT8*              pKernelBase;    ///< Pointer to the kernel base address.
-    UINT8*              pUserBase;      ///< Pointer to the user base address.
     OPLK_FILE_HANDLE    hFileHandle;    ///< File handle for the openPOWERLINK driver.
     tMemStruc           memStruc;       ///< Shared memory structure to exchange addresses.
 } tMemMapInstance;
@@ -97,7 +95,7 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tMemMapInstance      memMapInstance_l;
+static tMemMapInstance  memMapInstance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -200,15 +198,14 @@ The function maps a kernel buffer address.
 \ingroup module_lib_memmap
 */
 //------------------------------------------------------------------------------
-void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
+void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, size_t bufferSize_p)
 {
-    INT32       offset;
-    UINT8*      pUserAddr;
+    ptrdiff_t   offset;
+    void*       pUserAddr;
     tMemStruc*  pMemStruc = &memMapInstance_l.memStruc;
 
     // Check parameter validity
     ASSERT(pKernelBuffer_p != NULL);
-    UNUSED_PARAMETER(bufferSize_p);
 
     // Negative offset not possible
     if ((pKernelBuffer_p < pMemStruc->pKernelAddr) ||
@@ -216,10 +213,10 @@ void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
         ((const UINT8*)pMemStruc->pKernelAddr + pMemStruc->size)))
         return NULL;
 
-    offset = (UINT)((const UINT8*)pKernelBuffer_p - (const UINT8*)pMemStruc->pKernelAddr);
+    offset = (const UINT8*)pKernelBuffer_p - (const UINT8*)pMemStruc->pKernelAddr;
     pUserAddr = (UINT8*)pMemStruc->pUserAddr + offset;
 
-    return (void*)pUserAddr;
+    return pUserAddr;
 }
 
 //------------------------------------------------------------------------------

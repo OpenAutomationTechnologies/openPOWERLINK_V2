@@ -7,7 +7,7 @@
 This file contains the definitions for the memory mapping library.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -78,7 +78,7 @@ extern "C"
 tMemMapReturn memmap_init(void);
 tMemMapReturn memmap_shutdown(void);
 
-void*         memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p);
+void*         memmap_mapKernelBuffer(const void* pKernelBuffer_p, size_t bufferSize_p);
 void          memmap_unmapKernelBuffer(const void* pBuffer_p);
 
 #ifdef __cplusplus
