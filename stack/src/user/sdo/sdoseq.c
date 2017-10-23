@@ -272,6 +272,7 @@ static void       processFinalTimeout(tSdoSeqCon* pSdoSeqCon_p,
 static tOplkError processSubTimeout(tSdoSeqCon* pSdoSeqCon_p);
 static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p,
                                       tSdoSeqConHdl sdoSeqConHdl_p);
+static tOplkError deleteLowLayerConnection(tSdoSeqCon* pSdoSeqCon_p);
 static BOOL       checkHistoryAcked(const tSdoSeqCon* pSdoSeqCon_p,
                                     UINT8 recvSeqNumber_p);
 static BOOL       checkConnectionAckValid(const tSdoSeqCon* pSdoSeqCon_p,
@@ -664,24 +665,7 @@ tOplkError sdoseq_deleteCon(tSdoSeqConHdl sdoSeqConHdl_p)
         // process close in process function
         ret = processState(handle, 0, NULL, NULL, kSdoSeqEventCloseCon);
 
-        //check protocol
-        if ((pSdoSeqCon->conHandle & SDO_ASY_HANDLE_MASK) == SDO_UDP_HANDLE)
-        {
-#if defined(CONFIG_INCLUDE_SDO_UDP)
-            sdoudp_delConnection(pSdoSeqCon->conHandle);
-#endif
-        }
-        else
-        {
-#if defined(CONFIG_INCLUDE_SDO_ASND)
-            sdoasnd_deleteCon(pSdoSeqCon->conHandle);
-#endif
-        }
-        timeru_deleteTimer(&pSdoSeqCon->timerHandle);
-
-        // cleanup control structure
-        OPLK_MEMSET(pSdoSeqCon, 0x00, sizeof(tSdoSeqCon));
-        pSdoSeqCon->sdoSeqConHistory.freeEntries = SDO_HISTORY_SIZE;
+        deleteLowLayerConnection(pSdoSeqCon);
     }
 
     return ret;
@@ -781,8 +765,12 @@ static tOplkError processStateIdle(tSdoSeqCon* pSdoSeqCon_p,
                 pSdoSeqCon_p->sdoSeqState = kSdoSeqStateInit2; // change state to kSdoSeqStateInit2
                 ret = setTimer(pSdoSeqCon_p, sdoSeqInstance_l.sdoSeqTimeout);
             }
+            else
+            {   // otherwise, this is not an init from extern, therefore silently ignore it
+                // and just delete the connection internally
+                deleteLowLayerConnection(pSdoSeqCon_p);
+            }
 
-            // otherwise, this is not an init from extern therefore silently ignore it
             break;
 
         default:
@@ -1368,9 +1356,6 @@ static tOplkError processStateConnected(tSdoSeqCon* pSdoSeqCon_p,
             pSdoSeqCon_p->recvSeqNum &= SEQ_NUM_MASK;
             sendFrame(pSdoSeqCon_p, 0, NULL, FALSE);
 
-            timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
-            // call Command Layer Cb is not necessary, because the event came from there
-            // sdoSeqInstance_l.pfnSdoComConCb(SdoSeqConHdl, kAsySdoConStateInitError);
             break;
 
         case kSdoSeqEventTimeout:
@@ -2404,6 +2389,50 @@ static tOplkError processTimeoutEvent(tSdoSeqCon* pSdoSeqCon_p,
     return ret;
 }
 
+//------------------------------------------------------------------------------
+/**
+\brief  Delete SDO sequence connection to lower layer
+
+The function deletes the sequence layer connection and the connection to the
+lower layer as well as the related timer.
+
+\param[in,out]  pSdoSeqCon_p        Pointer to sequence layer connection information.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError deleteLowLayerConnection(tSdoSeqCon* pSdoSeqCon_p)
+{
+    tOplkError ret = kErrorOk;
+
+    if (pSdoSeqCon_p == NULL)
+    {
+        ret = kErrorSdoSeqInvalidHdl;
+        goto Exit;
+    }
+
+    //check protocol
+    if ((pSdoSeqCon_p->conHandle & SDO_ASY_HANDLE_MASK) == SDO_UDP_HANDLE)
+    {
+#if defined(CONFIG_INCLUDE_SDO_UDP)
+        sdoudp_delConnection(pSdoSeqCon_p->conHandle);
+#endif
+    }
+    else
+    {
+#if defined(CONFIG_INCLUDE_SDO_ASND)
+        sdoasnd_deleteCon(pSdoSeqCon_p->conHandle);
+#endif
+    }
+    timeru_deleteTimer(&pSdoSeqCon_p->timerHandle);
+
+    // cleanup control structure
+    OPLK_MEMSET(pSdoSeqCon_p, 0x00, sizeof(tSdoSeqCon));
+    pSdoSeqCon_p->sdoSeqConHistory.freeEntries = SDO_HISTORY_SIZE;
+
+Exit:
+    return ret;
+}
 //------------------------------------------------------------------------------
 /**
 \brief  Check if a history frame was acknowledged by the receiver
