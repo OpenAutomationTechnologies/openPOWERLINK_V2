@@ -19,7 +19,7 @@ module using the offset acquired from the kernel driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2017, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -179,8 +179,8 @@ tOplkError pdoucal_allocateMem(size_t memSize_p, UINT8** ppPdoMem_p)
         return kErrorNoResource;
     }
 
-    ret = ctrlucal_getMappedMem(outPdoMem.pdoMemOffset,
-                                outPdoMem.memSize,
+    ret = ctrlucal_getMappedMem((UINT32)outPdoMem.pdoMemOffset,
+                                (UINT32)outPdoMem.memSize,
                                 &pPdoMem);
 
     if ((ret != kErrorOk) || (pPdoMem == NULL))
