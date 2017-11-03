@@ -11,7 +11,7 @@ The file implements the getopt() function used to parse command line options.
 /*------------------------------------------------------------------------------
 Copyright (c) 1987, 1993, 1994
       The Regents of the University of California.  All rights reserved.
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -7,7 +7,7 @@
 This header file defines macros for Xilinx Microblaze targets to link specific
 functions to local memory (BRAM).
 
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, B&R Industrial Automation GmbH
 Copyright (c) 2014, Kalycito Infotech Private Ltd.
 All rights reserved.
 

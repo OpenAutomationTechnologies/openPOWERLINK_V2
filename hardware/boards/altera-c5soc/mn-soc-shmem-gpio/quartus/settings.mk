@@ -2,7 +2,7 @@
 #
 # Settings makefile for Cyclone V SoC MN dual processor shared memory GPIO design
 #
-# Copyright (c) 2015, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2015, B&R Industrial Automation GmbH
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #

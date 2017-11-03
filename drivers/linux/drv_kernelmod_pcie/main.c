@@ -11,7 +11,7 @@ for the openPOWERLINK kernel stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2015, Kalycito Private Limited
 All rights reserved.
 

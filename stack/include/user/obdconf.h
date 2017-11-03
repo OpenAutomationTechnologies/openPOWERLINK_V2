@@ -11,7 +11,7 @@ This file contains the target specific functions and definitions for OD store/re
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH, D-08468 Heinsdorfergrund, Am Windrad 2
 Copyright (c) 2015, Kalycito Infotech Private Limited
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

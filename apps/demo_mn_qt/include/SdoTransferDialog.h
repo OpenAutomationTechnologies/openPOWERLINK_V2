@@ -8,7 +8,7 @@ The file contains the definitions for the SDO transfer dialog
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
