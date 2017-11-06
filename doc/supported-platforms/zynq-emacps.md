@@ -93,7 +93,7 @@ to open the kernel configuration window:
 
 - Compile the kernel using the following command:
 
-      > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf-
+      > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-
 
 - To create uImage file:
 
@@ -102,11 +102,11 @@ to open the kernel configuration window:
 - Compile and install the modules for the Linux kernel using the following commands:
   * Compile modules:
 
-            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules
+            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf- modules
 
   * Install modules:
 
-            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules_install
+            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf- modules_install
 
 # Steps for cross-compiling the openPOWERLINK Linux MN for the Zynq Emacps design {#sect_cross_compile_openpowerlink}
 
@@ -192,7 +192,7 @@ generator and select **Specify toolchain file for cross-compiling** and click **
 - Provide the path for **Specify the Toolchain file** as below,
   - \<openPOWERLINK_dir\>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake
 - Click **Finish** to proceed.
-- Set CFG_KERNEL_DIR to the "<Xilinx_Linux_dir>" then select **CFG_POWERLINK_EDRV_EMACPS** and **CFG_OPLK_MN**.
+- Set CFG_BUILD_KERNEL_STACK to **Linux Kernel Module**.
 - Select **Configure** to apply the settings and click **Generate** to create the Makefile
 with the modified configuration.
 
