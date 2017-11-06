@@ -123,9 +123,9 @@ Steps 1-5 can be carried out by executing `$ make all` in a
 2. Download the ELF file to the target:
    Always follow the sequence by downloading the PCP ELF file first,
    afterwards the host ELF. \n
-   For the two FPGA demos enter in both directories in the "Nios II Command
-   Shell" \n
    `$ make download-elf` \n
+   or in debug mode use: \n
+   `$ make download-elf && nios2-terminal --instance=<0 or 1> --cable "USB-Blaster[USB-<0 or 1>]"` \n
 3. Enjoy the running POWERLINK network.
 
 # How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes {#sect_altera-mn_import}

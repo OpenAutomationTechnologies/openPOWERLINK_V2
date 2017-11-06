@@ -126,7 +126,7 @@ the target the following steps need to be executed:
 * Open the `ISE Design Suite Command Prompt` and execute the following
   commands:\n
 
-      > cd <openPOWERLINK_directory>\bin\generic\microblaze\[BOARD_NAME]\[DEMO_NAME]
+      > cd <openPOWERLINK_directory>\bin\generic\microblazeise\[BOARD_NAME]\[DEMO_NAME]
       > make download-bits
       > make download-elf
 
@@ -172,7 +172,7 @@ completed and the binary is installed into the __bin__ directory.
 
       > cd <openPOWERLINK_dir>/contrib/bootloader/xilinx-microblaze/simpleboot/build
       > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../
-      > cmake -DCFG_BIN_DIR=../../../../../bin/generic/microblaze/avnet-s6plkeb/cn-single-gpio -DCFG_HW_LIB_DIR=../../../../../hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio ../
+      > cmake -DCFG_BIN_DIR=../../../../../bin/generic/microblazeise/avnet-s6plkeb/cn-single-gpio -DCFG_HW_LIB_DIR=../../../../../hardware/lib/generic/microblaze/avnet-s6plkeb/cn-single-gpio ../
       > make all
       > make prog-flash
 

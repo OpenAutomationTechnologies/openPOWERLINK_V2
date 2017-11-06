@@ -381,8 +381,7 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
 3. Run make download-bits to download the bitstream.
 
-  `$ make download-bits`
-
+   `$ make download-bits`
 
 ## Program the software to the soft-core on the FPGA
 
@@ -399,15 +398,11 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
   `<OPLK_BASE_DIR>/apps/demo_cn_embedded/build/altera-nios2`
 
-3. Run make download-elf to download the software.
-
-  If the software was built in release mode use:
-
-  - `$ make download-elf`
-
-  or in debug mode use:
-
-  - `$ make download-elf && nios2-terminal -i <instance USB-Blaster (1 or 0)>`
+3. Run the make download-elf to download the software. \n
+   If the software was built in release mode use: \n
+   `$ make download-elf` \n
+   or in debug mode use: \n
+   `$ make download-elf && nios2-terminal --instance=<0 or 1> --cable "USB-Blaster[USB-<0 or 1>]"`
 
 \note Workaround for testing without a Nios II license:\n
       If you did not specify a valid Nios II IP-Core license, the terminal windows
