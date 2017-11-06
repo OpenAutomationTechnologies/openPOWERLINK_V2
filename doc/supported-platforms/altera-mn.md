@@ -126,6 +126,10 @@ Steps 1-5 can be carried out by executing `$ make all` in a
    For the two FPGA demos enter in both directories in the "Nios II Command
    Shell" \n
    `$ make download-elf` \n
+   or in debug mode use:
+
+   `$ make download-elf && nios2-terminal --instance=<0 or 1> --cable "USB-Blaster[USB-<0 or 1>]"`
+
 3. Enjoy the running POWERLINK network.
 
 # How to import the project into Nios II Software Build Tools for Eclipse for debugging purposes {#sect_altera-mn_import}

@@ -407,7 +407,7 @@ The SOF file for the TERASIC_DE2-115 (INK) is located in the following subdirect
 
   or in debug mode use:
 
-  - `$ make download-elf && nios2-terminal -i <instance USB-Blaster (1 or 0)>`
+  - `$ make download-elf && nios2-terminal --instance=<0 or 1> --cable "USB-Blaster[USB-<0 or 1>]"`
 
 \note Workaround for testing without a Nios II license:\n
       If you did not specify a valid Nios II IP-Core license, the terminal windows
