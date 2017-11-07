@@ -275,7 +275,7 @@ tOplkError sdoudp_sendToSocket(const tSdoUdpCon* pSdoUdpCon_p,
 
     error = sendto(instance_l.udpSocket,
                    (const char*)&pSrcData_p->messageType,
-                   dataSize_p,
+                   (INT)dataSize_p,
                    0,
                    (struct sockaddr*)&addr,
                    sizeof(struct sockaddr_in));
