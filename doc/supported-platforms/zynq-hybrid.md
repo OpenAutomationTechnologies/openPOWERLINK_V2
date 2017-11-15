@@ -84,20 +84,20 @@ the Linux kernel source and create the kernel image file for the Zynq ZC702.
 
 - Compile the kernel using the following command:
 
-      > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf-
+      > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-
 
 - To create the uImage file:
 
-      > make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf-
+      > make ARCH=arm UIMAGE_LOADADDR=0x8000 uImage CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf-
 
 - Compile and install the modules for the Linux kernel using the following commands:
   * Compile modules:
 
-            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules
+            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf- modules
 
   * Install modules:
 
-            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-armlinux-gnueabi/bin/arm-linux-gnueabihf- modules_install
+            > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf- modules_install
 
 # Steps to build the hardware for the Zynq Hybrid design {#sect_zynq_build_hardware}
 
@@ -127,7 +127,7 @@ the Linux kernel source and create the kernel image file for the Zynq ZC702.
 
 - Execute the following commands to build the hardware in **Release** mode:
 
-      > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
+      > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
       > make install
 
 # Steps to build the PCP {#sect_zynq_build_pcp}
@@ -147,7 +147,7 @@ and build the PCP for the Zynq Hybrid design.
 
 - Execute the following commands to build the PCP in **Release** mode:
 
-      > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DCFG_COMPILE_LIB_MNDRV_DUALPROCSHM=ON
+      > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_MNDRV_DUALPROCSHM=ON
       > make install
 
 ## Steps to build the driver application for Microblaze {#sect_build_driver_app_for_MB}
@@ -280,7 +280,7 @@ the Makefile with the modified configuration.
   - \<openPOWERLINK_dir\>/apps/demo_mn_console/
 - Provide the **Where to build the binaries** to the application build folder
   - \<openPOWERLINK_dir\>/apps/demo_mn_console/ build/linux
-- - Click the **Configure** button.
+- Click the **Configure** button.
 - In the **Specify the Generator for this project** dialog box, select **Unix Makefiles**
 generator and **Specify toolchain file for cross-compiling** and click **Next**.
 - Provide the path for **Specify the Toolchain file** as below
@@ -300,21 +300,25 @@ with the modified configuration.
 
 This section describes the steps to run the openPOWERLINK Linux MN demo on the Zynq ZC702 development board.
 
-- Refer to the link given below to convert the SD card to a bootable medium for the Zynq.
+- Refer to the link given below to convert the SD card to a bootable medium for the Zynq:
   * http://www.wiki.xilinx.com/Prepare+Boot+Medium
-- Refer to the link given below to download the Zynq ZC702 2016.2 pre-built Linux binaries.
+- Refer to the link given below to download the Zynq ZC702 2016.2 pre-built Linux binaries:
   * http://www.wiki.xilinx.com/Zynq+2016.2+Release
-- Extract and copy the following content from the downloaded folder to the boot partition of the SD card.
-  * uramdisk.image.gz
-  * devicetree.dtb
-  * BOOT.bin
-  * openPOWERLINK driver and application binaries from:
+- Extract the Zynq ZC702 2016.2 pre-built Linux binaries package.
+- Copy the following content to the boot partition of the SD card:
+  * uramdisk.image.gz from:
+    - Zynq ZC702 2016.2 pre-built Linux binaries package
+  * devicetree.dtb from:
+    - \<openPOWERLINK_dir>/hardware/boards/xilinx-z702/mn-dual-shmem-gpio/sdk/handoff
+  * BOOT.bin from:
+    - \<openPOWERLINK_dir>/tools/xilinx-zynqvivado
+  * openPOWERLINK driver and application folders from:
     - \<openPOWERLINK_dir\>/bin/linux/arm/oplkdrv_kernelmodule_zynq
     - \<openPOWERLINK_dir\>/bin/linux/arm/demo_mn_console
   * The uImage from:
     - \<Xilinx_Linux_dir\>/arch/arm/boot
 - Hardware setup
-  * Connect the Avnet expander board to the J3fmc1 connector of the Zynq ZC702 board.
+  * Connect the Avnet expander board to the J3 FMC1 connector of the Zynq ZC702 board.
   * Now connect the Ethernet cable to any of the Ethernet ports J6/J2 of the Avnet
 extension board and to a CN in the network.
 - To run openPOWERLINK
