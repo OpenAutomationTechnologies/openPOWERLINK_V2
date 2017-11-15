@@ -66,7 +66,7 @@ __CFG_KERNEL_DIR__.
 To build the kernel interface driver for Zynq hybrid:
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
-      > cmake -DCFG_OPLK_MN=TRUE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake
+      > cmake -DCFG_OPLK_MN=TRUE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake ..
       > make
       > make install
 
@@ -116,7 +116,7 @@ The PCP daemon uses the driver library for the host interface (`liboplkmndrv-hos
 To build the PCP daemon:
 
       > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+      > cmake -G"Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-ise-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release ..
       > make
       > make install
 
@@ -131,14 +131,14 @@ To build the PCP daemon:
   * On a Windows host platform
 
         > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" ..
         > make
         > make install
 
   * On a Linux host platform
 
         > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release ..
+        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" ..
         > make
         > make install
 
