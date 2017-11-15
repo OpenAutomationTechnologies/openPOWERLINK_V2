@@ -37,7 +37,8 @@ set -e
 #
 # verify commit message line length
 #
-len=`git log -n 1 --format=%B $GIT_COMMIT | awk '{ if (length > L) {L=length} }END{ print L}'`
+len=`git log --format=%B --no-merges -n 1 | awk '{ if (length > L) {L=length} }END{ print L}'`
+
 if [[ "$len" -gt "72" ]]; then
 	echo "ERROR: Maximum line length of commit message ($len) is bigger than 72 characters!"
 	exit 1
@@ -46,7 +47,7 @@ fi
 #
 # Verify if first line begins with [FIX], [TASK] or [FEATURE]
 #
-tag=`git log -n 1 --format=%B $GIT_COMMIT | awk -F" " 'NR == 1 { print $1 }'`
+tag=`git log --format=%B --no-merges -n 1  | awk -F" " 'NR == 1 { print $1 }'`
 
 if [[ "$tag" != "[MERGE]"  && "$tag" != "[FIX]"  && "$tag" != "[TASK]" && "$tag" != "[FEATURE]" ]]; then
 	echo "ERROR: Commit message does not begin with tag [MERGE] or [FIX] or [TASK] or [FEATURE]!"

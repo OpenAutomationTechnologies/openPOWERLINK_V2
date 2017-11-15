@@ -51,17 +51,20 @@ addons:
       - libtcl8.5
       - vera++
 
+before_install:
+  # Execute commit message guidelines check
+  - chmod +x tools/checkstyle/checkcommit.sh
+  - ./tools/checkstyle/checkcommit.sh
+
 before_script:
   # Print build info that binary is compiled with
   - echo $TRAVIS_COMMIT
+  - echo $TRAVIS_COMMIT_MESSAGE
+  - echo $TRAVIS_COMMIT_RANGE
   - echo $TRAVIS_TAG
   - echo $TRAVIS_BRANCH
   - echo $TRAVIS_BUILD_NUMBER
   - echo $TRAVIS_REPO_SLUG
-
-  # Execute commit message guidelines check
-  - chmod +x tools/checkstyle/checkcommit.sh
-  - ./tools/checkstyle/checkcommit.sh
 
   # Run vera++ coding guidelines check
   - cp -r /usr/lib/vera++ tools/checkstyle/.vera++
