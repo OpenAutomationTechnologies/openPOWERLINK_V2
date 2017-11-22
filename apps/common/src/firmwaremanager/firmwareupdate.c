@@ -282,8 +282,8 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
 
     if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
-        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %u - %zu\n",
-                  pSdoComFinished_p->nodeId, pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %u - %lu\n",
+                  pSdoComFinished_p->nodeId, pSdoComFinished_p->transferredBytes, (ULONG)pInfo->firmwareSize);
 
         fSucceeded = FALSE;
     }
@@ -462,8 +462,8 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
     if (!isTransmissionAllowed(pInfo_p))
     {
         FWM_TRACE("Postpone update for node: %u index: 0x%x subindex: 0x%x\n",
-                   pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
-                   pInfo_p->pUpdateList->subindex);
+                  pInfo_p->pUpdateList->nodeId, pInfo_p->pUpdateList->index,
+                  pInfo_p->pUpdateList->subindex);
 
         goto EXIT;
     }
@@ -476,7 +476,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
     if (ret != kFwReturnOk)
     {
         FWM_ERROR("Loading image for transmission failed with %d and errno %d\n",
-                ret, errno);
+                  ret, errno);
         goto EXIT;
     }
 
@@ -486,7 +486,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
     if (ret != kFwReturnOk)
     {
         FWM_ERROR("Getting the image for transmission failed with %d and errno %d\n",
-                ret, errno);
+                  ret, errno);
         goto EXIT;
     }
 
@@ -512,7 +512,7 @@ static tFirmwareRet transmitFirmware(tFirmwareUpdateTransmissionInfo* pInfo_p)
 EXIT:
     if (ret != kFwReturnOk)
     {
-        (void)firmwarestore_flushData(pInfo_p->pUpdateList->pStoreHandle);
+        firmwarestore_flushData(pInfo_p->pUpdateList->pStoreHandle);
     }
     return ret;
 }
@@ -565,8 +565,8 @@ static void transmissionFailed(tFirmwareUpdateTransmissionInfo* pInfo_p)
     {
         if (instance_l.config.pfnError != NULL)
         {
-            (void)instance_l.config.pfnError(pInfo_p->pUpdateList->nodeId,
-                                             &pInfo_p->sdoComCon);
+            instance_l.config.pfnError(pInfo_p->pUpdateList->nodeId,
+                                       &pInfo_p->sdoComCon);
         }
     }
 
@@ -649,7 +649,7 @@ static void cleanupTransmission(tFirmwareUpdateTransmissionInfo* pInfo_p)
     pInfo_p->pUpdateList = pInfo_p->pUpdateList->pNext;
     free(pRem);
 
-    (void)firmwarestore_flushData(pFwStore);
+    firmwarestore_flushData(pFwStore);
 }
 
 //------------------------------------------------------------------------------
