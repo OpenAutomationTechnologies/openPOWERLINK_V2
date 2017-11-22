@@ -186,7 +186,7 @@ tFirmwareRet firmwaremanager_init(const char* fwInfoFileName_p)
 
     infoConfig.pFwStore = instance_l.firmwareStore;
 
-    (void)firmwareinfo_create(&infoConfig, &instance_l.firmwareInfo);
+    firmwareinfo_create(&infoConfig, &instance_l.firmwareInfo);
 
     memset(&checkConfig, 0, sizeof(tFirmwareCheckConfig));
 
@@ -238,8 +238,8 @@ void firmwaremanager_exit(void)
 {
     firmwareupdate_exit();
     firmwarecheck_exit();
-    (void)firmwareinfo_destroy(instance_l.firmwareInfo);
-    (void)firmwarestore_destroy(instance_l.firmwareStore);
+    firmwareinfo_destroy(instance_l.firmwareInfo);
+    firmwarestore_destroy(instance_l.firmwareStore);
 
     instance_l.fInitialized = FALSE;
 }
@@ -434,7 +434,7 @@ static tFirmwareRet firmwareUpdateNotRequired(UINT nodeId_p,
     result = oplk_triggerMnStateChange(nodeId_p, kNmtNodeCommandSwOk);
     if (result != kErrorOk)
     {
-        FWM_ERROR("(%s) - Triggering mn state change failed with %d\n",
+        FWM_ERROR("(%s) - Triggering MN state change failed with %d\n",
                   __func__, result);
     }
 
@@ -491,7 +491,7 @@ static tFirmwareRet nodeUpdateCompleteCb(UINT nodeId_p,
     result = oplk_triggerMnStateChange(nodeId_p, kNmtNodeCommandSwUpdated);
     if (result != kErrorOk)
     {
-        FWM_ERROR("(%s) - Triggering mn state change failed with %d\n",
+        FWM_ERROR("(%s) - Triggering MN state change failed with %d\n",
                   __func__, result);
     }
 
@@ -524,7 +524,7 @@ static tFirmwareRet errorDuringUpdate(UINT nodeId_p,
     result = oplk_triggerMnStateChange(nodeId_p, kNmtNodeCommandSwErr);
     if (result != kErrorOk)
     {
-        FWM_ERROR("(%s) - Triggering mn state change failed with %d\n",
+        FWM_ERROR("(%s) - Triggering MN state change failed with %d\n",
                   __func__, result);
     }
 
@@ -534,7 +534,7 @@ static tFirmwareRet errorDuringUpdate(UINT nodeId_p,
 
 static void cleanupSdo(tSdoComConHdl* pSdoConnection_p)
 {
-    (void)oplk_freeSdoChannel(*pSdoConnection_p);
+    oplk_freeSdoChannel(*pSdoConnection_p);
     *pSdoConnection_p = FIRMWARECHECK_INVALID_SDO;
 }
 

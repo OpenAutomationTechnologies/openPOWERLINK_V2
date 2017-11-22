@@ -148,7 +148,7 @@ tFirmwareRet firmwareinfodecode_decodeInfo(tFirmwareStoreHandle pStore_p,
 
     while (pLine != NULL)
     {
-        pEntry = malloc(sizeof(tFirmwareInfoEntry));
+        pEntry = (tFirmwareInfoEntry*)malloc(sizeof(tFirmwareInfoEntry));
         if (pEntry == NULL)
         {
             ret = kFwReturnNoResource;

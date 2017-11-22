@@ -58,7 +58,7 @@ typedef enum
     kFwReturnOk = 0,                ///< Function call was successful
     kFwReturnInvalidParameter,      ///< An invalid parameter was passed
     kFwReturnInvalidInstance,       ///< An invalid instance was passed
-    kFwReturnNoResource,           ///< The allocation of required resources failed
+    kFwReturnNoResource,            ///< The allocation of required resources failed
     kFwReturnFileOperationFailed,   ///< A File operation failed
     kFwReturnInfoFormatError,       ///< The supplied fw.info file in formated invalid
     kFwReturnModuleNotFound,        ///< The requested module was not found

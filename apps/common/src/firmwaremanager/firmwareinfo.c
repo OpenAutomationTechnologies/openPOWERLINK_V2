@@ -123,7 +123,7 @@ tFirmwareRet firmwareinfo_create(const tFirmwareInfoConfig* pConfig_p,
         goto EXIT;
     }
 
-    instance = malloc(sizeof(tFirmwareInfoInstance));
+    instance = (tFirmwareInfoInstance*)malloc(sizeof(tFirmwareInfoInstance));
     if (instance == NULL)
     {
         ret = kFwReturnNoResource;
@@ -168,7 +168,7 @@ tFirmwareRet firmwareinfo_destroy(tFirmwareInfoHandle pHandle_p)
 
     if (pHandle_p != NULL)
     {
-        (void)firmwareinfodecode_freeInfo(pHandle_p->pInfoList);
+        firmwareinfodecode_freeInfo(pHandle_p->pInfoList);
         free(pHandle_p);
     }
     else
