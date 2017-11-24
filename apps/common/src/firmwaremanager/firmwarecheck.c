@@ -11,6 +11,7 @@ This module implements firmware version checks of a found node.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -967,8 +968,8 @@ static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
 
     ret = issueSdoRead(pNodeInfo_p); if (ret != kFwReturnOk)
     {
-        FWM_ERROR("(%s) - reading the index of the %zu fw fownload object failed with %d\n",
-                  __func__, index_p, ret);
+        FWM_ERROR("(%s) - reading the index of the %lu fw fownload object failed with %d\n",
+                  __func__, (ULONG)index_p, ret);
     }
 
     return ret;
@@ -1022,9 +1023,9 @@ static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p
 
     if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
     {
-        FWM_ERROR("Unexpected transferred bytes %zu instead of %zu for node %u index 0x%X subindex 0x%X\n",
-                  pSdoComFinished_p->transferredBytes,
-                  pNodeInfo_p->sdo.size,
+        FWM_ERROR("Unexpected transferred bytes %lu instead of %lu for node %u index 0x%X subindex 0x%X\n",
+                  (ULONG)pSdoComFinished_p->transferredBytes,
+                  (ULONG)pNodeInfo_p->sdo.size,
                   pNodeInfo_p->nodeId,
                   pNodeInfo_p->sdo.index,
                   pNodeInfo_p->sdo.subindex);
@@ -1227,16 +1228,16 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 {
                     if (isFirmwareUpdateRequired(pNodeInfo_p, &(*ppIter)->fwInfo))
                     {
-                        FWM_TRACE("Firmware update required for module %zu of node: %u\n",
-                                  modIdx, pNodeInfo_p->nodeId);
+                        FWM_TRACE("Firmware update required for module %lu of node: %u\n",
+                                  (ULONG)modIdx, pNodeInfo_p->nodeId);
                         pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateGetNumberOfFwDownIndices;
                         (*ppIter)->moduleIndex = modIdx;
                         ppIter = &(*ppIter)->pNext;
                     }
                     else
                     {
-                        FWM_TRACE("No firmware update required for module %zu of node: %u\n",
-                                  modIdx, pNodeInfo_p->nodeId);
+                        FWM_TRACE("No firmware update required for module %lu of node: %u\n",
+                                  (ULONG)modIdx, pNodeInfo_p->nodeId);
                         pRem = *ppIter;
                         *ppIter = pRem->pNext;
                         pRem->pNext = NULL;

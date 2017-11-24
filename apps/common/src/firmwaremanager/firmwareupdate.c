@@ -11,6 +11,7 @@ This module implements firmware updates of a node with wrong version.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -282,8 +283,8 @@ tFirmwareRet firmwareupdate_processSdoEvent(const tSdoComFinished* pSdoComFinish
 
     if (pSdoComFinished_p->transferredBytes != pInfo->firmwareSize)
     {
-        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %zu - %zu\n",
-                  pSdoComFinished_p->nodeId, pSdoComFinished_p->transferredBytes, pInfo->firmwareSize);
+        FWM_ERROR("SDO written number of bytes does not match for node 0x%X: %lu - %lu\n",
+                  pSdoComFinished_p->nodeId, (ULONG)pSdoComFinished_p->transferredBytes, (ULONG)pInfo->firmwareSize);
 
         fSucceeded = FALSE;
     }

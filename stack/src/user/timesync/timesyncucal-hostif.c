@@ -269,7 +269,7 @@ static void* getSharedMemory(tHostifInstance pHifInstance_p)
 
     if (span < sizeof(tTimesyncSharedMemory))
     {
-        DEBUG_LVL_ERROR_TRACE("%s() Time Synchronization Buffer too small (shall be: %zu)\n",
+        DEBUG_LVL_ERROR_TRACE("%s() Time Synchronization Buffer too small (shall be: %lu)\n",
                               __func__,
                               sizeof(tTimesyncSharedMemory));
         return NULL;
