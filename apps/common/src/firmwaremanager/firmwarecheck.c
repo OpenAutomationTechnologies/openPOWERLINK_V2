@@ -11,6 +11,7 @@ This module implements firmware version checks of a found node.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1024,9 +1025,9 @@ static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p
 
     if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
     {
-        FWM_ERROR("Unexpected transferred bytes %zu instead of %zu for node %u index 0x%X subindex 0x%X\n",
-                  pSdoComFinished_p->transferredBytes,
-                  pNodeInfo_p->sdo.size,
+        FWM_ERROR("Unexpected transferred bytes %lu instead of %lu for node %u index 0x%X subindex 0x%X\n",
+                  (ULONG)pSdoComFinished_p->transferredBytes,
+                  (ULONG)pNodeInfo_p->sdo.size,
                   pNodeInfo_p->nodeId,
                   pNodeInfo_p->sdo.index,
                   pNodeInfo_p->sdo.subindex);

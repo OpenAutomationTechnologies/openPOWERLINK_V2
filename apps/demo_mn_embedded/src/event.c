@@ -12,7 +12,7 @@ This file contains a demo MN application event handler.
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
+Copyright (c) 2017, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -435,9 +435,9 @@ static tOplkError processCfmProgressEvent(const tCfmEventCnProgress* pCfmProgres
            pCfmProgress_p->objectIndex,
            pCfmProgress_p->objectSubIndex);
 
-    PRINTF("%zu/%zu Bytes",
-           pCfmProgress_p->bytesDownloaded,
-           pCfmProgress_p->totalNumberOfBytes);
+    PRINTF("%lu/%lu Bytes",
+           (ULONG)pCfmProgress_p->bytesDownloaded,
+           (ULONG)pCfmProgress_p->totalNumberOfBytes);
 
     if ((pCfmProgress_p->sdoAbortCode != 0) ||
         (pCfmProgress_p->error != kErrorOk))

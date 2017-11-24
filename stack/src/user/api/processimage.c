@@ -11,6 +11,7 @@ This source file contains the implementation of the process image functions.
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -124,10 +125,10 @@ tOplkError oplk_allocProcessImage(size_t sizeProcessImageIn_p,
 {
     tOplkError  ret = kErrorOk;
 
-    DEBUG_LVL_ALWAYS_TRACE("%s(): Alloc(%zu, %zu)\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s(): Alloc(%lu, %lu)\n",
                            __func__,
-                           sizeProcessImageIn_p,
-                           sizeProcessImageOut_p);
+                           (ULONG)sizeProcessImageIn_p,
+                           (ULONG)sizeProcessImageOut_p);
 
     if (!ctrlu_stackIsInitialized())
         return kErrorApiNotInitialized;
@@ -160,12 +161,12 @@ tOplkError oplk_allocProcessImage(size_t sizeProcessImageIn_p,
         OPLK_MEMSET(instance_l.outputImage.pImage, 0x00, sizeProcessImageOut_p);
     }
 
-    DEBUG_LVL_ALWAYS_TRACE("%s: Alloc(%p, %zu, %p, %zu)\n",
+    DEBUG_LVL_ALWAYS_TRACE("%s: Alloc(%p, %lu, %p, %lu)\n",
                            __func__,
                            instance_l.inputImage.pImage,
-                           instance_l.inputImage.imageSize,
+                           (ULONG)instance_l.inputImage.imageSize,
                            instance_l.outputImage.pImage,
-                           instance_l.outputImage.imageSize);
+                           (ULONG)instance_l.outputImage.imageSize);
 
     return ret;
 }
