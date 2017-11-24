@@ -5,6 +5,31 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.6.2 {#sect_revision_v2_6_2}
+
+This is the latest release of the V2.6 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.6.2. For a detailed revision history
+refer to the Git source code history.
+
+### Changes:
+- Silently ignore invalid SDO commands for closed connections
+- Add 8111 edrv (rev 0c) support for kernel module design
+- Update the company name of B&R
+
+### Fixes:
+- Fix OD and XDD for compliance with EPSG DS 301 V1.3.0
+- Improve DLL_CNLossSoC_REC cumulative counter
+- Fix wrong calculation of the error counters
+- Fix conversion from us to ns in hrestimer
+- Fix SDO over UDP feature in Windows designs
+- Fix several compiler warnings
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.6.1 {#sect_revision_v2_6_1}
 
 This is the latest release of the V2.6 release series. This release is a stable
