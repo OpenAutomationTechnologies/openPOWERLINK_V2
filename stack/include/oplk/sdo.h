@@ -184,11 +184,11 @@ typedef struct
 This callback function is used for the object dictionary to finish a read or
 write access from an SDO command layer server.
 
-\param tSdoObdConHdl    SDO command layer connection to the object dictionary
+\param pObdHdl_p                SDO command layer connection to the object dictionary
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tCmdLayerObdFinishedCb)(tSdoObdConHdl*);
+typedef tOplkError (*tCmdLayerObdFinishedCb)(tSdoObdConHdl* pObdHdl_p);
 
 /**
 \brief Callback for SDO read or write access to the object dictionary
@@ -196,13 +196,14 @@ typedef tOplkError (*tCmdLayerObdFinishedCb)(tSdoObdConHdl*);
 This callback function is used for the SDO command layer server to process
 an object dictionary access.
 
-\param tSdoObdConHdl            SDO command layer connection to the
+\param pSdoHdl_p                SDO command layer connection to the
                                 object dictionary
-\param tCmdLayerObdFinishedCb   Callback for object dictionary to finish
+\param pfnFinishSdoCb_p         Callback for object dictionary to finish
                                 SDO read or write access
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tComdLayerObdCb)(tSdoObdConHdl*, tCmdLayerObdFinishedCb);
+typedef tOplkError (*tComdLayerObdCb)(tSdoObdConHdl* pSdoHdl_p,
+                                      tCmdLayerObdFinishedCb pfnFinishSdoCb_p);
 
 #endif /* _INC_oplk_sdo_H_ */

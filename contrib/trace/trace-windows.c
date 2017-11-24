@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -59,10 +59,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Windows.h>
 #endif
 
+#include <trace/trace.h>
+
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
+#ifndef NDEBUG
 //------------------------------------------------------------------------------
 /**
 \brief  Print debug trace message
@@ -92,3 +95,4 @@ void trace(const char* fmt, ...)
     OutputDebugString((LPSTR)&aBuffer);
 #endif
 }
+#endif

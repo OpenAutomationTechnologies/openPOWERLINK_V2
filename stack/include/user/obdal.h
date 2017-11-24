@@ -9,7 +9,7 @@ object dictionary access.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -54,11 +54,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 This callback is used to access the user defined object dictionary.
 
-\param tObdAlConHdl     Connection handle for user defined OD
+\param pObdAlConHdl_p               Connection handle for user defined OD
 
 \return The function returns a tOplkError error code.
 */
-typedef tOplkError (*tObdAlUserObdAccessCb)(tObdAlConHdl*);
+typedef tOplkError (*tObdAlUserObdAccessCb)(tObdAlConHdl* pObdAlConHdl_p);
 
 //------------------------------------------------------------------------------
 // function prototypes

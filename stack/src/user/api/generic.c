@@ -865,9 +865,9 @@ beginning of the access to signal a delayed answer.
 
 \parblock
 \param[in,out]  pUserObdConHdl_p    Connection handle to user OD. Used members:
-                \li \ref tObdAlConHdl::obdAlHdl
-                \li \ref tObdAlConHdl::plkError
-                \li \ref tObdAlConHdl::origin
+                \li tObdAlConHdl::obdAlHdl
+                \li tObdAlConHdl::plkError
+                \li tObdAlConHdl::origin
 
                 Only used for \ref tObdAlConHdl::accessTyp = kObdAlAccessTypeRead:
                 \li tObdAlConHdl::pSrcData
