@@ -1635,8 +1635,8 @@ dictionary.
 
 \parblock
 \param[in,out]  pObdHdl_p           Connection handle to SDO command layer. Used members:
-                                    \li \ref tSdoObdConHdl::sdoHdl
-                                    \li \ref tSdoObdConHdl::plkError
+                                    \li tSdoObdConHdl::sdoHdl
+                                    \li tSdoObdConHdl::plkError
 
                                     Only used for read access (status saved in local instance):
                                     \li tSdoObdConHdl::pSrcData

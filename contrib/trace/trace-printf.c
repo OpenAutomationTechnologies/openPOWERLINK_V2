@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronik GmbH
 All rights reserved.
 
@@ -39,11 +39,13 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 #include <stdio.h>
 #include <stdarg.h>
+#include <trace/trace.h>
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
+#ifndef NDEBUG
 //------------------------------------------------------------------------------
 /**
 \brief  Print debug trace message
@@ -62,3 +64,4 @@ void trace(const char* fmt, ...)
     vfprintf(stderr, fmt, argptr);
     va_end(argptr);
 }
+#endif

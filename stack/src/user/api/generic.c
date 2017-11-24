@@ -10,7 +10,7 @@ This file contains the implementation of the generic API functions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -817,9 +817,9 @@ beginning of the access to signal a delayed answer.
 
 \parblock
 \param[in,out]  pUserObdConHdl_p    Connection handle to user OD. Used members:
-                \li \ref tObdAlConHdl::obdAlHdl
-                \li \ref tObdAlConHdl::plkError
-                \li \ref tObdAlConHdl::origin
+                \li tObdAlConHdl::obdAlHdl
+                \li tObdAlConHdl::plkError
+                \li tObdAlConHdl::origin
 
                 Only used for \ref tObdAlConHdl::accessTyp = kObdAlAccessTypeRead:
                 \li tObdAlConHdl::pSrcData

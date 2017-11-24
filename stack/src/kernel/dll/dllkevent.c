@@ -203,8 +203,8 @@ tOplkError dllk_process(const tEvent* pEvent_p)
             for (;;);
 #else
             ret = kErrorInvalidEvent;
-#endif
             break;
+#endif
     }
 
     return ret;

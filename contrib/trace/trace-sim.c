@@ -7,7 +7,7 @@
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 All rights reserved.
 
@@ -37,9 +37,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <common/oplkinc.h>
+#include <string.h>
 #include <stdarg.h>
 #include <sim-trace.h>
+#include <trace/trace.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -82,8 +83,9 @@ typedef struct
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-
+#ifndef NDEBUG
 static tTraceInstance   traceInstance_l;
+#endif
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -93,6 +95,7 @@ static tTraceInstance   traceInstance_l;
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
+#ifndef NDEBUG
 //------------------------------------------------------------------------------
 /**
 \brief  Print debug trace message
@@ -108,7 +111,7 @@ void trace(const char* fmt, ...)
     va_list argptr;
 
     // clear buffer
-    OPLK_MEMSET(traceInstance_l.aBuffer, 0, CONFIG_TRACE_SIM_BUFFER_SIZE);
+    memset(traceInstance_l.aBuffer, 0, CONFIG_TRACE_SIM_BUFFER_SIZE);
 
     va_start(argptr, fmt);
     vsprintf(traceInstance_l.aBuffer, fmt, argptr);
@@ -116,3 +119,4 @@ void trace(const char* fmt, ...)
 
     sim_trace(traceInstance_l.aBuffer);
 }
+#endif
