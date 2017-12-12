@@ -54,6 +54,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/delay.h>
 #include <linux/sched.h>
 #include <linux/cpumask.h>
+#include <linux/uaccess.h>
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
 
