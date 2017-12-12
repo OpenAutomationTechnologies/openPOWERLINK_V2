@@ -169,7 +169,12 @@ tOplkError veth_init(const UINT8 aSrcMac_p[6])
 
     pVEthNetDevice_g->netdev_ops = &oplk_netdev_ops;
     pVEthNetDevice_g->watchdog_timeo = VETH_TX_TIMEOUT;
+#if (LINUX_VERSION_CODE>=KERNEL_VERSION(4,11,9))
+    pVEthNetDevice_g->needs_free_netdev = false;
+    pVEthNetDevice_g->priv_destructor = free_netdev;
+#else
     pVEthNetDevice_g->destructor = free_netdev;
+#endif
 
     // copy own MAC address to net device structure
     OPLK_MEMCPY(pVEthNetDevice_g->dev_addr, aSrcMac_p, 6);
