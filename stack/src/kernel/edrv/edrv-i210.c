@@ -2754,7 +2754,11 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
             edrvInstance_l.pMsixEntry[index].entry = index;
         }
 
+#if (LINUX_VERSION_CODE>=KERNEL_VERSION(4,12,0))
+        result = pci_enable_msix_exact(pPciDev_p, edrvInstance_l.pMsixEntry, numVectors);
+#else
         result = pci_enable_msix(pPciDev_p, edrvInstance_l.pMsixEntry, numVectors);
+#endif
         if (result != 0)
         {
             printk("...Failed\n");
