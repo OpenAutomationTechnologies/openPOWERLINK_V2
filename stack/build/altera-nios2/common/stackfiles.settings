@@ -359,6 +359,7 @@ ${HW_DRIVERS_DIR}/hostinterface/src/hostiflibint-pcp.c \
 
 DUALPROCSHM_COMMON_SOURCES="\
 ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-intr.c \
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-lock.c \
 ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-noos.c \
 "
 

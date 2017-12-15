@@ -80,6 +80,7 @@ SET(EXAMPLE_BINARY_DIR ${CMAKE_BINARY_DIR}/boards/${BOARD_NAME}/${EXAMPLE_NAME})
 ########################################################################
 SET(DUALPROCSHM_LIB_SRCS
     ${PROJECT_SOURCE_DIR}/src/dualprocshm-intr.c
+    ${PROJECT_SOURCE_DIR}/src/dualprocshm-lock.c
     ${PROJECT_SOURCE_DIR}/src/dualprocshm-noos.c
    )
 
