@@ -60,6 +60,7 @@ SET(DRIVER_SOURCE_FILES
     ${CMAKE_SOURCE_DIR}/main.c
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-intr.c
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-noos.c
+    ${DPSHM_SOURCE_DIR}/src/dualprocshm-lock.c
     ${DPSHM_SOURCE_DIR}/src/dualprocshm-winpcie.c
     ${CONTRIB_SOURCE_DIR}/trace/trace-windows.c
     ${NDISLIB_SOURCE_DIR}/ndispcie/ndis-pcie.c

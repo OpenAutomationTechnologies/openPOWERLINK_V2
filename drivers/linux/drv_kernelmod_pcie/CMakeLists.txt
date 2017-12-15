@@ -142,6 +142,7 @@ SET(MODULE_SOURCE_FILES
     ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-linuxpcie.c
     ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-intr.c
     ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-noos.c
+    ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-lock.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuf-noosdual.c
     ${COMMON_SOURCE_DIR}/circbuf/circbuffer.c
     ${COMMON_SOURCE_DIR}/debugstr.c

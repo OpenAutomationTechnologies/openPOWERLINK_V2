@@ -364,10 +364,12 @@ ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-noos.c \
 
 DUALPROCSHM_DRIVER_SOURCES="\
 ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-c5soc.c \
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-lock.c \
 "
 
 DUALPROCSHM_PCIE_SOURCES="\
 ${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-pcp.c \
+${CONTRIB_SOURCE_DIR}/dualprocshm/src/dualprocshm-lock.c \
 "
 ################################################################################
 # Target system specific sources

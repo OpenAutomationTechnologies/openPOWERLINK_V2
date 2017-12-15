@@ -77,8 +77,9 @@ locking mechanism in dual processor shared memory library.
 */
 typedef struct sDualprocLock
 {
-    unsigned char   lockToken;              ///< Locking token
-    unsigned char   aPadding1[3];           ///< Padding array variable 1
+    unsigned char   turn;                               ///< Flag to determine the processor holding or requesting the lock
+    unsigned char   afFlag[DUALPROC_INSTANCE_COUNT];    ///< Flag to request lock for the processor
+    unsigned char   reserved1;                          ///< Reserved
 } tDualprocLock;
 
 //------------------------------------------------------------------------------
