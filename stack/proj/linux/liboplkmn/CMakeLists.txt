@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK MN library
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -56,13 +56,19 @@ SET (LIB_SOURCES
      ${ERRHND_KCAL_LOCAL_SOURCES}
      ${EVENT_KCAL_LINUXUSER_SOURCES}
      ${PDO_KCAL_LOCAL_SOURCES}
-     ${HARDWARE_DRIVER_LINUXUSER_SOURCES}
      ${COMMON_SOURCES}
      ${COMMON_LINUXUSER_SOURCES}
      ${TARGET_LINUX_SOURCES}
      ${CIRCBUF_POSIX_SOURCES}
      ${MEMMAP_NULL_SOURCES}
      )
+
+# Configure compile definitions
+IF(CFG_USE_PCAP_EDRV)
+    SET(LIB_SOURCES ${LIB_SOURCES} ${HARDWARE_DRIVER_LINUXUSER_SOURCES})
+ELSE()
+    SET(LIB_SOURCES ${LIB_SOURCES} ${HARDWARE_DRIVER_LINUXUSERRAWSOCKET_SOURCES})
+ENDIF()
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")
     SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
@@ -76,6 +82,7 @@ ENDIF()
 IF(CFG_INCLUDE_MN_REDUNDANCY)
     ADD_DEFINITIONS(-DCONFIG_INCLUDE_NMT_RMN)
 ENDIF()
+ADD_DEFINITIONS(-DCONFIG_FIND_LOCAL_INTERFACES)
 ADD_DEFINITIONS(-DCONFIG_MN -D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
 

@@ -11,7 +11,7 @@ application library on Windows which is using the PCIe interface.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -65,6 +65,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_INCLUDE_SDO_RW_MULTIPLE
 #define CONFIG_INCLUDE_CFM
 #define CONFIG_INCLUDE_VETH
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
+#define CONFIG_INCLUDE_SDO_UDP
 
 #define CONFIG_DLLCAL_QUEUE                             IOCTL_QUEUE
 
@@ -101,5 +103,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define CONFIG_SDO_MAX_CONNECTION_ASND              100
 #define CONFIG_SDO_MAX_CONNECTION_SEQ               100
 #define CONFIG_SDO_MAX_CONNECTION_COM               100
+#define CONFIG_SDO_MAX_CONNECTION_UDP               50
 
 #endif // _INC_oplkcfg_H_

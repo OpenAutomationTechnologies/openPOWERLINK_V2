@@ -11,6 +11,7 @@ This file contains the configuration options for the openPOWERLINK kernel module
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronik GmbH
 Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -57,6 +58,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 // These macros define all modules which are included
 #define CONFIG_INCLUDE_PDO
+#define CONFIG_INCLUDE_SOC_TIME_FORWARD
 
 #define CONFIG_DLLCAL_QUEUE                         CIRCBUF_QUEUE
 

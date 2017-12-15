@@ -230,6 +230,13 @@
             output process data.</tip>
       </widget>
       '>
+      <!ENTITY Size_B_Timesync '
+      <widget id="Size_B_Timesync">
+            <key>Size_B_Timesync</key>
+            <label>Time synchronization buffer (Timesync): </label>
+            <tip>"The Timesync buffer is used to exchange timing information.</tip>
+      </widget>
+      '>
 <!--
       Parallel Interface Generics
 -->
@@ -344,6 +351,13 @@
       <widget id="gBasePdo">
             <key>gBasePdo</key>
             <label>gBasePdo</label>
+            <tip><![CDATA[Bytes]]></tip>
+      </widget>
+      '>
+      <!ENTITY gBaseTimeSync '
+      <widget id="gBaseTimeSync">
+            <key>gBaseTimeSync</key>
+            <label>gBaseTimeSync</label>
             <tip><![CDATA[Bytes]]></tip>
       </widget>
       '>
@@ -467,6 +481,7 @@
                   <item>&gBaseDynBuf0;</item>
                   <item>&gBaseDynBuf1;</item>
                   <item>&gBaseErrCntr;</item>
+                  <item>&gBaseTimeSync;</item>
                   <item>&gBaseRes;</item>
             </group>
       </view>

@@ -491,7 +491,7 @@ tOplkError EventHandler::pdoChangeEvent(const tOplkApiEventPdoChange& pdoChange_
     UINT        subIndex;
     UINT64      mappObject;
     tOplkError  ret;
-    UINT        varLen;
+    size_t      varLen;
 
     this->pEventLog->printEvent(pdoChange_p);
 

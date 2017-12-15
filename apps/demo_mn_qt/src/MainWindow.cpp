@@ -43,11 +43,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Api.h>
 #include <SdoTransferDialog.h>
 #include <NmtCommandDialog.h>
-
-#if defined(CONFIG_USE_PCAP)
 #include <InterfaceSelectionDialog.h>
-#endif
-
 
 //============================================================================//
 //            P U B L I C    M E M B E R    F U N C T I O N S                 //
@@ -139,16 +135,15 @@ Starts the openPOWERLINK stack.
 //------------------------------------------------------------------------------
 void MainWindow::startPowerlink()
 {
-#if defined(CONFIG_USE_PCAP)
     // start the selection dialog
     InterfaceSelectionDialog    interfaceDialog;
 
     if (interfaceDialog.fillList() < 0)
     {
         QMessageBox::warning(this,
-                             "PCAP not working!",
-                             "No PCAP interfaces found!\n"
-                             "Make sure LibPcap is installed and you have root permissions!",
+                             "Interface selection not working!",
+                             "No interfaces found!\n"
+                             "Make sure that you have got root permissions!",
                              QMessageBox::Close);
         return;
     }
@@ -158,9 +153,6 @@ void MainWindow::startPowerlink()
         return;
 
     this->devName = interfaceDialog.getDevName();
-#else
-    this->devName = QString("plk");
-#endif
 
     // Update GUI elements to started stack
     this->ui.pNodeIdInput->setEnabled(false);

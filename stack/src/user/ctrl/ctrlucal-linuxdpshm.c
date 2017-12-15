@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   ctrlucal-pcie.c
+\file   ctrlucal-linuxdpshm.c
 
 \brief  User control CAL module using PCIe interface to the Kernel layer
 
@@ -14,7 +14,7 @@ ioctl calls into corresponding PCIe messages for the kernel layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -456,9 +456,9 @@ the provided offset and returns the address back.
 \ingroup module_ctrlucal
 */
 //------------------------------------------------------------------------------
-tOplkError ctrlucal_getMappedMem(UINT32 kernelOffs_p,
-                                 UINT32 size_p,
-                                 UINT8** ppUserMem_p)
+tOplkError ctrlucal_getMappedMem(size_t kernelOffs_p,
+                                 size_t size_p,
+                                 void** ppUserMem_p)
 {
     UNUSED_PARAMETER(kernelOffs_p);
     UNUSED_PARAMETER(size_p);

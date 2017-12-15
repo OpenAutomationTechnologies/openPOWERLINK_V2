@@ -126,13 +126,18 @@ typedef struct
     sdoApiCbSeqTest             apiCb;        ///< API callback
 } tSdoTestSeq;
 
+//------------------------------------------------------------------------------
+// local vars
+//------------------------------------------------------------------------------
+static tSdoTestSeq sdoTestSeqInst_l;
+
 /**
 \brief  SDO sequence layer UDP functions
 
-This array sets the function pointers to the UDP functions.
+This structure sets the function pointers to the UDP functions.
 */
 #if defined(CONFIG_INCLUDE_SDO_UDP)
-tSdoTestSeqFunc sdoTestSeqUdpFuncs =
+static tSdoTestSeqFunc sdoTestSeqUdpFuncs_l =
 {
     sdoudp_init,
     sdoudp_exit,
@@ -145,10 +150,10 @@ tSdoTestSeqFunc sdoTestSeqUdpFuncs =
 /**
 \brief  SDO sequence layer ASnd functions
 
-This array sets the function pointers to the ASnd functions.
+This structure sets the function pointers to the ASnd functions.
 */
 #if defined(CONFIG_INCLUDE_SDO_ASND)
-tSdoTestSeqFunc sdoTestSeqAsndFuncs =
+static tSdoTestSeqFunc sdoTestSeqAsndFuncs_l =
 {
     sdoasnd_init,
     sdoasnd_exit,
@@ -157,11 +162,6 @@ tSdoTestSeqFunc sdoTestSeqAsndFuncs =
     sdoasnd_deleteCon
 };
 #endif
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-static tSdoTestSeq sdoTestSeqInst_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
@@ -345,7 +345,7 @@ tOplkError sdotestseq_sendFrame(UINT nodeId_p,
                     return ret;
 
 #if defined(CONFIG_INCLUDE_SDO_UDP)
-                pCon->pFuncTable = &sdoTestSeqUdpFuncs;
+                pCon->pFuncTable = &sdoTestSeqUdpFuncs_l;
 #endif
                 break;
 
@@ -360,7 +360,7 @@ tOplkError sdotestseq_sendFrame(UINT nodeId_p,
                     return ret;
 
 #if defined(CONFIG_INCLUDE_SDO_ASND)
-                pCon->pFuncTable = &sdoTestSeqAsndFuncs;
+                pCon->pFuncTable = &sdoTestSeqAsndFuncs_l;
 #endif
                 break;
 

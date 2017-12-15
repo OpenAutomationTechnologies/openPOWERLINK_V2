@@ -12,7 +12,7 @@ This file contains the implementation of the configuration file manager (CFM).
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -398,7 +398,7 @@ tOplkError cfmu_processNodeEvent(UINT nodeId_p,
             obdSize = obdu_getDataSize(0x1F22, subindex);
             // Download only cDCFs with at least one entry
             if (obdSize > 4)
-                pNodeInfo->eventCnProgress.totalNumberOfBytes += (UINT32)obdSize;
+                pNodeInfo->eventCnProgress.totalNumberOfBytes += (size_t)obdSize;
         }
 
         fDoNetConf = TRUE;

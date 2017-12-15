@@ -1,19 +1,17 @@
 /**
 ********************************************************************************
-\file   pcap-console.c
+\file   dualprocshm-lock.c
 
-\brief  Implementation of PCAP helper functions for console applications
+\brief  Dual processor library - Target lock
 
-This file provides helper functions for console applications using the PCAP
-library.
+This file provides specific function definitions for the target lock.
 
-\ingroup module_app_common
+\ingroup module_dualprocshm
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2015, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2013, SYSTEC electronic GmbH
-Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -42,10 +40,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
-#include <pcap.h>
-#include "pcap-console.h"
+#include <dualprocshm-target.h>
+#include <trace/trace.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -63,7 +59,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // global function prototypes
 //------------------------------------------------------------------------------
 
-
 //============================================================================//
 //            P R I V A T E   D E F I N I T I O N S                           //
 //============================================================================//
@@ -72,93 +67,92 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // const defines
 //------------------------------------------------------------------------------
 
-//------------------------------------------------------------------------------
-// local types
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local vars
-//------------------------------------------------------------------------------
-
-//------------------------------------------------------------------------------
-// local function prototypes
-//------------------------------------------------------------------------------
-
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
 //============================================================================//
 
 //------------------------------------------------------------------------------
 /**
-\brief  Select PCAP device
+\brief  Target specific memory lock routine(acquire)
 
-With this function the PCAP device to be used for openPOWERLINK is selected
-from a list of devices.
+This routine implements a target specific locking mechanism using the shared
+memory between two processors/processes. The caller needs to pass the base
+address and processor instance of the calling processor.
 
-\param[out]     pDevName_p          Pointer to store the device name which
-                                    should be used.
+The locking is achieved using Peterson's algorithm
+\ref https://en.wikipedia.org/wiki/Peterson's_algorithm
 
-\return The function returns 0 if a device could be selected, otherwise -1.
+\param[in,out]  pBase_p             Base address of the lock memory
+\param[in]      procInstance_p      Processor instance of the calling processor
 
-*/
+\ingroup module_dualprocshm
+ */
 //------------------------------------------------------------------------------
-int selectPcapDevice(char* pDevName_p)
+void dualprocshm_targetAcquireLock(tDualprocLock* pBase_p,
+                                   tDualProcInstance procInstance_p)
 {
-    char        sErr_Msg[PCAP_ERRBUF_SIZE];
-    pcap_if_t*  alldevs;
-    pcap_if_t*  seldev;
-    int         i = 0;
-    int         inum;
+    tDualprocLock*      pLock = pBase_p;
+    tDualProcInstance   otherProcInstance;
 
-    /* Retrieve the device list on the local machine */
-    if (pcap_findalldevs(&alldevs, sErr_Msg) == -1)
+    if (pLock == NULL)
+        return;
+
+    switch (procInstance_p)
     {
-        fprintf(stderr, "Error in pcap_findalldevs: %s\n", sErr_Msg);
-        return -1;
+        case kDualProcFirst:
+            otherProcInstance = kDualProcSecond;
+            break;
+
+        case kDualProcSecond:
+            otherProcInstance = kDualProcFirst;
+            break;
+
+        default:
+            TRACE("Invalid processor instance\n");
+            return;
     }
 
-    printf("--------------------------------------------------\n");
-    printf("List of Ethernet cards found in this system:\n");
-    printf("--------------------------------------------------\n");
+    DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
 
-    for (seldev = alldevs; seldev != NULL; seldev = seldev->next)
+    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 1);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
+                                   sizeof(pLock->afFlag[procInstance_p]));
+
+    DPSHM_WRITE8(&pLock->turn, otherProcInstance);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->turn, sizeof(pLock->turn));
+
+    DPSHM_DMB();
+
+    do
     {
-        printf("%d. ", ++i);
-        if (seldev->description)
-            printf("%s\n      %s\n", seldev->description, seldev->name);
-        else
-            printf("%s\n", seldev->name);
-    }
+        DUALPROCSHM_INVALIDATE_DCACHE_RANGE(pLock, sizeof(tDualprocLock));
+    } while (DPSHM_READ8(&pLock->afFlag[otherProcInstance]) &&
+             (DPSHM_READ8(&pLock->turn) == otherProcInstance));
+}
 
-    if (i == 0)
-    {
-        fprintf(stderr, "\nNo interfaces found! Make sure pcap library is installed.\n");
-        return -1;
-    }
+//------------------------------------------------------------------------------
+/**
+\brief  Target specific memory unlock routine (release)
 
-    printf("--------------------------------------------------\n");
-    printf("Select the interface to be used for POWERLINK (1-%d):", i);
-    if (scanf("%d", &inum) == EOF)
-    {
-        pcap_freealldevs(alldevs);
-        return -1;
-    }
+This routine is used to release a lock acquired at a specified address.
 
-    printf("--------------------------------------------------\n");
-    if ((inum < 1) || (inum > i))
-    {
-        printf("\nInterface number out of range.\n");
-        pcap_freealldevs(alldevs);
-        return -1;
-    }
+\param[in,out]  pBase_p             Base address of the lock memory
+\param[in]      procInstance_p      Processor instance of the calling processor
 
-    /* Jump to the selected adapter */
-    for (seldev = alldevs, i = 0; i < (inum - 1); seldev = seldev->next, i++)
-    {   // do nothing
-    }
-    strncpy(pDevName_p, seldev->name, 127);
+\ingroup module_dualprocshm
+ */
+//------------------------------------------------------------------------------
+void dualprocshm_targetReleaseLock(tDualprocLock* pBase_p,
+                                   tDualProcInstance procInstance_p)
+{
+    tDualprocLock*  pLock = pBase_p;
 
-    return 0;
+    if (pLock == NULL)
+        return;
+
+    DPSHM_WRITE8(&pLock->afFlag[procInstance_p], 0);
+    DUALPROCSHM_FLUSH_DCACHE_RANGE(&pLock->afFlag[procInstance_p],
+                                   sizeof(pLock->afFlag[procInstance_p]));
 }
 
 //============================================================================//
@@ -166,6 +160,5 @@ int selectPcapDevice(char* pDevName_p)
 //============================================================================//
 /// \name Private Functions
 /// \{
-
 
 /// \}

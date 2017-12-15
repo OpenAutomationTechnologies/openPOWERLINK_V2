@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   memmap/memmap-linuxpcie.c
+\file   memmap/memmap-linuxdpshm.c
 
 \brief  Memory mapping implementation for openPOWERLINK PCIe driver on Linux
 
@@ -11,7 +11,7 @@ for Linux systems using openPOWERLINK PCIe driver.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited.
+Copyright (c) 2017, Kalycito Infotech Private Limited.
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -174,11 +174,11 @@ void* memmap_mapKernelBuffer(const void* pKernelBuffer_p, UINT bufferSize_p)
     memmapInstance_l.offset = (ULONG)pKernelBuffer_p &
                               (sysconf(_SC_PAGE_SIZE) - 1);
 
-    memmapInstance_l.pUserBuf = mmap(NULL,          // Map at any address in vma
+    memmapInstance_l.pUserBuf = mmap(NULL,                       // Map at any address in vma
                                      memmapInstance_l.memSize + 2 * sysconf(_SC_PAGE_SIZE),
-                                     PROT_READ,     // Map as read only memory
-                                     MAP_SHARED,    // Map as shared memory, $$ private is enough for us
-                                     fd_l,          // file descriptor
+                                     PROT_READ | PROT_WRITE,     // Map as read and write memory
+                                     MAP_SHARED,                 // Map as shared memory, $$ private is enough for us
+                                     fd_l,                       // file descriptor
                                      (ULONG)memmapInstance_l.pKernelBuf);
     if (memmapInstance_l.pUserBuf == MAP_FAILED)
     {

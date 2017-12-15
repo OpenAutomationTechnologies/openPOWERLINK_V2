@@ -381,7 +381,7 @@ static tOplkError decrementMnCounters(void)
         if (thresholdCnt > 0)
         {
             thresholdCnt--;
-            errhndkcal_setMnCrcThresholdCnt(thresholdCnt);
+            errhndkcal_setMnCycTimeExceedThresholdCnt(thresholdCnt);
         }
     }
 
@@ -416,7 +416,7 @@ static void decrementCnCounters(void)
         if (thresholdCnt > 0)
         {
             thresholdCnt--;
-            errhndkcal_setLossSocThresholdCnt(thresholdCnt);
+            errhndkcal_setCnCrcThresholdCnt(thresholdCnt);
         }
     }
 }
@@ -464,6 +464,7 @@ static tOplkError handleCnLossSoc(const tEvent* pEvent_p)
             BENCHMARK_MOD_02_TOGGLE(7);
 
             postNmtEvent(kNmtEventNmtCycleError);
+            thresholdCnt = 0;
         }
         instance_l.dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
     }
@@ -516,6 +517,7 @@ static tOplkError handleCnLossPreq(const tEvent* pEvent_p)
             BENCHMARK_MOD_02_TOGGLE(7);
 
             postNmtEvent(kNmtEventNmtCycleError);
+            thresholdCnt = 0;
         }
     }
     errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
@@ -585,19 +587,19 @@ static tOplkError handleCnCrc(const tEvent* pEvent_p)
             ret = generateHistoryEntry(E_DLL_CRC_TH, pEvent_p->netTime);
             if (ret != kErrorOk)
             {
-                errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
+                errhndkcal_setCnCrcCounters(cumulativeCnt, thresholdCnt);
                 return ret;
             }
 
             BENCHMARK_MOD_02_TOGGLE(7);
 
             postNmtEvent(kNmtEventNmtCycleError);
+            thresholdCnt = 0;
         }
         instance_l.dllErrorEvents |= DLL_ERR_CN_CRC;
     }
 
-    errhndkcal_setCnLossPreqCounters(cumulativeCnt, thresholdCnt);
-
+    errhndkcal_setCnCrcCounters(cumulativeCnt, thresholdCnt);
     return kErrorOk;
 }
 
@@ -703,6 +705,7 @@ static tOplkError handleMnCrc(const tEvent* pEvent_p)
                 return ret;
             }
             postNmtEvent(kNmtEventNmtCycleError);
+            thresholdCnt = 0;
         }
         instance_l.dllErrorEvents |= DLL_ERR_MN_CRC;
     }
@@ -754,6 +757,7 @@ static tOplkError handleMnCycTimeExceed(const tEvent* pEvent_p)
                 return ret;
             }
             postNmtEvent(kNmtEventNmtCycleError);
+            thresholdCnt = 0;
         }
         else
         {
@@ -851,6 +855,7 @@ static tOplkError handleMnCnLossPres(const tEvent* pEvent_p)
             postHeartbeatEvent(pErrorHandlerEvent->nodeId,
                                kNmtCsNotActive,
                                E_DLL_LOSS_PRES_TH);
+            thresholdCnt = 0;
         }
         else
         {

@@ -10,7 +10,7 @@ This file contains the implementation of the user stack control module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -149,7 +149,7 @@ static tCtrluInstance   ctrlInstance_l;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
 static UINT8    aCmdData_l[C_MAX_NMT_CMD_DATA_SIZE];    // Extended NMT request command data
-static UINT     nmtCmdDataSize_l;                       // NMT Command Data Size
+static size_t   nmtCmdDataSize_l;                       // NMT Command Data Size
 // List of objects that need to get linked
 static tLinkObjectRequest   aLinkObjectRequestsMn_l[] =
 {//     Index       Variable        Count   Object size             SubIndex
@@ -391,9 +391,8 @@ tOplkError ctrlu_initStack(const tOplkApiInitParam* pInitParam_p)
         goto Exit;
 
     DEBUG_LVL_CTRL_TRACE("Initializing kernel modules ...\n");
-    OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, 6);
-    strncpy(ctrlParam.szEthDevName, ctrlInstance_l.initParam.hwParam.pDevName, 127);
-    ctrlParam.ethDevNumber = ctrlInstance_l.initParam.hwParam.devNum;
+    OPLK_MEMCPY(ctrlParam.aMacAddress, ctrlInstance_l.initParam.aMacAddress, sizeof(ctrlParam.aMacAddress));
+    strncpy(ctrlParam.aNetIfName, ctrlInstance_l.initParam.hwParam.pDevName, sizeof(ctrlParam.aNetIfName) - 1);
     ctrlucal_storeInitParam(&ctrlParam);
 
     ret = ctrlucal_executeCmd(kCtrlInitStack, &retVal);

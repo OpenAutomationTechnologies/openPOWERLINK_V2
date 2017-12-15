@@ -357,7 +357,7 @@ OBD_BEGIN()
 
         // Object 1F8Ch: NMT_CurrNMTState_U8
         OBD_BEGIN_INDEX_RAM(0x1F8C, 0x01, FALSE)
-            OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kObdTypeUInt8, (kObdAccR | kObdAccPdo), tObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
+            OBD_SUBINDEX_RAM_VAR(0x1F8C, 0x00, kObdTypeUInt8, kObdAccR, tObdUnsigned8, NMT_CurrNMTState_U8, 0x1C)
         OBD_END_INDEX(0x1F8C)
 
 #if NMT_MAX_NODE_ID > 0

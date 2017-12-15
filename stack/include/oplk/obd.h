@@ -8,7 +8,7 @@ This file contains definitions for the OBD module
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2013, Kalycito Infotech Private Ltd.All rights reserved.
 All rights reserved.
@@ -171,7 +171,7 @@ typedef UINT16 tObdAccess;        ///< Data type for OD access types
 #define kObdAccSVGPRW       (kObdAccStore | kObdAccVar | kObdAccRange | kObdAccPdo | 0            | kObdAccWrite | kObdAccRead)
 ///\}
 
-typedef unsigned int tObdSize;      // For all objects as objects size are used an unsigned int.
+typedef size_t tObdSize;                // Use size_t for object dictionary sizes
 
 /**
 \brief Enumeration for object data types (DS301)

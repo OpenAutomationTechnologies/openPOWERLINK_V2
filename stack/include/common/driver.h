@@ -10,7 +10,7 @@ kernel driver modules.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2016, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -92,8 +92,8 @@ kernel stack and mapped into user virtual address space.
 */
 typedef struct
 {
-    UINT32                  memSize;        ///< Size of PDO to be allocated and mapped
-    UINT32                  pdoMemOffset;   ///< Offset of PDO memory returned by kernel
+    size_t                  memSize;        ///< Size of PDO to be allocated and mapped
+    size_t                  pdoMemOffset;   ///< Offset of PDO memory returned by kernel
 } tPdoMem;
 
 /**
@@ -118,8 +118,22 @@ typedef struct
 {
     void*                   pKernelAddr;    ///< Pointer to the Kernel address
     void*                   pUserAddr;      ///< Pointer to the User address
-    UINT32                  size;           ///< Size of the shared memory
+    size_t                  size;           ///< Size of the shared memory
 } tMemStruc;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+/**
+\brief SoC memory structure
+
+The structure is used to retrieve the SoC memory allocated by openPOWERLINK
+kernel stack and mapped into user virtual address space.
+*/
+typedef struct
+{
+    size_t                  socMemSize;     ///< Size of SoC memory to be allocated and mapped
+    size_t                  socMemOffset;   ///< Offset of SoC memory returned by the kernel
+} tSocMem;
+#endif
 
 //------------------------------------------------------------------------------
 // function prototypes
@@ -138,7 +152,7 @@ extern "C"
 //------------------------------------------------------------------------------
 #if (TARGET_SYSTEM == _LINUX_)
 #if defined (__LINUX_PCIE__) || defined(__LINUX_ZYNQ__)
-#include <common/driver-linuxpcie.h>
+#include <common/driver-linuxdpshm.h>
 #else /* __LINUX_PCIE__ */
 #include <common/driver-linux.h>
 #endif /* __LINUX_PCIE__ */

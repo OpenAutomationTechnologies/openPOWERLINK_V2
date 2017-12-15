@@ -2,7 +2,7 @@
 #
 # Windows definitions for demo_mn_qt application
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -30,7 +30,7 @@
 
 ################################################################################
 # Set architecture specific definitions
-ADD_DEFINITIONS(-D_CONSOLE -DWPCAP -DHAVE_REMOTE -D_CRT_SECURE_NO_WARNINGS)
+ADD_DEFINITIONS(-D_CONSOLE -DHAVE_REMOTE -D_CRT_SECURE_NO_WARNINGS)
 
 ################################################################################
 # Set architecture specific sources and include directories
@@ -40,7 +40,6 @@ SET(DEMO_ARCH_SOURCES
     ${COMMON_SOURCE_DIR}/system/system-windows.c
     )
 
-INCLUDE_DIRECTORIES(${CONTRIB_SOURCE_DIR}/pcap/windows/WpdPack/Include)
 
 ################################################################################
 # Set architecture specific libraries

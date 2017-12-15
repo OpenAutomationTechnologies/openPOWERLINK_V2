@@ -1,6 +1,6 @@
 /**
 ********************************************************************************
-\file   common/driver-linuxpcie.h
+\file   common/driver-linuxdpshm.h
 
 \brief  Header file for openPOWERLINK PCIe driver interface for Linux kernel
 
@@ -10,7 +10,7 @@ PCIe driver interface for Linux kernel.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -68,6 +68,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define PLK_CMD_PDO_MAP_OFFSET                  _IOR (PLK_IOC_MAGIC, 11, ULONG)
 #define PLK_CMD_CTRL_WRITE_FILE_BUFFER          _IOW (PLK_IOC_MAGIC, 12, tIoctlFileChunk)
 #define PLK_CMD_CTRL_GET_FILE_BUFFER_SIZE       _IOR (PLK_IOC_MAGIC, 13, ULONG)
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+#define PLK_CMD_TIMESYNC_MAP_OFFSET             _IOWR(PLK_IOC_MAGIC, 14, ULONG)
+#endif
 
 //------------------------------------------------------------------------------
 // typedef

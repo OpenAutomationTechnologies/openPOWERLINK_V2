@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK CN library on Linux userspace
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -55,7 +55,6 @@ SET (LIB_SOURCES
      ${ERRHND_KCAL_LOCAL_SOURCES}
      ${EVENT_KCAL_LINUXUSER_SOURCES}
      ${PDO_KCAL_LOCAL_SOURCES}
-     ${HARDWARE_DRIVER_LINUXUSER_SOURCES}
      ${COMMON_SOURCES}
      ${COMMON_LINUXUSER_SOURCES}
      ${TARGET_LINUX_SOURCES}
@@ -63,6 +62,13 @@ SET (LIB_SOURCES
      ${CIRCBUF_POSIX_SOURCES}
      ${MEMMAP_NULL_SOURCES}
      )
+
+# Configure compile definitions
+IF(CFG_USE_PCAP_EDRV)
+    SET(LIB_SOURCES ${LIB_SOURCES} ${HARDWARE_DRIVER_LINUXUSER_SOURCES})
+ELSE()
+    SET(LIB_SOURCES ${LIB_SOURCES} ${HARDWARE_DRIVER_LINUXUSERRAWSOCKET_SOURCES})
+ENDIF()
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")
     SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
@@ -75,6 +81,7 @@ ENDIF()
 # Configure compile definitions
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -pthread -fno-strict-aliasing")
 ADD_DEFINITIONS(-D_GNU_SOURCE -D_POSIX_C_SOURCE=200112L)
+ADD_DEFINITIONS(-DCONFIG_FIND_LOCAL_INTERFACES)
 
 IF(CFG_STORE_RESTORE)
     ADD_DEFINITIONS(-DCONFIG_INCLUDE_STORE_RESTORE)

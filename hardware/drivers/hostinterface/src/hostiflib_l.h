@@ -9,7 +9,7 @@ register structures.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -48,7 +48,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define HOSTIF_BRIDGE_ENABLE      0x0001    ///< enables the bridge
 #define HOSTIF_IRQ_MASTER_ENABLE  0x0001    ///< enabled the IRQ master
 
-#define HOSTIF_BUF_COUNT          9         ///< number of supported buffers
+#define HOSTIF_BUF_COUNT          10        ///< number of supported buffers
 
 #define HOSTIF_STCTRL_SPAN        2048      ///< size of status control register
 

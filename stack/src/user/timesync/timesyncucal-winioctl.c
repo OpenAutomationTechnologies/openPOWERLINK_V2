@@ -5,13 +5,15 @@
 \brief  Sync implementation for the user CAL timesync module using Windows IOCTL
 
 This files implements the user CAL timesync module for synchronization using
-Windows IOCTL for communication between user and kernel layer of the stack.
+Windows IOCTL for communication between user and kernel layer of the stack. In
+addition, SoC timestamp forwarding feature implementation is done by creating
+a shared memory for the user and kernel.
 
 \ingroup module_timesyncucal
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -81,9 +83,12 @@ The structure holds the global parameters for PDO synchronization module.
 */
 typedef struct
 {
-    OPLK_FILE_HANDLE    hGlobalFileHandle;        ///< Global file handle to POWERLINK driver
-    HANDLE              hSyncFileHandle;          ///< File handle to driver for synchronization
-    BOOL                fIntialized;              ///< Flag to mark module initialization
+    OPLK_FILE_HANDLE       hGlobalFileHandle;        ///< Global file handle to POWERLINK driver
+    HANDLE                 hSyncFileHandle;          ///< File handle to driver for synchronization
+    BOOL                   fIntialized;              ///< Flag to mark module initialization
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory* pSharedMemory;            ///< Pointer to timesync shared memory
+#endif
 } tTimesyncuCalInstance;
 
 //------------------------------------------------------------------------------
@@ -94,6 +99,10 @@ static tTimesyncuCalInstance timesyncuInstance_l;
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static tOplkError getTimesyncShm(void);
+static tOplkError releaseTimesyncShm(void);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -142,6 +151,16 @@ tOplkError timesyncucal_init(tSyncCb pfnSyncCb_p)
     }
 
     timesyncuInstance_l.fIntialized = TRUE;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (getTimesyncShm() != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't get timesync shared memory!\n",
+                              __func__);
+        return kErrorNoResource;
+    }
+#endif
+
     return kErrorOk;
 }
 
@@ -157,6 +176,14 @@ The function cleans up the user CAL timesync module
 void timesyncucal_exit(void)
 {
     ULONG    bytesReturned;
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (releaseTimesyncShm() != kErrorOk)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() SoC Timestamp shm could not be released\n",
+                              __func__);
+    }
+#endif
 
     // Clean resources acquired in kernel driver for synchronization.
     if (!DeviceIoControl(timesyncuInstance_l.hGlobalFileHandle,
@@ -215,10 +242,116 @@ tOplkError timesyncucal_waitSyncEvent(ULONG timeout_p)
     return kErrorOk;
 }
 
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function returns the reference to the timesync shared memory.
+
+\return The function returns a pointer to the timesync shared memory.
+
+\ingroup module_timesyncucal
+*/
+//------------------------------------------------------------------------------
+tTimesyncSharedMemory* timesyncucal_getSharedMemory(void)
+{
+    return timesyncuInstance_l.pSharedMemory;
+}
+
 //============================================================================//
 //            P R I V A T E   F U N C T I O N S                               //
 //============================================================================//
 /// \name Private Functions
 /// \{
+
+//------------------------------------------------------------------------------
+/**
+\brief  Get timesync shared memory
+
+The function gets the available SoC timesync shared memory using
+Windows IOCTL and remaps the shared memory into user space.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError getTimesyncShm(void)
+{
+    BOOL        fIoctlRet = FALSE;
+    ULONG       bytesReturned = 0;
+    tSocMem     inSocTimesyncMem;
+    tSocMem     outSocTimesyncMem;
+    tOplkError  ret = kErrorOk;
+#if defined(CONFIG_PCIE)
+    void*       pSocTimesyncMemOut;
+#endif
+
+    if (timesyncuInstance_l.hGlobalFileHandle == NULL)
+        return kErrorNoResource;
+
+    inSocTimesyncMem.socMemSize = sizeof(tTimesyncSharedMemory);
+
+    fIoctlRet = DeviceIoControl(timesyncuInstance_l.hGlobalFileHandle,
+                                PLK_CMD_SOC_GET_MEM,
+                                &inSocTimesyncMem,
+                                sizeof(tSocMem),
+                                &outSocTimesyncMem,
+                                sizeof(tSocMem),
+                                &bytesReturned,
+                                NULL);
+
+    if (!fIoctlRet || (bytesReturned == 0) ||
+        (outSocTimesyncMem.socMemOffset == 0))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s(): Error in IOCTL %d\n",
+                              __func__,
+                              GetLastError());
+        timesyncuInstance_l.pSharedMemory = NULL;
+        return kErrorNoResource;
+    }
+
+#if defined(CONFIG_PCIE)
+    ret = ctrlucal_getMappedMem(outSocTimesyncMem.socMemOffset,
+                                outSocTimesyncMem.socMemSize,
+                                &pSocTimesyncMemOut);
+
+    if ((ret != kErrorOk) || (pSocTimesyncMemOut == NULL))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Couldn't get timesync shared memory.\n",
+                              __func__);
+        return ret;
+    }
+
+    timesyncuInstance_l.pSharedMemory = pSocTimesyncMemOut;
+#else
+    if (outSocTimesyncMem.socMemSize > inSocTimesyncMem.socMemSize)
+        return kErrorNoResource;
+
+    timesyncuInstance_l.pSharedMemory = (void*)outSocTimesyncMem.socMemOffset;
+#endif
+
+    return ret;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Release timesync shared memory
+
+The function releases the remapped timesync shared memory.
+
+\return The function returns a tOplkError error code.
+*/
+//------------------------------------------------------------------------------
+static tOplkError releaseTimesyncShm(void)
+{
+    if (timesyncuInstance_l.hGlobalFileHandle == NULL)
+        return kErrorNoResource;
+
+    if (timesyncuInstance_l.pSharedMemory != NULL)
+        timesyncuInstance_l.pSharedMemory = NULL;
+
+    return kErrorOk;
+}
+#endif
 
 /// \}

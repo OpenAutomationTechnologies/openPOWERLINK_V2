@@ -33,19 +33,17 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ------------------------------------------------------------------------------*/
-#if (TARGET_SYSTEM == _WIN32_)
-#define _WINSOCKAPI_            // prevent windows.h from including winsock.h
-#endif  // (TARGET_SYSTEM == _WIN32_)
 
 //------------------------------------------------------------------------------
 // includes
 //------------------------------------------------------------------------------
 #include <InterfaceSelectionDialog.h>
-#include <pcap.h>
+#include <oplk/oplk.h>
 
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+const int InterfaceSelectionDialog::MAX_INTERFACES = 10;    // Define the max. number of interfaces shown to the user
 
 //------------------------------------------------------------------------------
 // class definitions
@@ -82,38 +80,30 @@ Fill the list of available interfaces.
 //------------------------------------------------------------------------------
 int InterfaceSelectionDialog::fillList()
 {
-    char        aErrMsg[PCAP_ERRBUF_SIZE];
-    pcap_if_t*  pAlldevs;
-    pcap_if_t*  pSeldev;
-    int         numIntf = 0;
+    tNetIfId    aInterfaces[InterfaceSelectionDialog::MAX_INTERFACES];
+    size_t      noInterfaces = InterfaceSelectionDialog::MAX_INTERFACES;
+    size_t      i = 0;
 
-    // Retrieve the device list on the local machine
-    if (pcap_findalldevs(&pAlldevs, aErrMsg) == -1)
-        return -1;
-
-    // Add the list to the listbox
-    for (pSeldev = pAlldevs;
-         pSeldev != NULL;
-         pSeldev = pSeldev->next)
+    if (oplk_enumerateNetworkInterfaces(aInterfaces, &noInterfaces) == kErrorOk)
     {
-        numIntf++;
+        for (i = 0; i < noInterfaces; i++)
+        {
+            QListWidgetItem*    pNewItem = new QListWidgetItem();
+            QString             devDesc;
 
-        QListWidgetItem*    pNewItem = new QListWidgetItem();
-        QString             devDesc;
+            if (aInterfaces[i].aDeviceDescription)
+                devDesc = QString(aInterfaces[i].aDeviceDescription);
+            else
+                devDesc = QString(aInterfaces[i].aDeviceName);
 
-        if (pSeldev->description)
-            devDesc = QString(pSeldev->description);
-        else
-            devDesc = QString(pSeldev->name);
+            pNewItem->setData(Qt::UserRole, QString(aInterfaces[i].aDeviceName));
+            pNewItem->setText(devDesc);
 
-        pNewItem->setData(Qt::UserRole, QString(pSeldev->name));
-        pNewItem->setText(devDesc);
-
-        this->ui.pDeviceListWidget->addItem(pNewItem);
+            this->ui.pDeviceListWidget->addItem(pNewItem);
+        }
     }
-    pcap_freealldevs(pAlldevs);
 
-    if (numIntf > 0)
+    if (i > 0)
         return 0;
     else
         return -1;

@@ -8,7 +8,7 @@
 --
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2014
+--    (c) B&R, 2017
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions
@@ -90,8 +90,10 @@ entity hostInterface is
         gBaseU2KQ           : natural := 16#09000#;
         --! Base address Pdo
         gBasePdo            : natural := 16#0B000#;
-        --! Base address Reserved (-1 = high address of Pdo)
-        gBaseRes            : natural := 16#0E000#;
+        --! Base address Timesync
+        gBaseTimeSync       : natural := 16#0E000#;
+        --! Base address Reserved (-1 = high address of Timesync)
+        gBaseRes            : natural := 16#0E400#;
         --! Host address width
         gHostAddrWidth      : natural := 16
     );
@@ -170,6 +172,7 @@ architecture Rtl of hostInterface is
         std_logic_vector(to_unsigned(gBaseK2UQ,     cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBaseU2KQ,     cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBasePdo,      cArrayStd32ElementSize)),
+        std_logic_vector(to_unsigned(gBaseTimeSync, cArrayStd32ElementSize)),
         std_logic_vector(to_unsigned(gBaseRes,      cArrayStd32ElementSize))
     );
     --! Base address array count

@@ -10,6 +10,7 @@ This file contains the event handling functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
@@ -88,6 +89,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // const defines
 //------------------------------------------------------------------------------
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+#define DLLK_SEC_TO_NSEC_FACTOR 1000000000U
+#endif
 
 //------------------------------------------------------------------------------
 // local types
@@ -119,6 +123,12 @@ static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtSta
 #if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD))
 // Request forwarding of Pres frames (for conformance test)
 static tOplkError requestPresForward(UINT node_p);
+#endif
+
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+static void addNetTime(const tNetTime* pInputNetTime_p,
+                       const tNetTime cycleLength_p,
+                       tNetTime* pResultantNetTime_p);
 #endif
 
 //============================================================================//
@@ -203,8 +213,8 @@ tOplkError dllk_process(const tEvent* pEvent_p)
             for (;;);
 #else
             ret = kErrorInvalidEvent;
-#endif
             break;
+#endif
     }
 
     return ret;
@@ -288,6 +298,9 @@ static tOplkError processNmtStateChange(tNmtState newNmtState_p,
         case kNmtGsOff:
         case kNmtGsInitialising:
             dllkInstance_g.socTime.relTime = 0;
+#if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_SOC_TIME_FORWARD))
+            dllkInstance_g.fIncrementNetTime = FALSE;  // Reset increment net time flag
+#endif
             // set EC flag in Flag 1, so the MN can detect a reboot and
             // will initialize the Error Signaling.
             dllkInstance_g.flag1 = PLK_FRAME_FLAG1_EC;
@@ -1026,6 +1039,10 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     UINT            index = 0;
     UINT32          nextTimeOffsetNs = 0;
     UINT            nextTxBufferOffset = dllkInstance_g.curTxBufferOffsetCycle ^ 1;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tNetTime*       pNetTime = &dllkInstance_g.socTime.netTime;   // Pointer to net time value
+    BOOL            fNewData = FALSE;                             // Flag to indicate if new net time data is received from user layer
+#endif
 
     pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SOC + nextTxBufferOffset];
     pTxBuffer->timeOffsetNs = nextTimeOffsetNs;
@@ -1037,6 +1054,25 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     ret = timesynck_setSocTime(&dllkInstance_g.socTime);
     if (ret != kErrorOk)
         return ret;
+
+    // Get the net time information from userToKernel shared buffer
+    ret = timesynck_getNetTime(pNetTime, &fNewData);
+    if (ret != kErrorOk)
+        return ret;
+
+    if (fNewData)
+    {
+        // Set the flag to increment the net time value
+        dllkInstance_g.fIncrementNetTime = TRUE;
+    }
+
+    // Increment net time if dllkInstance_g.fIncrementNetTime is TRUE
+    if (dllkInstance_g.fIncrementNetTime)
+        addNetTime(pNetTime, dllkInstance_g.cycleLength, pNetTime);
+
+    // Set SoC net time
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.nsec, dllkInstance_g.socTime.netTime.nsec);
+    ami_setUint32Le(&pTxFrame->data.soc.netTimeLe.sec, dllkInstance_g.socTime.netTime.sec);
 #endif
 
     // Set SoC relative time
@@ -1211,6 +1247,36 @@ static tOplkError requestPresForward(UINT node_p)
 }
 #endif
 
+#endif
+
+#if (defined(CONFIG_INCLUDE_SOC_TIME_FORWARD) && defined(CONFIG_INCLUDE_NMT_MN))
+//------------------------------------------------------------------------------
+/**
+\brief  Add net time value
+
+This function increments the net time value with respect to cycle length and
+returns the updated net time value.
+
+\param[in]     pInputNetTime_p      Input pointer to net time structure.
+\param[in]     cycleLength_p        Cycle length in tNetTime format.
+\param[out]    pResultantNetTime_p  Resultant pointer to net time structure.
+
+*/
+//------------------------------------------------------------------------------
+static void addNetTime(const tNetTime* pInputNetTime_p,
+                       const tNetTime cycleLength_p,
+                       tNetTime* pResultantNetTime_p)
+{
+    UINT32 netTimeNsec = 0;
+
+    netTimeNsec = pInputNetTime_p->nsec + cycleLength_p.nsec;
+
+    // Update the seconds value
+    pResultantNetTime_p->sec = pInputNetTime_p->sec + cycleLength_p.sec +
+                               (netTimeNsec / DLLK_SEC_TO_NSEC_FACTOR);
+    // Update the nanoseconds value
+    pResultantNetTime_p->nsec = netTimeNsec % DLLK_SEC_TO_NSEC_FACTOR;
+}
 #endif
 
 /// \}

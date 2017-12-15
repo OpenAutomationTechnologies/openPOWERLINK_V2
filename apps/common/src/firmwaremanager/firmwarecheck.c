@@ -11,6 +11,7 @@ This module implements firmware version checks of a found node.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -162,7 +163,7 @@ typedef struct
     tSdoComConHdl   handle;     ///< SDO command handle
     UINT            index;      ///< SDO transfer OD index of remote
     UINT            subindex;   ///< SDO transfer OD subindex of remotes
-    UINT            size;       ///< Size of SDO transfer
+    size_t          size;       ///< Size of SDO transfer
     void*           pData;      ///< Pointer for result data storage
 } tFirmwareCheckNodeSdo;
 
@@ -203,7 +204,7 @@ typedef struct
     tFirmwareCheckIdentInfo*    pIdentArrays;               ///< Field of ident infos for each ident object
     tFirmwareCheckIndexArray    fwDownloadIndices;          ///< Index array for fw download objects
     UINT16*                     pNumbersOfFwDownloads;      ///< Field of Number of entries for each fw download object
-    tFirmwareCheckNodeSdo       sdo;                        ///< Information about the current sdo tranmission
+    tFirmwareCheckNodeSdo       sdo;                        ///< Information about the current sdo transmission
     BOOL                        fModuleListContainsHead;    ///< Flag for indicating if the head station was added to the module list
     UINT                        startCounter;               ///< Counter for requested module check starts
 } tFirmwareCheckNodeInfo;
@@ -575,7 +576,7 @@ static tFirmwareRet checkNodeInfo(tFirmwareCheckNodeInfo* pNodeInfo_p)
 
     if (isFirmwareUpdateRequired(pNodeInfo_p, &pNodeInfo_p->nodeFwInfo))
     {
-        pEntry = malloc(sizeof(tFirmwareCheckModuleEntry));
+        pEntry = (tFirmwareCheckModuleEntry*)malloc(sizeof(tFirmwareCheckModuleEntry));
         memset(pEntry, 0, sizeof(tFirmwareCheckModuleEntry));
         memcpy(&pEntry->fwInfo, &pNodeInfo_p->nodeFwInfo, sizeof(tFirmwareCheckFwInfo));
         pEntry->fwInfo.index = FIRMWARE_CHECK_NODE_FIRWMARE_INDEX;
@@ -632,7 +633,7 @@ tFirmwareRet finishCheck(tFirmwareCheckNodeInfo* pNodeInfo_p)
 
     while (pIter != NULL)
     {
-        pNew = malloc(sizeof(tFirmwareUpdateEntry));
+        pNew = (tFirmwareUpdateEntry*)malloc(sizeof(tFirmwareUpdateEntry));
         if (pNew == NULL)
         {
             ret = kFwReturnNoResource;
@@ -883,7 +884,7 @@ static tFirmwareRet getModuleIdent(tFirmwareCheckNodeInfo* pNodeInfo_p,
     tFirmwareCheckModuleEntry*  pEntry;
     tFirmwareCheckModuleEntry** ppInsertIter = NULL;
 
-    pEntry = malloc(sizeof(tFirmwareCheckModuleEntry));
+    pEntry = (tFirmwareCheckModuleEntry*)malloc(sizeof(tFirmwareCheckModuleEntry));
     if (pEntry == NULL)
     {
         ret = kFwReturnNoResource;
@@ -955,7 +956,7 @@ static tFirmwareRet getNumberOfModuleFwDownloadIndices(tFirmwareCheckNodeInfo* p
 */
 //------------------------------------------------------------------------------
 static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
-                                          size_t index_p)
+                                           size_t index_p)
 {
     tFirmwareRet            ret = kFwReturnOk;
     tFirmwareCheckNodeSdo*  pSdo = &pNodeInfo_p->sdo;
@@ -965,10 +966,11 @@ static tFirmwareRet getIndexOfModuleFwDown(tFirmwareCheckNodeInfo* pNodeInfo_p,
     pSdo->pData = &pNodeInfo_p->fwDownloadIndices.pIndices[index_p];
     pSdo->size = sizeof(UINT16);
 
-    ret = issueSdoRead(pNodeInfo_p); if (ret != kFwReturnOk)
+    ret = issueSdoRead(pNodeInfo_p);
+    if (ret != kFwReturnOk)
     {
-        FWM_ERROR("(%s) - reading the index of the %zu fw fownload object failed with %d\n",
-                  __func__, index_p, ret);
+        FWM_ERROR("(%s) - reading the index of the %lu fw download object failed with %d\n",
+                  __func__, (ULONG)index_p, ret);
     }
 
     return ret;
@@ -995,7 +997,8 @@ static tFirmwareRet getNumberOfModuleFwDownload(tFirmwareCheckNodeInfo* pNodeInf
     pSdo->pData = &pNodeInfo_p->pNumbersOfFwDownloads[fwArray_p];
     pSdo->size = sizeof(UINT8);
 
-    ret = issueSdoRead(pNodeInfo_p); if (ret != kFwReturnOk)
+    ret = issueSdoRead(pNodeInfo_p);
+    if (ret != kFwReturnOk)
     {
         FWM_ERROR("(%s) - reading the number of fw downloads failed with %d\n",
                   __func__, ret);
@@ -1022,9 +1025,9 @@ static tFirmwareRet processSdoEventForModule(tFirmwareCheckNodeInfo* pNodeInfo_p
 
     if (pSdoComFinished_p->transferredBytes != pNodeInfo_p->sdo.size)
     {
-        FWM_ERROR("Unexpected transferred bytes %u instead of %u for node %u index 0x%X subindex 0x%X\n",
-                  pSdoComFinished_p->transferredBytes,
-                  pNodeInfo_p->sdo.size,
+        FWM_ERROR("Unexpected transferred bytes %lu instead of %lu for node %u index 0x%X subindex 0x%X\n",
+                  (ULONG)pSdoComFinished_p->transferredBytes,
+                  (ULONG)pNodeInfo_p->sdo.size,
                   pNodeInfo_p->nodeId,
                   pNodeInfo_p->sdo.index,
                   pNodeInfo_p->sdo.subindex);
@@ -1095,7 +1098,7 @@ static tFirmwareRet processCheckStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p
                 {
                     if (pNodeInfo_p->identIndices.pIndices == NULL)
                     {
-                        pNodeInfo_p->identIndices.pIndices = malloc(pNodeInfo_p->identIndices.numberOfIndices * sizeof(UINT16));
+                        pNodeInfo_p->identIndices.pIndices = (UINT16*)malloc(pNodeInfo_p->identIndices.numberOfIndices * sizeof(UINT16));
                         memset(pNodeInfo_p->identIndices.pIndices, 0,
                                pNodeInfo_p->identIndices.numberOfIndices * sizeof(UINT16));
                     }
@@ -1124,7 +1127,7 @@ static tFirmwareRet processCheckStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_p
             case kFwModuleCheckStateGetNumberOfIdentsPerIndex:
                 if (pNodeInfo_p->pIdentArrays == NULL)
                 {
-                    pNodeInfo_p->pIdentArrays = malloc(pNodeInfo_p->identIndices.numberOfIndices * sizeof(tFirmwareCheckIdentInfo));
+                    pNodeInfo_p->pIdentArrays = (tFirmwareCheckIdentInfo*)malloc(pNodeInfo_p->identIndices.numberOfIndices * sizeof(tFirmwareCheckIdentInfo));
                     memset(pNodeInfo_p->pIdentArrays, 0, pNodeInfo_p->identIndices.numberOfIndices * sizeof(tFirmwareCheckIdentInfo));
                 }
 
@@ -1227,16 +1230,16 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 {
                     if (isFirmwareUpdateRequired(pNodeInfo_p, &(*ppIter)->fwInfo))
                     {
-                        FWM_TRACE("Firmware update required for module %zu of node: %u\n",
-                                  modIdx, pNodeInfo_p->nodeId);
+                        FWM_TRACE("Firmware update required for module %lu of node: %u\n",
+                                  (ULONG)modIdx, pNodeInfo_p->nodeId);
                         pNodeInfo_p->nextUpdateState = kFwModuleUpdateStateGetNumberOfFwDownIndices;
                         (*ppIter)->moduleIndex = modIdx;
                         ppIter = &(*ppIter)->pNext;
                     }
                     else
                     {
-                        FWM_TRACE("No firmware update required for module %zu of node: %u\n",
-                                  modIdx, pNodeInfo_p->nodeId);
+                        FWM_TRACE("No firmware update required for module %lu of node: %u\n",
+                                  (ULONG)modIdx, pNodeInfo_p->nodeId);
                         pRem = *ppIter;
                         *ppIter = pRem->pNext;
                         pRem->pNext = NULL;
@@ -1257,7 +1260,7 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 {
                     if (pNodeInfo_p->fwDownloadIndices.pIndices == NULL)
                     {
-                        pNodeInfo_p->fwDownloadIndices.pIndices = malloc(pNodeInfo_p->fwDownloadIndices.numberOfIndices * sizeof(UINT16));
+                        pNodeInfo_p->fwDownloadIndices.pIndices = (UINT16*)malloc(pNodeInfo_p->fwDownloadIndices.numberOfIndices * sizeof(UINT16));
                     }
 
                     if (pNodeInfo_p->fwDownloadIndices.indexIdx < pNodeInfo_p->fwDownloadIndices.numberOfIndices)
@@ -1284,7 +1287,7 @@ static tFirmwareRet processUpdateStateMachine(tFirmwareCheckNodeInfo* pNodeInfo_
                 {
                     if (pNodeInfo_p->pNumbersOfFwDownloads == NULL)
                     {
-                        pNodeInfo_p->pNumbersOfFwDownloads = malloc(sizeof(UINT16) * pNodeInfo_p->fwDownloadIndices.numberOfIndices);
+                        pNodeInfo_p->pNumbersOfFwDownloads = (UINT16*)malloc(sizeof(UINT16) * pNodeInfo_p->fwDownloadIndices.numberOfIndices);
                         memset(pNodeInfo_p->pNumbersOfFwDownloads, 0, sizeof(UINT16) * pNodeInfo_p->fwDownloadIndices.numberOfIndices);
                     }
 
@@ -1373,8 +1376,8 @@ static BOOL isFirmwareUpdateRequired(tFirmwareCheckNodeInfo* pNodeInfo_p,
               moduleInfo.hwVariant);
 
     fwReturn = firmwareinfo_getInfoForNode(instance_l.config.pFwInfo,
-                                      &moduleInfo,
-                                      &pFirmwareInfo);
+                                           &moduleInfo,
+                                           &pFirmwareInfo);
     if (fwReturn != kFwReturnOk)
     {
         goto EXIT;

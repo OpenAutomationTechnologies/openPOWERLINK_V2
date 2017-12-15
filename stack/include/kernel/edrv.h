@@ -186,9 +186,10 @@ This structure is used to initialize the Ethernet driver module.
 */
 typedef struct
 {
-    UINT8           aMacAddr[6];            ///< Ethernet controller MAC address
-    tEdrvRxHandler  pfnRxHandler;           ///< Rx frame callback function pointer
-    tHwParam        hwParam;                ///< Hardware parameter
+    UINT8                   aMacAddr[6];    ///< Ethernet controller MAC address
+    tEdrvRxHandler          pfnRxHandler;   ///< Rx frame callback function pointer
+    const char*             pDevName;       ///< Device name of the network interface card (valid if non-null)
+    OPLK_DEPRECATED UINT    devNum;         ///< Device number (deprecated)
 } tEdrvInitParam;
 
 /**

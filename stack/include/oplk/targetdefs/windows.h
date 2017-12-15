@@ -8,7 +8,7 @@ This file contains target specific definitions for Windows.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
@@ -45,12 +45,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdio.h>
 #include <string.h>
 
-// Windows version must be at least Windows XP
-#if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0501))
+// Windows version must be at least Windows Vista
+#if (defined(_WIN32_WINNT) && (_WIN32_WINNT < 0x0600))
 #undef _WIN32_WINNT
 #endif
 #if !defined(_WIN32_WINNT)
-#define _WIN32_WINNT 0x0501
+#define _WIN32_WINNT 0x0600
 #endif
 
 // Do not use extended Win32 API functions

@@ -2,7 +2,7 @@
 #
 # CMake file for openPOWERLINK MN library on Windows
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -79,6 +79,7 @@ IF(CFG_INCLUDE_MN_REDUNDANCY)
 ENDIF()
 ADD_DEFINITIONS(-DCONFIG_MN)
 ADD_DEFINITIONS(-D_CRT_SECURE_NO_WARNINGS)
+ADD_DEFINITIONS(-DCONFIG_FIND_LOCAL_INTERFACES)
 
 # Additional include directories
 INCLUDE_DIRECTORIES(

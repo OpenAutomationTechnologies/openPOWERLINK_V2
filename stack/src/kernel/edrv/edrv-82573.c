@@ -366,6 +366,7 @@ typedef struct
     UINT            txCount[EDRV_SAMPLE_NUM];               ///< Array of TX counter samples
     UINT            pos;                                    ///< Current sample position
 #endif
+    BOOL            fIrqHandlerEnabled;                     ///< Flag indicating whether the IRQ handler is enabled
 } tEdrvInstance;
 
 //------------------------------------------------------------------------------
@@ -379,6 +380,7 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p);
 // local vars
 //------------------------------------------------------------------------------
 // buffers and buffer descriptors and pointers
+
 static struct pci_device_id aEdrvPciTbl_l[] =
 {
     {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82573L
@@ -386,6 +388,7 @@ static struct pci_device_id aEdrvPciTbl_l[] =
     {0x8086, 0x150c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82583V
     {0x8086, 0x10de, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM
     {0x8086, 0x10d3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82574L
+    {0x8086, 0x100E, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82540EM
     {0, }
 };
 MODULE_DEVICE_TABLE(pci, aEdrvPciTbl_l);
@@ -1407,7 +1410,9 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
 
         msleep(1);
     }
-    if (i == 0)
+
+    // From Intel documentation for 82540EM: this controller can't ack the 64-bit write when issuing the reset
+    if ((i == 0) && !((pId_p->vendor == 0x8086) && (pId_p->device == 0x100E)))
     {
         result = -EIO;
         goto ExitFail;
@@ -1502,6 +1507,7 @@ static int initOnePciDev(struct pci_dev* pPciDev_p, const struct pci_device_id* 
     {
         goto ExitFail;
     }
+    edrvInstance_l.fIrqHandlerEnabled = TRUE;
 
     // allocate buffers
     result = pci_set_dma_mask(pPciDev_p, DMA_BIT_MASK(32));
@@ -1734,7 +1740,11 @@ static void removeOnePciDev(struct pci_dev* pPciDev_p)
     }
 
     // remove interrupt handler
-    free_irq(pPciDev_p->irq, pPciDev_p);
+    if (edrvInstance_l.fIrqHandlerEnabled)
+    {
+        free_irq(pPciDev_p->irq, pPciDev_p);
+        edrvInstance_l.fIrqHandlerEnabled = FALSE;
+    }
 
     // Disable Message Signaled Interrupt
     pci_disable_msi(pPciDev_p);

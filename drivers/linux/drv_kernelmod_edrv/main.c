@@ -11,6 +11,7 @@ the openPOWERLINK kernel stack.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -341,12 +342,23 @@ The function implements openPOWERLINK kernel module close function.
 static int powerlinkRelease(struct inode* pInode_p,
                             struct file* pFile_p)
 {
+    tCtrlKernelStatus   status;
+    UINT16              retVal;
+
     UNUSED_PARAMETER(pInode_p);
     UNUSED_PARAMETER(pFile_p);
 
     DEBUG_LVL_ALWAYS_TRACE("PLK: + %s()...\n", __func__);
 
     stopHeartbeatTimer();
+
+    // Close lower driver resources
+    status = ctrlkcal_getStatus();
+    if (status == kCtrlStatusRunning)
+    {
+        ctrlk_executeCmd(kCtrlShutdown, &retVal, &status, NULL);
+    }
+
     ctrlk_exit();
     atomic_dec(&openCount_g);
 
@@ -554,7 +566,10 @@ The function implements openPOWERLINK kernel module mmap function.
 static int powerlinkMmap(struct file* pFile_p,
                          struct vm_area_struct* pVmArea_p)
 {
-    BYTE*       pPdoMem;
+    BYTE*                        pPdoMem;
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*       pSocTimeMem;
+#endif
     tOplkError  ret = kErrorOk;
 
     UNUSED_PARAMETER(pFile_p);
@@ -567,24 +582,52 @@ static int powerlinkMmap(struct file* pFile_p,
 
     pVmArea_p->vm_flags |= VM_RESERVED;
     pVmArea_p->vm_ops = &powerlinkVmOps_l;
-
-    ret = pdokcal_getPdoMemRegion(&pPdoMem, NULL);
-
-    if ((ret != kErrorOk) || (pPdoMem == NULL))
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    if (pVmArea_p->vm_pgoff == 0)
     {
-        DEBUG_LVL_ERROR_TRACE("%s() no PDO memory allocated!\n", __func__);
-        return -ENOMEM;
-    }
+#endif
+        ret = pdokcal_getPdoMemRegion(&pPdoMem, NULL);
 
-    if (remap_pfn_range(pVmArea_p,
-                        pVmArea_p->vm_start,
-                        (__pa(pPdoMem) >> PAGE_SHIFT),
-                        pVmArea_p->vm_end - pVmArea_p->vm_start,
-                        pVmArea_p->vm_page_prot))
-    {
-        DEBUG_LVL_ERROR_TRACE("%s() remap_pfn_range failed\n", __func__);
-        return -EAGAIN;
+        if ((ret != kErrorOk) || (pPdoMem == NULL))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() no PDO memory allocated!\n", __func__);
+            return -ENOMEM;
+        }
+
+        if (remap_pfn_range(pVmArea_p,
+                            pVmArea_p->vm_start,
+                            (__pa(pPdoMem) >> PAGE_SHIFT),
+                            pVmArea_p->vm_end - pVmArea_p->vm_start,
+                            pVmArea_p->vm_page_prot))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() remap_pfn_range failed for PDO memory\n",
+                                  __func__);
+            return -EAGAIN;
+        }
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
     }
+    else
+    {
+        pSocTimeMem = timesynckcal_getSharedMemory();
+        if (pSocTimeMem == NULL)
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() no timesync memory allocated!\n", __func__);
+            return -ENOMEM;
+        }
+
+        if (remap_pfn_range(pVmArea_p,
+                            pVmArea_p->vm_start,
+                            (__pa(pSocTimeMem) >> PAGE_SHIFT),
+                            pVmArea_p->vm_end - pVmArea_p->vm_start,
+                            pVmArea_p->vm_page_prot))
+        {
+            DEBUG_LVL_ERROR_TRACE("%s() remap_pfn_range failed for timesync memory\n",
+                                  __func__);
+            return -EAGAIN;
+        }
+
+    }
+#endif
 
     powerlinkVmaOpen(pVmArea_p);
 

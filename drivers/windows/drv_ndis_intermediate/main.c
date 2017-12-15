@@ -11,7 +11,7 @@ the openPOWERLINK kernel stack daemon.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2017, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -332,14 +332,14 @@ NTSTATUS powerlinkClose(PDEVICE_OBJECT pDeviceObject_p,
         plkDriverInstance_l.fInitialized = FALSE;
         stopHeartbeatTimer();
 
-        ctrlk_exit();
-
         drv_getStatus(&status);
         if (status == kCtrlStatusRunning)
         {
             ctrlCmd.cmd = kCtrlShutdown;
             drv_executeCmd(&ctrlCmd);
         }
+
+        ctrlk_exit();
     }
 
     pIrp_p->IoStatus.Information = 0;
@@ -586,11 +586,31 @@ NTSTATUS powerlinkIoctl(PDEVICE_OBJECT pDeviceObject_p,
             tMemStruc*  pMemStruc = (tMemStruc*)pIrp_p->AssociatedIrp.SystemBuffer;
 
             drv_unMapPdoMem(pMemStruc->pUserAddr, pMemStruc->size);
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+            drv_unMapSocMem();
+#endif
 
             status = STATUS_SUCCESS;
             pIrp_p->IoStatus.Information = 0;
             break;
         }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+        case PLK_CMD_SOC_GET_MEM:
+        {
+            tSocMem* pSocMem = (tSocMem*)pIrp_p->AssociatedIrp.SystemBuffer;
+
+            oplkRet = drv_mapSocMem((void**)&pSocMem->socMemOffset, &pSocMem->socMemSize);
+
+            if (oplkRet != kErrorOk)
+                pIrp_p->IoStatus.Information = 0; // return size zero to indicate failure
+            else
+                pIrp_p->IoStatus.Information = sizeof(tSocMem);
+
+            status = STATUS_SUCCESS;
+            break;
+        }
+#endif
 
         default:
             DEBUG_LVL_ERROR_TRACE("PLK: - Invalid cmd (cmd=%d)\n",
@@ -643,6 +663,7 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
     UNICODE_STRING                  deviceLinkUnicodeString;
     NDIS_DEVICE_OBJECT_ATTRIBUTES   deviceObjectAttributes;
     PDRIVER_DISPATCH                dispatchTable[IRP_MJ_MAXIMUM_FUNCTION + 1];
+    UNICODE_STRING                  sddlString;
 
     DEBUG_LVL_ALWAYS_TRACE("PLK %s()...\n", __func__);
 
@@ -656,6 +677,8 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
 
     NdisInitUnicodeString(&deviceName, PLK_DEV_STRING);
     NdisInitUnicodeString(&deviceLinkUnicodeString, PLK_LINK_NAME);
+    // SDDL_DEVOBJ_SYS_ALL_ADM_RWX_WORLD_RW_RES_R from  wdmsec.h
+    NdisInitUnicodeString(&sddlString, L"D:P(A;;GA;;;SY)(A;;GRGWGX;;;BA)(A;;GRGW;;;WD)(A;;GR;;;RC)");
 
     NdisZeroMemory(&deviceObjectAttributes, sizeof(NDIS_DEVICE_OBJECT_ATTRIBUTES));
     // type implicit from the context
@@ -666,7 +689,7 @@ static void registerDrvIntf(NDIS_HANDLE driverHandle_p)
     deviceObjectAttributes.SymbolicName = &deviceLinkUnicodeString;
     deviceObjectAttributes.MajorFunctions = &dispatchTable[0];
     deviceObjectAttributes.ExtensionSize = 0;
-    deviceObjectAttributes.DefaultSDDLString = NULL;
+    deviceObjectAttributes.DefaultSDDLString = &sddlString;
     deviceObjectAttributes.DeviceClassGuid = 0;
 
     status = NdisRegisterDeviceEx(driverHandle_p,

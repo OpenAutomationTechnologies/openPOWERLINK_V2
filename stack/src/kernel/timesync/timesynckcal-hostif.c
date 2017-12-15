@@ -11,6 +11,7 @@ The sync module is responsible to synchronize the user layer.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -73,15 +74,33 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // local types
 //------------------------------------------------------------------------------
 
+/**
+\brief Memory instance for kernel timesync module
+
+This structure contains all necessary information needed by the timesync CAL
+module for host interface.
+*/
+typedef struct
+{
+    tHostifInstance         pHifInstance;   ///< Host interface instance
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    tTimesyncSharedMemory*  pSharedMemory;  ///< Shared memory
+#endif
+} tTimesynckcalInstance;
+
 //------------------------------------------------------------------------------
 // local vars
 //------------------------------------------------------------------------------
-static tHostifInstance pHifInstance_l;
+static tTimesynckcalInstance instance_l;
 
 //------------------------------------------------------------------------------
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError enableSyncIrq(BOOL fEnable_p);
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+static void* getSharedMemory(tHostifInstance pHifInstance_p);
+#endif
 
 //============================================================================//
 //            P U B L I C   F U N C T I O N S                                 //
@@ -100,13 +119,19 @@ The function initializes the kernel CAL timesync module.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_init(void)
 {
-    pHifInstance_l = hostif_getInstance(0);
+    OPLK_MEMSET(&instance_l, 0, sizeof(tTimesynckcalInstance));
 
-    if (pHifInstance_l == NULL)
+    instance_l.pHifInstance = hostif_getInstance(0);
+
+    if (instance_l.pHifInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kErrorNoResource;
     }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.pSharedMemory = (tTimesyncSharedMemory*)getSharedMemory(instance_l.pHifInstance);
+#endif
 
     return enableSyncIrq(FALSE);
 }
@@ -122,13 +147,17 @@ The function cleans up the CAL timesync module
 //------------------------------------------------------------------------------
 void timesynckcal_exit(void)
 {
-    if (pHifInstance_l == NULL)
+    if (instance_l.pHifInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return;
     }
 
     enableSyncIrq(FALSE);
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+    instance_l.pSharedMemory = NULL;
+#endif
 }
 
 //------------------------------------------------------------------------------
@@ -162,7 +191,7 @@ The function enables sync events.
 //------------------------------------------------------------------------------
 tOplkError timesynckcal_controlSync(BOOL fEnable_p)
 {
-    if (pHifInstance_l == NULL)
+    if (instance_l.pHifInstance == NULL)
     {
         DEBUG_LVL_ERROR_TRACE("%s: Could not find hostif instance!\n", __func__);
         return kErrorNoResource;
@@ -185,8 +214,7 @@ The function returns the reference to the timesync shared memory.
 //------------------------------------------------------------------------------
 tTimesyncSharedMemory* timesynckcal_getSharedMemory(void)
 {
-    // Not implemented yet
-    return NULL;
+    return instance_l.pSharedMemory;
 }
 #endif
 
@@ -209,7 +237,7 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 {
     tHostifReturn hifRet;
 
-    hifRet = hostif_irqSourceEnable(pHifInstance_l, kHostifIrqSrcSync, fEnable_p);
+    hifRet = hostif_irqSourceEnable(instance_l.pHifInstance, kHostifIrqSrcSync, fEnable_p);
     if (hifRet != kHostifSuccessful)
     {
         DEBUG_LVL_ERROR_TRACE("%s irq not possible (%d)!\n",
@@ -220,5 +248,46 @@ static tOplkError enableSyncIrq(BOOL fEnable_p)
 
     return kErrorOk;
 }
+
+#if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
+//------------------------------------------------------------------------------
+/**
+\brief  Get shared memory
+
+\param[in]      pHifInstance_p      Host interface instance
+
+\return The function returns a pointer to the shared memory.
+\retval NULL    No shared memory available!
+\retval !NULL   Pointer to shared memory
+*/
+//------------------------------------------------------------------------------
+static void* getSharedMemory(tHostifInstance pHifInstance_p)
+{
+    tHostifReturn   hifRet;
+    UINT8*          pBase;
+    UINT            span;
+
+    hifRet = hostif_getBuf(pHifInstance_p, kHostifInstIdTimesync, &pBase, &span);
+    if (hifRet != kHostifSuccessful)
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Could not get buffer from host interface (%d)\n",
+                              __func__,
+                              hifRet);
+        return NULL;
+    }
+
+    if (span < sizeof(tTimesyncSharedMemory))
+    {
+        DEBUG_LVL_ERROR_TRACE("%s() Time Synchronization Buffer too small (shall be: %lu)\n",
+                              __func__,
+                              (ULONG)sizeof(tTimesyncSharedMemory));
+        return NULL;
+    }
+
+    OPLK_MEMSET(pBase, 0, span);
+
+    return (void*)pBase;
+}
+#endif
 
 /// \}
