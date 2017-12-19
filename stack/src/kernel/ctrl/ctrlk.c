@@ -623,7 +623,7 @@ static void setupKernelFeatures(void)
     instance_l.features |= OPLK_KERNEL_RMN;
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     instance_l.features |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
 

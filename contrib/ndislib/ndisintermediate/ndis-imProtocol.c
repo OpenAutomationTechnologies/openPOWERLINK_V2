@@ -667,7 +667,7 @@ NDIS_STATUS protocolBindAdapter(NDIS_HANDLE protocolDriverContext_p,
 
     TRACE("%s()...\n", __FUNCTION__);
 
-    if (fBinding_l == TRUE)
+    if (fBinding_l != FALSE)
     {
         return NDIS_STATUS_SUCCESS;
     }
@@ -1091,7 +1091,7 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
     // Return NetBufferList immediately if the binding is not in running state
     if (protocolInstance_l.bindingState != kNdisBindingRunning)
     {
-        if (NDIS_TEST_RECEIVE_CAN_PEND(receiveFlags_p) == TRUE)
+        if (NDIS_TEST_RECEIVE_CAN_PEND(receiveFlags_p) != FALSE)
         {
             NdisReturnNetBufferLists(protocolInstance_l.hBindingHandle,
                                      pNetBufferLists_p,
@@ -1152,7 +1152,7 @@ VOID protocolReceiveNbl(NDIS_HANDLE protocolBindingContext_p,
         protocolInstance_l.receiveHead = (protocolInstance_l.receiveHead + 1) &
                                          (protocolInstance_l.receiveBufCount - 1);
 
-        if (NDIS_TEST_RECEIVE_CAN_PEND(receiveFlags_p) == TRUE)
+        if (NDIS_TEST_RECEIVE_CAN_PEND(receiveFlags_p) != FALSE)
         {
             if (pReturnNbl == NULL)
             {

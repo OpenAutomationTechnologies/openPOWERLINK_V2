@@ -150,7 +150,7 @@ typedef struct
 
     tDllkCalStatistics      statistics;             ///< DLL CAL statistics
 
-#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE)
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     UINT                    asyncFrameReceived;     ///< Asynchronous frames received counter
     UINT                    asyncFrameFreed;        ///< Asynchronous frames freed counter
 #endif
@@ -383,7 +383,7 @@ tOplkError dllkcal_process(const tEvent* pEvent_p)
     const tDllNodeOpParam*              pNodeOpParam;
 #endif
 
-#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE)
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     const tFrameInfo*                   pFrameInfo;
 #endif
 
@@ -438,7 +438,7 @@ tOplkError dllkcal_process(const tEvent* pEvent_p)
             initNodeInstance(pConfigParam->nodeId);
             break;
 
-#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE)
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
         case kEventTypeReleaseRxFrame:
             pFrameInfo = (const tFrameInfo*)pEvent_p->eventArg.pEventArg;
             ret = dllk_releaseRxFrame(pFrameInfo->frame.pBuffer, pFrameInfo->frameSize);
@@ -598,7 +598,7 @@ tOplkError dllkcal_asyncFrameReceived(tFrameInfo* pFrameInfo_p)
     event.eventSink = kEventSinkDlluCal;
 
     ret = eventk_postEvent(&event);
-#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE)
+#if (CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE)
     if (ret == kErrorOk)
     {
         instance_l.asyncFrameReceived++;
@@ -976,7 +976,7 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
     tOplkError  ret = kErrorOk;
     UINT        count;
 
-#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC == TRUE) && defined(CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS))
+#if ((CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC != FALSE) && defined(CONFIG_EDRV_ASND_DEFERRED_RX_BUFFERS))
     UINT        rxCount = instance_l.asyncFrameReceived - instance_l.asyncFrameFreed;
 
     // At the same time another frame could be waiting in the Rx queue of the MAC,
@@ -996,32 +996,32 @@ tOplkError dllkcal_getSoaRequest(tDllReqServiceId* pReqServiceId_p,
         switch (instance_l.nextRequestQueue)
         {
             case 0:
-                if (getCnGenRequest(pReqServiceId_p, pNodeId_p) == TRUE)
+                if (getCnGenRequest(pReqServiceId_p, pNodeId_p) != FALSE)
                     goto Exit;
                 break;
 
             case 1:
-                if (getCnNmtRequest(pReqServiceId_p, pNodeId_p) == TRUE)
+                if (getCnNmtRequest(pReqServiceId_p, pNodeId_p) != FALSE)
                     goto Exit;
                 break;
 
             case 2:
-                if (getMnGenNmtRequest(pReqServiceId_p, pNodeId_p) == TRUE)
+                if (getMnGenNmtRequest(pReqServiceId_p, pNodeId_p) != FALSE)
                     goto Exit;
                 break;
 
             case 3:
-                if (getMnIdentRequest(pReqServiceId_p, pNodeId_p) == TRUE)
+                if (getMnIdentRequest(pReqServiceId_p, pNodeId_p) != FALSE)
                     goto Exit;
                 break;
 
             case 4:
-                if (getMnStatusRequest(pReqServiceId_p, pNodeId_p) == TRUE)
+                if (getMnStatusRequest(pReqServiceId_p, pNodeId_p) != FALSE)
                     goto Exit;
                 break;
 
             case 5:
-                if (getMnSyncRequest(pReqServiceId_p, pNodeId_p, pSoaPayload_p) == TRUE)
+                if (getMnSyncRequest(pReqServiceId_p, pNodeId_p, pSoaPayload_p) != FALSE)
                     goto Exit;
                 break;
         }

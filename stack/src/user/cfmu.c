@@ -56,7 +56,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #if (CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == FALSE)
-#error "CFM module needs define(CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM == TRUE)"
+#error "CFM module needs define(CONFIG_OBD_USE_STRING_DOMAIN_IN_RAM != FALSE)"
 #endif
 
 //============================================================================//

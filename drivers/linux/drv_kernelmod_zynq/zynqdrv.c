@@ -354,7 +354,7 @@ static irqreturn_t pcpIrqHandler(int irqNum_p,
     UNUSED_PARAMETER(ppDevInstData_p);
 
     if ((instance_l.pfnCbSync != NULL) &&
-        (instance_l.fSyncEnabled == TRUE))
+        (instance_l.fSyncEnabled != FALSE))
     {
         // User wants the interrupt, forward it without any argument
         instance_l.pfnCbSync();

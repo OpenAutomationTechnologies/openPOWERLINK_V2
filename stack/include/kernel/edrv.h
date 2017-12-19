@@ -238,7 +238,7 @@ tOplkError   edrv_releaseRxBuffer(tEdrvRxBuffer* pBuffer_p);
 tOplkError   edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p);
 #endif
 
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
 tOplkError   edrv_getMacTime(UINT64* pCurtime_p);
 #endif
 

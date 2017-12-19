@@ -181,7 +181,7 @@ tOplkError eventucal_exit(void)
     if (instance_l.threadId != 0)
     {
         instance_l.fStopThread = TRUE;
-        while (instance_l.fStopThread == TRUE)
+        while (instance_l.fStopThread != FALSE)
         {
             target_msleep(10);
             if (i++ > 1000)

@@ -699,7 +699,7 @@ tDualprocReturn dualprocshm_enableShmIntf(tDualprocDrvInstance pInstance_p)
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    if (dualProcInstance_l.fInitialized != TRUE)
+    if (dualProcInstance_l.fInitialized == FALSE)
         return kDualprocInvalidInstance;
 
     pCommonMemHeader = pDrvInst->commonMemInst.pCommonMemHeader;
@@ -750,7 +750,7 @@ tDualprocReturn dualprocshm_checkShmIntfState(tDualprocDrvInstance pInstance_p)
     if (pInstance_p == NULL)
         return kDualprocInvalidParameter;
 
-    if (dualProcInstance_l.fInitialized != TRUE)
+    if (dualProcInstance_l.fInitialized == FALSE)
         return kDualprocInvalidInstance;
 
     pCommonMemHeader = pDrvInst->commonMemInst.pCommonMemHeader;
@@ -820,14 +820,14 @@ tDualprocReturn dualprocshm_getSharedMemInfo(tDualprocDrvInstance pInstance_p,
         (procInstance_p >= kDualProcLast))
         return kDualprocInvalidParameter;
 
-    if (dualProcInstance_l.fInitialized != TRUE)
+    if (dualProcInstance_l.fInitialized == FALSE)
     {
         // Check if driver instance is initialized
         return kDualprocInvalidInstance;
     }
 
     if ((procInstance_p != dualProcInstance_l.localProcessor) &&
-        (dualProcInstance_l.fShmEnabled != TRUE))
+        (dualProcInstance_l.fShmEnabled == FALSE))
     {
         // For remote processor's base address, interface has to be enabled.
         return kDualprocshmIntfDisabled;
@@ -1072,7 +1072,7 @@ static tDualprocReturn configureCommonMemHeader(tDualProcInstance procInstance_p
         return kDualprocInvalidParameter;
 
     // Check if the driver is already initialized
-    if (dpshmInstState == TRUE)
+    if (dpshmInstState != FALSE)
     {
         dualprocshm_targetWriteData(&pCommonMemHeader_p->sharedMemBase[procInstance_p],
                                     sizeof(UINT64),

@@ -5300,7 +5300,7 @@ static tOplkError nodeListToNodeId(const UINT8* pCmdData_p,
         }
     }
 
-    if (matchFound == TRUE)
+    if (matchFound != FALSE)
         ret = kErrorRetry;
 
     return ret;

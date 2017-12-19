@@ -96,7 +96,7 @@ const tHostifInstanceId hostifInstance[NR_OF_CIRC_BUFFERS] =
         kHostifInstIdTxVethQueue,   ///< Queue for sending virtual Ethernet frames in the DLLCAL
 };
 
-#if (CONFIG_HOSTIF_PCP == TRUE)
+#if (CONFIG_HOSTIF_PCP != FALSE)
 #define CIRCBUF_HOSTIF_LOCK_LOCAL       0
 #define CIRCBUF_HOSTIF_LOCK_OTHER       1
 #else

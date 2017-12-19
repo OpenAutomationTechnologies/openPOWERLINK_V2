@@ -259,7 +259,7 @@ static tOplkError controlTimeSync(BOOL fEnable_p)
     }
 #endif
 
-#if (CONFIG_TIMER_USE_HIGHRES == TRUE)
+#if (CONFIG_TIMER_USE_HIGHRES != FALSE)
     if (ret == kErrorOk)
     {
         // Activate/deactivate external synchronization interrupt

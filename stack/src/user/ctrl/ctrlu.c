@@ -1484,7 +1484,7 @@ static tOplkError updateDllConfig(const tOplkApiInitParam* pInitParam_p,
         if (ret != kErrorOk)
             return ret;
 
-#if (CONFIG_VETH_SET_DEFAULT_GATEWAY == TRUE)
+#if (CONFIG_VETH_SET_DEFAULT_GATEWAY != FALSE)
         ret = target_setDefaultGateway(dllIdentParam.defaultGateway);
         if (ret != kErrorOk)
             return ret;
@@ -2405,7 +2405,7 @@ UINT32 getRequiredKernelFeatures(void)
     requiredKernelFeatures |= OPLK_KERNEL_RMN;
 #endif
 
-#if (CONFIG_DLL_PRES_CHAINING_CN == TRUE)
+#if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     requiredKernelFeatures |= OPLK_KERNEL_PRES_CHAINING_CN;
 #endif
 
@@ -2701,7 +2701,7 @@ static tOplkError initDefaultOdPartArchive(void)
     UINT32      signature = 0;
 #endif
 
-    while (fExit != TRUE)
+    while (fExit == FALSE)
     {
         switch (curOdPart)
         {

@@ -416,7 +416,7 @@ static void loopMain(void)
             }
         }
 
-        if (system_getTermSignalState() == TRUE)
+        if (system_getTermSignalState() != FALSE)
         {
             fExit = TRUE;
             printf("Received termination signal, exiting...\n");
