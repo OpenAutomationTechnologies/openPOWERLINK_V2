@@ -202,10 +202,10 @@ tOplkError eventucal_exit(void)
 {
     UINT    i = 0;
 
-    if (instance_l.fInitialized == TRUE)
+    if (instance_l.fInitialized != FALSE)
     {
         instance_l.fStopThread = TRUE;
-        while (instance_l.fStopThread == TRUE)
+        while (instance_l.fStopThread != FALSE)
         {
             target_msleep(10);
             if (i++ > 100)

@@ -262,7 +262,7 @@ tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p)
                     pDllConfigParam_p,
                     (pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
                         pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
         // Time triggered sending requires sync on SOC
         dllkInstance_g.dllConfigParam.syncNodeId = C_ADR_SYNC_ON_SOC;
 #endif

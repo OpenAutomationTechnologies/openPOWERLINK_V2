@@ -384,7 +384,7 @@ tOplkError edrv_exit(void)
 #endif
 
 #if (OPENMAC_DMAOBSERV != 0)
-    if (edrvInstance_l.fDmaError == TRUE)
+    if (edrvInstance_l.fDmaError != FALSE)
     {
         //if you see this openMAC DMA is connected to slow memory!
         // -> use embedded memory or 10 nsec SRAM!!!

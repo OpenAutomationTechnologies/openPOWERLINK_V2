@@ -70,7 +70,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #if (CONFIG_PCP == FALSE)
 #define TGT_INTC_BASE           XPAR_HOST_INTC_BASEADDR
-#elif (CONFIG_PCP == TRUE)
+#elif (CONFIG_PCP != FALSE)
 #define TGT_INTC_BASE           XPAR_PCP_INTC_BASEADDR
 #else
 #error  "Unable to determine the processor instance"

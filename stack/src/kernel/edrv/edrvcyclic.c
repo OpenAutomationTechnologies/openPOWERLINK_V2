@@ -87,7 +87,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 #endif /* (CONFIG_EDRV_CYCLIC_USE_DIAGNOSTICS != FALSE) */
 
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
 #define EDRV_SHIFT                                      150000ULL
 #endif
 
@@ -110,7 +110,7 @@ typedef struct
     tTimerHdl               timerHdlSlot;                   ///< Handle of the slot timer
     tEdrvCyclicCbSync       pfnSyncCb;                      ///< Function pointer to the sync callback function
     tEdrvCyclicCbError      pfnErrorCb;                     ///< Function pointer to the error callback function
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
     ULONGLONG               nextCycleTime;                  ///< Timestamp of the start of the next cycle
     BOOL                    fNextCycleValid;                ///< Flag indicating whether the value in nextCycleTime is valid
 #endif
@@ -131,7 +131,7 @@ static tEdrvcyclicInstance edrvcyclicInstance_l;
 // local function prototypes
 //------------------------------------------------------------------------------
 static tOplkError timerHdlCycleCb(const tTimerEventArg* pEventArg_p);
-#if (EDRV_USE_TTTX != TRUE)
+#if (EDRV_USE_TTTX == FALSE)
 static tOplkError timerHdlSlotCb(const tTimerEventArg* pEventArg_p);
 #endif
 static tOplkError processTxBufferList(BOOL fCallSyncCb_p);
@@ -339,7 +339,7 @@ tOplkError edrvcyclic_startCycle(BOOL fContinuousMode_p)
                                 edrvcyclicInstance_l.cycleTimeUs * 1000ULL,
                                 timerHdlCycleCb, 0L, fContinuousMode_p);
 
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
     edrvcyclicInstance_l.fNextCycleValid = FALSE;
 #endif
 
@@ -613,14 +613,14 @@ Exit:
         }
     }
 
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
     edrvcyclicInstance_l.nextCycleTime += (edrvcyclicInstance_l.cycleTimeUs * 1000ULL);
 #endif
 
     return ret;
 }
 
-#if (EDRV_USE_TTTX != TRUE)
+#if (EDRV_USE_TTTX == FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Slot timer callback
@@ -686,7 +686,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
 {
     tOplkError          ret = kErrorOk;
     tEdrvTxBuffer*      pTxBuffer = NULL;
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
     BOOL                fFirstPacket = TRUE;
     UINT64              launchTime;
     UINT64              cycleMin;
@@ -694,7 +694,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
     UINT64              currentMacTime = 0;
 #endif
 
-#if (EDRV_USE_TTTX == TRUE)
+#if (EDRV_USE_TTTX != FALSE)
     edrv_getMacTime(&currentMacTime);
     if (!edrvcyclicInstance_l.fNextCycleValid)
     {
@@ -761,7 +761,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
         }
     }
 
-#else /* (EDRV_USE_TTTX == TRUE) */
+#else /* (EDRV_USE_TTTX != FALSE) */
 
     while ((pTxBuffer = edrvcyclicInstance_l.ppTxBufferList[edrvcyclicInstance_l.curTxBufferEntry]) != NULL)
     {
@@ -795,7 +795,7 @@ static tOplkError processTxBufferList(BOOL fCallSyncCb_p)
             fCallSyncCb_p = FALSE;
         }
     }
-#endif /* (EDRV_USE_TTTX == TRUE) */
+#endif /* (EDRV_USE_TTTX != FALSE) */
 
 Exit:
     if (ret != kErrorOk)

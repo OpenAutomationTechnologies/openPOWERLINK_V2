@@ -766,7 +766,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         // check if application is ready to operate
         case kNmtEventEnterReadyToOperate:
             // check if command NMTEnableReadyToOperate from MN was received
-            if (nmtkInstance_l.fEnableReadyToOperate == TRUE)
+            if (nmtkInstance_l.fEnableReadyToOperate != FALSE)
             {   // reset flags
                 nmtkInstance_l.fEnableReadyToOperate = FALSE;
                 nmtkInstance_l.fAppReadyToOperate = FALSE;
@@ -782,7 +782,7 @@ static tOplkError doStateCsPreOperational2(tNmtEvent nmtEvent_p)
         // NMT Commando EnableReadyToOperate
         case kNmtEventEnableReadyToOperate:
             // check if application is ready
-            if (nmtkInstance_l.fAppReadyToOperate == TRUE)
+            if (nmtkInstance_l.fAppReadyToOperate != FALSE)
             {   // reset flags
                 nmtkInstance_l.fEnableReadyToOperate = FALSE;
                 nmtkInstance_l.fAppReadyToOperate = FALSE;

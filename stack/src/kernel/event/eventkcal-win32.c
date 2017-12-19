@@ -186,7 +186,7 @@ functions of the queue implementations for each used queue.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_exit(void)
 {
-    if (instance_l.fInitialized == TRUE)
+    if (instance_l.fInitialized != FALSE)
     {
         instance_l.fStopThread = TRUE;
 

@@ -143,7 +143,7 @@ functions of the queue implementations for each used queue.
 //------------------------------------------------------------------------------
 tOplkError eventucal_exit(void)
 {
-    if (instance_l.fInitialized == TRUE)
+    if (instance_l.fInitialized != FALSE)
     {
         eventucal_exitQueueCircbuf(kEventQueueK2U);
         eventucal_exitQueueCircbuf(kEventQueueU2K);

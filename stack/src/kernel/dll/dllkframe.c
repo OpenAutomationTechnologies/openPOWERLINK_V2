@@ -151,7 +151,7 @@ static void       handleErrorSignaling(const tPlkFrame* pFrame_p, UINT nodeId_p)
 static tOplkError cbCnTimer(const tTimerEventArg* pEventArg_p);
 #endif
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == TRUE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
 static tOplkError enableRxFilter(UINT filterEntry_p, BOOL fEnable_p);
 #endif
 
@@ -424,7 +424,7 @@ void dllkframe_processTransmittedNmtReq(tEdrvTxBuffer* pTxBuffer_p)
     // mark Tx-buffer as empty
     dllkInstance_g.aTxBufferStateNmtReq[pTxBuffer_p - &dllkInstance_g.pTxBuffer[handle]] = kDllkTxBufEmpty;
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == TRUE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     // Disable the filter to avoid retransmission of the same frame
     if ((dllkInstance_g.nmtState & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
     {
@@ -499,7 +499,7 @@ void dllkframe_processTransmittedNonPlk(tEdrvTxBuffer* pTxBuffer_p)
     // mark Tx-buffer as empty
    dllkInstance_g.aTxBufferStateNonPlk[pTxBuffer_p - &dllkInstance_g.pTxBuffer[handle]] = kDllkTxBufEmpty;
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == TRUE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
     // Disable the filter to avoid retransmission of the same frame
     if ((dllkInstance_g.nmtState & (NMT_TYPE_MASK | NMT_SUPERSTATE_MASK)) == (NMT_TYPE_CS | NMT_CS_PLKMODE))
     {
@@ -3194,7 +3194,7 @@ Exit:
 }
 #endif
 
-#if (CONFIG_EDRV_AUTO_RESPONSE == TRUE)
+#if (CONFIG_EDRV_AUTO_RESPONSE != FALSE)
 //------------------------------------------------------------------------------
 /**
 \brief  Enable Rx filter

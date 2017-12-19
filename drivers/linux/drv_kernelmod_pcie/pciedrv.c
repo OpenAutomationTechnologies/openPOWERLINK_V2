@@ -361,7 +361,7 @@ static irqreturn_t pcieDrvIrqHandler(int irqNum_p,
     // Currently only sync interrupt is produced by the PCIe, check if the user
     // wants the irq to be forwarded
     if ((pcieDrvInstance_l.pfnCbSync != NULL) &&
-        (pcieDrvInstance_l.fSyncEnabled == TRUE))
+        (pcieDrvInstance_l.fSyncEnabled != FALSE))
     {
         // User wants the interrupt, forward it without any argument
         pcieDrvInstance_l.pfnCbSync();

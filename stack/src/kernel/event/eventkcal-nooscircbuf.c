@@ -152,7 +152,7 @@ functions of the queue implementations for each used queue.
 //------------------------------------------------------------------------------
 tOplkError eventkcal_exit(void)
 {
-    if (instance_l.fInitialized == TRUE)
+    if (instance_l.fInitialized != FALSE)
     {
         eventkcal_exitQueueCircbuf(kEventQueueKInt);
         eventkcal_exitQueueCircbuf(kEventQueueK2U);

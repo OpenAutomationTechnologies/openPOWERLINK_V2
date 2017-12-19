@@ -109,7 +109,7 @@ tOplkError dllkframe_cbMnTimerCycle(const tTimerEventArg* pEventArg_p);
 #endif
 
 /* PRes Chaining functions */
-#if CONFIG_DLL_PRES_CHAINING_CN == TRUE
+#if CONFIG_DLL_PRES_CHAINING_CN != FALSE
 tOplkError dllkframe_presChainingEnable(void);
 tOplkError dllkframe_presChainingDisable(void);
 #endif

@@ -219,7 +219,7 @@ tOplkError eventucal_exit(void)
     if (instance_l.kernelEventThreadId != 0)
     {
         instance_l.fStopKernelThread = TRUE;
-        while (instance_l.fStopKernelThread == TRUE)
+        while (instance_l.fStopKernelThread != FALSE)
         {
             target_msleep(10);
             if (timeout++ > 1000)
@@ -235,7 +235,7 @@ tOplkError eventucal_exit(void)
     if (instance_l.processEventThreadId != 0)
     {
         instance_l.fStopProcessThread = TRUE;
-        while (instance_l.fStopProcessThread == TRUE)
+        while (instance_l.fStopProcessThread != FALSE)
         {
             target_msleep(10);
             if (timeout++ > 1000)

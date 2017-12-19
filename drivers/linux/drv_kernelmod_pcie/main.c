@@ -693,9 +693,9 @@ static int plkIntfMmap(struct file* pFile_p,
     }
 
 #if defined(CONFIG_INCLUDE_SOC_TIME_FORWARD)
-    if ((fPdoMem == TRUE) || (fSocMem == TRUE))
+    if ((fPdoMem != FALSE) || (fSocMem != FALSE))
 #else
-    if (fPdoMem == TRUE)
+    if (fPdoMem != FALSE)
 #endif
     {
         // Get the bus address of the atomic access memory

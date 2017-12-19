@@ -207,7 +207,7 @@ void hrtimer_shutdown(void)
     /* stop timer task */
     timerData_g.m_fStopTimerTask = TRUE;
     semGive (timerData_g.m_signalSem);
-    while (timerData_g.m_fStopTimerTask == TRUE)
+    while (timerData_g.m_fStopTimerTask != FALSE)
     {
         taskDelay(sysClkRateGet() / 2);
     }

@@ -213,7 +213,7 @@ tOplkError timesynckcal_waitSyncEvent(void)
         return kErrorNoResource;
 
     ret = wait_event_interruptible_timeout(instance_l.syncWaitQueue,
-                                           (instance_l.fSync == TRUE),
+                                           (instance_l.fSync != FALSE),
                                            timeout);
     if (ret == 0)
         return kErrorRetry;
