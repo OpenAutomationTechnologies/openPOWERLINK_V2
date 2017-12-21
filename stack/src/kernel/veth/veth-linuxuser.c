@@ -12,6 +12,7 @@ implementation. It uses a TUN/TAP device as virtual Ethernet driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -368,6 +369,14 @@ static void* vethRecvThread(void* pArg_p)
                     if (ret != kErrorOk)
                     {
                         DEBUG_LVL_VETH_TRACE("%s(): dllkcal_sendAsyncFrame returned 0x%04X\n", __func__, ret);
+                    }
+
+                    // Forward the non-powerlink frame via async receive FIFO to userspace
+                    ret = dllkcal_asyncFrameReceived(&frameInfo);
+                    if (ret != kErrorOk)
+                    {
+                        DEBUG_LVL_VETH_TRACE("%s(): dllkcal_asyncFrameReceived returned 0x%04X\n",
+                                             __func__, ret);
                     }
                 }
                 break;

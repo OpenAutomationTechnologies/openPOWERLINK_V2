@@ -14,7 +14,7 @@ application layer into POWERLINK network.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 All rights reserved.
 
@@ -211,6 +211,7 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
                                  tEdrvReleaseRxBuffer* pReleaseRxBuffer_p)
 {
     tNdisErrorStatus status;
+    tOplkError       ret = kErrorOk;
 
     status = ndis_vethReceive((void*)pFrameInfo_p->frame.pBuffer,
                               pFrameInfo_p->frameSize);
@@ -218,12 +219,20 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
     {
         DEBUG_LVL_VETH_TRACE("%s() Unable to indicate received frames error 0x%2X\n",
                              __func__, status);
-        return kErrorNoResource;
+        ret = kErrorNoResource;
+    }
+
+    // Forward the non-powerlink frame via async receive FIFO to userspace
+    ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
+    if (ret == kErrorReject)
+    {
+        *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+        ret = kErrorOk;
     }
 
     *pReleaseRxBuffer_p = kEdrvReleaseRxBufferImmediately;
 
-    return kErrorOk;
+    return ret;
 }
 
 /// \}
