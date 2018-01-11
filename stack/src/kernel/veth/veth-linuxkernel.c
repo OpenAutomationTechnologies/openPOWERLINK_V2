@@ -13,6 +13,7 @@ implementation.
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -407,6 +408,14 @@ static tOplkError receiveFrameCb(tFrameInfo* pFrameInfo_p,
                          pFrameInfo_p->frame.pBuffer->aSrcMac[3],
                          pFrameInfo_p->frame.pBuffer->aSrcMac[4],
                          pFrameInfo_p->frame.pBuffer->aSrcMac[5]);
+
+    // Forward the non-powerlink frame via async receive FIFO to userspace
+    ret = dllkcal_asyncFrameReceived(pFrameInfo_p);
+    if (ret == kErrorReject)
+    {
+        *pReleaseRxBuffer_p = kEdrvReleaseRxBufferLater;
+        ret = kErrorOk;
+    }
 
     // update receive statistics
     pStats->rx_packets++;
