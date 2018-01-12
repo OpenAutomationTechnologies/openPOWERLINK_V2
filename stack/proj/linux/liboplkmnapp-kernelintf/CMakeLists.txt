@@ -3,6 +3,7 @@
 # CMake file of openPOWERLINK application MN library with kernelspace interface
 #
 # Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -61,6 +62,7 @@ IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")
     SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_X86_SOURCES})
 ELSEIF(CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
     SET(LIB_SOURCES ${LIB_SOURCES} ${ARCH_LE_SOURCES})
+    ADD_DEFINITIONS(-DCONFIG_EMACPS_VETH_NAME)
 ELSE()
     MESSAGE(FATAL_ERROR "Unsupported CMAKE_SYSTEM_PROCESSOR ${CMAKE_SYSTEM_PROCESSOR}")
 ENDIF()
