@@ -90,17 +90,29 @@ Windows Driver Kit (WDK) 8.1 for compilation.
 Follow the steps below to build the NDIS driver on a Windows system using MSbuild.
 Open a Visual Studio command line and enter the following commands:
 
-* Build driver for Windows 7 (64 bit) in debug mode
+* Build driver for Windows 7 & 10 (64 bit) in debug mode
 
       > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Debug"
 
-* Build driver for Windows 7 (64 bit) in release mode
+* Build driver for Windows 7 & 10 (64 bit) in release mode
 
       > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
       > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
       > msbuild /t:build /p:Platform=x64 /p:Configuration="Win7 Release"
+
+* Build driver for Windows 7 & 10 (32 bit) in debug mode
+
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Debug ..
+      > msbuild /t:build /p:Platform=Win32 /p:Configuration="Win7 Debug"
+
+* Build driver for Windows 7 & 10 (32 bit) in release mode
+
+      > cd <openPOWERLINK_dir>\drivers\windows\drv_ndis_[pcie;intermediate]\build
+      > cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+      > msbuild /t:build /p:Platform=Win32 /p:Configuration="Win7 Release"
 
 `Platform` and `Configuration` parameters can be modified to compile the driver for
 a different platform and Windows version.
