@@ -74,6 +74,8 @@
     <VerifyProjectOutput>True</VerifyProjectOutput>
     <VerifyDrivers />
     <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITECTURE)\</OutDir>
+    <IntDir>$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Release|Win32'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -87,6 +89,8 @@
     <VerifyProjectOutput>True</VerifyProjectOutput>
     <VerifyDrivers />
     <VerifyFlags>133563</VerifyFlags>
+    <OutDir>$(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITECTURE)\</OutDir>
+    <IntDir>$(Platform)\$(ConfigurationName)\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Win7 Debug|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -120,9 +124,6 @@
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\drv_ndis_intermediate\drv_ndis_intermediate.vcxproj">
-      <Project>{be53555d-b97e-480a-9cab-29aa58d34d00}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\notifyObj\notifyObj.vcxproj">
       <Project>{293ba7ca-111d-4125-864a-ad5edd9de5cc}</Project>
     </ProjectReference>
