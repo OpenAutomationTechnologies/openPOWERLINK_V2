@@ -90,8 +90,8 @@ void                omethFilterDisable
 void            omethFilterSetByteValue
 (
  OMETH_FILTER_H    hFilter,    /* filter handle                                    */
- unsigned short    offset,        /* offset in the filterarray                        */
- unsigned char    value        /* value to set                                        */
+ uint16_t          offset,     /* offset in the filterarray                        */
+ uint8_t           value       /* value to set                                     */
 )
 {
     hFilter->pFilterData->pFilterWriteOnly[offset].value = value;
@@ -119,7 +119,7 @@ void            omethRxIrqHandler
     ometh_pending_typ         *pQueue;                    // ptr to buffer queue
     ometh_rx_info_typ         *pInfo;
     ometh_desc_typ            *pDesc;
-    unsigned long             flags=0;
+    uint32_t                  flags=0;
 
     #ifdef DEBUG_OUTPUT_ETH_RX_HOOK_SET
         DEBUG_OUTPUT_ETH_RX_HOOK_SET();
@@ -140,7 +140,7 @@ void            omethRxIrqHandler
     // access to buffer structure and set packet length
     pRxBuf = GET_TYPE_BASE( ometh_buf_typ , packet.data, pDesc->pData);
 
-    pRxBuf->packet.length = (unsigned long)pDesc->len - 4;    // length without checksum
+    pRxBuf->packet.length = (uint32_t)pDesc->len - 4;       // length without checksum
     pRxBuf->timeStamp     = pDesc->time;                    // overtake timestamp to packet header
 
     if(((ometh_status_typ*)hHook)->value & OMETH_REG_LOST)
@@ -197,7 +197,7 @@ void            omethRxIrqHandler
                     if(hHook->pFct(hFilter->arg, &pRxBuf->packet, omethPacketFree) == 0)
                     {
                         // use new frame for next rx at this descriptor
-                        pDesc->pData = (unsigned long)&pQueue->pBuf->packet.data;
+                        pDesc->pData = (uint32_t)&pQueue->pBuf->packet.data;
 
                         pQueue->pBuf = 0;                    // remove buffer from list
 
@@ -244,7 +244,7 @@ void            omethTxIrqHandler
 {
     ometh_tx_info_typ    *pInfo    = hEth->pTxFree[0];    // access to next tx info structure;
     ometh_desc_typ        *pDesc    = pInfo->pDesc;        // access to tx descriptor
-    unsigned long        i;
+    uint32_t             i;
 
 
 #if (OMETH_ENABLE_SOFT_IRQ==1)
@@ -267,7 +267,7 @@ void            omethTxIrqHandler
         // if it was not the last queue-descriptor .. it was an auto answer buffer
         if(pDesc->flags.byte.high & FLAGS1_SENT)
         {
-            i = (unsigned long)pDesc->flags.word & 0x0F;    // collisions of this frame
+            i = (uint32_t)pDesc->flags.word & 0x0F;         // collisions of this frame
             hEth->stat.txDone[i]++;                            // count transmits depending on occurred collisions
             hEth->stat.txCollision += i;                    // count collisions
 
@@ -295,7 +295,7 @@ void            omethTxIrqHandler
             // if it was not the last queue-descriptor .. it was an auto answer buffer
             if(pDesc->flags.byte.high & FLAGS1_SENT)
             {
-                i = (unsigned long)pDesc->flags.word & 0x0F;    // collisions of this frame
+                i = (uint32_t)pDesc->flags.word & 0x0F;         // collisions of this frame
                 hEth->stat.txDone[i]++;                         // count transmits depending on occurred collisions
                 hEth->stat.txCollision += i;                    // count collisions
 
@@ -347,7 +347,7 @@ void            omethTxIrqHandler
 
         pInfo->autoTxCount++;
 
-        i = (unsigned long)pDesc->flags.word & 0x0F;    // collisions of this frame
+        i = (uint32_t)pDesc->flags.word & 0x0F;         // collisions of this frame
         hEth->stat.txDone[i]++;                            // count transmits depending on occurred collisions
         hEth->stat.txCollision += i;                    // count collisions
 
@@ -365,7 +365,7 @@ void            omethTxIrqHandler
 * omethGetTimestamp - get timestamp of a received packet
 *
 */
-unsigned long    omethGetTimestamp
+uint32_t         omethGetTimestamp
 (
  ometh_packet_typ    *pPacket    /* address of rx packet*/
  )
