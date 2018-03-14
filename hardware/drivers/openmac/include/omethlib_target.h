@@ -73,7 +73,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         #endif
     //
     //---------------------------------------------------------
-    #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((unsigned long)ptr)|NIOS2_BYPASS_DCACHE_MASK);
+    #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((uint32_t)ptr)|NIOS2_BYPASS_DCACHE_MASK);
     #define OMETH_UNCACHED_MALLOC(size)        alt_uncached_malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)           alt_uncached_free(ptr)
 
