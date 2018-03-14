@@ -386,6 +386,7 @@ int        omethMiiControl
 {
     // enable phys
     ometh_mii_typ* pPhy = OMETH_MAKE_NONCACHABLE(pPhyBase);
+    uint16_t       control;
 
     if(pPhyBase==0) return -1;
 
@@ -394,16 +395,22 @@ int        omethMiiControl
 
     if(command & MII_CTRL_RESET)
     {
-        while(pPhy->control & MII_REG_ENABLE) pPhy->control &= (uint16_t)~MII_REG_ENABLE;
+        while ((control = ometh_rd_16(&pPhy->control)) & MII_REG_ENABLE)
+        {
+            ometh_wr_16(&pPhy->control, control & (uint16_t)~MII_REG_ENABLE);
+        }
     }
 
     if(command & MII_CTRL_ACTIVE)
     {
-        while((pPhy->control & MII_REG_ENABLE)==0) pPhy->control |= MII_REG_ENABLE;
+        while (((control = ometh_rd_16(&pPhy->control)) & MII_REG_ENABLE) == 0)
+        {
+            ometh_wr_16(&pPhy->control, control | MII_REG_ENABLE);
+        }
     }
 
     // return 1 if state is requested and phy enable is set
-    if((command & MII_CTRL_GET_STATE) && (pPhy->control & MII_REG_ENABLE) ) return 1;
+    if((command & MII_CTRL_GET_STATE) && (ometh_rd_16(&pPhy->control) & MII_REG_ENABLE) ) return 1;
 
     return 0;
 }
@@ -1166,19 +1173,19 @@ int                    omethPhyRead
 
     pMII = hEth->config.pPhyBase;
 
-    while(pMII->cmd.ack & 1);    // wait until busy = 0
-    dataBackup = pMII->data;    // backup data in case omethPeriodic() was waiting for a register
+    while(ometh_rd_16(&pMII->cmd.ack) & 1);    // wait until busy = 0
+    dataBackup = ometh_rd_16(&pMII->data);     // backup data in case omethPeriodic() was waiting for a register
 
     if(port & 0x8000)        port = ((port&0x1F)<<7) | PHY_REG_READ;    // generate phy-read command from phy-address
     else if(port & 0x4000)    port = SMI_REG_READ | ((reg&0xE0)<<2);    // patch the higher 3 bits of the register number to phy address
     else                     port = hEth->phyCmdRead[port];            // take phy read command from ethernet-instance
 
-    pMII->cmd.req = port | ( (reg&0x1F)<<2 );
+    ometh_wr_16(&pMII->cmd.req, port | ( (reg&0x1F)<<2 ));
 
-    while(pMII->cmd.ack & 1);                        // wait until busy = 0
+    while(ometh_rd_16(&pMII->cmd.ack) & 1);                        // wait until busy = 0
 
-    if(pValue) *pValue = pMII->data;    // get response
-    pMII->data = dataBackup;            // restore backup for next omethPeriodic() call
+    if(pValue) *pValue = ometh_rd_16(&pMII->data);    // get response
+    ometh_wr_16(&pMII->data, dataBackup);            // restore backup for next omethPeriodic() call
 
     return 0;
 }
@@ -1215,18 +1222,18 @@ int                    omethPhyWrite
 
     pMII = hEth->config.pPhyBase;
 
-    while(pMII->cmd.ack & 1);    // wait until busy = 0
-    dataBackup = pMII->data;    // backup data in case omethPeriodic() was waiting for a register
+    while(ometh_rd_16(&pMII->cmd.ack) & 1);    // wait until busy = 0
+    dataBackup = ometh_rd_16(&pMII->data);     // backup data in case omethPeriodic() was waiting for a register
 
     if(port & 0x8000)        port = ((port&0x1F)<<7) | PHY_REG_WRITE;    // generate phy-read command from phy-address
     else if(port & 0x4000)    port = SMI_REG_WRITE | ((reg&0xE0)<<2);        // patch the higher 3 bits of the register number to phy address
     else                    port = hEth->phyCmdWrite[port];                // take phy read command from ethernet-instance
 
-    pMII->data = value;
-    pMII->cmd.req = port | ( (reg&0x1F) <<2 );
-    while(pMII->cmd.ack & 1);    // wait until busy = 0
+    ometh_wr_16(&pMII->data, value);
+    ometh_wr_16(&pMII->cmd.req, port | ( (reg&0x1F) <<2 ));
+    while(ometh_rd_16(&pMII->cmd.ack) & 1);    // wait until busy = 0
 
-    pMII->data = dataBackup;    // restore backup for next omethPeriodic() call
+    ometh_wr_16(&pMII->data, dataBackup);    // restore backup for next omethPeriodic() call
     return 0;
 }
 
@@ -1261,14 +1268,14 @@ int                    omethPhyReadNonBlocking
 {
     ometh_mii_typ*    pMII = hEth->config.pPhyBase;
 
-    if (pMII->cmd.ack & 1) return -1;            // busy -> blocking
+    if (ometh_rd_16(&pMII->cmd.ack) & 1) return -1;            // busy -> blocking
 
     if(port & 0x8000)        port = ((port&0x1F)<<7) | PHY_REG_READ;    // generate phy-read command from phy-address
     else if(port & 0x4000)    port = SMI_REG_READ | ((reg&0xE0)<<2);    // patch the higher 3 bits of the register number to phy address
     else                    port = hEth->phyCmdRead[port];            // take phy read command from ethernet-instance
 
-    *pValue            = pMII->data;                // get response
-    pMII->cmd.req = port | ( (reg&0x1F) <<2 );    // set new read commando
+    *pValue            = ometh_rd_16(&pMII->data);             // get response
+    ometh_wr_16(&pMII->cmd.req, port | ( (reg&0x1F) <<2 ));    // set new read commando
 
     return 0;
 }
@@ -1326,13 +1333,13 @@ void            omethPeriodic
         omethInternal.pPeriodicEth = hEth;        // start periodic phy control with last found instance
 
         pMII = hEth->config.pPhyBase;
-        pMII->cmd.req = hEth->phyCmdRead[0];    // initiate read command of phy 0 / register 0
+        ometh_wr_16(&pMII->cmd.req, hEth->phyCmdRead[0]);    // initiate read command of phy 0 / register 0
 
         return;
     }
 
     pMII = hEth->config.pPhyBase;    // ptr to MII
-    if (pMII->cmd.ack & 1)
+    if (ometh_rd_16(&pMII->cmd.ack) & 1)
     {
         return;    // mii busy
     }
@@ -1346,15 +1353,15 @@ void            omethPeriodic
         omethInternal.pPeriodicEth = hEth;    // save for next periodic call
 
         // start read command
-        pMII->cmd.req = hEth->phyCmdRead[0];    // initiate read command of phy 0 / register 0
+        ometh_wr_16(&pMII->cmd.req, hEth->phyCmdRead[0]);    // initiate read command of phy 0 / register 0
         return;
     }
 
     // check if tx-job for port0/reg4 is pending
     if(hEth->txVal)
     {
-        pMII->data    = hEth->txVal;
-        pMII->cmd.req = hEth->phyCmdWrite[hEth->txPort] | (hEth->txReg << 2);
+        ometh_wr_16(&pMII->data, hEth->txVal);
+        ometh_wr_16(&pMII->cmd.req, hEth->phyCmdWrite[hEth->txPort] | (hEth->txReg << 2));
 
         hEth->txVal = 0;
 
@@ -1370,9 +1377,9 @@ void            omethPeriodic
     pPhyReg = hEth->pPhyReg + hEth->phyPort;    //  access to phy register structure
 
     // get data from MII
-    ((uint16_t*)(pPhyReg))[hEth->phyReg] = pMII->data;
+    ((uint16_t*)(pPhyReg))[hEth->phyReg] = ometh_rd_16(&pMII->data);
 
-    if(pMII->data == 0xFFFF) hEth->phyOffline = 1;
+    if(ometh_rd_16(&pMII->data) == 0xFFFF) hEth->phyOffline = 1;
 
     hEth->phyReg++;
     if(hEth->phyReg >= sizeof(pPhyReg->r)/sizeof(pPhyReg->r[0]))
@@ -1487,7 +1494,7 @@ void            omethPeriodic
     }
 
     // start read command
-    pMII->cmd.req = hEth->phyCmdRead[hEth->phyPort] | (phyRegMapping[hEth->phyReg]<<2);
+    ometh_wr_16(&pMII->cmd.req, hEth->phyCmdRead[hEth->phyPort] | (phyRegMapping[hEth->phyReg]<<2));
 }
 
 /*****************************************************************************
