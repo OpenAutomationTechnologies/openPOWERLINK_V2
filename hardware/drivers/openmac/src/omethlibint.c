@@ -74,7 +74,7 @@ void                omethFilterDisable
 )
 {
     // disable filter
-    *hFilter->pFilterData->pCommand = hFilter->pFilterData->cmd &= CMD_FILTER_nON;
+    ometh_wr_8(hFilter->pFilterData->pCommand, hFilter->pFilterData->cmd &= CMD_FILTER_nON);
 }
 
 /*****************************************************************************
@@ -94,7 +94,7 @@ void            omethFilterSetByteValue
  uint8_t           value       /* value to set                                     */
 )
 {
-    hFilter->pFilterData->pFilterWriteOnly[offset].value = value;
+    ometh_wr_8(&hFilter->pFilterData->pFilterWriteOnly[offset].value, value);
 //    FILTER_SET_FLAG(hFilter->pFilterData, CMD_FILTER_ON);
 }
 
