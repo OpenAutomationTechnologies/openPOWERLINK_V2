@@ -468,27 +468,27 @@ static OMETH_H        omethCreateInt
     pRegBase = OMETH_MAKE_NONCACHABLE(pEthConfig->pRegBase);
 
     // initialize control registers
-    pRegBase->rxStatus.clrBit        = 0xFFFF;            // clear all bits in rx status
-    pRegBase->rxStatus.setDescriptor = 0;
+    ometh_wr_16(&pRegBase->rxStatus.clrBit, 0xFFFF);            // clear all bits in rx status
+    ometh_wr_16(&pRegBase->rxStatus.setDescriptor, 0);
 
     // clear all bits in tx status except the hub-enable
-    pRegBase->txStatus.clrBit        = ~(uint16_t)OMETH_REG_HALF;
-    pRegBase->txStatus.setDescriptor = 0;
+    ometh_wr_16(&pRegBase->txStatus.clrBit, ~(uint16_t)OMETH_REG_HALF);
+    ometh_wr_16(&pRegBase->txStatus.setDescriptor, 0);
 
     // only halfduplex is allowed ... no fullduplex -> set half-bit in mac register (which also enables the HUB)
     if (((pEthConfig->mode & OMETH_MODE_HALFDUPLEX) != 0) && ((pEthConfig->mode & OMETH_MODE_FULLDUPLEX) == 0))
     {
-        pRegBase->txStatus.setBit = OMETH_REG_HALF;
+        ometh_wr_16(&pRegBase->txStatus.setBit, OMETH_REG_HALF);
     }
 
     // clear all pending rx irqs
-    while(pRegBase->rxStatus.value & OMETH_REG_PENDING) pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
+    while(ometh_rd_16(&pRegBase->rxStatus.value) & OMETH_REG_PENDING) ometh_wr_16(&pRegBase->rxStatus.clrBit, OMETH_REG_IQUIT);
 
     // clear all pending rx irqs
-    while(pRegBase->txStatus.value & OMETH_REG_PENDING) pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;
+    while(ometh_rd_16(&pRegBase->txStatus.value) & OMETH_REG_PENDING) ometh_wr_16(&pRegBase->txStatus.clrBit, OMETH_REG_IQUIT);
 
     // clear all pending tx-beg irqs
-    while(pRegBase->txStatus.value & OMETH_REG_TX_BEG) pRegBase->txStatus.clrBit = OMETH_REG_TX_BEG;
+    while(ometh_rd_16(&pRegBase->txStatus.value) & OMETH_REG_TX_BEG) ometh_wr_16(&pRegBase->txStatus.clrBit, OMETH_REG_TX_BEG);
 
     hEth = calloc(sizeof(struct OMETH_TYP),1);    // allocate memory for instance handle
     assert(hEth);
@@ -613,7 +613,7 @@ static OMETH_H        omethCreateInt
     }
 
     // write IPG value to tx status register
-    pRegBase->txStatus.setDescriptor = i;
+    ometh_wr_16(&pRegBase->txStatus.setDescriptor, i);
 
     hEth->pRegBase    = hEth->config.pRegBase;
     hEth->pHardware    = hEth->config.pRamBase;
@@ -1399,7 +1399,7 @@ void            omethPeriodic
                 }
                 else    // otherwise change speed to 10 MBit
                 {
-                    hEth->pRegBase->rxStatus.setBit = OMETH_REG_10MBIT; // manipulate 10/100 flag
+                    ometh_wr_16(&hEth->pRegBase->rxStatus.setBit, OMETH_REG_10MBIT); // manipulate 10/100 flag
                     hEth->linkSpeed = 10;
                 }
             }
@@ -1456,7 +1456,7 @@ void            omethPeriodic
             // change back to 100 MBit (and setup MAC) (not for MACs with more than 1 port)
             if(hEth->phyLinkActive==0 && hEth->phyCount==1)
             {
-                if(hEth->linkSpeed == 10) hEth->pRegBase->rxStatus.clrBit = OMETH_REG_10MBIT;
+                if(hEth->linkSpeed == 10) ometh_wr_16(&hEth->pRegBase->rxStatus.clrBit, OMETH_REG_10MBIT);
                 hEth->linkSpeed        = OMETH_INIT_LINK_SPEED;
                 hEth->phyHalfMax    = 0;
             }
@@ -1467,11 +1467,11 @@ void            omethPeriodic
             if((hEth->phyLinkActive > 1) || ((hEth->config.mode & OMETH_MODE_FULLDUPLEX) == 0) ||
                 (hEth->phyHalfCount > 0))
             {
-                hEth->pRegBase->txStatus.setBit = OMETH_REG_HALF;
+                ometh_wr_16(&hEth->pRegBase->txStatus.setBit, OMETH_REG_HALF);
             }
             else
             {
-                hEth->pRegBase->txStatus.clrBit = OMETH_REG_HALF;
+                ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_HALF);
             }
 
             hEth->phyPort        = 0;    // start with port 0 if all are done
@@ -1905,7 +1905,7 @@ int                omethSetSCNM
 
         hEth->pFilterSCNM = hFilter->pFilterData;                // access to new filter
 
-        hEth->pRegBase->txStatus.setBit = OMETH_REG_SYNC;        // set sync flag in control register
+        ometh_wr_16(&hEth->pRegBase->txStatus.setBit, OMETH_REG_SYNC);        // set sync flag in control register
 
         FILTER_SET_FLAG(hEth->pFilterSCNM, CMD_FILTER_SYNC);    // set sync flag in this filter
     }
@@ -1915,7 +1915,7 @@ int                omethSetSCNM
         if(hEth->pFilterSCNM) FILTER_CLEAR_FLAG(hEth->pFilterSCNM, CMD_FILTER_SYNC);
 
         // clear sync flag in control register
-        hEth->pRegBase->txStatus.clrBit = OMETH_REG_SYNC;
+        ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_SYNC);
 
         hEth->pFilterSCNM = 0;
     }
@@ -1999,7 +1999,7 @@ int                omethResponseInitBuf
 
     hEth = hFilter->pFilterData->hEth;                        // get driver instance from hook
 
-    if(hEth->pRegBase->txStatus.value & OMETH_REG_RUN)
+    if(ometh_rd_16(&hEth->pRegBase->txStatus.value) & OMETH_REG_RUN)
     {
         assert(0);
         return -1;    // new setup in run mode not allowed
@@ -2362,21 +2362,21 @@ void            omethStart
         hEth->clearPendingIrqAtStart=0;    // important for debugging .. clear pending irqs from last activation
 
         // quit pending irqs and clear lost-bit
-        while(hEth->pRegBase->rxStatus.value & OMETH_REG_PENDING) hEth->pRegBase->rxStatus.clrBit = OMETH_REG_IQUIT;
-        while(hEth->pRegBase->txStatus.value & OMETH_REG_PENDING) hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;
+        while(ometh_rd_16(&hEth->pRegBase->rxStatus.value) & OMETH_REG_PENDING) ometh_wr_16(&hEth->pRegBase->rxStatus.clrBit, OMETH_REG_IQUIT);
+        while(ometh_rd_16(&hEth->pRegBase->txStatus.value) & OMETH_REG_PENDING) ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_IQUIT);
 
-        hEth->pRxNext = &hEth->pRxInfo[hEth->pRegBase->rxStatus.value & (hEth->nbRxDesc-1)]; // set pRxNext descriptor info
+        hEth->pRxNext = &hEth->pRxInfo[ometh_rd_16(&hEth->pRegBase->rxStatus.value) & (hEth->nbRxDesc-1)]; // set pRxNext descriptor info
     }
 
-    hEth->pRegBase->rxStatus.clrBit = OMETH_REG_LOST;
+    ometh_wr_16(&hEth->pRegBase->rxStatus.clrBit, OMETH_REG_LOST);
 
     setBit = OMETH_REG_RUN | OMETH_REG_IE;
 
-    hEth->pRegBase->txStatus.setBit = setBit;
+    ometh_wr_16(&hEth->pRegBase->txStatus.setBit, setBit);
 
     if(hEth->config.mode & OMETH_MODE_CRC_DETECT) setBit = setBit | OMETH_REG_DIAG;
 
-    hEth->pRegBase->rxStatus.setBit = setBit;
+    ometh_wr_16(&hEth->pRegBase->rxStatus.setBit, setBit);
 }
 
 /*****************************************************************************
@@ -2392,8 +2392,8 @@ void            omethStop
     if(hEth==0) return;
 
     // clear run bits for rx and tx
-    hEth->pRegBase->rxStatus.clrBit = OMETH_REG_RUN | OMETH_REG_IE;
-    hEth->pRegBase->txStatus.clrBit = OMETH_REG_RUN | OMETH_REG_IE;
+    ometh_wr_16(&hEth->pRegBase->rxStatus.clrBit, OMETH_REG_RUN | OMETH_REG_IE);
+    ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_RUN | OMETH_REG_IE);
 }
 
 
@@ -2434,7 +2434,7 @@ ometh_stat_typ    *omethStatistics
     OMETH_H            hEth        /* handle of ethernet driver, see omethCreate() */
     )
     {
-        if(hEth) hEth->pRegBase->txStatus.setBit = OMETH_REG_SOFTIRQ;
+        if(hEth) ometh_wr_16(&hEth->pRegBase->txStatus.setBit, OMETH_REG_SOFTIRQ);
     }
 #endif
 
@@ -2476,8 +2476,8 @@ ometh_stat_typ    *omethStatistics
                 return;
         }
 
-        pSetClrBit[0] = OMETH_REG_RXMODE_MASK;
-        pSetClrBit[1] = clrBitValue;
+        ometh_wr_16(&pSetClrBit[0], OMETH_REG_RXMODE_MASK);
+        ometh_wr_16(&pSetClrBit[1], clrBitValue);
     }
 #endif
 
@@ -2641,14 +2641,14 @@ void            omethRxTxIrqHandlerMux
     {
         pRegBase = hEth->pRegBase;
 
-        pending = pRegBase->rxStatus.value & OMETH_REG_PENDING;
+        pending = ometh_rd_16(&pRegBase->rxStatus.value) & OMETH_REG_PENDING;
         if(pending > maxPending)
         {
             hEthProcess = hEth;
             maxPending = pending;
         }
 
-        pending = pRegBase->txStatus.value & OMETH_REG_PENDING;
+        pending = ometh_rd_16(&pRegBase->txStatus.value) & OMETH_REG_PENDING;
         if(pending > maxPending)
         {
             hEthProcess = (OMETH_H)((size_t)hEth | 1);    // use bit 0 to mark that this is a tx-IRQ
