@@ -133,7 +133,7 @@ void            omethRxIrqHandler
     // !! here hHook is abused to save stack-variables (until required for its original reason)
     //    (faster processing)
     hHook = (OMETH_HOOK_H)&hEth->pRegBase->rxStatus;
-    ((ometh_status_typ*)hHook)->clrBit = OMETH_REG_IQUIT;
+    ometh_wr_16(&((ometh_status_typ*)hHook)->clrBit, OMETH_REG_IQUIT);
 
     flags = pDesc->flags.word;
 
@@ -143,9 +143,9 @@ void            omethRxIrqHandler
     pRxBuf->packet.length = (uint32_t)pDesc->len - 4;       // length without checksum
     pRxBuf->timeStamp     = pDesc->time;                    // overtake timestamp to packet header
 
-    if(((ometh_status_typ*)hHook)->value & OMETH_REG_LOST)
+    if(ometh_rd_16(&((ometh_status_typ*)hHook)->value) & OMETH_REG_LOST)
     {
-        ((ometh_status_typ*)hHook)->clrBit = OMETH_REG_LOST;
+        ometh_wr_16(&((ometh_status_typ*)hHook)->clrBit, OMETH_REG_LOST);
 
         hEth->stat.rxLost++;
     }
@@ -249,9 +249,9 @@ void            omethTxIrqHandler
 
 #if (OMETH_ENABLE_SOFT_IRQ==1)
     // check if soft IRQ was triggered
-    if(hEth->pRegBase->txStatus.value & OMETH_REG_SOFTIRQ)
+    if(ometh_rd_16(&hEth->pRegBase->txStatus.value) & OMETH_REG_SOFTIRQ)
     {
-        hEth->pRegBase->txStatus.clrBit = OMETH_REG_SOFTIRQ;
+        ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_SOFTIRQ);
 
         hEth->pFctSoftIrq(0);        // call user function for software IRQ
 
@@ -260,7 +260,7 @@ void            omethTxIrqHandler
 #endif
 
     // return if no tx irq pending on this interface
-    if((hEth->pRegBase->txStatus.value & OMETH_REG_PENDING) == 0) return;
+    if((ometh_rd_16(&hEth->pRegBase->txStatus.value) & OMETH_REG_PENDING) == 0) return;
 
     while(1)
     {
@@ -329,7 +329,7 @@ void            omethTxIrqHandler
                 // return if no sent buffer found
                 hEth->stat.txSpuriousInt++;
 
-                hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;    // quit tx irq
+                ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_IQUIT);    // quit tx irq
 
                 #ifdef DEBUG_OUTPUT_ETH_SPURIOUS_CLR
                     DEBUG_OUTPUT_ETH_SPURIOUS_CLR();
@@ -357,7 +357,7 @@ void            omethTxIrqHandler
         break;
     }
 
-    hEth->pRegBase->txStatus.clrBit = OMETH_REG_IQUIT;    // quit tx irq
+    ometh_wr_16(&hEth->pRegBase->txStatus.clrBit, OMETH_REG_IQUIT);    // quit tx irq
 }
 
 /*****************************************************************************
