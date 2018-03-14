@@ -1654,7 +1654,7 @@ OMETH_FILTER_H    omethFilterCreate
             FILTER_SET_FLAG(hFilter->pFilterData, CMD_FILTER_ON);    // enable filter
 
             hFilter->pFilterData->cmdHigh = 0;
-            *(hFilter->pFilterData->pCommand-1) = 0;
+            ometh_wr_8(hFilter->pFilterData->pCommand-1, 0);
 
             hEth->cntFilterUsed++;
 
@@ -1742,15 +1742,15 @@ int                omethFilterSetPattern
     pFilterData = hFilter->pFilterData;
 
     // disable filter
-    *pFilterData->pCommand = pFilterData->cmd & ~CMD_FILTER_ON;
+    ometh_wr_8(pFilterData->pCommand, pFilterData->cmd & ~CMD_FILTER_ON);
 
     pFilterEntry = pFilterData->pFilterWriteOnly;    // access to filter data
 
     i = pFilterData->len;
     while(i--)
     {
-        pFilterEntry->mask  = *(uint8_t*)pMask;
-        pFilterEntry->value = *(uint8_t*)pValue;
+        ometh_wr_8(&pFilterEntry->mask, *(uint8_t*)pMask);
+        ometh_wr_8(&pFilterEntry->value, *(uint8_t*)pValue);
 
         pMask  = (uint8_t*)pMask  + 1;
         pValue = (uint8_t*)pValue + 1;
@@ -1758,7 +1758,7 @@ int                omethFilterSetPattern
         pFilterEntry++;
     }
     // restore old command flag
-    *pFilterData->pCommand = pFilterData->cmd;
+    ometh_wr_8(pFilterData->pCommand, pFilterData->cmd);
 
     return 0;
 }
@@ -1779,7 +1779,7 @@ void            omethFilterSetByteMask
  uint8_t           mask        /* mask to set                                      */
 )
 {
-    hFilter->pFilterData->pFilterWriteOnly[offset].mask = mask;
+    ometh_wr_8(&hFilter->pFilterData->pFilterWriteOnly[offset].mask, mask);
 }
 
 /*****************************************************************************

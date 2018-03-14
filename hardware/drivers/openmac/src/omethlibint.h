@@ -347,7 +347,7 @@ struct OMETH_TYP
 * RETURN: -
 *
 */
-#define FILTER_SET_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd |= flag))
+#define FILTER_SET_FLAG(pFilter, flag) ometh_wr_8(pFilter->pCommand, (pFilter->cmd |= flag))
 
 /*****************************************************************************
 *
@@ -356,6 +356,6 @@ struct OMETH_TYP
 * RETURN: -
 *
 */
-#define FILTER_CLEAR_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd &= ~flag))
+#define FILTER_CLEAR_FLAG(pFilter, flag) ometh_wr_8(pFilter->pCommand, (pFilter->cmd &= ~flag))
 
 #endif
