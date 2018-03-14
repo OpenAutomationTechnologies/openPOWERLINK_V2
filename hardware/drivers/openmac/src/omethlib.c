@@ -249,15 +249,15 @@ static ometh_internal_typ    omethInternal;    // driver internal data
     /* check if descriptor is free */                                                               \
     if(pPacket == 0)                return 0;    /* invalid packet passed */                        \
     if(hEth->txQueueEnable == 0)    return 0;                                                       \
-    if(pDesc->pData != 0)            return 0;    /* descriptor is not free (queue full !) */       \
+    if(ometh_rd_32(&pDesc->pData) != 0) return 0;    /* descriptor is not free (queue full !) */    \
                                                                                                     \
     len = pPacket->length;    /* padding, ethernet frames must be at least 64 byte long */          \
     if(len < OMETH_MIN_TX_FRAME) len=OMETH_MIN_TX_FRAME;                                            \
                                                                                                     \
-    pDesc->pData    = (uint32_t)&pPacket->data;    /* write buffer ptr to descriptor */             \
-    pDesc->len        = len;                                                                        \
+    ometh_wr_32(&pDesc->pData, (uint32_t)&pPacket->data);    /* write buffer ptr to descriptor */   \
+    ometh_wr_16(&pDesc->len, len);                                                                  \
     pInfo->fctFreeArg    = ARG;    /* store user argument for tx-callback */                        \
-    pDesc->txStart        = TIME;    /* scheduled start time of this frame  */                      \
+    ometh_wr_32(&pDesc->txStart, TIME);    /* scheduled start time of this frame  */                \
     /* (if reaching this descriptor the tx-queue will wait until the time is reached */             \
     pInfo->pFctFree    = (OMETH_BUF_FREE_FCT_ARG*)pFct;    /* store callback for free function */   \
                                                                                                     \
@@ -266,13 +266,13 @@ static ometh_internal_typ    omethInternal;    // driver internal data
                                                                                                     \
     if(addFlags == FLAGS1_START_TIME) /* in case of Time-Triggered TX no retry */                   \
     {                                                                                               \
-        pDesc->flags.byte.low    = OMETH_NO_RETRY;                                                  \
+        ometh_wr_8(&pDesc->flags.byte.low, OMETH_NO_RETRY);                                         \
     }                                                                                               \
     else                                                                                            \
     {                                                                                               \
-        pDesc->flags.byte.low    = OMETH_MAX_RETRY;                                                 \
+        ometh_wr_8(&pDesc->flags.byte.low, OMETH_MAX_RETRY);                                        \
     }                                                                                               \
-    pDesc->flags.byte.high    = pInfo->flags1 | addFlags;    /* set flag to start transmitter */    \
+    ometh_wr_8(&pDesc->flags.byte.high, pInfo->flags1 | addFlags); /* set flag to start transmitter */ \
                                                                                                     \
     return len                                                                                      \
 
@@ -778,13 +778,14 @@ static OMETH_H        omethCreateInt
 
     for(i=0 ; i<hEth->config.rxBuffers ; i++)
     {
-        pDesc->flags.byte.high = pRxInfo->flags1 = FLAGS1_OWNER;
+        pRxInfo->flags1 = FLAGS1_OWNER;
+        ometh_wr_8(&pDesc->flags.byte.high, pRxInfo->flags1);
 
         pRxInfo->pDesc    = pDesc;        // rx descriptor ptr
         pRxInfo->pNext    = pRxInfo+1;    // ptr to next info
 
-        pDesc->len        = hEth->rxLen;
-        pDesc->pData     = (uint32_t)&((ometh_buf_typ*)pByte)->packet.data;
+        ometh_wr_16(&pDesc->len, hEth->rxLen);
+        ometh_wr_32(&pDesc->pData, (uint32_t)&((ometh_buf_typ*)pByte)->packet.data);
 
         pByte = pByte + len;            // switch to next allocated buffer
 
@@ -795,7 +796,8 @@ static OMETH_H        omethCreateInt
     pRxInfo--;    // switch back to last info structure
     pDesc--;    // switch to last descriptor
 
-    pDesc->flags.byte.high = pRxInfo->flags1    = FLAGS1_OWNER | FLAGS1_LAST;
+    pRxInfo->flags1 = FLAGS1_OWNER | FLAGS1_LAST;
+    ometh_wr_8(&pDesc->flags.byte.high, pRxInfo->flags1);
 
     pRxInfo->pNext = hEth->pRxInfo;                // ptr to first info
 
@@ -2087,10 +2089,10 @@ ometh_packet_typ    *omethResponseSet
         // write length before ptr only if new packet is bigger
         // (if new frame is smaller it could happen that the length is overtaken first and the mac sends
         //  the old ptr with too less bytes)
-        if(len > pDesc->len) pDesc->len = len;
+        if(len > ometh_rd_16(&pDesc->len)) ometh_wr_16(&pDesc->len, len);
 
         // overtake buffer to descriptor
-        pDesc->pData    = (uint32_t)&pPacket->data; // | chgIndexHighBit[newChgIndex];
+        ometh_wr_32(&pDesc->pData, (uint32_t)&pPacket->data); // | chgIndexHighBit[newChgIndex];
     }
     else    // x-filter
     {
@@ -2101,16 +2103,16 @@ ometh_packet_typ    *omethResponseSet
         // write length before ptr only if new packet is bigger
         // (if new frame is smaller it could happen that the length is overtaken first and the mac sends
         //  the old ptr with too less bytes)
-        if(len > pDesc->len) pDesc->len = len;
+        if(len > ometh_rd_16(&pDesc->len)) ometh_wr_16(&pDesc->len, len);
 
         // overtake buffer to descriptor
-        pDesc->pData    = (((uint32_t)&pPacket->data)+OMETH_X_OFFSET) | chgIndexHighBit[newChgIndex];
+        ometh_wr_32(&pDesc->pData, (((uint32_t)&pPacket->data)+OMETH_X_OFFSET) | chgIndexHighBit[newChgIndex]);
     }
 
-    pDesc->len        = len;
+    ometh_wr_16(&pDesc->len, len);
 
     // decide which buffer can be released
-    pInfo->chgIndexRead = pDesc->txStart & 3;    // get current chg index from descriptor
+    pInfo->chgIndexRead = ometh_rd_32(&pDesc->txStart) & 3;    // get current chg index from descriptor
 
     // if buffer was not overtaken just during the last lines we have to take another buffer to pass back to the user
     if (pInfo->chgIndexRead != newChgIndex) freeChgIndex = chgIndexTab[newChgIndex][pInfo->chgIndexRead];
@@ -2119,10 +2121,10 @@ ometh_packet_typ    *omethResponseSet
     pInfo->chgIndexWrite = newChgIndex;            // the next cycle has to know the change index which was written the last time to generate a different one
 
     // writing to flags1 is only allowed if owner is not yet set, otherwise collision with tx-irq-access to this field
-    if ((pDesc->flags.byte.high & FLAGS1_OWNER) == 0)
+    if ((ometh_rd_8(&pDesc->flags.byte.high) & FLAGS1_OWNER) == 0)
     {
-        pDesc->txStart            = pInfo->delayTime;
-        pDesc->flags.byte.high    = FLAGS1_OWNER | FLAGS1_TX_DELAY;
+        ometh_wr_32(&pDesc->txStart, pInfo->delayTime);
+        ometh_wr_8(&pDesc->flags.byte.high, FLAGS1_OWNER | FLAGS1_TX_DELAY);
     }
 
     // check tx-enable of filter and turn on if not already done
@@ -2181,7 +2183,7 @@ int        omethResponseTime
     if(pTxInfo == 0)    return -1;    // no tx-info installed, not an auto-response filter ?
 
     pTxInfo->delayTime        = ticks;
-    pTxInfo->pDesc->txStart    = ticks;
+    ometh_wr_32(&pTxInfo->pDesc->txStart, ticks);
 
     return 0;
 }
@@ -2229,7 +2231,7 @@ int                    omethResponseEnable
     hFilter->pFilterData->txEnableRequest = 1;
 
     // if owner bit of descriptor is on ... turn auto tx flag on immediately
-    if(pDesc->flags.byte.high & FLAGS1_OWNER)
+    if(ometh_rd_8(&pDesc->flags.byte.high) & FLAGS1_OWNER)
     {
         FILTER_SET_FLAG(hFilter->pFilterData, CMD_TX_ENABLE);
     }
