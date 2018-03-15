@@ -1298,4 +1298,22 @@ int                omethDestroy
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
 );
 
+static inline uint32_t omethPacketGetLength(ometh_packet_typ *pPacket)
+{
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    return ometh_rd_32(&pPacket->length);
+#else
+    return pPacket->length;
+#endif
+}
+
+static inline void omethPacketSetLength(ometh_packet_typ *pPacket, uint32_t length)
+{
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    ometh_wr_32(&pPacket->length, length);
+#else
+    pPacket->length = length;
+#endif
+}
+
 #endif
