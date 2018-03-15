@@ -251,7 +251,7 @@ static ometh_internal_typ    omethInternal;    // driver internal data
     if(hEth->txQueueEnable == 0)    return 0;                                                       \
     if(ometh_rd_32(&pDesc->pData) != 0) return 0;    /* descriptor is not free (queue full !) */    \
                                                                                                     \
-    len = pPacket->length;    /* padding, ethernet frames must be at least 64 byte long */          \
+    len = omethPacketGetLength(pPacket);    /* padding, ethernet frames must be at least 64 byte long */ \
     if(len < OMETH_MIN_TX_FRAME) len=OMETH_MIN_TX_FRAME;                                            \
                                                                                                     \
     ometh_wr_32(&pDesc->pData, (uint32_t)&pPacket->data);    /* write buffer ptr to descriptor */   \
@@ -329,7 +329,11 @@ void        omethPacketFree
 
     // access to header of packet
     pBuf  = GET_TYPE_BASE( ometh_buf_typ, packet, pPacket);
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    hHook = ometh_rd_cpu_ptr((void *const *)&pBuf->hHook);
+#else
     hHook = pBuf->hHook;
+#endif
 
     if(pPacket==0 || hHook==0) return;    // invalid
 
@@ -2083,7 +2087,7 @@ ometh_packet_typ    *omethResponseSet
     if(hFilter->pFilterData->len == OMETH_FILTER_LEN)    // normal filter
     {
         // set new packet for auto response
-        len = pPacket->length;
+        len = omethPacketGetLength(pPacket);
         if(len < OMETH_MIN_TX_FRAME) len = OMETH_MIN_TX_FRAME;
 
         // write length before ptr only if new packet is bigger
@@ -2097,7 +2101,7 @@ ometh_packet_typ    *omethResponseSet
     else    // x-filter
     {
         // set new packet for auto response
-        len = pPacket->length - OMETH_X_OFFSET;
+        len = omethPacketGetLength(pPacket) - OMETH_X_OFFSET;
         if(len < OMETH_MIN_TX_FRAME-OMETH_X_OFFSET) len = OMETH_MIN_TX_FRAME-OMETH_X_OFFSET;
 
         // write length before ptr only if new packet is bigger

@@ -140,8 +140,14 @@ void            omethRxIrqHandler
     // access to buffer structure and set packet length
     pRxBuf = GET_TYPE_BASE( ometh_buf_typ , packet.data, ometh_rd_32(&pDesc->pData));
 
-    pRxBuf->packet.length = (uint32_t)ometh_rd_16(&pDesc->len) - 4;       // length without checksum
-    pRxBuf->timeStamp     = ometh_rd_32(&pDesc->time);                    // overtake timestamp to packet header
+    omethPacketSetLength(&pRxBuf->packet, (uint32_t)ometh_rd_16(&pDesc->len) - 4);       // length without checksum
+
+    // overtake timestamp to packet header
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    ometh_wr_32(&pRxBuf->timeStamp, ometh_rd_32(&pDesc->time));
+#else
+    pRxBuf->timeStamp = ometh_rd_32(&pDesc->time);
+#endif
 
     if(ometh_rd_16(&((ometh_status_typ*)hHook)->value) & OMETH_REG_LOST)
     {
@@ -183,7 +189,12 @@ void            omethRxIrqHandler
             }
             else
             {
-                pRxBuf->hHook = hHook;                // overtake hook handle for free function
+                // overtake hook handle for free function
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+                ometh_wr_cpu_ptr((void **)&pRxBuf->hHook, hHook);
+#else
+                pRxBuf->hHook = hHook;
+#endif
 
                 pQueue = hHook->pFreeRead;
 
@@ -372,5 +383,9 @@ uint32_t         omethGetTimestamp
 {
     if(pPacket==0) return 0;
 
-    return GET_TYPE_BASE( ometh_buf_typ, packet, pPacket)->timeStamp;
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    return ometh_rd_32(&GET_TYPE_BASE(ometh_buf_typ, packet, pPacket)->timeStamp);
+#else
+    return GET_TYPE_BASE(ometh_buf_typ, packet, pPacket)->timeStamp;
+#endif
 }
