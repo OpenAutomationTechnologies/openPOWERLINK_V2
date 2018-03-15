@@ -1495,7 +1495,7 @@ tOplkError dllkframe_updateFrameSoa(tEdrvTxBuffer* pTxBuffer_p,
             }
             else
             {
-                pTxFrame->data.soa.flag1 = 0;
+                ami_setUint8Le(&pTxFrame->data.soa.flag1, 0);
             }
         }
         else
