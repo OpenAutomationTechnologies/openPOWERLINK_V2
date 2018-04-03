@@ -94,6 +94,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         IOWR_32DIRECT((uint32_t)p, 0, v);
     }
 
+    static inline void *ometh_rd_cpu_ptr(void *const *p)
+    {
+        return (void *)IORD_32DIRECT((uint32_t)p, 0);
+    }
+
+    static inline void ometh_wr_cpu_ptr(void **p, void *v)
+    {
+        IOWR_32DIRECT((uint32_t)p, 0, (uint32_t)v);
+    }
+
     //---------------------------------------------------------
     // borrowed from Altera Nios II Toolchain
     //  alt_remap_uncached.c
@@ -155,6 +165,16 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     static inline void ometh_wr_32(volatile uint32_t *p, uint32_t v)
     {
         Xil_Out32((uint32_t)p, v);
+    }
+
+    static inline void *ometh_rd_cpu_ptr(void *const *p)
+    {
+        return (void *)Xil_In32((uint32_t)p);
+    }
+
+    static inline void ometh_wr_cpu_ptr(void **p, void *v)
+    {
+        Xil_Out32((uint32_t)p, (uint32_t)v);
     }
 
     #define OMETH_MAKE_NONCACHABLE(ptr)     (ptr)
