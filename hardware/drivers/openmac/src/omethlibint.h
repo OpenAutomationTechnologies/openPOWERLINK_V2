@@ -61,8 +61,8 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //-------------------- filter entry type (for 1 byte) --------------------
 typedef struct
 {
-    unsigned char value;
-    unsigned char mask;
+    uint8_t value;
+    uint8_t mask;
 }ometh_filter_entry_typ;
 
 //-------------------- filter type --------------------
@@ -73,15 +73,15 @@ typedef struct
 typedef struct
 {
     ometh_filter_entry_typ    b[OMETH_FILTER_LEN];    // 31 filter entries
-    unsigned char            command;    // command register
-    unsigned char            commandHigh;
+    uint8_t                   command;    // command register
+    uint8_t                   commandHigh;
 }ometh_filter_typ;
 
 typedef struct
 {
     ometh_filter_entry_typ    b[OMETH_XFILTER_LEN];    // 17 filter entries
-    unsigned char            command;    // command register
-    unsigned char            reserve;
+    uint8_t                   command;    // command register
+    uint8_t                   reserve;
 }ometh_xfilter_typ;
 
 #define CMD_FILTER_SYNC    0x10    // this is a sync filter
@@ -96,23 +96,23 @@ typedef struct
 //-------------------- rx/tx descriptor --------------------
 typedef struct
 {
-    unsigned char    low;
-    unsigned char    high;
+    uint8_t    low;
+    uint8_t    high;
 }ometh_desc_flags_bytes;
 
 typedef union    // descriptor status
 {
     ometh_desc_flags_bytes    byte;
-    unsigned short            word;
+    uint16_t                  word;
 }ometh_desc_flags_union;
 
 typedef struct
 {
     ometh_desc_flags_union    flags;
-    unsigned short            len;        // number of bytes
-    unsigned long    pData;        // ptr to data
-    unsigned long    txStart;    // tx start time
-    unsigned long    time;        // time stamp
+    uint16_t                  len;        // number of bytes
+    uint32_t                  pData;      // ptr to data
+    uint32_t                  txStart;    // tx start time
+    uint32_t                  time;       // time stamp
 }ometh_desc_typ;
 
 #define FLAGS1_OWNER           0x01        // 1 if mac is the owner of the descriptor
@@ -173,8 +173,8 @@ typedef struct ometh_pending_typ
 struct OMETH_HOOK
 {
     OMETH_HOOK_FCT     *pFct;            // function ptr to hook
-    unsigned char      maxPending;        // number of max pending buffers
-    unsigned short     cntOverflow;    // statistics: buffer overflow
+    uint8_t             maxPending;      // number of max pending buffers
+    uint16_t            cntOverflow;     // statistics: buffer overflow
 
     OMETH_H              hEth;        // handle to ethernet instance
     ometh_buf_typ        *pRxBufBase;    // (only used for destroy function)
@@ -187,12 +187,12 @@ struct OMETH_HOOK
 // additional info about tx descriptors
 typedef struct ometh_tx_info_typ
 {
-    unsigned char                flags1;            // flags for the tx descriptor
-    unsigned char                index;            // index (required for filter configuration)
-    unsigned char                chgIndexWrite;    // last write index of change-buffer-system (auto response buffers)
-    unsigned char                chgIndexRead;    // last read index of change-buffer-system (auto response buffers)
-    unsigned long                autoTxCount;    // counts auto-tx events on this descriptor
-    unsigned long                delayTime;        // delay time for auto tx
+    uint8_t                       flags1;        // flags for the tx descriptor
+    uint8_t                       index;         // index (required for filter configuration)
+    uint8_t                       chgIndexWrite; // last write index of change-buffer-system (auto response buffers)
+    uint8_t                       chgIndexRead;  // last read index of change-buffer-system (auto response buffers)
+    uint32_t                      autoTxCount;   // counts auto-tx events on this descriptor
+    uint32_t                      delayTime;     // delay time for auto tx
     ometh_desc_typ               *pDesc;            // ptr to tx descriptor
     OMETH_BUF_FREE_FCT_ARG       *pFctFree;        // ptr to free function for this buffer (ptr to filter cmd for auto response descriptors)
     void                         *fctFreeArg;    // argument passed to free function after packet pointer
@@ -203,7 +203,7 @@ typedef struct ometh_tx_info_typ
 // additional info about rx descriptors
 typedef struct ometh_rx_info_typ
 {
-    unsigned char                flags1;        // flags for the rx descriptor
+    uint8_t                       flags1;       // flags for the rx descriptor
     ometh_desc_typ               *pDesc;        // ptr to rx descriptor
     struct ometh_rx_info_typ     *pNext;        // ptr to next rx descriptor
 }ometh_rx_info_typ;
@@ -211,12 +211,12 @@ typedef struct ometh_rx_info_typ
 // reference to filter hardware ports
 typedef struct ometh_filter_data_typ
 {
-    unsigned char            cmd;                // current filter command
-    unsigned char            cmdHigh;            // high byte of filter command
-    unsigned char            txEnableRequest;    // auto response should be enabled at next omethResponseSet
-    unsigned char            len;                // filter length
+    uint8_t                   cmd;                 // current filter command
+    uint8_t                   cmdHigh;             // high byte of filter command
+    uint8_t                   txEnableRequest;     // auto response should be enabled at next omethResponseSet
+    uint8_t                   len;                 // filter length
 
-    unsigned char             *pCommand;            // ptr to filter command (can be different for different filters)
+    uint8_t                  *pCommand;            // ptr to filter command (can be different for different filters)
     ometh_filter_entry_typ    *pFilterWriteOnly;    // ptr to filter data (write only area)
     OMETH_H                   hEth;                // handle to ethernet instance
 }ometh_filter_data_typ;
@@ -232,10 +232,10 @@ struct OMETH_FILTER
 
 typedef struct
 {
-    unsigned short    value;            // read/write port
-    unsigned short    setBit;            // set single bits in status register
-    unsigned short    clrBit;            // clear single bits in status register
-    unsigned short    setDescriptor;    // set descriptor index
+    uint16_t    value;            // read/write port
+    uint16_t    setBit;           // set single bits in status register
+    uint16_t    clrBit;           // clear single bits in status register
+    uint16_t    setDescriptor;    // set descriptor index
 }ometh_status_typ;                    // mac rx/tx status registers
 
 typedef struct
@@ -247,15 +247,15 @@ typedef struct
 //-------------------- instance of ethernet driver --------------------
 struct OMETH_TYP
 {
-    unsigned short       rxLen;            // data length of rx buffers
-    unsigned char        nbFilter;        // number of filters
-    unsigned char        nbFilterX;        // number of filters for x-node functionality
-    unsigned char        nbTxDesc;
-    unsigned char        nbRxDesc;
-    unsigned char        txQueueEnable;    // will be set to 0 if upper layer switches queue sending off
+    uint16_t              rxLen;           // data length of rx buffers
+    uint8_t               nbFilter;        // number of filters
+    uint8_t               nbFilterX;       // number of filters for x-node functionality
+    uint8_t               nbTxDesc;
+    uint8_t               nbRxDesc;
+    uint8_t               txQueueEnable;   // will be set to 0 if upper layer switches queue sending off
 
-    unsigned char        cntTxQueueIn,cntTxQueueOut;        // counter to evaluate the number of pending tx descriptors
-    unsigned char        cntFilterUsed,cntFilterXUsed;
+    uint8_t               cntTxQueueIn,cntTxQueueOut;       // counter to evaluate the number of pending tx descriptors
+    uint8_t               cntFilterUsed,cntFilterXUsed;
 
     ometh_reg_typ        *pRegBase;        // control register base adr
 
@@ -275,29 +275,29 @@ struct OMETH_TYP
 
     ometh_config_typ     config;            // copy of config structure from omethCreate
 
-    unsigned char        phyCount;        // number of phy's on this mac (max 8)
-    unsigned char        phyLinkCount;    // number of linked phys
-    unsigned char        phyLinkActive;
-    unsigned char        phyHalfCount;    // number of phys linked with half duplex
-    unsigned char        phyHalfMax;
-    unsigned char        phyOffline;
+    uint8_t              phyCount;        // number of phy's on this mac (max 8)
+    uint8_t              phyLinkCount;    // number of linked phys
+    uint8_t              phyLinkActive;
+    uint8_t              phyHalfCount;    // number of phys linked with half duplex
+    uint8_t              phyHalfMax;
+    uint8_t              phyOffline;
 
-    unsigned char        phyAdr[OMETH_MAX_PHY_CNT];        // array with phy addresses on MII interface
-    unsigned short       phyCmdRead[OMETH_MAX_PHY_CNT];    // phy write commands
-    unsigned short       phyCmdWrite[OMETH_MAX_PHY_CNT];    // phy read commands
+    uint8_t              phyAdr[OMETH_MAX_PHY_CNT];        // array with phy addresses on MII interface
+    uint16_t             phyCmdRead[OMETH_MAX_PHY_CNT];    // phy write commands
+    uint16_t             phyCmdWrite[OMETH_MAX_PHY_CNT];    // phy read commands
 
     phy_reg_typ          *pPhyReg;    // ptr to all phy register sets
-    unsigned short       phyPort;    // current port
-    unsigned short       phyReg;        // current register
+    uint16_t             phyPort;      // current port
+    uint16_t             phyReg;       // current register
 
-    unsigned short       linkSpeed;    // 0/10/100 (initialized with 100, will be reduced to 10 when the first 10MBit device is detected)
-    unsigned short       r4Init;        // initial value of r4
+    uint16_t             linkSpeed;    // 0/10/100 (initialized with 100, will be reduced to 10 when the first 10MBit device is detected)
+    uint16_t             r4Init;       // initial value of r4
 
-    unsigned short       txVal;        // tx value for phy write
-    unsigned short       txPort;        // tx port for phy write
-    unsigned char        txReg;        // tx register for phy write
+    uint16_t             txVal;        // tx value for phy write
+    uint16_t             txPort;       // tx port for phy write
+    uint8_t              txReg;        // tx register for phy write
 
-    unsigned char        clearPendingIrqAtStart;    // will be set to 1 only for the first start
+    uint8_t              clearPendingIrqAtStart;    // will be set to 1 only for the first start
 
     // hardware access for debug
     union
@@ -306,8 +306,8 @@ struct OMETH_TYP
     }*pHardware;
 
 //------------- MAC-internal RX/TX buffer base addresses -------------
-    unsigned char       *pRxBufBase;
-    unsigned char       *pTxBufBase;
+    uint8_t              *pRxBufBase;
+    uint8_t              *pTxBufBase;
 //--------------------------------------------------------------------
     struct OMETH_HOOK    *pHookList;        // (only used for destroy function)
 
@@ -347,7 +347,7 @@ struct OMETH_TYP
 * RETURN: -
 *
 */
-#define FILTER_SET_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd |= flag))
+#define FILTER_SET_FLAG(pFilter, flag) ometh_wr_8(pFilter->pCommand, (pFilter->cmd |= flag))
 
 /*****************************************************************************
 *
@@ -356,6 +356,6 @@ struct OMETH_TYP
 * RETURN: -
 *
 */
-#define FILTER_CLEAR_FLAG(pFilter, flag) (*pFilter->pCommand = (pFilter->cmd &= ~flag))
+#define FILTER_CLEAR_FLAG(pFilter, flag) ometh_wr_8(pFilter->pCommand, (pFilter->cmd &= ~flag))
 
 #endif
