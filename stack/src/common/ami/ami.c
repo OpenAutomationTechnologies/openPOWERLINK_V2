@@ -1,17 +1,18 @@
 /**
 ********************************************************************************
-\file   ami/amibe.c
+\file   ami/ami.c
 
 \brief  Generic implementation of the Abstract Memory Interface (ami)
 
-This file implements the AMI interface in big endian for architectures
-where access to unaligned addresses is not possible. (This implementation
-always copies bytewise)
+This file implements the AMI interface for architectures where access to
+unaligned addresses is not possible. (This implementation always copies
+bytewise)
 
 \ingroup module_ami
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
+Copyright (c) 2018, embedded brains GmbH
 Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
@@ -99,11 +100,13 @@ Sets a 16 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint16Be(void* pAddr_p, UINT16 uint16Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint16Val_p)[0];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint16Val_p)[1];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint16Val_p >> 8);
+    pAddr[1] = (UINT8)(uint16Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -120,11 +123,13 @@ Sets a 16 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint16Le(void* pAddr_p, UINT16 uint16Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint16Val_p)[0];
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint16Val_p)[1];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint16Val_p >> 0);
+    pAddr[1] = (UINT8)(uint16Val_p >> 8);
 }
 
 //------------------------------------------------------------------------------
@@ -143,15 +148,12 @@ Reads a 16 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT16 ami_getUint16Be(const void* pAddr_p)
 {
-    UINT16 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[1];
-
-    return val;
+    return ((UINT16)pAddr[0] << 8) | ((UINT16)pAddr[1] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -170,15 +172,12 @@ Reads a 16 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT16 ami_getUint16Le(const void* pAddr_p)
 {
-    UINT16 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[1];
-
-    return val;
+    return ((UINT16)pAddr[0] << 0) | ((UINT16)pAddr[1] << 8);
 }
 
 //------------------------------------------------------------------------------
@@ -195,12 +194,14 @@ Sets a 24 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint24Be(void* pAddr_p, UINT32 uint32Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint32Val_p)[1];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint32Val_p)[2];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint32Val_p)[3];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint32Val_p >> 16);
+    pAddr[1] = (UINT8)(uint32Val_p >> 8);
+    pAddr[2] = (UINT8)(uint32Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -217,12 +218,14 @@ Sets a 24 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint24Le(void* pAddr_p, UINT32 uint32Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint32Val_p)[3];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint32Val_p)[2];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint32Val_p)[1];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint32Val_p >> 0);
+    pAddr[1] = (UINT8)(uint32Val_p >> 8);
+    pAddr[2] = (UINT8)(uint32Val_p >> 16);
 }
 
 //------------------------------------------------------------------------------
@@ -241,16 +244,13 @@ Reads a 24 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT32 ami_getUint24Be(const void* pAddr_p)
 {
-    UINT32 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[3];
-
-    return val;
+    return ((UINT32)pAddr[0] << 16) | ((UINT32)pAddr[1] << 8) |
+           ((UINT32)pAddr[2] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -269,16 +269,13 @@ Reads a 24 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT32 ami_getUint24Le(const void* pAddr_p)
 {
-    UINT32 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[1];
-
-    return val;
+    return ((UINT32)pAddr[0] << 0) | ((UINT32)pAddr[1] << 8) |
+           ((UINT32)pAddr[2] << 16);
 }
 
 //------------------------------------------------------------------------------
@@ -295,13 +292,15 @@ Sets a 32 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint32Be(void* pAddr_p, UINT32 uint32Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint32Val_p)[0];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint32Val_p)[1];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint32Val_p)[2];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint32Val_p)[3];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint32Val_p >> 24);
+    pAddr[1] = (UINT8)(uint32Val_p >> 16);
+    pAddr[2] = (UINT8)(uint32Val_p >> 8);
+    pAddr[3] = (UINT8)(uint32Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -318,13 +317,15 @@ Sets a 32 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint32Le(void* pAddr_p, UINT32 uint32Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint32Val_p)[0];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint32Val_p)[1];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint32Val_p)[2];
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint32Val_p)[3];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint32Val_p >> 0);
+    pAddr[1] = (UINT8)(uint32Val_p >> 8);
+    pAddr[2] = (UINT8)(uint32Val_p >> 16);
+    pAddr[3] = (UINT8)(uint32Val_p >> 24);
 }
 
 //------------------------------------------------------------------------------
@@ -343,17 +344,13 @@ Reads a 32 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT32 ami_getUint32Be(const void* pAddr_p)
 {
-    UINT32 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[3];
-
-    return val;
+    return ((UINT32)pAddr[0] << 24) | ((UINT32)pAddr[1] << 16) |
+           ((UINT32)pAddr[2] << 8) | ((UINT32)pAddr[3] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -372,17 +369,13 @@ Reads a 32 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT32 ami_getUint32Le(const void* pAddr_p)
 {
-    UINT32 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[3];
-
-    return val;
+    return ((UINT32)pAddr[0] << 0) | ((UINT32)pAddr[1] << 8) |
+           ((UINT32)pAddr[2] << 16) | ((UINT32)pAddr[3] << 24);
 }
 
 //------------------------------------------------------------------------------
@@ -399,14 +392,16 @@ Sets a 40 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint40Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[7];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 32);
+    pAddr[1] = (UINT8)(uint64Val_p >> 24);
+    pAddr[2] = (UINT8)(uint64Val_p >> 16);
+    pAddr[3] = (UINT8)(uint64Val_p >> 8);
+    pAddr[4] = (UINT8)(uint64Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -423,14 +418,16 @@ Sets a 40 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint40Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[7];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[3];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 0);
+    pAddr[1] = (UINT8)(uint64Val_p >> 8);
+    pAddr[2] = (UINT8)(uint64Val_p >> 16);
+    pAddr[3] = (UINT8)(uint64Val_p >> 24);
+    pAddr[4] = (UINT8)(uint64Val_p >> 32);
 }
 
 //------------------------------------------------------------------------------
@@ -449,18 +446,14 @@ Reads a 40 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint40Be(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[7];
-
-    return val;
+    return ((UINT64)pAddr[0] << 32) | ((UINT64)pAddr[1] << 24) |
+           ((UINT64)pAddr[2] << 16) | ((UINT64)pAddr[3] << 8) |
+           ((UINT64)pAddr[4] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -479,18 +472,14 @@ Reads a 40 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint40Le(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[7];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[3];
-
-    return val;
+    return ((UINT64)pAddr[0] << 0) | ((UINT64)pAddr[1] << 8) |
+           ((UINT64)pAddr[2] << 16) | ((UINT64)pAddr[3] << 24) |
+           ((UINT64)pAddr[4] << 32);
 }
 
 //------------------------------------------------------------------------------
@@ -507,15 +496,17 @@ Sets a 48 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint48Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[2];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[7];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 40);
+    pAddr[1] = (UINT8)(uint64Val_p >> 32);
+    pAddr[2] = (UINT8)(uint64Val_p >> 24);
+    pAddr[3] = (UINT8)(uint64Val_p >> 16);
+    pAddr[4] = (UINT8)(uint64Val_p >> 8);
+    pAddr[5] = (UINT8)(uint64Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -532,15 +523,17 @@ Sets a 48 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint48Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[7];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[2];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 0);
+    pAddr[1] = (UINT8)(uint64Val_p >> 8);
+    pAddr[2] = (UINT8)(uint64Val_p >> 16);
+    pAddr[3] = (UINT8)(uint64Val_p >> 24);
+    pAddr[4] = (UINT8)(uint64Val_p >> 32);
+    pAddr[5] = (UINT8)(uint64Val_p >> 40);
 }
 
 //------------------------------------------------------------------------------
@@ -559,19 +552,14 @@ Reads a 48 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint48Be(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[7];
-
-    return val;
+    return ((UINT64)pAddr[0] << 40) | ((UINT64)pAddr[1] << 32) |
+           ((UINT64)pAddr[2] << 24) | ((UINT64)pAddr[3] << 16) |
+           ((UINT64)pAddr[4] << 8) | ((UINT64)pAddr[5] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -590,19 +578,14 @@ Reads a 48 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint48Le(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[7];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[2];
-
-    return val;
+    return ((UINT64)pAddr[0] << 0) | ((UINT64)pAddr[1] << 8) |
+           ((UINT64)pAddr[2] << 16) | ((UINT64)pAddr[3] << 24) |
+           ((UINT64)pAddr[4] << 32) | ((UINT64)pAddr[5] << 40);
 }
 
 //------------------------------------------------------------------------------
@@ -619,16 +602,18 @@ Sets a 56 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint56Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[1];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[2];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[6] = ((const UINT8*)&uint64Val_p)[7];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 48);
+    pAddr[1] = (UINT8)(uint64Val_p >> 40);
+    pAddr[2] = (UINT8)(uint64Val_p >> 32);
+    pAddr[3] = (UINT8)(uint64Val_p >> 24);
+    pAddr[4] = (UINT8)(uint64Val_p >> 16);
+    pAddr[5] = (UINT8)(uint64Val_p >> 8);
+    pAddr[6] = (UINT8)(uint64Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -645,16 +630,18 @@ Sets a 56 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint56Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[7];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[2];
-    ((UINT8*)pAddr_p)[6] = ((const UINT8*)&uint64Val_p)[1];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 0);
+    pAddr[1] = (UINT8)(uint64Val_p >> 8);
+    pAddr[2] = (UINT8)(uint64Val_p >> 16);
+    pAddr[3] = (UINT8)(uint64Val_p >> 24);
+    pAddr[4] = (UINT8)(uint64Val_p >> 32);
+    pAddr[5] = (UINT8)(uint64Val_p >> 40);
+    pAddr[6] = (UINT8)(uint64Val_p >> 48);
 }
 
 //------------------------------------------------------------------------------
@@ -673,20 +660,15 @@ Reads a 56 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint56Be(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[6] = ((const UINT8*)pAddr_p)[7];
-
-    return val;
+    return ((UINT64)pAddr[0] << 48) | ((UINT64)pAddr[1] << 40) |
+           ((UINT64)pAddr[2] << 32) | ((UINT64)pAddr[3] << 24) |
+           ((UINT64)pAddr[4] << 16) | ((UINT64)pAddr[5] << 8) |
+           ((UINT64)pAddr[6] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -705,20 +687,15 @@ Reads a 56 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint56Le(const void* pAddr_p)
 {
-    UINT64 val = 0;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[7];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[6] = ((const UINT8*)pAddr_p)[1];
-
-    return val;
+    return ((UINT64)pAddr[0] << 0) | ((UINT64)pAddr[1] << 8) |
+           ((UINT64)pAddr[2] << 16) | ((UINT64)pAddr[3] << 24) |
+           ((UINT64)pAddr[4] << 32) | ((UINT64)pAddr[5] << 40) |
+           ((UINT64)pAddr[6] << 48);
 }
 
 //------------------------------------------------------------------------------
@@ -735,17 +712,19 @@ Sets a 64 bit value to a buffer in big endian
 //------------------------------------------------------------------------------
 void ami_setUint64Be(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[0];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[1];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[2];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[6] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[7] = ((const UINT8*)&uint64Val_p)[7];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 56);
+    pAddr[1] = (UINT8)(uint64Val_p >> 48);
+    pAddr[2] = (UINT8)(uint64Val_p >> 40);
+    pAddr[3] = (UINT8)(uint64Val_p >> 32);
+    pAddr[4] = (UINT8)(uint64Val_p >> 24);
+    pAddr[5] = (UINT8)(uint64Val_p >> 16);
+    pAddr[6] = (UINT8)(uint64Val_p >> 8);
+    pAddr[7] = (UINT8)(uint64Val_p >> 0);
 }
 
 //------------------------------------------------------------------------------
@@ -762,17 +741,19 @@ Sets a 64 bit value to a buffer in little endian
 //------------------------------------------------------------------------------
 void ami_setUint64Le(void* pAddr_p, UINT64 uint64Val_p)
 {
-    // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    UINT8* pAddr = pAddr_p;
 
-    ((UINT8*)pAddr_p)[7] = ((const UINT8*)&uint64Val_p)[0];
-    ((UINT8*)pAddr_p)[6] = ((const UINT8*)&uint64Val_p)[1];
-    ((UINT8*)pAddr_p)[5] = ((const UINT8*)&uint64Val_p)[2];
-    ((UINT8*)pAddr_p)[4] = ((const UINT8*)&uint64Val_p)[3];
-    ((UINT8*)pAddr_p)[3] = ((const UINT8*)&uint64Val_p)[4];
-    ((UINT8*)pAddr_p)[2] = ((const UINT8*)&uint64Val_p)[5];
-    ((UINT8*)pAddr_p)[1] = ((const UINT8*)&uint64Val_p)[6];
-    ((UINT8*)pAddr_p)[0] = ((const UINT8*)&uint64Val_p)[7];
+    // Check parameter validity
+    ASSERT(pAddr != NULL);
+
+    pAddr[0] = (UINT8)(uint64Val_p >> 0);
+    pAddr[1] = (UINT8)(uint64Val_p >> 8);
+    pAddr[2] = (UINT8)(uint64Val_p >> 16);
+    pAddr[3] = (UINT8)(uint64Val_p >> 24);
+    pAddr[4] = (UINT8)(uint64Val_p >> 32);
+    pAddr[5] = (UINT8)(uint64Val_p >> 40);
+    pAddr[6] = (UINT8)(uint64Val_p >> 48);
+    pAddr[7] = (UINT8)(uint64Val_p >> 56);
 }
 
 //------------------------------------------------------------------------------
@@ -791,21 +772,15 @@ Reads a 64 bit value from a buffer in big endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint64Be(const void* pAddr_p)
 {
-    UINT64 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[6] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[7] = ((const UINT8*)pAddr_p)[7];
-
-    return val;
+    return ((UINT64)pAddr[0] << 56) | ((UINT64)pAddr[1] << 48) |
+           ((UINT64)pAddr[2] << 40) | ((UINT64)pAddr[3] << 32) |
+           ((UINT64)pAddr[4] << 24) | ((UINT64)pAddr[5] << 16) |
+           ((UINT64)pAddr[6] << 8) | ((UINT64)pAddr[7] << 0);
 }
 
 //------------------------------------------------------------------------------
@@ -824,21 +799,15 @@ Reads a 64 bit value from a buffer in little endian
 //------------------------------------------------------------------------------
 UINT64 ami_getUint64Le(const void* pAddr_p)
 {
-    UINT64 val;
+    const UINT8* pAddr = pAddr_p;
 
     // Check parameter validity
-    ASSERT(pAddr_p != NULL);
+    ASSERT(pAddr != NULL);
 
-    ((UINT8*)&val)[7] = ((const UINT8*)pAddr_p)[0];
-    ((UINT8*)&val)[6] = ((const UINT8*)pAddr_p)[1];
-    ((UINT8*)&val)[5] = ((const UINT8*)pAddr_p)[2];
-    ((UINT8*)&val)[4] = ((const UINT8*)pAddr_p)[3];
-    ((UINT8*)&val)[3] = ((const UINT8*)pAddr_p)[4];
-    ((UINT8*)&val)[2] = ((const UINT8*)pAddr_p)[5];
-    ((UINT8*)&val)[1] = ((const UINT8*)pAddr_p)[6];
-    ((UINT8*)&val)[0] = ((const UINT8*)pAddr_p)[7];
-
-    return val;
+    return ((UINT64)pAddr[0] << 0) | ((UINT64)pAddr[1] << 8) |
+           ((UINT64)pAddr[2] << 16) | ((UINT64)pAddr[3] << 24) |
+           ((UINT64)pAddr[4] << 32) | ((UINT64)pAddr[5] << 40) |
+           ((UINT64)pAddr[6] << 48) | ((UINT64)pAddr[7] << 56);
 }
 
 //------------------------------------------------------------------------------

@@ -675,7 +675,7 @@ SET(ARCH_X86_SOURCES
     )
 
 SET(ARCH_LE_SOURCES
-    ${COMMON_SOURCE_DIR}/ami/amile.c
+    ${COMMON_SOURCE_DIR}/ami/ami.c
     )
 
 ################################################################################
