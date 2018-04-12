@@ -57,10 +57,53 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define __OMETHLIB_TARGET_H__
 
 #if defined(__NIOS2__)
+    #include <io.h>
+
     #include <sys/alt_cache.h>
 
     // Nios II is little endian
     #define OMETH_HW_MODE                    0
+
+    static inline uint8_t ometh_rd_8(volatile uint8_t *p)
+    {
+        return IORD_8DIRECT((uint32_t)p, 0);
+    }
+
+    static inline void ometh_wr_8(volatile uint8_t *p, uint8_t v)
+    {
+        IOWR_8DIRECT((uint32_t)p, 0, v);
+    }
+
+    static inline uint16_t ometh_rd_16(volatile uint16_t *p)
+    {
+        return IORD_16DIRECT((uint32_t)p, 0);
+    }
+
+    static inline void ometh_wr_16(volatile uint16_t *p, uint16_t v)
+    {
+        IOWR_16DIRECT((uint32_t)p, 0, v);
+    }
+
+    static inline uint32_t ometh_rd_32(volatile uint32_t *p)
+    {
+        return IORD_32DIRECT((uint32_t)p, 0);
+    }
+
+    static inline void ometh_wr_32(volatile uint32_t *p, uint32_t v)
+    {
+        IOWR_32DIRECT((uint32_t)p, 0, v);
+    }
+
+    static inline void *ometh_rd_cpu_ptr(void *const *p)
+    {
+        return (void *)IORD_32DIRECT((uint32_t)p, 0);
+    }
+
+    static inline void ometh_wr_cpu_ptr(void **p, void *v)
+    {
+        IOWR_32DIRECT((uint32_t)p, 0, (uint32_t)v);
+    }
+
     //---------------------------------------------------------
     // borrowed from Altera Nios II Toolchain
     //  alt_remap_uncached.c
@@ -73,12 +116,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         #endif
     //
     //---------------------------------------------------------
-    #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((unsigned long)ptr)|NIOS2_BYPASS_DCACHE_MASK);
+    #define OMETH_MAKE_NONCACHABLE(ptr)        (void*)(((uint32_t)ptr)|NIOS2_BYPASS_DCACHE_MASK);
     #define OMETH_UNCACHED_MALLOC(size)        alt_uncached_malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)           alt_uncached_free(ptr)
 
 #elif defined(__MICROBLAZE__)
 
+#include <xil_io.h>
 #include <xparameters.h>
 
 #ifndef XPAR_MICROBLAZE_ENDIANNESS
@@ -92,6 +136,47 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     // Microblaze is little endian (with AXI)
     #define OMETH_HW_MODE                     0
 #endif
+
+    static inline uint8_t ometh_rd_8(volatile uint8_t *p)
+    {
+        return Xil_In8((uint32_t)p);
+    }
+
+    static inline void ometh_wr_8(volatile uint8_t *p, uint8_t v)
+    {
+        Xil_Out8((uint32_t)p, v);
+    }
+
+    static inline uint16_t ometh_rd_16(volatile uint16_t *p)
+    {
+        return Xil_In16((uint32_t)p);
+    }
+
+    static inline void ometh_wr_16(volatile uint16_t *p, uint16_t v)
+    {
+        Xil_Out16((uint32_t)p, v);
+    }
+
+    static inline uint32_t ometh_rd_32(volatile uint32_t *p)
+    {
+        return Xil_In32((uint32_t)p);
+    }
+
+    static inline void ometh_wr_32(volatile uint32_t *p, uint32_t v)
+    {
+        Xil_Out32((uint32_t)p, v);
+    }
+
+    static inline void *ometh_rd_cpu_ptr(void *const *p)
+    {
+        return (void *)Xil_In32((uint32_t)p);
+    }
+
+    static inline void ometh_wr_cpu_ptr(void **p, void *v)
+    {
+        Xil_Out32((uint32_t)p, (uint32_t)v);
+    }
+
     #define OMETH_MAKE_NONCACHABLE(ptr)     (ptr)
     #define OMETH_UNCACHED_MALLOC(size)     malloc(size)
     #define OMETH_UNCACHED_FREE(ptr)        free(ptr)
