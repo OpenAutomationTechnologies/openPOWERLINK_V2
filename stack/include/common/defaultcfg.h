@@ -10,6 +10,7 @@ This file defines openPOWERLINK default configuration values.
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -226,7 +227,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #endif
 
 #ifndef PLK_VETH_NAME
-#define PLK_VETH_NAME                                   "plk"               // name of net device in Linux
+#define PLK_VETH_NAME                                   "plk_veth"          // name of net device in Linux
 #endif
 
 #ifndef CONFIG_VETH_SET_DEFAULT_GATEWAY
