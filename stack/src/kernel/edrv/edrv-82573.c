@@ -23,6 +23,7 @@ number of the buffer.
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -386,7 +387,10 @@ static struct pci_device_id aEdrvPciTbl_l[] =
     {0x8086, 0x109a, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82573L
     {0x8086, 0x1501, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567V
     {0x8086, 0x150c, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82583V
-    {0x8086, 0x10de, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM
+    {0x8086, 0x10e5, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM ICH 9
+    {0x8086, 0x10f5, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM ICH 9M
+    {0x8086, 0x10cc, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM ICH 10
+    {0x8086, 0x10de, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82567LM ICH 10D
     {0x8086, 0x10d3, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82574L
     {0x8086, 0x100E, PCI_ANY_ID, PCI_ANY_ID, 0, 0, 0},  // 82540EM
     {0, }
