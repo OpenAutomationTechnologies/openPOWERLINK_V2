@@ -5,6 +5,114 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.7.0 {#sect_revision_v2_7_0}
+
+This is the first release of the V2.7 release series. It contains new features
+and functionalities. For productive environments it is recommended to use the
+latest stable release of the V2.6 series (\ref sect_revision_v2_6_1)
+
+Following is a summary of changes in V2.7.0. For a detailed revision history
+refer to the Git source code history.
+
+### New Features:
+- Add SoC timestamp forwarding feature in Windows NDIS design
+- Add SoC timestamp forwarding feature in Windows PCIe design
+- Add MN net time distribution feature implementation
+- Add SoC time stamp forwarding feature in Linux PCIe design
+- Add raw socket implementation
+- Add Intel 82540EM support
+- Enable SoC time forward in host interface stack libraries
+- Add timesync support to timesync CAL modules
+- Add timesync support to host interface driver
+- Add timesync shared memory to host interface IP-Core
+- Add SoC timestamp forwarding for Linux ioctl design
+- Add SoC time stamp forwarding feature in BSD semaphore design
+- Add SoC time stamp forwarding feature in Zynq Hybrid design
+
+### Fixes:
+- Fix Compilation issue in Windows NDIS 32 bit
+- Fix variable naming in edrv-8255x.c
+- Avoid comparison with TRUE
+- Use pci_enable_msix_exact in edrv-i210
+- Fix issues in veth-linuxkernel with kernel >= 4.11.9
+- Add uaccess.h header to edrv
+- Update format specifier for size_t
+- Fix several Clang warnings
+- Fix type conversion warning in windows design
+- Fix typecasts and typos in the firmware manager module
+- Fix commit message checking
+- Fix CMake commands in documentation
+- Fix Xilinx and Altera documentation
+- Unblock connection attempts after ignored SDO commands
+- Fix errors/warnings in Visual Studio
+- Fix shutdown stack if still running during exit
+- Fix startup/shutdown issues of the Windows kernel driver
+- Fix driver compilation warning in NDIS intermediate design
+- Add NDEBUG macro in Visual studio project for Windows NDIS
+- Fix Windows 10 compatibility issues for Windows NDIS
+- Fix SDO over UDP feature in Windows designs
+- Fix data type definition in Windows designs for 64 bit systems
+- Improve DLL_CNLossSoC_REC cumulative counter
+- Use size_t for sizes in order to fix several 64 bit warnings
+- Add conversion from us to ns for hrestimer
+- Add 8111 edrv (rev 0c) support for kernel module design
+- Fix doxygen warnings in timesyncucal modules
+- Fix application compilation issue in 32 bit Windows
+- More robust mutex init against previous crashes
+- Fix wrong calculation of the error counters
+- Fix OD and XDD for compliance with EPSG DS 301 V1.3.0
+- Hostif IP-Core: Drop useless inclusion
+- Use getopt() only on Windows
+- Use pcap-config to fix static linking
+
+### Changes:
+- Use ami_setUint8Le() to honour the API
+- Add 82567LM driver support for kernel module design
+- Update net device name as plk_veth for all platforms
+- Use generic data types in several stack modules
+- Enable SoC timestamp forward feature for Windows PCIe and NDIS
+- Improve code quality in ctrlucal modules
+- Silently ignore invalid SDO commands for closed connections
+- Add vera++ to Travis-CI
+- Add Travis continuous integration
+- Enable SoC timestamp forward feature for supported platforms
+- Add API implementation of net time in windows target
+- Add an API to get the current system timestamp in target files
+- Increase tightly coupled memory size in Terasic DE2i-150
+- Use network interface enumeration in demo applications
+- Add network interface enumeration
+- Refactor network interface card parameter passing
+- Rename common files of Linux PCIe and Zynq hybrid designs
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.6.2 {#sect_revision_v2_6_2}
+
+This is the latest release of the V2.6 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.6.2. For a detailed revision history
+refer to the Git source code history.
+
+### Changes:
+- Silently ignore invalid SDO commands for closed connections
+- Add 8111 edrv (rev 0c) support for kernel module design
+- Update the company name of B&R
+
+### Fixes:
+- Fix OD and XDD for compliance with EPSG DS 301 V1.3.0
+- Improve DLL_CNLossSoC_REC cumulative counter
+- Fix wrong calculation of the error counters
+- Fix conversion from us to ns in hrestimer
+- Fix SDO over UDP feature in Windows designs
+- Fix several compiler warnings
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.6.1 {#sect_revision_v2_6_1}
 
 This is the latest release of the V2.6 release series. This release is a stable
