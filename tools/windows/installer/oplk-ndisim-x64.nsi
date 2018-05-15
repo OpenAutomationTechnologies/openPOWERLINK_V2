@@ -1,5 +1,5 @@
 ;------------------------------------------------------------------------------
-; \file oplk-ndisim.nsi
+; \file oplk-ndisim-x64.nsi
 ;
 ; \brief NSIS Installer script for NDIS intermediate driver
 ;
@@ -9,7 +9,7 @@
 ;------------------------------------------------------------------------------
 
 ;------------------------------------------------------------------------------
-;Copyright(c) 2015, Kalycito Infotech Private Limited
+;Copyright(c) 2018, Kalycito Infotech Private Limited
 ;All rights reserved.
 
 ;Redistribution and use in source and binary forms, with or without

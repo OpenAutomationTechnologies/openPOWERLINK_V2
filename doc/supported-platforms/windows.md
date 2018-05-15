@@ -211,7 +211,14 @@ Follow the steps below to build the NDIS intermediate driver installer.
   - Build installer application
 
         > cd <openPOWERLINK_directory>\tools\windows\installer-ndisim\build
-        > msbuild /t:build /p:Platform=x64 /p:Configuration="Release"
+
+        - Build in 64-bit Environment
+
+             > msbuild /t:build /p:Platform=x64 /p:Configuration="Release"
+
+        - Build in 32-bit Environment
+
+             > msbuild /t:build /p:Platform=Win32 /p:Configuration="Release"
 
 * Copy the required Visual C++ Redistributable executable to `tools/windows/installer`
 directory.
@@ -224,13 +231,21 @@ directory.
 
 * Compile the NSIS script to generate the openPOWERLINK driver installer executable.
 
+  Use oplk-ndisim-x64.nsi script for 64-bit Windows and oplk-ndisim-x86.nsi for 32-bit
+  Windows driver installation
+
   The script can be compiled either from the context menu option `Compile NSIS Script` or
   using the command line utility `makensis`.
+  Command line utility for 32-bit Windows is given below.
 
-      > makensis <openPOWERLINK_directory>\tools\windows\installer\oplk-ndisim.nsi
+      > makensis <openPOWERLINK_directory>\tools\windows\installer\oplk-ndisim-x86.nsi
+
+  Command line utility for 64-bit Windows is given below.
+
+      > makensis <openPOWERLINK_directory>\tools\windows\installer\oplk-ndisim-x64.nsi
 
 The default installation location for the openPOWERLINK driver installer executable is:
-`bin\windows\amd64`
+`bin\windows\amd64` for 64-bit and `bin\windows\x86` for 32-bit
 
 __NOTE:__ Currently the script supports creation of executable only for 64-bit Windows.
 
