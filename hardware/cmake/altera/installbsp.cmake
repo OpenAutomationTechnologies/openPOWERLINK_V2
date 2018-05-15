@@ -2,7 +2,7 @@
 #
 # CMake macro for installing the bsp for Altera Designs
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, B&R Industrial Automation GmbH
 # Copyright (c) 2015, Kalycito Infotech Private Limited
 # All rights reserved.
 #

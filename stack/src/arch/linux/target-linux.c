@@ -10,7 +10,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 

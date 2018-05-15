@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##    (c) B&R, 2016
+##    (c) B&R Industrial Automation GmbH, 2016
 ##    (c) Weidmueller Interface GmbH & Co. KG, 2016
 ##
 ##    Redistribution and use in source and binary forms, with or without

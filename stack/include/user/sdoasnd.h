@@ -8,7 +8,7 @@ The file contains definitions for the SDO over ASnd protocol abstraction layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 

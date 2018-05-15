@@ -19,12 +19,12 @@
     <ProfileBody
       xsi:type="ProfileBody_Device_Powerlink"
       fileName="00000000_POWERLINK_CiA302-4_MN.xdd"
-      fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
+      fileCreator="B&R Industrial Automation GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
       fileModificationDate="2015-11-12"
       fileModificationTime="10:00:00+01:00"
-      fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
+      fileModifiedBy="B&R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <DeviceIdentity>
@@ -67,12 +67,12 @@
     <ProfileBody
       xsi:type="ProfileBody_CommunicationNetwork_Powerlink"
       fileName="00000000_POWERLINK_CiA302-4_MN.xdd"
-      fileCreator="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
+      fileCreator="B&R Industrial Automation GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
       fileModificationDate="2015-11-12"
       fileModificationTime="10:00:00+01:00"
-      fileModifiedBy="Bernecker+Rainer Industrie-Elektronik Ges.m.b.H."
+      fileModifiedBy="B&R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <ApplicationLayers>

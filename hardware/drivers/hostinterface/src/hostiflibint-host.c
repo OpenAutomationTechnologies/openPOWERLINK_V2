@@ -10,7 +10,7 @@ The file contains the high level driver for the host interface library for Host.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

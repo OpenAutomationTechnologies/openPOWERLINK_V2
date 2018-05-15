@@ -11,7 +11,7 @@ This file contains the implementation of the Linux raw socket Ethernet driver.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, BE.services GmbH
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

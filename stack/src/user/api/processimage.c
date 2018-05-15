@@ -10,7 +10,7 @@ This source file contains the implementation of the process image functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronic GmbH
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 

@@ -10,7 +10,7 @@ The sync module is responsible to synchronize the user layer.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 

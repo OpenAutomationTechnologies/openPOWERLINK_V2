@@ -3,7 +3,7 @@
 # Descripition:
 #   Connects to mb, download the elf file and set Microblaze to run
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, B&R Industrial Automation GmbH
 # Copyright (c) 2014, Kalycito Infotech Pvt Ltd.
 # All rights reserved.
 #

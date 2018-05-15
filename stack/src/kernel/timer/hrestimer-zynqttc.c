@@ -15,7 +15,7 @@ one-shot and continuous timer support of POWERLINK module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
-Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2016, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

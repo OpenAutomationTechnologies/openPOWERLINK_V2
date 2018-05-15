@@ -12,7 +12,7 @@ as the equivalent configurations in user and kernel layers of the stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2012, SYSTEC electronik GmbH
-Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2014, B&R Industrial Automation GmbH
 Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 

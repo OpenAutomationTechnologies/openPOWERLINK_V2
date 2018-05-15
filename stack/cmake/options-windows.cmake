@@ -2,7 +2,7 @@
 #
 # CMake options for openPOWERLINK stack on Windows
 #
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 # All rights reserved.
 #

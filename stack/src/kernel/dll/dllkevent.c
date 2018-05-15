@@ -11,7 +11,7 @@ This file contains the event handling functions of the kernel DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 

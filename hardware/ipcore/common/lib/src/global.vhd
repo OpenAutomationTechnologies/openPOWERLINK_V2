@@ -1,7 +1,7 @@
 -------------------------------------------------------------------------------
 -- Global package
 --
---    (c) B&R, 2014
+--    (c) B&R Industrial Automation GmbH, 2014
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions

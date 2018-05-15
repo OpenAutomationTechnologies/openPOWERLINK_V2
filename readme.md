@@ -70,7 +70,7 @@ openPOWERLINK can be downloaded from its SourceForge project site:
     D-08468 Heinsdorfergrund,
     <http://www.systec-electronic.com>
 
-(c) Bernecker + Rainer Industrie Elektronik Ges.m.b.H.,
+(c) B&R Industrial Automation GmbH,
     B&R Strasse 1,
     A-5142 Eggelsberg,
     <http://www.br-automation.com>

@@ -3,7 +3,7 @@
 # CMake file for openPOWERLINK user PCIe interface (Linux kernel PCIe module)
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
-# Copyright (c) 2016, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2016, B&R Industrial Automation GmbH
 # Copyright (c) 2017, Kalycito Infotech Private Limited
 # All rights reserved.
 #

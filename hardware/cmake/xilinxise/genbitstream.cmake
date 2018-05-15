@@ -2,7 +2,7 @@
 #
 # CMake macro for generating the bitstream for Microblaze
 #
-# Copyright (c) 2014, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+# Copyright (c) 2014, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Kalycito Infotech Private Limited
 # All rights reserved.
 #

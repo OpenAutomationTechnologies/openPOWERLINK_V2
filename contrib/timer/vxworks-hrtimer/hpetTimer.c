@@ -1,7 +1,7 @@
 /*******************************************************************************
   File:         hpetTimer.c
 
-  (c) Bernecker + Rainer Ges.m.b.H.,  B&R Strasse 1, 5142 Eggelsberg, Austria
+  (c) B&R Industrial Automation GmbH,  B&R Strasse 1, 5142 Eggelsberg, Austria
       www.br-automation.com
 
   Project:      openPOWERLINK
@@ -31,7 +31,7 @@
        notice, this list of conditions and the following disclaimer in the
        documentation and/or other materials provided with the distribution.
 
-    3. Neither the name of Bernecker + Rainer Ges.m.b.H nor the names of its
+    3. Neither the name of B&R Industrial Automation GmbH nor the names of its
        contributors may be used to endorse or promote products derived
        from this software without prior written permission. For written
        permission, please contact office@br-automation.com.

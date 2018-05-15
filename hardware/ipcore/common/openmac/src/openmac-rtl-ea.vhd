@@ -6,7 +6,7 @@
 --! @details This is the openMAC core file implementing the MAC functionality.
 -------------------------------------------------------------------------------
 --
---    (c) B&R, 2009
+--    (c) B&R Industrial Automation GmbH, 2009
 --
 --    Redistribution and use in source and binary forms, with or without
 --    modification, are permitted provided that the following conditions

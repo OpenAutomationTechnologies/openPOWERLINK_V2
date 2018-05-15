@@ -12,7 +12,7 @@ the EMACPS Gigabit Ethernet Controller (GEM) on the Xilinx Zynq SoC.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

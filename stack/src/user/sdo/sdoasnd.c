@@ -9,7 +9,7 @@ This file contains the implementation of the SDO over ASnd protocol.
 \ingroup module_sdo_asnd
 *******************************************************************************/
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Bernecker+Rainer Industrie-Elektronik Ges.m.b.H. (B&R)
+Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
