@@ -10,7 +10,7 @@ on Linux with simulation interface.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
 All rights reserved.
 
@@ -77,12 +77,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Ethernet driver (Edrv) specific defines
 //==============================================================================
 
-// switch this define to TRUE if Edrv supports fast tx frames
-#define CONFIG_EDRV_FAST_TXFRAMES                   FALSE
-
-// switch this define to TRUE if Edrv supports early receive interrupts
-#define CONFIG_EDRV_EARLY_RX_INT                    FALSE
-
 // switch this define to TRUE if Edrv supports auto delay responses
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY             FALSE
 
@@ -92,14 +86,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================
-
-// switch this define to TRUE if Edrv supports fast tx frames
-// and DLL shall pass PRes as ready to Edrv after SoC
-#define CONFIG_DLL_PRES_READY_AFTER_SOC             FALSE
-
-// switch this define to TRUE if Edrv supports fast tx frames
-// and DLL shall pass PRes as ready to Edrv after SoA
-#define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
 // CN supports PRes Chaining
 #define CONFIG_DLL_PRES_CHAINING_CN                 FALSE

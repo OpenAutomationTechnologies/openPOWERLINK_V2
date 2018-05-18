@@ -8,7 +8,7 @@ This header file configures the POWERLINK node.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -78,12 +78,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // Ethernet driver (Edrv) specific defines
 //==============================================================================
 
-// switch this define to TRUE if Edrv supports fast tx frames
-#define CONFIG_EDRV_FAST_TXFRAMES                   FALSE
-
-// switch this define to TRUE if Edrv supports early receive interrupts
-#define CONFIG_EDRV_EARLY_RX_INT                    FALSE
-
 // openMAC supports auto-response
 #define CONFIG_EDRV_AUTO_RESPONSE                   TRUE
 
@@ -100,14 +94,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //==============================================================================
 // Data Link Layer (DLL) specific defines
 //==============================================================================
-
-// switch this define to TRUE if Edrv supports fast tx frames
-// and DLL shall pass PRes as ready to Edrv after SoC
-#define CONFIG_DLL_PRES_READY_AFTER_SOC             FALSE
-
-// switch this define to TRUE if Edrv supports fast tx frames
-// and DLL shall pass PRes as ready to Edrv after SoA
-#define CONFIG_DLL_PRES_READY_AFTER_SOA             FALSE
 
 // maximum count of Rx filter entries for PRes frames
 #define CONFIG_DLL_PRES_FILTER_COUNT                3

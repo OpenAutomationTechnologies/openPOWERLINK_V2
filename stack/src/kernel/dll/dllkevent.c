@@ -11,7 +11,7 @@ This file contains the event handling functions of the kernel DLL module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, Kalycito Infotech Private Limited
-Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -115,9 +115,6 @@ static tOplkError processSyncCn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION
 static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p) SECTION_DLLK_PROCESS_SYNC;
 static tOplkError processStartReducedCycle(void);
 #endif
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE)
-static tOplkError processPresReady(tNmtState nmtState_p);
-#endif
 static tOplkError processFillTx(tDllAsyncReqPriority asyncReqPriority_p, tNmtState nmtState_p);
 
 #if (defined(CONFIG_INCLUDE_NMT_MN) && defined(CONFIG_INCLUDE_PRES_FORWARD))
@@ -198,13 +195,6 @@ tOplkError dllk_process(const tEvent* pEvent_p)
 #endif
 
 #endif
-
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE)
-        case kEventTypeDllkPresReady:
-            ret = processPresReady(dllkInstance_g.nmtState);
-            break;
-#endif
-
 
         default:
             TRACE("%s(): unhandled event type!\n", __func__);
@@ -1105,56 +1095,6 @@ static tOplkError processSyncMn(tNmtState nmtState_p, BOOL fReadyFlag_p)
     index++;
 
     ret = edrvcyclic_setNextTxBufferList(dllkInstance_g.ppTxBufferList, index);
-
-    return ret;
-}
-#endif
-
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE)
-//------------------------------------------------------------------------------
-/**
-\brief  Process PRes ready event
-
-The function processes the PRes Ready event.
-
-\param[in]      nmtState_p          NMT state of local node.
-
-\return The function returns a tOplkError error code.
-*/
-//------------------------------------------------------------------------------
-static tOplkError processPresReady(tNmtState nmtState_p)
-{
-    tOplkError  ret = kErrorOk;
-    tPlkFrame*  pTxFrame;
-
-    // post PRes to transmit FIFO
-    if (nmtState_p != kNmtCsBasicEthernet)
-    {
-        // Does PRes exist?
-        if (dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                     dllkInstance_g.curTxBufferOffsetCycle].pBuffer != NULL)
-        {   // PRes does exist
-            pTxFrame = (tPlkFrame*)dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                            dllkInstance_g.curTxBufferOffsetCycle].pBuffer;
-            // update frame (NMT state, RD, RS, PR, MS, EN flags)
-            if (nmtState_p < kNmtCsPreOperational2)
-            {   // NMT state is not PreOp2, ReadyToOp or Op
-                // fake NMT state PreOp2, because PRes will be sent only in PreOp2 or greater
-                nmtState_p = kNmtCsPreOperational2;
-            }
-            ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState_p);
-            ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
-            if (nmtState_p != kNmtCsOperational)
-            {   // mark PDO as invalid in all NMT state but Op
-                // $$$ reset only RD flag; set other flags appropriately
-                ami_setUint8Le(&pTxFrame->data.pres.flag1, 0);
-            }
-            // $$$ make function that updates Pres, StatusRes
-            // mark PRes frame as ready for transmission
-            //ret = edrv_setTxBufferReady(&dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-            //                                               dllkInstance_g.curTxBufferOffsetCycle]);
-        }
-    }
 
     return ret;
 }

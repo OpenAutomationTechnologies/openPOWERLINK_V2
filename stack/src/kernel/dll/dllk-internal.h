@@ -11,7 +11,7 @@ files.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
-Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 Copyright (c) 2017, Kalycito Infotech Private Limited
 All rights reserved.
 
@@ -57,17 +57,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //------------------------------------------------------------------------------
 // check for correct compilation options
 //------------------------------------------------------------------------------
-#if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) && (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
-#error "DLLK: select only one of CONFIG_DLL_PRES_READY_AFTER_SOA and CONFIG_DLL_PRES_READY_AFTER_SOC."
-#endif
-
-#if (((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)) && defined(CONFIG_INCLUDE_NMT_MN))
-#error "DLLK: currently, CONFIG_DLL_PRES_READY_AFTER_* is not supported if CONFIG_INCLUDE_NMT_MN is enabled."
-#endif
-
-#if ((CONFIG_EDRV_FAST_TXFRAMES == FALSE) && ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)))
-#error "DLLK: CONFIG_DLL_PRES_READY_AFTER_* is enabled, but not CONFIG_EDRV_FAST_TXFRAMES."
-#endif
 
 #if (defined(CONFIG_INCLUDE_NMT_MN) && (CONFIG_DLL_PRES_FILTER_COUNT == 0))
 #error "MN support needs CONFIG_DLL_PRES_FILTER_COUNT != 0"

@@ -8,7 +8,7 @@ This header file configures the POWERLINK node.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2012, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -84,10 +84,6 @@ The Ethernet driver (Edrv) defines determine the stack's Ethernet module.
 Note: The settings are specific for MN with openMAC!
 */
 /**@{*/
-#define CONFIG_EDRV_FAST_TXFRAMES           FALSE
-    ///< fast TX support by Edrv
-#define CONFIG_EDRV_EARLY_RX_INT            FALSE
-    ///< support TX handler call when DMA transfer finished
 #define CONFIG_EDRV_AUTO_RESPONSE           TRUE
     ///< support auto-response (e.g. openMAC)
 #define CONFIG_EDRV_AUTO_RESPONSE_DELAY     TRUE
@@ -102,10 +98,6 @@ Note: The settings are specific for MN with openMAC!
 The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
 */
 /**@{*/
-#define CONFIG_DLL_PRES_READY_AFTER_SOC        FALSE
-    ///< support PRes packet ready after SoC (CONFIG_EDRV_FAST_TXFRAMES necessary)
-#define CONFIG_DLL_PRES_READY_AFTER_SOA        FALSE
-    ///< support PRes packet ready after SoA (CONFIG_EDRV_FAST_TXFRAMES necessary)
 #define CONFIG_DLL_PRES_FILTER_COUNT           3
     ///< max. supported PRes packet filters (for specific nodes)
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE

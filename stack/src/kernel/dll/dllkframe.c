@@ -10,7 +10,7 @@ This file contains the frame processing functions of the kernel DLL module.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2018, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -199,58 +199,6 @@ tEdrvReleaseRxBuffer dllkframe_processFrameReceived(tEdrvRxBuffer* pRxBuffer_p)
         goto Exit;
 
     pFrame = (tPlkFrame*)pRxBuffer_p->pBuffer;
-#if (CONFIG_EDRV_EARLY_RX_INT != FALSE)
-    switch (pRxBuffer_p->bufferInFrame)
-    {
-        case kEdrvBufferFirstInFrame:
-        {
-            tEdrvTxBuffer* pTxBuffer = NULL;
-
-            msgType = (tMsgType)ami_getUint8Le(&pFrame->messageType);
-            if (msgType == kMsgTypePreq)
-            {
-                if (dllkInstance_g.dllState == kDllCsWaitPreq)
-                {   // PReq expected and actually received
-                    // d.k.: The condition above is sufficient, because POWERLINK
-                    //       cycle is active and no non-POWERLINK frame shall be
-                    //       received in isochronous phase.
-                    // start transmission PRes
-                    // $$$ What if Tx buffer is invalid?
-                    pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES +
-                                                          dllkInstance_g.curTxBufferOffsetCycle];
-#if ((CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE))
-                    //ret = edrv_startTxBuffer(pTxBuffer);
-#else
-                    {
-                        tPlkFrame* pTxFrame = (tPlkFrame*)pTxBuffer->pBuffer;
-
-                        // update frame (NMT state, RD, RS, PR, MS, EN flags)
-                        ami_setUint8Le(&pTxFrame->data.pres.nmtStatus, (UINT8)nmtState);
-                        ami_setUint8Le(&pTxFrame->data.pres.flag2, dllkInstance_g.flag2);
-                        if (nmtState != kNmtCsOperational)
-                        {   // mark PDO as invalid in NMT state Op
-                            // $$$ reset only RD flag; set other flags appropriately
-                            ami_setUint8Le(&pTxFrame->data.pres.flag1, 0);
-                        }
-                        // $$$ make function that updates Pres, StatusRes
-                        // send PRes frame
-                        ret = edrv_sendTxBuffer(pTxBuffer);
-                    }
-#endif
-                }
-            }
-            goto Exit;
-            break;
-        }
-
-        case kEdrvBufferMiddleInFrame:
-            goto Exit;
-            break;
-
-        case kEdrvBufferLastInFrame:
-            break;
-    }
-#endif
 
     frameInfo.frame.pBuffer = pFrame;
     frameInfo.frameSize = (UINT)pRxBuffer_p->rxFrameSize;
@@ -1784,7 +1732,6 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p,
         goto Exit;
     }
 
-#if (CONFIG_EDRV_EARLY_RX_INT == FALSE)
     if (nmtState_p >= kNmtCsPreOperational2)
     {   // respond to and process PReq frames only in PreOp2, ReadyToOp and Op
 
@@ -1796,15 +1743,10 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p,
         pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle];
         if (pTxBuffer->pBuffer != NULL)
         {   // PRes does exist -> send PRes frame
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE) || (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-            //edrv_startTxBuffer(pTxBuffer);
-#else
             ret = edrv_sendTxBuffer(pTxBuffer);
             if (ret != kErrorOk)
                 goto Exit;
-#endif
         }
-#endif
 #endif
 
         // update only EA and MS flag
@@ -1848,10 +1790,8 @@ static tOplkError processReceivedPreq(tFrameInfo* pFrameInfo_p,
         }
 #endif
 
-#if (CONFIG_EDRV_EARLY_RX_INT == FALSE)
         // $$$ inform emergency protocol handling (error signaling module) about flags
     }
-#endif
 
     // reset cycle counter
     dllkInstance_g.cycleCount = 0;
@@ -2127,9 +2067,6 @@ static tOplkError processReceivedSoc(const tEdrvRxBuffer* pRxBuffer_p,
     tOplkError          ret = kErrorOk;
     const tPlkFrame*    pFrame;
     UINT64              relTime;
-#if (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-    tEdrvTxBuffer*      pTxBuffer = NULL;
-#endif
 
 #if (CONFIG_DLL_PROCESS_SYNC != DLL_PROCESS_SYNC_ON_TIMER)
     UNUSED_PARAMETER(pRxBuffer_p);
@@ -2141,20 +2078,6 @@ static tOplkError processReceivedSoc(const tEdrvRxBuffer* pRxBuffer_p,
     }
 
     pFrame = (const tPlkFrame*)pRxBuffer_p->pBuffer;
-
-#if (CONFIG_DLL_PRES_READY_AFTER_SOC != FALSE)
-    // post PRes to transmit FIFO of the Ethernet controller, but don't start
-    // transmission over bus
-    pTxBuffer = &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_PRES + dllkInstance_g.curTxBufferOffsetCycle];
-    if (pTxBuffer->pBuffer != NULL)          // Does PRes exist?
-    {   // PRes does exist -> mark PRes frame as ready for transmission
-        /*
-        ret = edrv_setTxBufferReady(pTxBuffer);
-        if (ret != kErrorOk)
-            return ret;
-        */
-    }
-#endif
 
     if (nmtState_p >= kNmtCsStopped)
     {   // SoC frames only in Stopped, PreOp2, ReadyToOp and Operational
@@ -2594,14 +2517,6 @@ static tOplkError processReceivedSoa(const tEdrvRxBuffer* pRxBuffer_p,
     }
 #endif
 
-#if (CONFIG_DLL_PRES_READY_AFTER_SOA != FALSE)
-    if (pTxBuffer == NULL)
-    {   // signal process function readiness of PRes frame
-        ret = postEvent(kEventTypeDllkPresReady);
-        if (ret != kErrorOk)
-            goto Exit;
-    }
-#endif
     // $$$ put SrcNodeId, NMT state and NetTime as HeartbeatEvent into eventqueue
     // $$$ inform emergency protocol handling about flags
 
