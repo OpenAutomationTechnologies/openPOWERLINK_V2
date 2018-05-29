@@ -86,12 +86,14 @@ SET(DUALPROCSHM_LIB_SRCS
 IF(DEFINED CFG_DEMO_BOARD_ZYNQ AND CFG_DEMO_BOARD_ZYNQ)
     SET(DUALPROCSHM_LIB_SRCS
         ${DUALPROCSHM_LIB_SRCS}
+        ${PROJECT_SOURCE_DIR}/src/dualprocshm-lock.c
         ${PROJECT_SOURCE_DIR}/src/dualprocshm-zynq.c
        )
 ELSEIF(DEFINED CFG_DEMO_BOARD_NAME AND (CFG_DEMO_BOARD_NAME STREQUAL "altera-c5soc"))
     SET(DUALPROCSHM_LIB_SRCS
         ${DUALPROCSHM_LIB_SRCS}
         ${PROJECT_SOURCE_DIR}/src/dualprocshm-c5soc.c
+        ${PROJECT_SOURCE_DIR}/src/dualprocshm-lock.c
        )
 ELSE()
     MESSAGE(FATAL_ERROR "Dual Processor Shared Memory Interface is not supported on ${CFG_DEMO_BOARD_NAME} platform!!")
