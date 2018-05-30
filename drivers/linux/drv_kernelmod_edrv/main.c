@@ -11,7 +11,7 @@ the openPOWERLINK kernel stack.
 *******************************************************************************/
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, B&R Industrial Automation GmbH
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -157,7 +157,11 @@ static int          sendAsyncFrame(unsigned long arg_p);
 static int          writeErrorObject(unsigned long arg_p);
 static int          readErrorObject(unsigned long arg_p);
 
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 15, 0))
 static void         increaseHeartbeatCb(ULONG data_p);
+#else
+static void         increaseHeartbeatCb(struct timer_list* data_p);
+#endif
 static void         startHeartbeatTimer(ULONG timeInMs_p);
 static void         stopHeartbeatTimer(void);
 
@@ -310,7 +314,13 @@ static int powerlinkOpen(struct inode* pInode_p,
         return -ENOTTY;
     }
 
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 15, 0))
     init_timer(&heartbeatTimer_g);
+#else
+    /* timer_setup API is used instead of init_timer as it is deprecated
+     * in the new kernel */
+    timer_setup(&heartbeatTimer_g, increaseHeartbeatCb, 0);
+#endif
 
     if (ctrlk_init(NULL) != kErrorOk)
     {
@@ -930,8 +940,11 @@ The function starts the timer used for updating the heartbeat counter.
 //------------------------------------------------------------------------------
 void startHeartbeatTimer(ULONG timeInMs_p)
 {
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 15, 0))
     heartbeatTimer_g.function = increaseHeartbeatCb;
     heartbeatTimer_g.data = 0;
+#endif
+
     heartbeatTimer_g.expires = jiffies + (timeInMs_p * HZ / 1000);
     add_timer(&heartbeatTimer_g);
 }
@@ -962,7 +975,12 @@ heartbeat counter.
 \ingroup module_driver_linux_kernel
 */
 //------------------------------------------------------------------------------
+#if (LINUX_VERSION_CODE <= KERNEL_VERSION(4, 15, 0))
 void increaseHeartbeatCb(ULONG data_p)
+#else
+/* Modified increaseHeartbeatCb to handle callback functionality */
+void increaseHeartbeatCb(struct timer_list* data_p)
+#endif
 {
     UNUSED_PARAMETER(data_p);
 
