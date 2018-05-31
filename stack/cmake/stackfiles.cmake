@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2017, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
-# Copyright (c) 2017, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -510,6 +510,11 @@ SET(HARDWARE_DRIVER_OPENMAC_CN_SOURCES
      )
 
 SET(HARDWARE_DRIVER_OPENMAC_MN_SOURCES
+    ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
+    ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
+    )
+
+SET(HARDWARE_DRIVER_OPENMAC_CN_ZYNQ_SOURCES
     ${KERNEL_SOURCE_DIR}/timer/hrestimer-openmac.c
     ${KERNEL_SOURCE_DIR}/edrv/edrvcyclic-openmac.c
     )

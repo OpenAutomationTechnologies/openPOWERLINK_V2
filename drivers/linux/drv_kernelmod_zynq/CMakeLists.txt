@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2013, SYSTEC electronik GmbH
 # Copyright (c) 2016, B&R Industrial Automation GmbH
-# Copyright (c) 2017, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -94,7 +94,9 @@ IF(CFG_OPLK_MN)
     SET(MODULE_NAME "${MODULE_NAME}mn")
     INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/mn)
 ELSE()
-    MESSAGE(SEND_ERROR "Currently the interface only supports MN!")
+    ADD_DEFINITIONS(-D__LINUX_ZYNQ__ -DCONFIG_CN)
+    SET(MODULE_NAME "${MODULE_NAME}cn")
+    INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/proj/cn)
 ENDIF()
 
 SET(MODULE_NAME "oplk${MODULE_NAME}zynqintf")
@@ -190,7 +192,7 @@ ENDFOREACH()
 CONFIGURE_FILE(${TOOLS_DIR}/linux/Kbuild.in ${MODULE_OUTPUT_DIR}/Kbuild)
 
 IF(CMAKE_CROSSCOMPILING)
-    IF(DEFINED MAKE_KERNEL_ARCH)
+    IF (DEFINED MAKE_KERNEL_ARCH)
         SET(MAKE_KERNEL_CROSSCOMPILING_PARAMS ARCH=${MAKE_KERNEL_ARCH})
     ELSE()
         MESSAGE(WARNING "ARCH is not set while cross-compiling !\n"

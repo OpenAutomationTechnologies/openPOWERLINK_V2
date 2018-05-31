@@ -2,7 +2,7 @@
 #
 # Microblaze CMake configuration for openPOWERLINK kernel stack process
 #
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,7 +45,7 @@ SET(XIL_HW_LIB_DIR ${OPLK_BASE_DIR}/hardware/lib/${SYSTEM_NAME_DIR}/${SYSTEM_PRO
 LIST_SUBDIRECTORIES(HW_BOARD_DEMOS ${XIL_HW_LIB_DIR} 2)
 
 IF (CFG_KERNEL_DUALPROCSHM)
-    SET(CFG_HW_LIB xilinx-z702/mn-dual-shmem-gpio CACHE STRING
+    SET(CFG_HW_LIB xilinx-z702/dual-shmem-gpio CACHE STRING
     "Subfolder of hardware board demo")
 ENDIF ()
 
