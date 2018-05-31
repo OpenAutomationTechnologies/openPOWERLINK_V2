@@ -1,8 +1,8 @@
 ################################################################################
 #
-# CMake settings file for mn-dual-shmem-gpio demo on xilinx-z702
+# CMake settings file for dual-shmem-gpio demo on xilinx-z702
 #
-# Copyright (c) 2016, Kalycito Infotech Pvt. Ltd.
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,7 +32,7 @@
 # D E M O   I D E N T I F I C A T I O N
 
 # Name of the demo
-SET(CFG_DEMO_NAME "mn-dual-shmem-gpio")
+SET(CFG_DEMO_NAME "dual-shmem-gpio")
 
 # Board of the demo
 SET(CFG_DEMO_BOARD_NAME "xilinx-z702")

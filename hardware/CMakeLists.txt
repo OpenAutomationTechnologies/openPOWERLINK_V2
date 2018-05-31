@@ -3,7 +3,7 @@
 # CMake root file for finding all board examples for the selected platform
 #
 # Copyright (c) 2014, B&R Industrial Automation GmbH
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,11 @@ FOREACH(BOARD_DIR IN ITEMS ${BOARD_DIRS})
 
     STRING(TOUPPER ${FRAG_BOARD_NAME} FRAG_BOARD_NAME)
 
-    FILE(GLOB EXAMPLE_NAMES RELATIVE "${BOARD_DIR}/" "${BOARD_DIR}/[c|m]n-*")
+    IF(${BOARD_NAME} STREQUAL "xilinx-z702")
+        FILE(GLOB EXAMPLE_NAMES RELATIVE "${BOARD_DIR}/" "${BOARD_DIR}/dual-*")
+    ELSE()
+        FILE(GLOB EXAMPLE_NAMES RELATIVE "${BOARD_DIR}/" "${BOARD_DIR}/[c|m]n-*")
+    ENDIF()
 
     FOREACH(EXAMPLE_NAME IN ITEMS ${EXAMPLE_NAMES})
         STRING(TOUPPER ${EXAMPLE_NAME} EXAMPLE_NAME_VAR)
