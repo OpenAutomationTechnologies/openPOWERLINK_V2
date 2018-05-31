@@ -1,4 +1,4 @@
-openPOWERLINK MN on Zynq Hybrid design {#page_zynq_hybrid}
+openPOWERLINK MN on Zynq Hybrid design {#page_mn_zynq_hybrid}
 =================
 
 [TOC]
@@ -9,12 +9,12 @@ This section serves as a quick-start guide to setup the environment for compilin
 executing the openPOWERLINK Linux MN demo for the Zynq Hybrid design using the Vivado
 2016.2 toolchain.
 
-# Requirements {#sect_zynq_hybrid_requirements}
+# Requirements {#sect_zynq_hybrid_mn_requirements}
 
 This section describes the hardware and software requirements for executing the
 openPOWERLINK Linux MN Demo with the Zynq Hybrid design.
 
-## Hardware Requirements {#sect_hardware_requirements}
+## Hardware Requirements {#sect_mn_hardware_requirements}
 
 - Zynq ZC702 board (used as openPOWERLINK MN)
 - AVNET expander board (AES-FMC-ISMNET-G)
@@ -24,7 +24,7 @@ openPOWERLINK Linux MN Demo with the Zynq Hybrid design.
 - Ethernet cables
 - 1 Mini USB serial cable
 
-## Software Requirements {#sect_software_requirements}
+## Software Requirements {#sect_mn_software_requirements}
 
 The following list of software packages and their dependencies are required to
 run the openPOWERLINK Linux MN demo on the Zynq ZC702.
@@ -56,7 +56,7 @@ run the openPOWERLINK Linux MN demo on the Zynq ZC702.
 - Download the openPOWERLINK stack (2.5.0 or higher) from the following link:
   * http://openpowerlink.sourceforge.net/web/openPOWERLINK/Download.html
 
-# Steps to apply the RT Preempt patch to the Linux kernel source {#sect_zynq_hybrid_preempt_patch}
+# Steps to apply the RT Preempt patch to the Linux kernel source {#sect_zynq_hybrid_mn_preempt_patch}
 
 This section describes the steps to be carried out on the Linux PC to apply the
 RT Preempt patch to the Xilinx Linux kernel sources and compile the kernel.
@@ -69,7 +69,7 @@ RT Preempt patch to the Xilinx Linux kernel sources and compile the kernel.
 
       > patch -p1 < <(gunzip -c <path_to_patch-4.4-rt2.patch.gz>)
 
-# Steps to compile the Linux kernel source for the Zynq ZC702 {#sect_hybrid_kernel_compile}
+# Steps to compile the Linux kernel source for the Zynq ZC702 {#sect_hybrid_mn_kernel_compile}
 
 This section describes the steps to be carried out on the Linux PC to compile
 the Linux kernel source and create the kernel image file for the Zynq ZC702.
@@ -99,7 +99,7 @@ the Linux kernel source and create the kernel image file for the Zynq ZC702.
 
             > make ARCH=arm CROSS_COMPILE=<Xilinx_dir>/SDK/2016.2/gnu/aarch32/lin/gcc-arm-linux-gnueabi/bin/arm-linux-gnueabihf- modules_install
 
-# Steps to build the hardware for the Zynq Hybrid design {#sect_zynq_build_hardware}
+# Steps to build the hardware for the Zynq Hybrid design {#sect_zynq_build_mn_hardware}
 
 - Change the path to the Xilinx Vivado directory:
 
@@ -130,12 +130,12 @@ the Linux kernel source and create the kernel image file for the Zynq ZC702.
       > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DSKIP_BITSTREAM=OFF -DDEMO_Z702_MN_DUAL_SHMEM_GPIO=ON
       > make install
 
-# Steps to build the PCP {#sect_zynq_build_pcp}
+# Steps to build the PCP {#sect_zynq_build_mn_pcp}
 
 This section describes the steps to be carried out on the Linux PC to compile
 and build the PCP for the Zynq Hybrid design.
 
-## Steps to build the driver library for Microblaze {#sect_build_driver_lib_for_MB}
+## Steps to build the driver library for Microblaze {#sect_build_driver_mn_lib_for_MB}
 - Change directory:
 
       > cd <openPOWERLINK_dir>/stack/build/xilinx-microblaze
@@ -150,7 +150,7 @@ and build the PCP for the Zynq Hybrid design.
       > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchain-xilinx-microblaze-gnu.cmake ../.. -DCMAKE_BUILD_TYPE=Release -DCFG_COMPILE_LIB_MNDRV_DUALPROCSHM=ON
       > make install
 
-## Steps to build the driver application for Microblaze {#sect_build_driver_app_for_MB}
+## Steps to build the driver application for Microblaze {#sect_build_driver_mn_app_for_MB}
 
 - Change directory:
 
@@ -163,7 +163,7 @@ and build the PCP for the Zynq Hybrid design.
 
 - Exit from the Vivado TCL console.
 
-# Generate FSBL {#sect_zynq_generate_FSBL}
+# Generate FSBL {#sect_zynq_generate_mn_FSBL}
 
 - Change to the SDK binary directory:
 
@@ -186,7 +186,7 @@ in the application project window.
 - **fsbl.elf** is generated in the debug folder of the Xilinx SDK workspace.
 - Exit from SDK workspace.
 
-# Generate BOOT.bin {#sect_zynq_generate_boot_bin}
+# Generate BOOT.bin {#sect_zynq_generate_mn_boot_bin}
 
 - Open terminal and change directory:
 
@@ -202,7 +202,7 @@ in the application project window.
 
       > <Xilinx_dir>/SDK/2016.2/bin/bootgen -image bootimage.bif -o i boot.bin
 
-# Generate device tree blob {#sect_generate_device_tree_blob}
+# Generate device tree blob {#sect_generate_mn_device_tree_blob}
 
 - In the terminal, change the directory to the device tree source path using the following command:
 
@@ -214,7 +214,7 @@ the source code for DTC and needs to be compiled in order to be used.
 
       > <Xilinx_Linux_dir>/scripts/dtc/dtc -I dts -O dtb -o devicetree.dtb system.dts
 
-# Steps for cross-compiling the openPOWERLINK Linux MN for the Zynq Hybrid design {#sect_zynq_cross_compile}
+# Steps for cross-compiling the openPOWERLINK Linux MN for the Zynq Hybrid design {#sect_zynq_mn_cross_compile}
 
 This section describes the set of steps to cross compile the openPOWERLINK
 Linux MN Zynq ZC702 for the Zynq Hybrid design.
@@ -227,7 +227,7 @@ Linux MN Zynq ZC702 for the Zynq Hybrid design.
 
       > cmake-gui
 
-## Compile the stack libraries {#sect_compile_stack}
+## Compile the stack libraries {#sect_compile_mn_stack}
 - Point the **Where is the source code** to the stack source folder
   - \<openPOWERLINK_dir\>/stack
 - Point the **Where to build the binaries** to the stack build folder
@@ -253,7 +253,7 @@ the Makefile with the modified configuration.
 
       > make install
 
-## Compile the driver libraries {#sect_compile_driver}
+## Compile the driver libraries {#sect_compile_mn_driver}
 - Provide the **Where is the source code** to the driver source folder
   - \<openPOWERLINK_dir\>/drivers/linux/drv_kernelmod_zynq>
 - Provide the **Where to build the binaries** to the driver build folder
@@ -275,11 +275,11 @@ the Makefile with the modified configuration.
 
       > make install
 
-## Compile the application libraries {#sect_compile_application}
+## Compile the application libraries {#sect_compile_mn_application}
 - Provide the **Where to build the binaries** to the application build folder
   - \<openPOWERLINK_dir\>/apps/demo_mn_console/
 - Provide the **Where to build the binaries** to the application build folder
-  - \<openPOWERLINK_dir\>/apps/demo_mn_console/ build/linux
+  - \<openPOWERLINK_dir\>/apps/demo_mn_console/build/linux
 - Click the **Configure** button.
 - In the **Specify the Generator for this project** dialog box, select **Unix Makefiles**
 generator and **Specify toolchain file for cross-compiling** and click **Next**.
@@ -296,7 +296,7 @@ with the modified configuration.
 
       > make install
 
-# Steps to execute the openPOWERLINK Linux MN demo application for the Zynq Hybrid design {#sect_zynq_execute_demo}
+# Steps to execute the openPOWERLINK Linux MN demo application for the Zynq Hybrid design {#sect_zynq_execute_mn_demo}
 
 This section describes the steps to run the openPOWERLINK Linux MN demo on the Zynq ZC702 development board.
 
@@ -350,6 +350,6 @@ extension board and to a CN in the network.
 
         > cd /mnt/demo_mn_console
 
-  * Run the openOWERLINK MN demo using the following command:
+  * Run the openPOWERLINK MN demo using the following command:
 
         > ./demo_mn_console

@@ -20,6 +20,7 @@ without locking, the buffer switching has to be performed in an atomic operation
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -239,6 +240,13 @@ tOplkError pdokcal_writeRxPdo(UINT8 channelId_p, const void* pPayload_p, UINT16 
 
     OPLK_DCACHE_FLUSH(pPdo, pdoSize_p);
 
+#if defined (__LINUX_ZYNQ__)
+    target_lock();
+#endif
+    // Invalidate the cache again, for the previous is not under the lock context, and the
+    // value of .cleanBuf may be changed on the physical memory.
+    OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->rxChannelInfo[channelId_p]),
+                           sizeof(tPdoBufferInfo));
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
                          temp,
@@ -247,8 +255,11 @@ tOplkError pdokcal_writeRxPdo(UINT8 channelId_p, const void* pPayload_p, UINT16 
     pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
 
     // Flush data cache for variables changed in this function
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].newData), sizeof(UINT8));
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p]),
+                      sizeof(tPdoBufferInfo));
+#if defined (__LINUX_ZYNQ__)
+    target_unlock();
+#endif
 
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
     //TRACE("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
@@ -278,7 +289,11 @@ tOplkError pdokcal_readTxPdo(UINT8 channelId_p, void* pPayload_p, UINT16 pdoSize
     // Check parameter validity
     ASSERT(pPayload_p != NULL);
 
-    // Invalidate data cache for addressed txChannelInfo
+#if defined (__LINUX_ZYNQ__)
+    target_lock();
+#endif
+
+     // Invalidate data cache for addressed txChannelInfo
     OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->txChannelInfo[channelId_p]), sizeof(tPdoBufferInfo));
 
     if (pPdoMem_l->txChannelInfo[channelId_p].newData)
@@ -290,9 +305,13 @@ tOplkError pdokcal_readTxPdo(UINT8 channelId_p, void* pPayload_p, UINT16 pdoSize
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
 
         // Flush data cache for variables changed in this function
-        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].readBuf), sizeof(OPLK_ATOMIC_T));
-        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
+        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p]),
+                          sizeof(tPdoBufferInfo));
     }
+
+#if defined (__LINUX_ZYNQ__)
+    target_unlock();
+#endif
 
     pPdo = (UINT8*)pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +
                pPdoMem_l->txChannelInfo[channelId_p].channelOffset;

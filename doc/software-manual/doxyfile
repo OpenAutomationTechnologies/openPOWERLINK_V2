@@ -815,7 +815,8 @@ INPUT                  = ../../stack/src \
                          ../supported-platforms/altera-cn.md \
                          ../supported-platforms/xilinx.md \
                          ../supported-platforms/zynq.md \
-                         ../supported-platforms/zynq-hybrid.md \
+                         ../supported-platforms/zynq-hybrid-mn.md \
+                         ../supported-platforms/zynq-hybrid-cn.md \
                          ../supported-platforms/zynq-emacps.md \
                          ../supported-platforms/altera-soc.md \
                          ../../readme.md \
