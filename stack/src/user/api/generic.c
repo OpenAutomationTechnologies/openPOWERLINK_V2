@@ -11,7 +11,7 @@ This file contains the implementation of the generic API functions.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -121,7 +121,9 @@ static BOOL fStackInitialized_l = FALSE;
 static tOplkError cbSdoCon(const tSdoComFinished* pSdoComFinished_p);
 #endif
 static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p);
-#if defined(CONFIG_INCLUDE_VETH)
+// Include the call back function for received ethernet frames only if
+// the target is a OS design
+#if (defined(CONFIG_INCLUDE_VETH) && (TARGET_SYSTEM == _NO_OS_))
 static tOplkError cbReceivedEth(const tFrameInfo* pFrameInfo_p);
 #endif
 static tOplkError readLocalObject(UINT index_p,
@@ -1289,7 +1291,15 @@ tOplkError oplk_setNonPlkForward(BOOL fEnable_p)
 
 #if defined(CONFIG_INCLUDE_VETH)
     if (fEnable_p)
+    {
+#if (TARGET_SYSTEM != _NO_OS_)
+        DEBUG_LVL_ERROR_TRACE("%s() Operation is not supported in OS designs\n",
+                              __func__);
+        ret = kErrorApiNotSupported;
+#else
         ret = dllucal_regNonPlkHandler(cbReceivedEth);
+#endif
+    }
     else
         ret = dllucal_regNonPlkHandler(NULL);
 #else
@@ -1911,7 +1921,7 @@ static tOplkError cbReceivedAsnd(const tFrameInfo* pFrameInfo_p)
     return ret;
 }
 
-#if defined(CONFIG_INCLUDE_VETH)
+#if (defined(CONFIG_INCLUDE_VETH) && (TARGET_SYSTEM == _NO_OS_))
 //------------------------------------------------------------------------------
 /**
 \brief  Callback function for received Ethernet frames
