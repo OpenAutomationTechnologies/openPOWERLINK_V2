@@ -24,7 +24,7 @@
       fileCreationTime="15:50:00+01:00"
       fileModificationDate="2018-05-17"
       fileModificationTime="09:50:00+01:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <DeviceIdentity>
@@ -72,7 +72,7 @@
       fileCreationTime="15:50:00+01:00"
       fileModificationDate="2018-05-17"
       fileModificationTime="09:50:00+01:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <ApplicationLayers>

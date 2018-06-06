@@ -69,7 +69,7 @@
         <ProfileTechnology>Powerlink</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xsi:type="ProfileBody_Device_Powerlink" fileName="00000000_POWERLINK_CiA401.xdd" fileCreator="B&R Industrial Automation GmbH" fileCreationDate="2011-04-01" fileCreationTime="10:00:00+02:00" fileModificationDate="2017-04-05" fileModificationTime="12:47:52+02:00" fileModifiedBy="rueckerc" fileVersion="01.00" supportedLanguages="en">
+    <ProfileBody xsi:type="ProfileBody_Device_Powerlink" fileName="00000000_POWERLINK_CiA401.xdd" fileCreator="B&amp;R Industrial Automation GmbH" fileCreationDate="2011-04-01" fileCreationTime="10:00:00+02:00" fileModificationDate="2017-04-05" fileModificationTime="12:47:52+02:00" fileModifiedBy="rueckerc" fileVersion="01.00" supportedLanguages="en">
       <DeviceIdentity>
         <vendorName>Unknown vendor</vendorName>
         <vendorID>0x00000000</vendorID>
@@ -107,7 +107,7 @@
         <ProfileTechnology>Powerlink</ProfileTechnology>
       </ISO15745Reference>
     </ProfileHeader>
-    <ProfileBody xsi:type="ProfileBody_CommunicationNetwork_Powerlink" fileName="00000000_POWERLINK_CiA401.xdd" fileCreator="B&R Industrial Automation GmbH" fileCreationDate="2011-04-01" fileCreationTime="10:00:00+02:00" fileModificationDate="2017-04-05" fileModificationTime="12:47:52+02:00" fileModifiedBy="rueckerc" fileVersion="01.00" supportedLanguages="en">
+    <ProfileBody xsi:type="ProfileBody_CommunicationNetwork_Powerlink" fileName="00000000_POWERLINK_CiA401.xdd" fileCreator="B&amp;R Industrial Automation GmbH" fileCreationDate="2011-04-01" fileCreationTime="10:00:00+02:00" fileModificationDate="2017-04-05" fileModificationTime="12:47:52+02:00" fileModifiedBy="rueckerc" fileVersion="01.00" supportedLanguages="en">
       <ApplicationLayers>
         <identity>
           <vendorID>0x00000000</vendorID>
