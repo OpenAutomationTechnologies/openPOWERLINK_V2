@@ -1,38 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <openCONFIGURATORProject xmlns="http://sourceforge.net/projects/openconf/configuration" xmlns:ns2="http://ethernet-powerlink.org/POWERLINK" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://sourceforge.net/projects/openconf/configuration openCONFIGURATOR.xsd">
-  <Generator vendor="Kalycito Infotech Private Limited &amp; B&R Industrial Automation GmbH" toolName="Ethernet POWERLINK openCONFIGURATOR" toolVersion="2.1.2" createdBy="rueckerc" createdOn="2015-02-17T16:36:58" modifiedBy="rueckerc" modifiedOn="2017-04-05T12:47:45.276+02:00" />
-  <ProjectConfiguration activeAutoGenerationSetting="all">
-    <PathSettings>
-      <Path id="defaultOutputPath" path="output" />
+  <Generator vendor="Kalycito Infotech Private Limited &amp; B&amp;R Industrial Automation GmbH" toolName="Ethernet POWERLINK openCONFIGURATOR" toolVersion="2.2.1" createdBy="Priyadharshini" createdOn="2018-06-07T17:16:06.918+05:30" modifiedBy="Priyadharshini" modifiedOn="2018-06-11T16:04:52.706+05:30" />
+  <ProjectConfiguration activeAutoGenerationSetting="custom" activePathSetting="default">
+    <PathSettings id="default">
+      <Path id="CONFIG_TEXT" path="output" />
+      <Path id="CONFIG_BINARY" path="output" />
+      <Path id="CONFIG_CHAR_ARRAY" path="output" />
+      <Path id="XML_PROCESS_IMAGE" path="output" />
+      <Path id="C_PROCESS_IMAGE" path="output" />
+      <Path id="CSHARP_PROCESS_IMAGE" path="output" />
     </PathSettings>
     <AutoGenerationSettings id="all">
       <Setting name="GENERATE_MN_MAPPING_FOR_NODES" value="" enabled="true" />
     </AutoGenerationSettings>
     <AutoGenerationSettings id="none" />
-    <AutoGenerationSettings id="custom" />
+    <AutoGenerationSettings id="custom">
+      <Setting name="GENERATE_MN_MAPPING_FOR_NODES" value="1;32;110" enabled="true" />
+    </AutoGenerationSettings>
   </ProjectConfiguration>
   <NetworkConfiguration lossOfSocTolerance="50000000">
     <NodeCollection>
       <MN name="openPOWERLINK_MN" nodeID="240" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA302-4_MN.xdc" isAsyncOnly="false" isType1Router="false" isType2Router="false" transmitsPRes="false" />
-      <CN name="CN_1" nodeID="1" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_1.xdc" autostartNode="true" isMandatory="false" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" isAsyncOnly="false" isMultiplexed="false" isType1Router="false" isType2Router="false" isChained="false">
+      <CN name="CN_1" nodeID="1" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_1.xdc" isMultiplexed="false" isChained="false" isMandatory="false" autostartNode="true" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" isAsyncOnly="false" isType1Router="false" isType2Router="false">
         <ForcedObjects>
-          <Object index="1F98" subindex="04" />
-          <Object index="1F98" subindex="05" />
           <Object index="1F8D" subindex="F0" />
+          <Object index="1F98" subindex="05" />
+          <Object index="1F98" subindex="04" />
         </ForcedObjects>
       </CN>
-      <CN name="CN_2" nodeID="32" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_32.xdc" autostartNode="true" isMandatory="false" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" isAsyncOnly="false" isMultiplexed="false" isType1Router="false" isType2Router="false" isChained="false">
+      <CN nodeID="32" name="CN_2" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_32.xdc" forcedMultiplexedCycle="0" isMultiplexed="false" isChained="false" isAsyncOnly="false" isType1Router="false" isType2Router="false" isMandatory="false" autostartNode="true" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" verifyDeviceType="true" verifyVendorId="false" verifyRevisionNumber="false" verifyProductCode="false" verifySerialNumber="false" enabled="true">
         <ForcedObjects>
-          <Object index="1F98" subindex="04" />
-          <Object index="1F98" subindex="05" />
           <Object index="1F8D" subindex="F0" />
+          <Object index="1F98" subindex="05" />
+          <Object index="1F98" subindex="04" />
         </ForcedObjects>
       </CN>
-      <CN name="CN_3" nodeID="110" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_110.xdc" autostartNode="true" isMandatory="false" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" isAsyncOnly="false" isMultiplexed="false" isType1Router="false" isType2Router="false" isChained="false">
+      <CN nodeID="110" name="CN_3" pathToXDC="deviceConfiguration/00000000_POWERLINK_CiA401_CN_110.xdc" forcedMultiplexedCycle="0" isMultiplexed="false" isChained="false" isAsyncOnly="false" isType1Router="false" isType2Router="false" isMandatory="false" autostartNode="true" resetInOperational="false" verifyAppSwVersion="false" autoAppSwUpdateAllowed="false" verifyDeviceType="true" verifyVendorId="false" verifyRevisionNumber="false" verifyProductCode="false" verifySerialNumber="false" enabled="true">
         <ForcedObjects>
-          <Object index="1F98" subindex="04" />
-          <Object index="1F98" subindex="05" />
           <Object index="1F8D" subindex="F0" />
+          <Object index="1F98" subindex="05" />
+          <Object index="1F98" subindex="04" />
         </ForcedObjects>
       </CN>
     </NodeCollection>

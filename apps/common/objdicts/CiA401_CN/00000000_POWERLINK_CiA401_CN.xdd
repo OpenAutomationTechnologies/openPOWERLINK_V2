@@ -9,6 +9,9 @@
       B&R Strasse 1, A-5142 Eggelsberg
       www.br-automation.com
 
+  (c) Kalycito Infotech Private Limited
+      www.kalycito.com
+
   Project:      openPOWERLINK
 
   Description:  Device Description for a CiA DS401 POWERLINK CN
@@ -75,12 +78,12 @@
     <ProfileBody
       xsi:type="ProfileBody_Device_Powerlink"
       fileName="00000000_POWERLINK_CiA401.xdd"
-      fileCreator="B&R Industrial Automation GmbH"
+      fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
       fileModificationDate="2018-05-17"
       fileModificationTime="09:50:00+01:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <DeviceIdentity>
@@ -139,12 +142,12 @@
     <ProfileBody
       xsi:type="ProfileBody_CommunicationNetwork_Powerlink"
       fileName="00000000_POWERLINK_CiA401.xdd"
-      fileCreator="B&R Industrial Automation GmbH"
+      fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
       fileModificationDate="2018-05-17"
       fileModificationTime="09:50:00+01:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <ApplicationLayers>
