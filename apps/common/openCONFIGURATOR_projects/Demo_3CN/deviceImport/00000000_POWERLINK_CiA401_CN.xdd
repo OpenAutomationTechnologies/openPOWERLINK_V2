@@ -75,12 +75,12 @@
     <ProfileBody
       xsi:type="ProfileBody_Device_Powerlink"
       fileName="00000000_POWERLINK_CiA401.xdd"
-      fileCreator="B&R Industrial Automation GmbH"
+      fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2015-02-05"
-      fileModificationTime="17:22:00+02:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModificationDate="2018-05-17"
+      fileModificationTime="09:50:00+01:00"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <DeviceIdentity>
@@ -89,7 +89,7 @@
         <productName>openPOWERLINK device</productName>
         <version versionType="HW">1.00</version>
         <version versionType="SW">1.00</version>
-        <version versionType="FW">OPLK V2.1.1</version>
+        <version versionType="FW">OPLK V2.7.0</version>
       </DeviceIdentity>
       <DeviceFunction>
         <capabilities>
@@ -104,6 +104,22 @@
             </characteristic>
           </characteristicsList>
         </capabilities>
+        <picturesList>
+            <picture URI="image_generic_cn.png" type="frontPicture">
+                <label lang="en">Front picture</label>
+            </picture>
+            <picture URI="icon_generic_cn.ico" type="icon">
+                <label lang="en">Icon</label>
+            </picture>
+        </picturesList>
+        <connectorList>
+            <connector id="PLK_IF1" connectorType="POWERLINK" positioning="remote" posX="157" posY="215" >
+                <label lang="en">PLK_IF1</label>
+            </connector>
+            <connector id="PLK_IF2" connectorType="POWERLINK" positioning="remote" posX="282" posY="215" >
+                <label lang="en">PLK_IF2</label>
+            </connector>
+        </connectorList>
       </DeviceFunction>
     </ProfileBody>
   </ISO15745Profile>
@@ -123,12 +139,12 @@
     <ProfileBody
       xsi:type="ProfileBody_CommunicationNetwork_Powerlink"
       fileName="00000000_POWERLINK_CiA401.xdd"
-      fileCreator="B&R Industrial Automation GmbH"
+      fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2011-04-01"
       fileCreationTime="10:00:00+02:00"
-      fileModificationDate="2015-05-02"
-      fileModificationTime="17:22:00+02:00"
-      fileModifiedBy="B&R Industrial Automation GmbH"
+      fileModificationDate="2018-05-17"
+      fileModificationTime="09:50:00+01:00"
+      fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
       <ApplicationLayers>
@@ -228,12 +244,12 @@
           <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="1000"/>
           <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device"/>
           <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.00"/>
-          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.1.1"/>
+          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.7.0"/>
           <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
             <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
             <SubObject subIndex="02" name="ProductCode_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
-            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00020000"/>
+            <SubObject subIndex="03" name="RevisionNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00020007"/>
             <SubObject subIndex="04" name="SerialNo_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no"/>
           </Object>
           <Object index="1020" name="CFM_VerifyConfiguration_REC" objectType="9">
@@ -253,7 +269,7 @@
             <SubObject subIndex="08" name="InterfaceAdminState_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" lowLimit="0" highLimit="1" defaultValue="1"/>
             <SubObject subIndex="09" name="Valid_BOOL" objectType="7" dataType="0001" accessType="rw" PDOmapping="no" defaultValue="true"/>
           </Object>
-          <Object index="1050" name="NMT_RelativeLatencyDiff_AU32" objectType="8" dataType="0007">
+          <Object index="1050" name="NMT_RelativeLatencyDiff_AU32" objectType="8">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="ro" PDOmapping="no" defaultValue="254"/>
             <SubObject subIndex="01" name="RelativeLatencyDiff" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="02" name="RelativeLatencyDiff" objectType="7" dataType="0007" accessType="ro" PDOmapping="no" defaultValue="0"/>
@@ -919,9 +935,9 @@
             <SubObject subIndex="FD" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="FE" name="NodeAssignment" objectType="7" dataType="0007" accessType="rw" PDOmapping="no" defaultValue="0"/>
           </Object>
-          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00050265"/>
+          <Object index="1F82" name="NMT_FeatureFlags_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00058265"/>
           <Object index="1F83" name="NMT_EPLVersion_U8" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="0x20"/>
-          <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="optional" accessType="ro"/>
+          <Object index="1F8C" name="NMT_CurrNMTState_U8" objectType="7" dataType="0005" PDOmapping="no" accessType="ro"/>
           <Object index="1F8D" name="NMT_PResPayloadLimitList_AU16" objectType="8" dataType="0006">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="254"/>
             <SubObject subIndex="01" name="PResPayloadLimit" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" defaultValue="36"/>
@@ -1186,11 +1202,11 @@
           </Object>
           <Object index="1F98" name="NMT_CycleTiming_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="14"/>
-            <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="36"/>
-            <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="36"/>
+            <SubObject subIndex="01" name="IsochrTxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="1490"/>
+            <SubObject subIndex="02" name="IsochrRxMaxPayload_U16" objectType="7" dataType="0006" accessType="const" PDOmapping="no" defaultValue="1490"/>
             <SubObject subIndex="03" name="PResMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="2000"/>
-            <SubObject subIndex="04" name="PReqActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="36" highLimit="36" defaultValue="36"/>
-            <SubObject subIndex="05" name="PResActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="36" highLimit="36" defaultValue="36"/>
+            <SubObject subIndex="04" name="PReqActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="36" highLimit="1490" defaultValue="36"/>
+            <SubObject subIndex="05" name="PResActPayloadLimit_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="36" highLimit="1490" defaultValue="36"/>
             <SubObject subIndex="06" name="ASndMaxLatency_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="2000"/>
             <SubObject subIndex="07" name="MultiplCycleCnt_U8" objectType="7" dataType="0005" accessType="rw" PDOmapping="no" defaultValue="0"/>
             <SubObject subIndex="08" name="AsyncMTU_U16" objectType="7" dataType="0006" accessType="rw" PDOmapping="no" lowLimit="300" highLimit="1500" defaultValue="300"/>
@@ -1531,7 +1547,8 @@
           SDOCmdReadAllByIndex="false"
           SDOCmdWriteByName="false"
           SDOCmdReadByName="false"
-          SDOCmdWriteMultParam="false"
+          SDOCmdWriteMultParam="true"
+          SDOCmdReadMultParam="true"
           NMTFlushArpEntry="false"
           NMTNetHostNameSet="false"
           PDORPDOChannels="3"
