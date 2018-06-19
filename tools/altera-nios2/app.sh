@@ -4,6 +4,7 @@
 # App generator script for Altera Nios II
 #
 # Copyright (c) 2014, B&R Industrial Automation GmbH
+# Copyright (c) 2018, Kalycito Infotech Private Ltd
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -248,8 +249,8 @@ fi
 TMP_LIB_FILE=${OUT_PATH}/created-lib.tmp
 
 if [ -f "${TMP_LIB_FILE}" ]; then
-    echo "INFO: Link lib${LIB_NAME} to application."
     LIB_NAME=$(cat ${TMP_LIB_FILE})
+    echo "INFO: Link lib${LIB_NAME} to application."
     rm -f ${TMP_LIB_FILE}
 else
     echo "WARNING: The stack.sh script has not generated the ${TMP_LIB_FILE} file!"
