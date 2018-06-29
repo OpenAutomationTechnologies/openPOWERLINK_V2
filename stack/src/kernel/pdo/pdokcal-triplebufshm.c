@@ -20,6 +20,7 @@ without locking, the buffer switching has to be performed in an atomic operation
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -239,6 +240,11 @@ tOplkError pdokcal_writeRxPdo(UINT8 channelId_p, const void* pPayload_p, UINT16 
 
     OPLK_DCACHE_FLUSH(pPdo, pdoSize_p);
 
+    // Invalidate the cache again, as the previous cache invalidation is
+    // not under the lock context, and also the value of .cleanBuf may
+    // be changed on the physical memory.
+    OPLK_DCACHE_INVALIDATE(&(pPdoMem_l->rxChannelInfo[channelId_p]),
+                           sizeof(tPdoBufferInfo));
     temp = pPdoMem_l->rxChannelInfo[channelId_p].writeBuf;
     OPLK_ATOMIC_EXCHANGE(&pPdoMem_l->rxChannelInfo[channelId_p].cleanBuf,
                          temp,
@@ -247,8 +253,8 @@ tOplkError pdokcal_writeRxPdo(UINT8 channelId_p, const void* pPayload_p, UINT16 
     pPdoMem_l->rxChannelInfo[channelId_p].newData = 1;
 
     // Flush data cache for variables changed in this function
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].writeBuf), sizeof(OPLK_ATOMIC_T));
-    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p].newData), sizeof(UINT8));
+    OPLK_DCACHE_FLUSH(&(pPdoMem_l->rxChannelInfo[channelId_p]),
+                      sizeof(tPdoBufferInfo));
 
     //TRACE("%s() chan:%d new wi:%d\n", __func__, channelId_p, pPdoMem_l->rxChannelInfo[channelId_p].writeBuf);
     //TRACE("%s() *pPayload_p:%02x\n", __func__, *pPayload_p);
@@ -290,8 +296,8 @@ tOplkError pdokcal_readTxPdo(UINT8 channelId_p, void* pPayload_p, UINT16 pdoSize
         pPdoMem_l->txChannelInfo[channelId_p].newData = 0;
 
         // Flush data cache for variables changed in this function
-        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].readBuf), sizeof(OPLK_ATOMIC_T));
-        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p].newData), sizeof(UINT8));
+        OPLK_DCACHE_FLUSH(&(pPdoMem_l->txChannelInfo[channelId_p]),
+                          sizeof(tPdoBufferInfo));
     }
 
     pPdo = (UINT8*)pTripleBuf_l[pPdoMem_l->txChannelInfo[channelId_p].readBuf] +

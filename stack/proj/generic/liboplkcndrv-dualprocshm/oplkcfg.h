@@ -106,6 +106,8 @@ The Data Link Layer (DLL) defines determine the POWERLINK DLL module.
     ///< support PRes packet ready after SoA (CONFIG_EDRV_FAST_TXFRAMES necessary)
 #define CONFIG_DLL_PRES_FILTER_COUNT                3
     ///< max. supported PRes packet filters (for specific nodes)
+#define CONFIG_DLL_PROCESS_SYNC                     DLL_PROCESS_SYNC_ON_TIMER
+    ///< support usage of sync timer for process synchronization
 #define CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_SYNC    FALSE
 
 #if !defined(CONFIG_DLL_DEFERRED_RXFRAME_RELEASE_ASYNC)
