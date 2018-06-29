@@ -30,5 +30,7 @@ This design requires additional hardware, the AVNET expander board
 (AES-FMC-ISMNET-G), which is connected to the FMC connector of the Zynq ZC702
 evaluation board. This expander board adds two 1588 compatible 10/100
 Ethernet PHYs as well as CAN, RS232 and RS485.
-Refer the document to [build and execute Zyny Hybrid design](\ref page_zynq_hybrid)
+Refer the document to [build and execute Zynq Hybrid MN design](\ref page_mn_zynq_hybrid)
+on openPOWERLINK.
+Refer the document to [build and execute Zynq Hybrid CN design](\ref page_cn_zynq_hybrid)
 on openPOWERLINK.
