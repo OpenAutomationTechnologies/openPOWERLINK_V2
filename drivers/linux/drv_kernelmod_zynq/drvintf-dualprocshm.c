@@ -16,7 +16,7 @@ provide direct access to user application for specific shared memory regions.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1540,6 +1540,7 @@ static tOplkError initDllQueueInterface(void)
         return kErrorNoResource;
     }
 
+#if defined(CONFIG_INCLUDE_NMT_MN)
     circError = circbuf_connect(CIRCBUF_DLLCAL_TXSYNC,
                                 &drvIntfInstance_l.apDllQueueInst[kDllCalQueueTxSync]);
     if (circError != kCircBufOk)
@@ -1547,6 +1548,7 @@ static tOplkError initDllQueueInterface(void)
         DEBUG_LVL_DRVINTF_TRACE("PLK : Could not allocate CIRCBUF_DLLCAL_TXSYNC circbuffer\n");
         return kErrorNoResource;
     }
+#endif
 
 #if defined(CONFIG_INCLUDE_VETH)
     circError = circbuf_connect(CIRCBUF_DLLCAL_TXVETH,

@@ -3,6 +3,7 @@
 # CMake file of CiA 401 CN console demo application
 #
 # Copyright (c) 2017, B&R Industrial Automation GmbH
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -98,6 +99,10 @@ ELSE (CFG_KERNEL_STACK_DIRECTLINK)
         ADD_DEFINITIONS(-DCONFIG_USE_SYNCTHREAD)
     ENDIF (CFG_DEMO_CN_CONSOLE_USE_SYNCTHREAD)
 ENDIF (CFG_KERNEL_STACK_DIRECTLINK)
+
+IF (CFG_KERNEL_STACK_ZYNQ_INTF)
+    ADD_DEFINITIONS(-D__LINUX_ZYNQ__)
+ENDIF ()
 
 
 ################################################################################

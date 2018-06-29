@@ -3,7 +3,7 @@
 # CMake options for openPOWERLINK stack on Xilinx/Microblaze Vivado
 #
 # Copyright (c) 2014, B&R Industrial Automation GmbH
-# Copyright (c) 2016, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -45,16 +45,28 @@ SET(XIL_TOOLS_DIR ${TOOLS_DIR}/xilinx-microblaze)
 ################################################################################
 # Options for MN libraries
 OPTION(CFG_COMPILE_LIB_MNDRV_DUALPROCSHM   "Compile openPOWERLINK MN driver library using dual procesor shared memory" OFF)
+
+# Options for CN libraries
+OPTION(CFG_COMPILE_LIB_CNDRV_DUALPROCSHM   "Compile openPOWERLINK CN driver library using dual procesor shared memory" OFF)
+
 ################################################################################
 # Add library subdirectories and hardware library path
 
 # MN libraries
 IF (CFG_COMPILE_LIB_MNDRV_DUALPROCSHM)
-    # Path to the hardware library folder of your board example
+    # Path to the MN hardware library folder of your board example
     SET(CFG_COMPILE_LIB_MN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/xilinx-z702/mn-dual-shmem-gpio
             CACHE PATH "Path to the hardware library folder for the dual processor MN library")
 
     ADD_SUBDIRECTORY(proj/generic/liboplkmndrv-dualprocshm)
+# CN libraries
+ELSEIF (CFG_COMPILE_LIB_CNDRV_DUALPROCSHM)
+    # Path to the CN hardware library folder of your board example
+    SET(CFG_COMPILE_LIB_CN_HW_LIB_DIR ${XIL_HW_LIB_DIR}/xilinx-z702/cn-dual-shmem-gpio
+            CACHE PATH "Path to the hardware library folder for the dual processor CN library")
+
+    ADD_SUBDIRECTORY(proj/generic/liboplkcndrv-dualprocshm)
 ELSE ()
     UNSET(CFG_COMPILE_LIB_MN_HW_PATH CACHE)
+    UNSET(CFG_COMPILE_LIB_CN_HW_PATH CACHE)
 ENDIF ()
