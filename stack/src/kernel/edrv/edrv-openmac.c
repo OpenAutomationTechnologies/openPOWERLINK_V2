@@ -465,7 +465,7 @@ tOplkError edrv_allocTxBuffer(tEdrvTxBuffer* pBuffer_p)
         goto Exit;
     }
 
-    pPacket->length = (unsigned long)pBuffer_p->maxBufferSize;
+    omethPacketSetLength(pPacket, (uint32_t)pBuffer_p->maxBufferSize);
 
     pBuffer_p->txBufferNumber.value = EDRV_MAX_FILTERS;
 
@@ -557,7 +557,7 @@ tOplkError edrv_updateTxBuffer(tEdrvTxBuffer* pBuffer_p)
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
-    pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
+    omethPacketSetLength(pPacket, (uint32_t)pBuffer_p->txFrameSize);
 
     // Flush data cache before handing over the packet buffer to openMAC.
     OPENMAC_FLUSHDATACACHE(pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
@@ -608,8 +608,8 @@ tOplkError edrv_sendTxBuffer(tEdrvTxBuffer* pBuffer_p)
     OPENMAC_FLUSHDATACACHE(pBuffer_p->pBuffer, pBuffer_p->txFrameSize);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
+    omethPacketSetLength(pPacket, (uint32_t)pBuffer_p->txFrameSize);
 
-    pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
 #if (CONFIG_EDRV_TIME_TRIG_TX != FALSE)
     if (pBuffer_p->fLaunchTimeValid)
     {
@@ -938,13 +938,13 @@ tOplkError edrv_releaseRxBuffer(tEdrvRxBuffer* pRxBuffer_p)
     ASSERT(pRxBuffer_p != NULL);
 
     pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pRxBuffer_p->pBuffer);
-    pPacket->length = (unsigned long)pRxBuffer_p->rxFrameSize;
+    omethPacketSetLength(pPacket, (uint32_t)pRxBuffer_p->rxFrameSize);
 
 #if (CONFIG_EDRV_USE_DIAGNOSTICS != FALSE)
     diagnoseReleasedAsndFrame(pPacket);
 #endif
 
-    if (pPacket->length != 0)
+    if (pRxBuffer_p->rxFrameSize != 0)
     {
         target_enableGlobalInterrupt(FALSE);
 
@@ -1325,7 +1325,7 @@ static void irqHandler(void* pArg_p)
 
         pPacket = GET_TYPE_BASE(ometh_packet_typ, data, pBuffer_p->pBuffer);
 
-        pPacket->length = (unsigned long)pBuffer_p->txFrameSize;
+        omethPacketSetLength(pPacket, (uint32_t)pBuffer_p->txFrameSize);
 
         //offset is the openMAC time tick (no conversion needed)
         txLength = omethTransmitTime(edrvInstance_l.pMacInst, pPacket,
@@ -1402,7 +1402,7 @@ static int rxHook(void* pArg_p, ometh_packet_typ* pPacket_p, OMETH_BUF_FREE_FCT*
 
     rxBuffer.bufferInFrame = kEdrvBufferLastInFrame;
     rxBuffer.pBuffer = &pPacket_p->data;
-    rxBuffer.rxFrameSize = pPacket_p->length;
+    rxBuffer.rxFrameSize = omethPacketGetLength(pPacket_p);
     timeStamp.timeStamp = omethGetTimestamp(pPacket_p);
     rxBuffer.pRxTimeStamp = &timeStamp;
 

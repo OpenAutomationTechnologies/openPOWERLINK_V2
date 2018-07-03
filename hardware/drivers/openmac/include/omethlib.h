@@ -111,18 +111,20 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef __OMETHLIB_H__
 #define __OMETHLIB_H__
 
+#include <stdint.h>
+
 //********** packet structure for ethernet frames ***********************
 typedef struct
 {
-    unsigned long    length;        // frame length excluding checksum
+    uint32_t length; // frame length excluding checksum
 
     struct ometh_packet_data_typ
     {
-        unsigned char dstMac[6];
-        unsigned char srcMac[6];
-        unsigned char ethertype[2];
-        unsigned char minData[46];    // minimum number of data bytes for a standard ethernet frame
-        unsigned char checkSum[4];
+        uint8_t dstMac[6];
+        uint8_t srcMac[6];
+        uint8_t ethertype[2];
+        uint8_t minData[46]; // minimum number of data bytes for a standard ethernet frame
+        uint8_t checkSum[4];
     }data;
 }ometh_packet_typ;
 
@@ -174,42 +176,42 @@ typedef struct OMETH_FILTER*    OMETH_FILTER_H;    // handle for receive filter
 //********************* network configuration ******************************
 typedef struct
 {
-    unsigned char    macType;    // MAC type : OMETH_MAC_TYPE_01
-    unsigned char    adapter;    // Adapter number (any number can be chosen, must be unique)
-    unsigned short    mode;        // OMETH_MODE_FULLDUPLEX, OMETH_MODE_HALFDUPLEX (or both)
+    uint8_t          macType;     // MAC type : OMETH_MAC_TYPE_01
+    uint8_t          adapter;     // Adapter number (any number can be chosen, must be unique)
+    uint16_t         mode;        // OMETH_MODE_FULLDUPLEX, OMETH_MODE_HALFDUPLEX (or both)
 
     void            *pRamBase;    // base address of MAC RAM (filters+descriptors)
     void            *pRegBase;    // base address of MAC control registers
 
     void            *pBufBase;  // base address of MAC-internal memory
-    unsigned char    pktLoc;        // use heap or MAC-internal memory
+    uint8_t          pktLoc;      // use heap or MAC-internal memory
 
-    unsigned short    rxBuffers;    // number of rx buffers (2<=rxBuffers<=max)
-    unsigned short    rxMtu;        // MTU for buffers
+    uint16_t         rxBuffers;   // number of rx buffers (2<=rxBuffers<=max)
+    uint16_t         rxMtu;       // MTU for buffers
 
     void            *pPhyBase;    // base address of PHY MII control registers (can also be 0 if no phys should be controlled)
 
     // list of phy addresses which shall be used (only if mode-bit OMETH_MODE_PHY_LIST is set)
     // (only list phys which belong to the respective ethernet mac, not all existing phys !)
-    unsigned char    phyCount;    // number of valid bytes in phyList[]
-    unsigned char    phyList[OMETH_MAX_PHY_CNT];
+    uint8_t          phyCount;    // number of valid bytes in phyList[]
+    uint8_t          phyList[OMETH_MAX_PHY_CNT];
 
-    unsigned short    responseIpg;    // inter package gap [ns] (values < 140 will result in a ipg of 140ns)
+    uint16_t         responseIpg; // inter package gap [ns] (values < 140 will result in a ipg of 140ns)
 }ometh_config_typ;
 
 //********************* network statistics ******************************
 typedef struct
 {
-    unsigned long rxOk;
-    unsigned long rxLost;
-    unsigned long rxOversize;
-    unsigned long rxCrcError;
-    unsigned long rxHookDisabled;    // frames received while hook is disabled, frame discarded
-    unsigned long rxHookOverflow;    // frames received but no available buffer, frame discarded
+    uint32_t rxOk;
+    uint32_t rxLost;
+    uint32_t rxOversize;
+    uint32_t rxCrcError;
+    uint32_t rxHookDisabled;    // frames received while hook is disabled, frame discarded
+    uint32_t rxHookOverflow;    // frames received but no available buffer, frame discarded
 
-    unsigned long txCollision;        // total tx collisions on the bus
-    unsigned long txDone[16];        // [0]..number of sent frames with 0 collisions ...
-    unsigned long txSpuriousInt;    // tx int occurred but no frame sent ??
+    uint32_t txCollision;       // total tx collisions on the bus
+    uint32_t txDone[16];        // [0]..number of sent frames with 0 collisions ...
+    uint32_t txSpuriousInt;     // tx int occurred but no frame sent ??
 }ometh_stat_typ;
 
 
@@ -224,7 +226,7 @@ typedef enum
 
 typedef struct
 {
-    unsigned short r[9];    // [8] contains register 1F
+    uint16_t r[9];    // [8] contains register 1F
 }phy_reg_typ;
 
 //Phy REG 0
@@ -290,7 +292,7 @@ typedef struct
 typedef struct
 {
     // buffer header
-    unsigned long        timeStamp;    // packet time stamp is stored here
+    uint32_t            timeStamp;    // packet time stamp is stored here
     OMETH_HOOK_H        hHook;        // handle to hook which created the buffer
 
     // ethernet packet
@@ -309,7 +311,7 @@ typedef void    OMETH_BUF_FREE_FCT_ARG
 (
     ometh_packet_typ    *pPacket,    /* packet which should be released    */
     void                *arg,        /* argument passed to omethTransmit */
-    unsigned long        time        /* time when packet was sent */
+    uint32_t             time        /* time when packet was sent */
 );
 
 //********* ethernet callback function / buffer received ****************
@@ -334,16 +336,16 @@ typedef int        OMETH_HOOK_FCT
 #define MII_CTRL_GET_STATE    0x0004    /* get reset/active state (0/1)   */
 
 // convert eth-ticks to ms and vica versa
-#define OMETH_TICKS_2_MS(ticks)        ((unsigned long)(ticks)/50000u)
-#define OMETH_MS_2_TICKS(ms)        ((unsigned long)(ms)*50000u)
+#define OMETH_TICKS_2_MS(ticks)     ((uint32_t)(ticks)/50000u)
+#define OMETH_MS_2_TICKS(ms)        ((uint32_t)(ms)*50000u)
 
 // convert eth-ticks to us and vica versa
-#define OMETH_TICKS_2_US(ticks)        ((unsigned long)(ticks)/50u)
-#define OMETH_US_2_TICKS(us)        ((unsigned long)(us)*50u)
+#define OMETH_TICKS_2_US(ticks)     ((uint32_t)(ticks)/50u)
+#define OMETH_US_2_TICKS(us)        ((uint32_t)(us)*50u)
 
 // convert eth-ticks to ns and vica versa
-#define OMETH_TICKS_2_NS(ticks)        ((unsigned long)(ticks)*20u)
-#define OMETH_NS_2_TICKS(ns)        ((unsigned long)(ns)/20u)
+#define OMETH_TICKS_2_NS(ticks)     ((uint32_t)(ticks)*20u)
+#define OMETH_NS_2_TICKS(ns)        ((uint32_t)(ns)/20u)
 
 /*****************************************************************************
 *
@@ -361,7 +363,7 @@ typedef int        OMETH_HOOK_FCT
 int        omethMiiControl
 (
  void            *pPhyBase,    /* ptr to phy register */
- unsigned short    command        /* combination of MII_CTRL_... values */
+ uint16_t         command      /* combination of MII_CTRL_... values */
 );
 
 /*****************************************************************************
@@ -431,7 +433,7 @@ OMETH_H            omethGetHandle
 int                omethPhyHardwareAdr
 (
  OMETH_H        hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short    port        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t       port         /* phy number / port number of integrated hub (0-n)    */
 );
 
 /*****************************************************************************
@@ -446,7 +448,7 @@ int                omethPhyHardwareAdr
 phy_reg_typ*    omethPhyInfo
 (
  OMETH_H        hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short    port        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t       port         /* phy number / port number of integrated hub (0-n)    */
 );
 
 /*****************************************************************************
@@ -464,7 +466,7 @@ phy_reg_typ*    omethPhyInfo
 phy_stat_enum        omethPhyLinkState
 (
  OMETH_H            hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short        port        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t           port         /* phy number / port number of integrated hub (0-n)    */
 );
 
 /*****************************************************************************
@@ -477,7 +479,7 @@ phy_stat_enum        omethPhyLinkState
 *     100 ... 100 MBit
 *
 */
-unsigned short        omethGetLinkSpeed
+uint16_t              omethGetLinkSpeed
 (
  OMETH_H            hEth        /* handle of ethernet driver, see omethCreate()        */
 );
@@ -490,7 +492,7 @@ unsigned short        omethGetLinkSpeed
 *    tx buffer base pointer
 *
 */
-unsigned char *     omethGetTxBufBase
+uint8_t *           omethGetTxBufBase
 (
  OMETH_H            hEth        /* handle of ethernet driver, see omethCreate()     */
 );
@@ -503,7 +505,7 @@ unsigned char *     omethGetTxBufBase
 *    tx buffer base pointer
 *
 */
-unsigned char *     omethGetRxBufBase
+uint8_t *           omethGetRxBufBase
 (
  OMETH_H            hEth        /* handle of ethernet driver, see omethCreate()     */
 );
@@ -518,7 +520,7 @@ unsigned char *     omethGetRxBufBase
 *
 *
 */
-unsigned short        omethGetConfigMode
+uint16_t              omethGetConfigMode
 (
  OMETH_H            hEth        /* handle of ethernet driver, see omethCreate()        */
 );
@@ -539,9 +541,9 @@ unsigned short        omethGetConfigMode
 int                    omethPhyRead
 (
  OMETH_H            hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short        port,        /* phy number / port number of integrated hub (0-n)    */
- unsigned short        reg,        /* read register number */
- unsigned short        *pValue        /* ptr to read value */
+ uint16_t           port,        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t           reg,         /* read register number */
+ uint16_t          *pValue       /* ptr to read value */
 );
 
 /*****************************************************************************
@@ -559,9 +561,9 @@ int                    omethPhyRead
 int                    omethPhyWrite
 (
  OMETH_H            hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short        port,        /* phy number / port number of integrated hub (0-n)    */
- unsigned short        reg,        /* read register number */
- unsigned short        value        /* value */
+ uint16_t           port,        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t           reg,         /* read register number */
+ uint16_t           value        /* value */
 );
 
 /*****************************************************************************
@@ -585,9 +587,9 @@ int                    omethPhyWrite
 int                    omethPhyReadNonBlocking
 (
  OMETH_H            hEth,        /* handle of ethernet driver, see omethCreate()        */
- unsigned short        port,        /* phy number / port number of integrated hub (0-n)    */
- unsigned short        reg,        /* read register number                                */
- unsigned short        *pValue        /* ptr to read value                                */
+ uint16_t           port,        /* phy number / port number of integrated hub (0-n)    */
+ uint16_t           reg,         /* read register number                                */
+ uint16_t          *pValue       /* ptr to read value                                */
 );
 
 /*****************************************************************************
@@ -663,7 +665,7 @@ OMETH_HOOK_H    omethHookCreate
 (
  OMETH_H        hEth,        /* handle of ethernet driver, see omethCreate() */
  OMETH_HOOK_FCT    *pFct,        /* callback function                            */
- unsigned short    maxPending    /* maximum number of pending buffers            */
+ uint16_t       maxPending   /* maximum number of pending buffers            */
 );
 
 /*****************************************************************************
@@ -752,8 +754,8 @@ int                omethFilterSetPattern
 void            omethFilterSetByteMask
 (
  OMETH_FILTER_H    hFilter,    /* filter handle                                    */
- unsigned short    offset,        /* offset in the filterarray                        */
- unsigned char    mask        /* mask to set                                        */
+ uint16_t          offset,     /* offset in the filterarray                        */
+ uint8_t           mask        /* mask to set                                      */
 );
 
 /*****************************************************************************
@@ -768,8 +770,8 @@ void            omethFilterSetByteMask
 void            omethFilterSetByteValue
 (
  OMETH_FILTER_H    hFilter,    /* filter handle                                    */
- unsigned short    offset,        /* offset in the filterarray                        */
- unsigned char    value        /* value to set                                        */
+ uint16_t          offset,     /* offset in the filterarray                        */
+ uint8_t           value       /* value to set                                     */
 );
 
 /*****************************************************************************
@@ -958,7 +960,7 @@ int        omethResponseLink
 int        omethResponseTime
 (
  OMETH_FILTER_H        hFilter,        /* set time value for auto response        */
- unsigned long        ticks            /* delay ticks added to IPG                */
+ uint32_t              ticks           /* delay ticks added to IPG                */
 );
 
 /*****************************************************************************
@@ -966,7 +968,7 @@ int        omethResponseTime
 * omethResponseCount - returns the number of autoresonse-frames which were
 *                        sent for this filter
 */
-unsigned long        omethResponseCount
+uint32_t             omethResponseCount
 (
  OMETH_FILTER_H        hFilter        /* filter handle                            */
 );
@@ -1036,7 +1038,7 @@ int                    omethResponseEnable
 *    The value can only be 0 (MAC buffer overflow) or the given length of the packet type)
 *
 */
-unsigned long        omethTransmit
+uint32_t             omethTransmit
 (
  OMETH_H            hEth,        /* handle of ethernet driver, see omethCreate() */
  ometh_packet_typ    *pPacket,    /* packet to be sent                            */
@@ -1049,7 +1051,7 @@ unsigned long        omethTransmit
 *    (same like omethTransmit, just the optional argument is additional)
 *
 */
-unsigned long        omethTransmitArg
+uint32_t             omethTransmitArg
 (
  OMETH_H                hEth,        /* handle of ethernet driver, see omethCreate() */
  ometh_packet_typ        *pPacket,    /* packet to be sent                            */
@@ -1063,7 +1065,7 @@ unsigned long        omethTransmitArg
 *    (same like omethTransmitArg but using the 2nd transmit queue if existing)
 *
 */
-unsigned long        omethTransmitArg2
+uint32_t             omethTransmitArg2
 (
  OMETH_H                hEth,        /* handle of ethernet driver, see omethCreate() */
  ometh_packet_typ        *pPacket,    /* packet to be sent                            */
@@ -1077,13 +1079,13 @@ unsigned long        omethTransmitArg2
 *    (same like omethTransmitArg, just the optional argument is additional)
 *
 */
-unsigned long        omethTransmitTime
+uint32_t        omethTransmitTime
 (
  OMETH_H                hEth,        /* handle of ethernet driver, see omethCreate() */
  ometh_packet_typ        *pPacket,    /* packet to be sent                            */
  OMETH_BUF_FREE_FCT_ARG    *pFct,        /* function ptr to sent-ack-function            */
  void                    *arg,        /* argument which will be passed to free function */
- unsigned long            time        /* timestamp                                    */
+ uint32_t               time         /* timestamp                                    */
 ) SECTION_OMETHLIB_TX_TIME;
 
 /*****************************************************************************
@@ -1092,7 +1094,7 @@ unsigned long        omethTransmitTime
 *
 * RETURN: number of pending transmit frames in queue (0..16)
 */
-unsigned char        omethTransmitPending
+uint8_t              omethTransmitPending
 (
  OMETH_H                hEth        /* handle of ethernet driver, see omethCreate() */
 );
@@ -1134,7 +1136,7 @@ void            omethStop
 *
 * RETURN: timestamp value (50 MHz clock)
 */
-unsigned long    omethGetTimestamp
+uint32_t         omethGetTimestamp
 (
  ometh_packet_typ    *pPacket    /* address of rx packet*/
 );
@@ -1200,7 +1202,7 @@ ometh_stat_typ    *omethStatistics
     void    omethSetRxHandshake
     (
     OMETH_H        hEth,        /* handle of ethernet driver, see omethCreate() */
-    unsigned short    mode
+    uint16_t       mode
     );
 #endif
 
@@ -1295,5 +1297,23 @@ int                omethDestroy
 (
  OMETH_H        hEth        /* handle of ethernet driver, see omethCreate() */
 );
+
+static inline uint32_t omethPacketGetLength(ometh_packet_typ *pPacket)
+{
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    return ometh_rd_32(&pPacket->length);
+#else
+    return pPacket->length;
+#endif
+}
+
+static inline void omethPacketSetLength(ometh_packet_typ *pPacket, uint32_t length)
+{
+#if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
+    ometh_wr_32(&pPacket->length, length);
+#else
+    pPacket->length = length;
+#endif
+}
 
 #endif
