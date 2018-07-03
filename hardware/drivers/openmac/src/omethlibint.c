@@ -115,6 +115,7 @@ void            omethRxIrqHandler
 
     OMETH_HOOK_H              hHook;
     OMETH_FILTER_H            hFilter;
+    volatile ometh_status_typ *pStatus;
     ometh_buf_typ             *pRxBuf;
     ometh_pending_typ         *pQueue;                    // ptr to buffer queue
     ometh_rx_info_typ         *pInfo;
@@ -130,10 +131,8 @@ void            omethRxIrqHandler
 
     if(ometh_rd_8(&pDesc->flags.byte.high) & FLAGS1_OWNER) return;    // leave IRQ if no rx-buffer available
 
-    // !! here hHook is abused to save stack-variables (until required for its original reason)
-    //    (faster processing)
-    hHook = (OMETH_HOOK_H)&hEth->pRegBase->rxStatus;
-    ometh_wr_16(&((ometh_status_typ*)hHook)->clrBit, OMETH_REG_IQUIT);
+    pStatus = &hEth->pRegBase->rxStatus;
+    ometh_wr_16(&pStatus->clrBit, OMETH_REG_IQUIT);
 
     flags = ometh_rd_16(&pDesc->flags.word);
 
@@ -149,9 +148,9 @@ void            omethRxIrqHandler
     pRxBuf->timeStamp = ometh_rd_32(&pDesc->time);
 #endif
 
-    if(ometh_rd_16(&((ometh_status_typ*)hHook)->value) & OMETH_REG_LOST)
+    if(ometh_rd_16(&pStatus->value) & OMETH_REG_LOST)
     {
-        ometh_wr_16(&((ometh_status_typ*)hHook)->clrBit, OMETH_REG_LOST);
+        ometh_wr_16(&pStatus->clrBit, OMETH_REG_LOST);
 
         hEth->stat.rxLost++;
     }
