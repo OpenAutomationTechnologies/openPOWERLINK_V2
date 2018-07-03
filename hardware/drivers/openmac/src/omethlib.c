@@ -330,7 +330,7 @@ void        omethPacketFree
     // access to header of packet
     pBuf  = GET_TYPE_BASE( ometh_buf_typ, packet, pPacket);
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
-    hHook = ometh_rd_cpu_ptr((void *const *)&pBuf->hHook);
+    hHook = ometh_rd_cpu_ptr(&pBuf->hHook);
 #else
     hHook = pBuf->hHook;
 #endif

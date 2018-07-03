@@ -191,7 +191,7 @@ void            omethRxIrqHandler
             {
                 // overtake hook handle for free function
 #if (OPENMAC_PKTLOCTX == OPENMAC_PKTBUF_LOCAL)
-                ometh_wr_cpu_ptr((void **)&pRxBuf->hHook, hHook);
+                ometh_wr_cpu_ptr(&pRxBuf->hHook, hHook);
 #else
                 pRxBuf->hHook = hHook;
 #endif
