@@ -9,6 +9,7 @@ This file contains the definitions needed by the PDO lookup table module.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -77,7 +78,7 @@ extern "C"
 void       pdoklut_clear(tPdoklutEntry* pLut_p, size_t numEntries_p);
 tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p,
                               const tPdoChannel* pPdoChannel_p,
-                              UINT8 channelId_p);
+                              UINT channelId_p);
 UINT8      pdoklut_getChannel(const tPdoklutEntry* pLut_p,
                               UINT8 index_p,
                               UINT8 nodeId_p)
