@@ -12,7 +12,7 @@ This file contains the implementation of the DLL kernel module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2017, B&R Industrial Automation GmbH
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -547,16 +547,24 @@ tOplkError dllk_configNode(const tDllNodeInfo* pNodeInfo_p)
 
     // copy node configuration
     if (pNodeInfo_p->presPayloadLimit > dllkInstance_g.dllConfigParam.isochrRxMaxPayload)
-        pIntNodeInfo->presPayloadLimit = dllkInstance_g.dllConfigParam.isochrRxMaxPayload;
+    {
+        pIntNodeInfo->presPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrRxMaxPayload;
+    }
     else
+    {
         pIntNodeInfo->presPayloadLimit = pNodeInfo_p->presPayloadLimit;
+    }
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     pIntNodeInfo->presTimeoutNs = pNodeInfo_p->presTimeoutNs;
     if (pNodeInfo_p->preqPayloadLimit > dllkInstance_g.dllConfigParam.isochrTxMaxPayload)
-        pIntNodeInfo->preqPayloadLimit = dllkInstance_g.dllConfigParam.isochrTxMaxPayload;
+    {
+        pIntNodeInfo->preqPayloadLimit = (UINT16)dllkInstance_g.dllConfigParam.isochrTxMaxPayload;
+    }
     else
+    {
         pIntNodeInfo->preqPayloadLimit = pNodeInfo_p->preqPayloadLimit;
+    }
 
     // initialize elements of internal node info structure
     pIntNodeInfo->soaFlag1 = PLK_FRAME_FLAG1_ER;
