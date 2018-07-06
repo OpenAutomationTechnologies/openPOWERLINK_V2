@@ -8,7 +8,7 @@ This file contains target specific definitions for Windows.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
@@ -76,12 +76,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef FALSE
 #undef FALSE
 #endif
-#define FALSE 0
+#define FALSE 0x00
 
 #ifdef TRUE
 #undef TRUE
 #endif
-#define TRUE 1
+#define TRUE 0xFF
 
 #ifdef _CONSOLE // use standard printf in console applications
 #define PRINTF(...)             printf(__VA_ARGS__)

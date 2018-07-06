@@ -11,6 +11,7 @@ This file contains the definitions for the DLL module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -192,7 +193,7 @@ the data link layer (DLL).
 typedef struct
 {
     UINT32              sizeOfStruct;               ///< Size of the structure
-    BOOL                fAsyncOnly;                 ///< Async only node, does not need to register PRes-Frame
+    UINT8               fAsyncOnly;                 ///< Async only node, does not need to register PRes-Frame
     UINT8               nodeId;                     ///< Local node ID
     UINT8               padding0[3];                ///< Padding to 32 bit boundary
     UINT32              featureFlags;               ///< 0x1F82: NMT_FeatureFlags_U32
@@ -213,7 +214,7 @@ typedef struct
     UINT32              asyncSlotTimeout;           ///< 0x1F8A.2: AsyncSlotTimeout_U32 in [ns]
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in [ns]
     UINT32              syncNodeId;                 ///< Synchronization trigger (AppCbSync, cycle preparation) after PRes from CN with this node-ID (0 = SoC, 255 = SoA)
-    BOOL                fSyncOnPrcNode;             ///< TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
+    UINT8               fSyncOnPrcNode;             ///< TRUE: CN is PRes chained; FALSE: conventional CN (PReq/PRes)
 #if defined(CONFIG_INCLUDE_NMT_RMN)
     UINT32              switchOverTimeMn;           ///< Switch over time when CS_OPERATIONAL in [us]
     UINT32              reducedSwitchOverTimeMn;    ///< Switch over time when CS_PREOPERATIONAL1 in [us]

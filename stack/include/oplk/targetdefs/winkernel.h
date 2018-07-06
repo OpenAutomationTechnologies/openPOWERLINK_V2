@@ -8,7 +8,7 @@ This file contains target specific definitions for Windows kernel.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2015, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2016, B&R Industrial Automation GmbH
 All rights reserved.
 
@@ -71,12 +71,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef FALSE
 #undef FALSE
 #endif
-#define FALSE 0
+#define FALSE 0x00
 
 #ifdef TRUE
 #undef TRUE
 #endif
-#define TRUE 1
+#define TRUE 0xFF
 
 #define PRINTF(...)    DbgPrint(__VA_ARGS__)
 

@@ -12,6 +12,7 @@ This file contains the implementation of the user stack control module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -1589,43 +1590,43 @@ static tOplkError updateObd(const tOplkApiInitParam* pInitParam_p,
     if (pInitParam_p->featureFlags != UINT_MAX)
         obdu_writeEntry(0x1F82, 0, &pInitParam_p->featureFlags, 4);
 
-    wordValue = (UINT16)pInitParam_p->isochrTxMaxPayload;
+    wordValue = pInitParam_p->isochrTxMaxPayload;
     obdu_writeEntry(0x1F98, 1, &wordValue, 2);
 
-    wordValue = (UINT16)pInitParam_p->isochrRxMaxPayload;
+    wordValue = pInitParam_p->isochrRxMaxPayload;
     obdu_writeEntry(0x1F98, 2, &wordValue, 2);
 
     obdu_writeEntry(0x1F98, 3, &pInitParam_p->presMaxLatency, 4);
 
     if (!fDisableUpdateStoredConf_p && (pInitParam_p->preqActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
-        wordValue = (UINT16)pInitParam_p->preqActPayloadLimit;
+        wordValue = pInitParam_p->preqActPayloadLimit;
         obdu_writeEntry(0x1F98, 4, &wordValue, 2);
     }
 
     if (!fDisableUpdateStoredConf_p && (pInitParam_p->presActPayloadLimit <= C_DLL_ISOCHR_MAX_PAYL))
     {
-        wordValue = (UINT16)pInitParam_p->presActPayloadLimit;
+        wordValue = pInitParam_p->presActPayloadLimit;
         obdu_writeEntry(0x1F98, 5, &wordValue, 2);
     }
 
     obdu_writeEntry(0x1F98, 6, &pInitParam_p->asndMaxLatency, 4);
 
-    if (!fDisableUpdateStoredConf_p && (pInitParam_p->multiplCylceCnt <= 0xFF))
+    if (!fDisableUpdateStoredConf_p)
     {
-        byteValue = (UINT8)pInitParam_p->multiplCylceCnt;
+        byteValue = pInitParam_p->multiplCylceCnt;
         obdu_writeEntry(0x1F98, 7, &byteValue, 1);
     }
 
     if (!fDisableUpdateStoredConf_p && (pInitParam_p->asyncMtu <= C_DLL_MAX_ASYNC_MTU))
     {
-        wordValue = (UINT16)pInitParam_p->asyncMtu;
+        wordValue = pInitParam_p->asyncMtu;
         obdu_writeEntry(0x1F98, 8, &wordValue, 2);
     }
 
     if (!fDisableUpdateStoredConf_p && (pInitParam_p->prescaler <= 1000))
     {
-        wordValue = (UINT16)pInitParam_p->prescaler;
+        wordValue = pInitParam_p->prescaler;
         obdu_writeEntry(0x1F98, 9, &wordValue, 2);
     }
 

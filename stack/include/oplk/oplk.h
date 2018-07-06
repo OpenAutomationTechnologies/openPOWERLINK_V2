@@ -11,6 +11,7 @@ API.
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -422,20 +423,22 @@ byte order!
 typedef struct
 {
     UINT                sizeOfInitParam;            ///< This field contains the size of the initialization parameter structure.
-    BOOL                fAsyncOnly;                 ///< Determines if this node is an async-only node. If TRUE the node communicates only asynchronously.
-    UINT                nodeId;                     ///< The node ID of this node.
+    UINT8               fAsyncOnly;                 ///< Determines if this node is an async-only node. If TRUE the node communicates only asynchronously.
+    UINT8               nodeId;                     ///< The node ID of this node.
+    UINT8               padding1[3];                ///< Padding to 32 bit boundary
     UINT8               aMacAddress[6];             ///< The MAC address of this node.
     UINT32              featureFlags;               ///< The POWERLINK feature flags of this node (0x1F82: NMT_FeatureFlags_U32)
     UINT32              cycleLen;                   ///< The cycle Length (0x1006: NMT_CycleLen_U32) in [us]
-    UINT                isochrTxMaxPayload;         ///< Maximum isochronous transmit payload (0x1F98.1: IsochrTxMaxPayload_U16) Const!
-    UINT                isochrRxMaxPayload;         ///< Maximum isochronous receive payload (0x1F98.2: IsochrRxMaxPayload_U16) Const!
+    UINT16              isochrTxMaxPayload;         ///< Maximum isochronous transmit payload (0x1F98.1: IsochrTxMaxPayload_U16) Const!
+    UINT16              isochrRxMaxPayload;         ///< Maximum isochronous receive payload (0x1F98.2: IsochrRxMaxPayload_U16) Const!
     UINT32              presMaxLatency;             ///< Maximum PRes latency in ns (0x1F98.3: PResMaxLatency_U32) Read-only!
-    UINT                preqActPayloadLimit;        ///< Actual PReq payload limit (0x1F98.4: PReqActPayloadLimit_U16)
-    UINT                presActPayloadLimit;        ///< Actual PRes payload limit (0x1F98.5: PResActPayloadLimit_U16)
+    UINT16              preqActPayloadLimit;        ///< Actual PReq payload limit (0x1F98.4: PReqActPayloadLimit_U16)
+    UINT16              presActPayloadLimit;        ///< Actual PRes payload limit (0x1F98.5: PResActPayloadLimit_U16)
     UINT32              asndMaxLatency;             ///< Maximum ASnd latency in ns (0x1F98.6: ASndMaxLatency_U32) Const!
-    UINT                multiplCylceCnt;            ///< Multiplexed cycle count (0x1F98.7: MultiplCycleCnt_U8)
-    UINT                asyncMtu;                   ///< Asynchronous MTU (0x1F98.8: AsyncMTU_U16)
-    UINT                prescaler;                  ///< SoC prescaler (0x1F98.9: Prescaler_U16)
+    UINT8               multiplCylceCnt;            ///< Multiplexed cycle count (0x1F98.7: MultiplCycleCnt_U8)
+    UINT8               padding2[3];                ///< Padding to 32 bit boundary
+    UINT16              asyncMtu;                   ///< Asynchronous MTU (0x1F98.8: AsyncMTU_U16)
+    UINT16              prescaler;                  ///< SoC prescaler (0x1F98.9: Prescaler_U16)
     UINT32              lossOfFrameTolerance;       ///< Loss of frame tolerance in ns (0x1C14: DLL_LossOfFrameTolerance_U32)
     UINT32              waitSocPreq;                ///< Wait time for first PReq in ns (0x1F8A.1: WaitSoCPReq_U32) Only for MN!
     UINT32              asyncSlotTimeout;           ///< Asynchronous slot timeout in ns (0x1F8A.2: AsyncSlotTimeout_U32) Only for MN!
@@ -467,7 +470,7 @@ typedef struct
     tNetIfParameter     hwParam;                    ///< The network interface card parameters of the node
     UINT32              syncResLatency;             ///< Constant response latency for SyncRes in ns
     UINT                syncNodeId;                 ///< Specifies the synchronization point for the MN. The synchronization take place after a PRes from a CN with this node-ID (0 = SoC, 255 = SoA)
-    BOOL                fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)
+    UINT8               fSyncOnPrcNode;             ///< If it is TRUE, Sync on PRes chained CN; FALSE: conventional CN (PReq/PRes)
     tOplkApiSdoStack    sdoStackType;               ///< Specifies the SDO stack that should be used.
                                                     /**< It is used for switching between the standard SDO stack and alternative SDO stacks. The available SDO stacks are defined by the \ref tOplkApiSdoStack enumeration.
                                                          If the standard SDO stack is used it must be initialized with 0x00.*/
