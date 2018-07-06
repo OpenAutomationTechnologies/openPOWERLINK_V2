@@ -12,6 +12,7 @@ This file contains the frame processing functions of the kernel DLL module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2018, B&R Industrial Automation GmbH
 Copyright (c) 2015, SYSTEC electronic GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -700,7 +701,7 @@ tOplkError dllkframe_checkFrame(tPlkFrame* pFrame_p, size_t frameSize_p)
         if (etherType == C_DLL_ETHERTYPE_EPL)
         {
             // source node ID
-            ami_setUint8Le(&pFrame_p->srcNodeId, dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pFrame_p->srcNodeId, (UINT8)dllkInstance_g.dllConfigParam.nodeId);
 
             // check message type
             msgType = (tMsgType)ami_getUint8Le(&pFrame_p->messageType);
@@ -879,7 +880,7 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
         if (msgType_p != kMsgTypeNonPowerlink)
         {   // fill out Frame only if it is a POWERLINK frame
             ami_setUint16Be(&pTxFrame->etherType, C_DLL_ETHERTYPE_EPL);
-            ami_setUint8Le(&pTxFrame->srcNodeId, dllkInstance_g.dllConfigParam.nodeId);
+            ami_setUint8Le(&pTxFrame->srcNodeId, (UINT8)dllkInstance_g.dllConfigParam.nodeId);
             OPLK_MEMCPY(&pTxFrame->aSrcMac[0], edrv_getMacAddr(), 6);
 
             switch (msgType_p)
@@ -896,11 +897,11 @@ tOplkError dllkframe_createTxFrame(UINT* pHandle_p,
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.featureFlagsLe,
                                             dllkInstance_g.dllConfigParam.featureFlags);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.mtuLe,
-                                            dllkInstance_g.dllConfigParam.asyncMtu);
+                                            (UINT16)dllkInstance_g.dllConfigParam.asyncMtu);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollInSizeLe,
-                                            dllkInstance_g.dllConfigParam.preqActPayloadLimit);
+                                            (UINT16)dllkInstance_g.dllConfigParam.preqActPayloadLimit);
                             ami_setUint16Le(&pTxFrame->data.asnd.payload.identResponse.pollOutSizeLe,
-                                            dllkInstance_g.dllConfigParam.presActPayloadLimit);
+                                            (UINT16)dllkInstance_g.dllConfigParam.presActPayloadLimit);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.responseTimeLe,
                                             dllkInstance_g.dllConfigParam.presMaxLatency);
                             ami_setUint32Le(&pTxFrame->data.asnd.payload.identResponse.deviceTypeLe,
