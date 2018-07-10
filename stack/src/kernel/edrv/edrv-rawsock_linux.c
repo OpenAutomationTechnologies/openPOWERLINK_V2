@@ -59,6 +59,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <linux/if_packet.h>
+#include <sys/types.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
