@@ -11,7 +11,7 @@ the EMACPS Gigabit Ethernet Controller (GEM) on the Xilinx Zynq SoC.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2014, Kalycito Infotech Pvt. Ltd.
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2017, B&R Industrial Automation GmbH
 All rights reserved.
 
@@ -473,7 +473,7 @@ tOplkError edrv_setRxMulticastMacAddr(const UINT8* pMacAddr_p)
     hashValue = calculateHashAddr(pMacAddr_p);
 
     hashRegLVal = EDRV_READ_REG(EDRV_HASHL_REG);
-    hashRegHVal = EDRV_READ_REG(EDRV_HASHL_REG);
+    hashRegHVal = EDRV_READ_REG(EDRV_HASHH_REG);
 
     if (hashValue < 32)
     {
@@ -516,7 +516,7 @@ tOplkError edrv_clearRxMulticastMacAddr(const UINT8* pMacAddr_p)
     hashValue = calculateHashAddr(pMacAddr_p);
 
     hashRegLVal = EDRV_READ_REG(EDRV_HASHL_REG);
-    hashRegHVal = EDRV_READ_REG(EDRV_HASHL_REG);
+    hashRegHVal = EDRV_READ_REG(EDRV_HASHH_REG);
 
     if (hashValue < 32)
     {
