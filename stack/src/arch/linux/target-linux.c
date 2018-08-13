@@ -11,7 +11,7 @@ The file implements target specific functions used in the openPOWERLINK stack.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, B&R Industrial Automation GmbH
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -49,6 +49,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <signal.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+#include <netinet/in.h>
+#include <net/if.h>
+#include <arpa/inet.h>
 
 //============================================================================//
 //            G L O B A L   D E F I N I T I O N S                             //
@@ -209,12 +214,15 @@ tOplkError target_setIpAdrs(const char* ifName_p,
                             UINT32 subnetMask_p,
                             UINT16 mtu_p)
 {
-    tOplkError  ret = kErrorOk;
-    INT         iRet;
-    char        sBufferIp[16];
-    char        sBufferMask[16];
-    char        sBufferMtu[6];
-    char        command[256];
+    tOplkError          ret = kErrorOk;
+    INT                 iRet = 0;
+    INT                 sock;
+    char                sBufferIp[16];
+    char                sBufferMask[16];
+    char                sBufferMtu[6];
+    struct ifreq        ifr;
+    struct sockaddr_in* pAddrIp;
+    struct sockaddr_in* pAddrNetmask;
 
     // configure IP address of virtual network interface
     // for TCP/IP communication over the POWERLINK network
@@ -239,20 +247,69 @@ tOplkError target_setIpAdrs(const char* ifName_p,
              "%u",
              (UINT)mtu_p);
 
-    /* call ifconfig to configure the virtual network interface */
-    sprintf(command,
-            "/sbin/ifconfig %s %s netmask %s mtu %s",
-            ifName_p,
-            sBufferIp,
-            sBufferMask,
-            sBufferMtu);
-
-    iRet = system(command);
-    if (iRet < 0)
+    // Create a socket
+    sock = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sock == 0)
     {
-        TRACE("ifconfig %s %s returned %d\n", ifName_p, sBufferIp, iRet);
+        // Failed to create a socket
+        TRACE("Socket creation failed!\n");
         return kErrorNoResource;
     }
+
+    ifr.ifr_addr.sa_family = AF_INET;
+
+    // Configure virtual interface name
+    OPLK_MEMCPY(ifr.ifr_name, ifName_p, IFNAMSIZ-1);
+
+    // Configure the IP address
+    pAddrIp = (struct sockaddr_in*)&ifr.ifr_addr;
+    if (pAddrIp == NULL)
+    {
+        close(sock);
+        return kErrorNoResource;
+    }
+
+    // Convert the IP address format from X.X.X.X to binary
+    inet_pton(AF_INET, sBufferIp, &pAddrIp->sin_addr);
+    // Set the IP address
+    iRet = ioctl(sock, SIOCSIFADDR, &ifr);
+    if (iRet < 0)
+    {
+        close(sock);
+        TRACE("ioctl() set IP failed! %s %s returned %d\n", ifName_p, sBufferIp, iRet);
+        return kErrorNoResource;
+    }
+
+    // Convert the Netmask address to binary and set it
+    pAddrNetmask = (struct sockaddr_in*)&ifr.ifr_netmask;
+    if (pAddrNetmask == NULL)
+    {
+        close(sock);
+        return kErrorNoResource;
+    }
+
+    // Convert the Netmask address format from X.X.X.X to binary
+    inet_pton(AF_INET, sBufferMask, &pAddrNetmask->sin_addr);
+    // Set the Netmask address
+    iRet = ioctl(sock, SIOCSIFNETMASK, &ifr);
+    if (iRet < 0)
+    {
+        close(sock);
+        TRACE("ioctl() set Netmask failed! %s %s returned %d\n", ifName_p, sBufferMask, iRet);
+        return kErrorNoResource;
+    }
+
+    // Set the MTU for virtual network interface
+    ifr.ifr_mtu = (UINT)mtu_p;
+    iRet = ioctl(sock, SIOCSIFMTU, &ifr);
+    if (iRet < 0)
+    {
+        close(sock);
+        TRACE("ioctl() set MTU failed! %s %s returned %d\n", ifName_p, sBufferMtu, iRet);
+        return kErrorNoResource;
+    }
+
+    close(sock);
 
     return ret;
 }
