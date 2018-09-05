@@ -14,6 +14,7 @@ kernelspace platform. It uses the circular buffer interface for all event queues
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -55,6 +56,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <linux/sched.h>
 #include <linux/cpumask.h>
 #include <linux/uaccess.h>
+
+#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,15,0))
+/* Included types.h header to link sched_param structure */
+#include <linux/sched/types.h>
+#endif
+
 #include <asm/uaccess.h>
 #include <asm/atomic.h>
 
