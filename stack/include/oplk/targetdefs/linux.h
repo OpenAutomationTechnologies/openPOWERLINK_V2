@@ -8,7 +8,7 @@ This file contains target definitions for Linux systems
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, Kalycito Infotech Private Limited
+Copyright (c) 2018, Kalycito Infotech Private Limited
 Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
@@ -106,13 +106,18 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ATOMIC_MEM_OFFSET           0x80000 // $$ Get the atomic memory base address from config header
 #define OPLK_ATOMIC_INIT(base)
 #elif defined (__LINUX_ZYNQ__)
+// Check if Microblaze is being locked by any other processes
+// If so it returns an error stating that the resources cannot be created
+#define OPLK_ATOMIC_INIT(base) \
+    if (target_initLock(&base->lock) != 0) \
+        return kErrorNoResource
 #define ATOMIC_MEM_OFFSET           0
 #endif
 
 #if defined (__LINUX_PCIE__) || defined(__LINUX_ZYNQ__)
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
-                        OPLK_IO_WR8((ULONG)address + ATOMIC_MEM_OFFSET, newval); \
-                        oldval = OPLK_IO_RD8((ULONG)address + ATOMIC_MEM_OFFSET)
+    oldval = OPLK_IO_RD8((ULONG)address + ATOMIC_MEM_OFFSET); \
+    OPLK_IO_WR8((ULONG)address + ATOMIC_MEM_OFFSET, newval)
 #else /* __LINUX_PCIE__ */
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
     oldval = __sync_lock_test_and_set(address, newval);

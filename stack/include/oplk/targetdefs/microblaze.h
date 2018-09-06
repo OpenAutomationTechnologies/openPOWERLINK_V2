@@ -10,6 +10,7 @@ This file contains target specific definitions for microblaze systems.
 /*------------------------------------------------------------------------------
 Copyright (c) 2016, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -104,10 +105,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
                         if (target_initLock(&base->lock) != 0) \
                             return kErrorNoResource
 #define OPLK_ATOMIC_EXCHANGE(address, newval, oldval) \
-                        target_lock(); \
                         oldval = Xil_In8((u32)(address)); \
-                        Xil_Out8((u32)(address), newval); \
-                        target_unlock()
+                        Xil_Out8((u32)(address), newval);
 
 #define OPLK_MUTEX_T    u8
 
