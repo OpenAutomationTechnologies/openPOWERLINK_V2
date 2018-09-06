@@ -4,7 +4,7 @@
 #
 # Copyright (c) 2017, B&R Industrial Automation GmbH
 # Copyright (c) 2016, Franz Profelt (franz.profelt@gmail.com)
-# Copyright (c) 2017, Kalycito Infotech Private Limited
+# Copyright (c) 2018, Kalycito Infotech Private Limited
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -627,11 +627,20 @@ SET(TARGET_WINDOWS_DUAL_SOURCES
     ${ARCH_SOURCE_DIR}/windows/lock-dualprocnoos.c
     )
 
-SET(TARGET_LINUX_SOURCES
-    ${ARCH_SOURCE_DIR}/linux/target-linux.c
-    ${ARCH_SOURCE_DIR}/linux/target-mutex.c
-    ${ARCH_SOURCE_DIR}/linux/netif-linux.c
-    )
+IF (CFG_COMPILE_LIB_MNAPP_ZYNQINTF OR CFG_COMPILE_LIB_CNAPP_ZYNQINTF)
+    SET(TARGET_LINUX_SOURCES
+        ${ARCH_SOURCE_DIR}/linux/target-linux.c
+        ${ARCH_SOURCE_DIR}/linux/target-mutex.c
+        ${ARCH_SOURCE_DIR}/linux/netif-linux.c
+        ${ARCH_SOURCE_DIR}/linux/lock-dualproczynq.c
+        )
+ELSE ()
+    SET(TARGET_LINUX_SOURCES
+        ${ARCH_SOURCE_DIR}/linux/target-linux.c
+        ${ARCH_SOURCE_DIR}/linux/target-mutex.c
+        ${ARCH_SOURCE_DIR}/linux/netif-linux.c
+        )
+ENDIF ()
 
 SET(TARGET_MICROBLAZE_SOURCES
     ${ARCH_SOURCE_DIR}/xilinx-microblaze/systemtimer.c
