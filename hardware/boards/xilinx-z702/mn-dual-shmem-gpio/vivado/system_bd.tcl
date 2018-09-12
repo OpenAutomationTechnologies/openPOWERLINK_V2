@@ -55,6 +55,9 @@ set_property target_language VHDL [current_project]
 set proj_dir [get_property directory $obj]
 set_property  ip_repo_paths  $proj_dir/../../../../../ipcore/xilinx [current_project]
 update_ip_catalog
+
+# CHANGE DESIGN NAME HERE
+variable design_name
 set design_name system
 
 # If you do not already have an existing IP Integrator design open,
@@ -1303,12 +1306,6 @@ proc create_root_design { parentCell } {
    CONFIG.preset {ZC702} \
  ] $processing_system7_0
 
-  # Create instance: xlconcat_0, and set properties
-  set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
-  set_property -dict [ list \
-   CONFIG.NUM_PORTS {1} \
- ] $xlconcat_0
-
   # Create interface connections
   connect_bd_intf_net -intf_net BENCHMARK_PIO_GPIO [get_bd_intf_ports BENCHMARK_PIO] [get_bd_intf_pins BENCHMARK_PIO/GPIO]
   connect_bd_intf_net -intf_net CLK_IN1_D_1 [get_bd_intf_ports clk_in] [get_bd_intf_pins clock_generator/CLK_IN1_D]
@@ -1345,7 +1342,7 @@ proc create_root_design { parentCell } {
   connect_bd_net -net S00_ARESETN_1 [get_bd_pins HOST_BENCHMARK_PIO/s_axi_aresetn] [get_bd_pins LEDS_6BIT/s_axi_aresetn] [get_bd_pins Node_Switches/s_axi_aresetn] [get_bd_pins axi4lite_0/M00_ARESETN] [get_bd_pins axi4lite_0/M01_ARESETN] [get_bd_pins axi4lite_0/M02_ARESETN] [get_bd_pins axi4lite_0/S00_ARESETN] [get_bd_pins proc_sys_rst1/peripheral_aresetn]
   connect_bd_net -net axi_openmac_0_MAC_IRQ [get_bd_pins axi_openmac_0/MAC_IRQ] [get_bd_pins pcp_xlconcat/In1]
   connect_bd_net -net axi_openmac_0_TIMER_IRQ [get_bd_pins axi_openmac_0/TIMER_IRQ] [get_bd_pins pcp_xlconcat/In0]
-  connect_bd_net -net axi_openmac_0_TIMER_PULSE_IRQ [get_bd_pins axi_openmac_0/TIMER_PULSE_IRQ] [get_bd_pins xlconcat_0/In0]
+  connect_bd_net -net axi_openmac_0_TIMER_PULSE_IRQ [get_bd_pins axi_openmac_0/TIMER_PULSE_IRQ] [get_bd_pins processing_system7_0/IRQ_F2P]
   connect_bd_net -net axi_openmac_0_oSmi_nPhyRst [get_bd_ports oSmi_nPhyRst] [get_bd_pins axi_openmac_0/oSmi_nPhyRst]
   connect_bd_net -net clock_generator_clk_out2 [get_bd_pins axi4lite_mb_0/M03_ACLK] [get_bd_pins axi_openmac_0/S_AXI_MAC_REG_ACLK] [get_bd_pins axi_openmac_0/iClk50] [get_bd_pins clock_generator/clk_out2] [get_bd_pins fit_timer_0/Clk] [get_bd_pins proc_sys_rst/slowest_sync_clk]
   connect_bd_net -net clock_generator_locked [get_bd_pins clock_generator/locked] [get_bd_pins proc_sys_rst/dcm_locked]
@@ -1364,7 +1361,6 @@ proc create_root_design { parentCell } {
   connect_bd_net -net rst_clk_wiz_1_100M_bus_struct_reset [get_bd_pins pcp_bram/SYS_Rst] [get_bd_pins proc_sys_rst/bus_struct_reset]
   connect_bd_net -net rst_clk_wiz_1_100M_interconnect_aresetn [get_bd_pins axi4lite_mb_0/ARESETN] [get_bd_pins axi_0/ARESETN] [get_bd_pins proc_sys_rst/interconnect_aresetn]
   connect_bd_net -net rst_clk_wiz_1_100M_peripheral_aresetn [get_bd_pins BENCHMARK_PIO/s_axi_aresetn] [get_bd_pins POWERLINK_Led/s_axi_aresetn] [get_bd_pins axi4lite_mb_0/M00_ARESETN] [get_bd_pins axi4lite_mb_0/M01_ARESETN] [get_bd_pins axi4lite_mb_0/M02_ARESETN] [get_bd_pins axi4lite_mb_0/M03_ARESETN] [get_bd_pins axi4lite_mb_0/M04_ARESETN] [get_bd_pins axi4lite_mb_0/M05_ARESETN] [get_bd_pins axi4lite_mb_0/M06_ARESETN] [get_bd_pins axi4lite_mb_0/S00_ARESETN] [get_bd_pins axi_0/M00_ARESETN] [get_bd_pins axi_0/S00_ARESETN] [get_bd_pins axi_0/S01_ARESETN] [get_bd_pins axi_0/S02_ARESETN] [get_bd_pins axi_openmac_0/M_AXI_MAC_DMA_ARESETN] [get_bd_pins axi_openmac_0/S_AXI_MAC_PKT_ARESETN] [get_bd_pins axi_openmac_0/S_AXI_MAC_REG_ARESETN] [get_bd_pins debug_module/S_AXI_ARESETN] [get_bd_pins fit_timer_0/Rst] [get_bd_pins pcp_intc/s_axi_aresetn] [get_bd_pins proc_sys_rst/peripheral_aresetn]
-  connect_bd_net -net xlconcat_0_dout [get_bd_pins processing_system7_0/IRQ_F2P] [get_bd_pins xlconcat_0/dout]
 
   # Create address segments
   create_bd_addr_seg -range 0x20000000 -offset 0x20000000 [get_bd_addr_spaces axi_openmac_0/M_AXI_MAC_DMA] [get_bd_addr_segs processing_system7_0/S_AXI_HP0/HP0_DDR_LOWOCM] SEG_processing_system7_0_HP0_DDR_LOWOCM
