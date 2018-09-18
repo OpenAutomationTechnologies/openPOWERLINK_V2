@@ -112,8 +112,8 @@ copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\x86\$
       <AdditionalDependencies>setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;Cfgmgr32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITEW6432)\$(SolutionName)\
-copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITEW6432)\$(SolutionName)\</Command>
+      <Command>mkdir $(SolutionDir)..\..\..\..\bin\windows\amd64\$(SolutionName)\
+copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\amd64\$(SolutionName)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -158,8 +158,8 @@ copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\x86\$
       <AdditionalDependencies>setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;Cfgmgr32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITEW6432)\$(SolutionName)\
-copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\$(PROCESSOR_ARCHITEW6432)\$(SolutionName)\</Command>
+      <Command>mkdir $(SolutionDir)..\..\..\..\bin\windows\amd64\$(SolutionName)\
+copy  $(OutputPath)$(TargetFileName) $(SolutionDir)..\..\..\..\bin\windows\amd64\$(SolutionName)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

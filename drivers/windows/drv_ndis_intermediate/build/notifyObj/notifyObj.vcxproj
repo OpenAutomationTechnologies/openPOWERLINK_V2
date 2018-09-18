@@ -102,7 +102,7 @@
       <InterfaceIdentifierFileName>notifyObj_i.c</InterfaceIdentifierFileName>
       <ProxyFileName>notifyObj_p.c</ProxyFileName>
       <GenerateStublessProxies>true</GenerateStublessProxies>
-      <TypeLibraryName>$(IntDir)notifyObj.tlb</TypeLibraryName>
+      <TypeLibraryName>notifyObj.tlb</TypeLibraryName>
       <DllDataFileName />
       <OutputDirectory>$(IntDir)</OutputDirectory>
       <ValidateAllParameters>true</ValidateAllParameters>
