@@ -91,7 +91,7 @@ hardware-dependent drivers.
 
 -# Build hardware platform with all driver libraries set to debug
 
-        > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Debug -DSKIP_BITSTREAM=OFF -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
         > make install
 
@@ -100,7 +100,7 @@ hardware-dependent drivers.
 
 -# Build hardware platforms with all driver libraries set to release
 
-        > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
+        > cmake ../.. -DCMAKE_BUILD_TYPE=Release -DSKIP_BITSTREAM=OFF -DDEMO_[BOARD_NAME]_[DEMO_NAME]=ON
         > make
         > make install
 

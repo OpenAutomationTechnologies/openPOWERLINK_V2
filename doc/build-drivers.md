@@ -63,10 +63,17 @@ To build the kernel space driver, the appropriate kernel sources must be install
 on your system. The path to the kernel sources can be configured by
 __CFG_KERNEL_DIR__.
 
-To build the kernel interface driver for Zynq hybrid:
+To build the kernel interface driver for Zynq hybrid MN:
 
       > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
       > cmake -DCFG_OPLK_MN=TRUE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake ..
+      > make
+      > make install
+
+To build the kernel interface driver for Zynq hybrid CN:
+
+      > cd <openPOWERLINK_dir>/drivers/linux/drv_kernelmod_zynq/build
+      > cmake -DCFG_OPLK_MN=FALSE -CMAKE_TOOLCHAIN_FILE=<openPOWERLINK_dir>/cmake/toolchain-xilinx-vivado-arm-linux-eabi-gnu.cmake ..
       > make
       > make install
 
@@ -138,19 +145,35 @@ This section will explain the steps to build the PCP daemon for a Microblaze
 softcore processor with host interface by using the Vivado toolchain.
 The PCP daemon uses the driver library for the host interface (`liboplkmndrv-dualprocshm`).
 
-To build the PCP daemon:
+To build the MN PCP daemon:
 
   * On a Windows host platform
 
         > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" ..
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" -DCFG_HW_LIB=xilinx-z702/mn-dual-shmem-gpio ..
         > make
         > make install
 
   * On a Linux host platform
 
         > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
-        > cmake -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" ..
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" -DCFG_HW_LIB=xilinx-z702/mn-dual-shmem-gpio ..
+        > make
+        > make install
+
+To build the CN PCP daemon:
+
+  * On a Windows host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" -DCFG_HW_LIB=xilinx-z702/cn-dual-shmem-gpio -DCFG_OPLK_MN=OFF ..
+        > make
+        > make install
+
+  * On a Linux host platform
+
+        > cd <openPOWERLINK_dir>/drivers/xilinx-microblaze/drv_daemon/build
+        > cmake -GUnix\ Makefiles -DCMAKE_TOOLCHAIN_FILE=../../../../cmake/toolchain-xilinx-microblaze-gnu.cmake -DCMAKE_BUILD_TYPE=Release -DCFG_BUILD_KERNEL_STACK="PCP Daemon Dual-Proc" -DCFG_HW_LIB=xilinx-z702/cn-dual-shmem-gpio -DCFG_OPLK_MN=OFF ..
         > make
         > make install
 
