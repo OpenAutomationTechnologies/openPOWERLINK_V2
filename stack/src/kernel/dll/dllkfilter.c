@@ -12,6 +12,7 @@ This file contains the functions to setup the edrv filter structures.
 /*------------------------------------------------------------------------------
 Copyright (c) 2013, SYSTEC electronic GmbH
 Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -137,13 +138,13 @@ void dllkfilter_setupFilters(void)
     setupSocFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOC]);
     setupSoaFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA]);
     setupSoaIdentReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_IDREQ],
-                           dllkInstance_g.dllConfigParam.nodeId,
+                           (UINT8)dllkInstance_g.dllConfigParam.nodeId,
                            &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_IDENTRES]);
     setupSoaStatusReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_STATREQ],
-                            dllkInstance_g.dllConfigParam.nodeId,
+                            (UINT8)dllkInstance_g.dllConfigParam.nodeId,
                             &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_STATUSRES]);
     setupSoaNmtReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NMTREQ],
-                         dllkInstance_g.dllConfigParam.nodeId,
+                         (UINT8)dllkInstance_g.dllConfigParam.nodeId,
                          &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NMTREQ]);
 #if (CONFIG_DLL_PRES_CHAINING_CN != FALSE)
     setupSoaSyncReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_SYNCREQ],
@@ -151,7 +152,7 @@ void dllkfilter_setupFilters(void)
                           &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_SYNCRES]);
 #endif
     setupSoaUnspecReqFilter(&dllkInstance_g.aFilter[DLLK_FILTER_SOA_NONPLK],
-                            dllkInstance_g.dllConfigParam.nodeId,
+                            (UINT8)dllkInstance_g.dllConfigParam.nodeId,
                             &dllkInstance_g.pTxBuffer[DLLK_TXFRAME_NONPLK]);
 #if defined(CONFIG_INCLUDE_VETH)
     setupVethUnicast(&dllkInstance_g.aFilter[DLLK_FILTER_VETH_UNICAST],
@@ -200,7 +201,7 @@ The function sets up an PReq filter in the Edrv filter structure.
 */
 //------------------------------------------------------------------------------
 void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p,
-                                UINT8 nodeId_p,
+                                UINT nodeId_p,
                                 tEdrvTxBuffer* pBuffer_p,
                                 const UINT8* pMacAdrs_p)
 {
@@ -215,7 +216,7 @@ void dllkfilter_setupPreqFilter(tEdrvFilter* pFilter_p,
     ami_setUint16Be(&pFilter_p->aFilterMask[12], 0xFFFF);
     ami_setUint8Be(&pFilter_p->aFilterValue[14], kMsgTypePreq);
     ami_setUint8Be(&pFilter_p->aFilterMask[14], 0xFF);
-    ami_setUint8Be(&pFilter_p->aFilterValue[15], nodeId_p);
+    ami_setUint8Be(&pFilter_p->aFilterValue[15], (UINT8)nodeId_p);
     ami_setUint8Be(&pFilter_p->aFilterMask[15], 0xFF);
     ami_setUint8Be(&pFilter_p->aFilterValue[16], C_ADR_MN_DEF_NODE_ID);
     ami_setUint8Be(&pFilter_p->aFilterMask[16], 0xFF);
