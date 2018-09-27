@@ -12,6 +12,7 @@ used for fast searching of PDO channels for a specific node.
 
 /*------------------------------------------------------------------------------
 Copyright (c) 2017, B&R Industrial Automation GmbH
+Copyright (c) 2018, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -132,11 +133,11 @@ This function adds a new PDO channel to the lookup table.
 //------------------------------------------------------------------------------
 tOplkError pdoklut_addChannel(tPdoklutEntry* pLut_p,
                               const tPdoChannel* pPdoChannel_p,
-                              UINT8 channelId_p)
+                              UINT channelId_p)
 {
     tOplkError      ret = kErrorIllegalInstance;
     int             i;
-    UINT8           nodeId;
+    UINT            nodeId;
 
     // Check parameter validity
     ASSERT(pLut_p != NULL);
