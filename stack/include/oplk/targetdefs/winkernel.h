@@ -71,12 +71,12 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifdef FALSE
 #undef FALSE
 #endif
-#define FALSE 0
+#define FALSE 0x00
 
 #ifdef TRUE
 #undef TRUE
 #endif
-#define TRUE 1
+#define TRUE 0xFF
 
 #define PRINTF(...)    DbgPrint(__VA_ARGS__)
 
