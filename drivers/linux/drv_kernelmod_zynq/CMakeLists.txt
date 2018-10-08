@@ -158,7 +158,7 @@ SET(MODULE_SOURCE_FILES
     ${KERNEL_SOURCE_DIR}/timesync/timesynckcal-linuxdpshm.c
     ${KERNEL_SOURCE_DIR}/veth/veth-linuxdpshm.c
     ${ARCH_SOURCE_DIR}/target-linuxkernel.c
-    ${STACK_SOURCE_DIR}/arch/linux/lock-dualproczynq.c
+    ${STACK_SOURCE_DIR}/arch/linux/lock-linuxdualproc.c
     )
 
 IF(CMAKE_SYSTEM_PROCESSOR MATCHES "^(i.86|x86(_64)?)$")

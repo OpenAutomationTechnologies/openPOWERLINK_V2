@@ -627,12 +627,13 @@ SET(TARGET_WINDOWS_DUAL_SOURCES
     ${ARCH_SOURCE_DIR}/windows/lock-dualprocnoos.c
     )
 
-IF (CFG_COMPILE_LIB_MNAPP_ZYNQINTF OR CFG_COMPILE_LIB_CNAPP_ZYNQINTF)
+IF (CFG_COMPILE_LIB_MNAPP_ZYNQINTF OR CFG_COMPILE_LIB_CNAPP_ZYNQINTF OR
+    CFG_COMPILE_LIB_MNAPP_PCIEINTF)
     SET(TARGET_LINUX_SOURCES
         ${ARCH_SOURCE_DIR}/linux/target-linux.c
         ${ARCH_SOURCE_DIR}/linux/target-mutex.c
         ${ARCH_SOURCE_DIR}/linux/netif-linux.c
-        ${ARCH_SOURCE_DIR}/linux/lock-dualproczynq.c
+        ${ARCH_SOURCE_DIR}/linux/lock-linuxdualproc.c
         )
 ELSE ()
     SET(TARGET_LINUX_SOURCES
