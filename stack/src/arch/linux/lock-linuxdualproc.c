@@ -1,8 +1,8 @@
 /**
 ********************************************************************************
-\file  linux/lock-dualproczynq.c
+\file  linux/lock-linuxdualproc.c
 
-\brief  Locks for Zynq with Linux in dual processor system which pcp runs on MicroBlaze
+\brief  Locks for Zynq & PCIe with Linux in dual processor system
 
 This target depending module provides lock functionality in dual processor
 system with shared memory.
@@ -110,7 +110,9 @@ This function initializes the lock instance.
 int target_initLock(OPLK_LOCK_T* pLock_p)
 {
     if (pLock_p == NULL)
+    {
         return -1;
+    }
 
     pLock_l = pLock_p;
 
@@ -134,7 +136,9 @@ int target_lock(void)
     UINT8  val;
 
     if (pLock_l == NULL)
+    {
         return -1;
+    }
 
     // spin if id is not written to shared memory
     do
@@ -165,7 +169,9 @@ This function frees the given lock.
 int target_unlock(void)
 {
     if (pLock_l == NULL)
+    {
         return -1;
+    }
 
     OPLK_IO_WR8(pLock_l, LOCK_UNLOCKED_C);
 
