@@ -50,8 +50,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2018-05-17"
-      fileModificationTime="09:50:00+01:00"
+      fileModificationDate="2018-10-08"
+      fileModificationTime="08:55:00+01:00"
       fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
@@ -61,7 +61,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         <productName>openPOWERLINK device</productName>
         <version versionType="HW">1.00</version>
         <version versionType="SW">1.00</version>
-        <version versionType="FW">OPLK V2.7.0</version>
+        <version versionType="FW">OPLK V2.7.1-rc1</version>
       </DeviceIdentity>
       <DeviceFunction>
         <capabilities>
@@ -98,8 +98,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
       fileCreator="B&amp;R Industrial Automation GmbH"
       fileCreationDate="2009-09-18"
       fileCreationTime="15:50:00+01:00"
-      fileModificationDate="2018-05-17"
-      fileModificationTime="09:50:00+01:00"
+      fileModificationDate="2018-10-08"
+      fileModificationTime="08:55:00+01:00"
       fileModifiedBy="B&amp;R Industrial Automation GmbH"
       fileVersion="01.00"
       supportedLanguages="en">
@@ -200,7 +200,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
           <Object index="1006" name="NMT_CycleLen_U32" objectType="7" dataType="0007" accessType="rw" PDOmapping="no"/>
           <Object index="1008" name="NMT_ManufactDevName_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="openPOWERLINK device"/>
           <Object index="1009" name="NMT_ManufactHwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="1.00"/>
-          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.7.0"/>
+          <Object index="100A" name="NMT_ManufactSwVers_VS" objectType="7" dataType="0009" accessType="const" PDOmapping="no" defaultValue="OPLK V2.7.1-rc1"/>
           <Object index="1018" name="NMT_IdentityObject_REC" objectType="9">
             <SubObject subIndex="00" name="NumberOfEntries" objectType="7" dataType="0005" accessType="const" PDOmapping="no" defaultValue="4"/>
             <SubObject subIndex="01" name="VendorId_U32" objectType="7" dataType="0007" accessType="const" PDOmapping="no" defaultValue="0x00000000"/>
