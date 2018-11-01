@@ -106,11 +106,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define ATOMIC_MEM_OFFSET           0x80000 // $$ Get the atomic memory base address from config header
 #define OPLK_ATOMIC_INIT(base)
 #elif defined (__LINUX_ZYNQ__)
-// Check if Microblaze is being locked by any other processes
-// If so it returns an error stating that the resources cannot be created
-#define OPLK_ATOMIC_INIT(base) \
-    if (target_initLock(&base->lock) != 0) \
-        return kErrorNoResource
 #define ATOMIC_MEM_OFFSET           0
 #endif
 
