@@ -5,6 +5,41 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
+## V2.7.1 {#sect_revision_v2_7_1}
+
+This is the latest release of the V2.7 release series. This release is a stable
+release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.7.1. For a detailed revision history
+refer to the Git source code history.
+
+### Changes:
+- Add CN Zynq hybrid design
+- Refactor omethlib
+- Update openCONFIGURATOR project in stack
+- Unify default ami module implementation
+- Handle oplk_setNonPlkForward() API in OS designs
+- Remove unused defines and according dead code
+
+### Fixes:
+- Fix Zynq Hybrid performance issue
+- Use Peterson's algorithm for dualproshm lock
+- Fix Linux PCIe compilation issue
+- Fix Windows NDIS and PCIe basic run issue
+- Doxygen Enhancement
+- Fix output path for NDIS driver build
+- Fix timesync issue in Zynq hybrid CN design
+- Fix for RMN support in Zynq Emacps
+- Fix compilation errors for Linux kernel > v4.15
+- Fix for ifconfig deprecated issue
+- edrv-rawsock_linux: add missing include for u_char type
+- Fix errors in Altera Nios II build scripts
+- Fix errors in the xdd/xdc files
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
 ## V2.7.0 {#sect_revision_v2_7_0}
 
 This is the first release of the V2.7 release series. It contains new features
