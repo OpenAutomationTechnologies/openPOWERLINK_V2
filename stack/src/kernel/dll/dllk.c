@@ -12,7 +12,7 @@ This file contains the implementation of the DLL kernel module.
 /*------------------------------------------------------------------------------
 Copyright (c) 2015, SYSTEC electronic GmbH
 Copyright (c) 2017, B&R Industrial Automation GmbH
-Copyright (c) 2017, Kalycito Infotech Private Limited
+Copyright (c) 2019, Kalycito Infotech Private Limited
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -262,10 +262,6 @@ tOplkError dllk_config(const tDllConfigParam* pDllConfigParam_p)
                     pDllConfigParam_p,
                     ((size_t)pDllConfigParam_p->sizeOfStruct < sizeof(tDllConfigParam) ?
                         (size_t)pDllConfigParam_p->sizeOfStruct : sizeof(tDllConfigParam)));
-#if (EDRV_USE_TTTX != FALSE)
-        // Time triggered sending requires sync on SOC
-        dllkInstance_g.dllConfigParam.syncNodeId = C_ADR_SYNC_ON_SOC;
-#endif
     }
 
     if ((dllkInstance_g.dllConfigParam.cycleLen != 0) &&
