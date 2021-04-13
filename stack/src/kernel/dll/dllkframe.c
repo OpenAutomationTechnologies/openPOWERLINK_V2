@@ -2561,6 +2561,7 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
     const tPlkFrame*    pFrame;
     tDllAsndServiceId   asndServiceId;
     UINT                nodeId;
+    UINT64              dMac;
 
 #if defined(CONFIG_INCLUDE_NMT_MN)
     UINT8               flag1;
@@ -2572,6 +2573,15 @@ static tOplkError processReceivedAsnd(tFrameInfo* pFrameInfo_p,
 #endif
 
     pFrame = pFrameInfo_p->frame.pBuffer;
+
+    dMac = ami_getUint48Be(pFrame->aDstMac);
+    if ((dMac != C_DLL_MULTICAST_ASND) && (dMac != C_DLL_MACADDR_MASK) &&
+        (0 != OPLK_MEMCMP(pFrame->aDstMac, edrv_getMacAddr(), 6)))
+    {
+        // ignore invalid DMAC
+        // process only multicast, broadcast and unicast
+        goto Exit;
+    }
 
     // ASnd service registered?
     asndServiceId = (tDllAsndServiceId)ami_getUint8Le(&pFrame->data.asnd.serviceId);
