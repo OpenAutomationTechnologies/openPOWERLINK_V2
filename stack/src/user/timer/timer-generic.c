@@ -11,7 +11,7 @@ generic timer list. It is used for Windows and non OS targets.
 *******************************************************************************/
 
 /*------------------------------------------------------------------------------
-Copyright (c) 2016, B&R Industrial Automation GmbH
+Copyright (c) 2021, B&R Industrial Automation GmbH
 Copyright (c) 2013, SYSTEC electronic GmbH
 All rights reserved.
 
@@ -80,6 +80,11 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define TIMERU_EVENT_WAKEUP     1
 #endif
 
+// Adjust timeru instance start time, when the time elapsed since
+// start exceeds the threshold. Maximum value may be (UINT_MAX >> 1)
+// to prevent overflows during timer setup.
+#define TIMERU_TIMEOUT_ADJUST_THRESHOLD (UINT_MAX >> 2)
+
 //------------------------------------------------------------------------------
 // local types
 //------------------------------------------------------------------------------
@@ -117,6 +122,7 @@ static tTimeruInstance timeruInstance_l;
 //------------------------------------------------------------------------------
 static void         enterCriticalSection(int nType_p);
 static void         leaveCriticalSection(int nType_p);
+static void         adjustStartTime(UINT32 timeoutInMs_p);
 
 #if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
 static DWORD WINAPI processThread(LPVOID parameter_p);
@@ -253,9 +259,21 @@ tOplkError timeru_process(void)
             timeruInstance_l.pTimerListFirst = pTimerEntry->pNext;
             // adjust start time
             timeruInstance_l.startTimeInMs += pTimerEntry->timeoutInMs;
+            // no start time adjustment necessary
+            timeoutInMs = 0;
         }
         else
             pTimerEntry = NULL;
+    }
+
+    if (timeoutInMs > TIMERU_TIMEOUT_ADJUST_THRESHOLD)
+    {
+        // Adjust instance start time and timeout of first timer
+        // if timeout exceeds threshold.
+        // In case of continuously reset timer which is never expiring,
+        // this prevents an overflow in timer timeout value leading to
+        // an undefined behavior.
+        adjustStartTime(timeoutInMs);
     }
     leaveCriticalSection(TIMERU_TIMER_LIST);
 
@@ -299,6 +317,8 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
 {
     tTimerEntry*    pNewEntry;
     tTimerEntry**   ppEntry;
+    UINT32          timeoutInMs;
+    UINT32          tickCount;
 
     // check pointer to handle
     if (pTimerHdl_p == NULL)
@@ -333,8 +353,20 @@ tOplkError timeru_setTimer(tTimerHdl* pTimerHdl_p,
 
     // insert timer entry in timer list
     enterCriticalSection(TIMERU_TIMER_LIST);
+
     // calculate timeout based on start time
-    pNewEntry->timeoutInMs = (target_getTickCount() - timeruInstance_l.startTimeInMs) + timeInMs_p;
+    tickCount = target_getTickCount();
+    timeoutInMs = tickCount - timeruInstance_l.startTimeInMs;
+
+    if (timeoutInMs > TIMERU_TIMEOUT_ADJUST_THRESHOLD)
+    {
+        // Adjust instance start time and timeout of first existing
+        // timer, if timeout exceeds threshold. This also prevents
+        // overflow of timeout value of the new timer.
+        adjustStartTime(timeoutInMs);
+    }
+
+    pNewEntry->timeoutInMs = (tickCount - timeruInstance_l.startTimeInMs) + timeInMs_p;
 
     ppEntry = &timeruInstance_l.pTimerListFirst;
     while (*ppEntry != NULL)
@@ -495,6 +527,46 @@ static void leaveCriticalSection(int nType_p)
 #elif ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
     LeaveCriticalSection(&timeruInstance_l.aCriticalSections[nType_p]);
 #endif
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Adjust timeru instance start time and related first timer timeout
+
+This function adjusts the start time of the timeru instance and the timeout
+value of the very first timer.
+
+\param[in]  timeoutInMs_p           Elapsed timeout since timer start.
+*/
+//------------------------------------------------------------------------------
+static void adjustStartTime(UINT32 timeoutInMs_p)
+{
+    tTimerEntry*    pTimerEntry = NULL;
+
+    pTimerEntry = timeruInstance_l.pTimerListFirst;
+
+    if (pTimerEntry != NULL)
+    {
+        // adjust only very first timer, as following timers are relative
+        // to the first one
+        if (timeoutInMs_p > pTimerEntry->timeoutInMs)
+        {
+            // in case timer has already expired, adjustment can only
+            // be done within timer timeout
+            timeruInstance_l.startTimeInMs += pTimerEntry->timeoutInMs;
+            pTimerEntry->timeoutInMs = 0;
+        }
+        else
+        {
+            // timer expires in the future, do full adjustment
+            timeruInstance_l.startTimeInMs += TIMERU_TIMEOUT_ADJUST_THRESHOLD;
+            pTimerEntry->timeoutInMs -= TIMERU_TIMEOUT_ADJUST_THRESHOLD;
+        }
+    }
+    else
+    {
+        timeruInstance_l.startTimeInMs += TIMERU_TIMEOUT_ADJUST_THRESHOLD;
+    }
 }
 
 #if ((TARGET_SYSTEM == _WIN32_) || (TARGET_SYSTEM == _WINCE_))
