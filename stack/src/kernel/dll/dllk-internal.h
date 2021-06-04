@@ -152,8 +152,8 @@ This structure controls the status of the reported errors in each cycle.
 */
 typedef struct
 {
-    BOOL      fLossReported;        ///< A loss of SoC was already reported in this cycle
-    BOOL      fTimeoutOccurred;     ///< The sync interrupt occurred after a report of a loss of SoC
+    BOOL      fLogicalLossReported; ///< A logical loss of SoC was already reported in this cycle
+    BOOL      fConsecutive;         ///< No SoC was received since last SoC timeout
 } tDllLossSocStatus;
 
 /**

@@ -132,8 +132,9 @@ static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p,
                                             tNmtEvent nmtEvent_p,
                                             tEventDllError* pDllEvent_p);
 
-static BOOL triggerLossOfSocEvent(void);
+static BOOL triggerLossOfSocEventByFrameSequence(void);
 static BOOL triggerLossOfSocEventOnFrameTimeout(void);
+static tOplkError resetLossOfSocEventMgmt(void);
 
 //------------------------------------------------------------------------------
 // local vars
@@ -549,8 +550,7 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
             dllkInstance_g.dllState = kDllCsWaitPreq;
 
             // Valid Soc arrived -> Reset report flags!
-            dllkInstance_g.lossSocStatus.fLossReported = FALSE;
-            dllkInstance_g.lossSocStatus.fTimeoutOccurred = FALSE;
+            resetLossOfSocEventMgmt();
             break;
 
         case kNmtEventDllCeFrameTimeout:    // DLL_CT4
@@ -573,8 +573,9 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
         case kNmtEventDllCePreq:
             // enter DLL_CS_WAIT_SOA
             dllkInstance_g.dllState = kDllCsWaitSoa;
-            if (triggerLossOfSocEvent())
+            if (triggerLossOfSocEventByFrameSequence())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
+
             break;
 
         case kNmtEventDllCeSoa:
@@ -584,7 +585,7 @@ static tOplkError processCsFullCycleDllWaitSoc(tNmtState nmtState_p,
             }
             else
             {   // in other states, avoid double counting with SoC timeouts
-                if (triggerLossOfSocEvent())
+                if (triggerLossOfSocEventByFrameSequence())
                     pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
             }
         case kNmtEventDllCeAsnd:
@@ -631,23 +632,19 @@ static tOplkError processCsFullCycleDllWaitSoa(tNmtState nmtState_p,
             if (triggerLossOfSocEventOnFrameTimeout())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
-
             dllkInstance_g.dllState = kDllCsWaitSoc;
             break;
 
         case kNmtEventDllCePreq:
-            if (triggerLossOfSocEvent())
+            if (triggerLossOfSocEventByFrameSequence())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
             // report DLL_CEV_LOSS_SOA
             pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOA;
-
+            // fall-through
         case kNmtEventDllCeSoa:
             // enter DLL_CS_WAIT_SOC
             dllkInstance_g.dllState = kDllCsWaitSoc;
-            // prepare new cycle -> Reset report flags!
-            dllkInstance_g.lossSocStatus.fLossReported = FALSE;
-            dllkInstance_g.lossSocStatus.fTimeoutOccurred = FALSE;
             break;
 
         case kNmtEventDllCeSoc:             // DLL_CT9
@@ -782,7 +779,7 @@ static tOplkError processCsStoppedDllWaitSoc(tNmtState nmtState_p,
 
         case kNmtEventDllCePreq:            // DLL_CT4
         case kNmtEventDllCeSoa:
-            if (triggerLossOfSocEvent())
+            if (triggerLossOfSocEventByFrameSequence())
                 pDllEvent_p->dllErrorEvents |= DLL_ERR_CN_LOSS_SOC;
 
             break;
@@ -897,11 +894,12 @@ static tOplkError processCsStoppedDllGsInit(tNmtState nmtState_p,
 
 //------------------------------------------------------------------------------
 /**
-\brief  Check if the loss of SoC event shall be triggered
+\brief  Check if a logical loss of SoC event shall be triggered
 
 The loss of SoC event shall only be reported once per cycle to the error
 handler. This functions checks if the event was already reported in this
-cycle.
+cycle. The function should be called in case a logical loss of Soc due
+to frame sequence error is detected.
 
 \return The return indicates if a loss of SoC event shall be triggered
 \retval TRUE       Trigger error event
@@ -909,13 +907,13 @@ cycle.
 
 */
 //------------------------------------------------------------------------------
-static BOOL triggerLossOfSocEvent(void)
+static BOOL triggerLossOfSocEventByFrameSequence(void)
 {
     BOOL fTriggerEvent = FALSE;
 
-    if (!dllkInstance_g.lossSocStatus.fLossReported)
+    if (!dllkInstance_g.lossSocStatus.fLogicalLossReported)
     {
-        dllkInstance_g.lossSocStatus.fLossReported = TRUE;
+        dllkInstance_g.lossSocStatus.fLogicalLossReported = TRUE;
         fTriggerEvent = TRUE;
     }
 
@@ -930,8 +928,8 @@ The loss of SoC event shall only be reported once per cycle to the error
 handler. This functions checks if the event was already reported in this
 cycle in case of a frame timeout. Contrary to the logical checks for
 loss of SoC detection the frame timeout always occurs for a lost SoC.
-Therefore the timeout event is used to detect multiple loss of SoC after each
-other.
+Therefore the timeout event is used to detect multiple subsequent loss of SoC
+events.
 
 \return The return indicates if a loss of SoC event shall be triggered
 \retval TRUE       Trigger error event
@@ -943,26 +941,38 @@ static BOOL triggerLossOfSocEventOnFrameTimeout(void)
 {
     BOOL fTriggerEvent = FALSE;
 
-    if (!dllkInstance_g.lossSocStatus.fLossReported)
+    if (dllkInstance_g.lossSocStatus.fConsecutive ||
+        (!dllkInstance_g.lossSocStatus.fLogicalLossReported &&
+         !dllkInstance_g.lossSocStatus.fConsecutive))
     {
-        dllkInstance_g.lossSocStatus.fLossReported = TRUE;
-        dllkInstance_g.lossSocStatus.fTimeoutOccurred = TRUE;
-
-        // Loss of Soc will be reported and can be marked as such!
+        // Loss of SoC will be reported if not detected logically already.
+        // Subsequent logical reporting is blocked until an SoC is received.
         fTriggerEvent = TRUE;
     }
-    else
-    {
-        if (dllkInstance_g.lossSocStatus.fTimeoutOccurred)
-        {
-            // Loss and timeout already reported -> Second SoC lost
-            fTriggerEvent = TRUE;
-        }
 
-        dllkInstance_g.lossSocStatus.fTimeoutOccurred = TRUE;
-    }
+    // next timeout is not the first, but a consecutive
+    dllkInstance_g.lossSocStatus.fConsecutive = TRUE;
 
     return fTriggerEvent;
+}
+
+//------------------------------------------------------------------------------
+/**
+\brief  Reset loss of SoC report flags
+
+This function is used to reset the LossOfSoC management structure, which tracks
+SoC loss events to avoid multiple reports for the same SoC loss.
+
+\return The function returns a tOplkError error code.
+
+*/
+//------------------------------------------------------------------------------
+static tOplkError resetLossOfSocEventMgmt(void)
+{
+    dllkInstance_g.lossSocStatus.fLogicalLossReported = FALSE;
+    dllkInstance_g.lossSocStatus.fConsecutive = FALSE;
+
+      return kErrorOk;
 }
 
 /// \}
