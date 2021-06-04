@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define OBD_DEFINE_MACRO
     #include <obdcreate/obdmacro.h>
 #undef OBD_DEFINE_MACRO
+#include <limits.h>
 
 OBD_BEGIN()
     /*************************************************************************
@@ -63,7 +64,7 @@ OBD_BEGIN()
 
         // Object 1006h: NMT_CycleLen_U32 in [us]
         OBD_BEGIN_INDEX_RAM(0x1006, 0x01, FALSE)
-            OBD_SUBINDEX_RAM_VAR(0x1006, 0x00, kObdTypeUInt32, kObdAccSRW, tObdUnsigned32, NMT_CycleLen_U32, 0x00000000)   // in [us]
+            OBD_SUBINDEX_RAM_VAR_RG(0x1006, 0x00, kObdTypeUInt32, kObdAccSGRW, tObdUnsigned32, NMT_CycleLen_U32, 0x00000000, 400, UINT_MAX)   // in [us]
         OBD_END_INDEX(0x1006)
 
         // Object 1008h: NMT_ManufactDevName_VS
@@ -383,8 +384,8 @@ OBD_BEGIN()
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x01, kObdTypeUInt16, kObdAccR, tObdUnsigned16, IsochrTxMaxPayload_U16, 0)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x02, kObdTypeUInt16, kObdAccR, tObdUnsigned16, IsochrRxMaxPayload_U16, 0)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x03, kObdTypeUInt32, kObdAccR, tObdUnsigned32, PResMaxLatency_U32, 0)     // in [ns]
-            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x04, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, PReqActPayloadLimit_U16, 36)
-            OBD_SUBINDEX_RAM_VAR(0x1F98, 0x05, kObdTypeUInt16, kObdAccSRW, tObdUnsigned16, PResActPayloadLimit_U16, 36)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x04, kObdTypeUInt16, kObdAccSGRW, tObdUnsigned16, PReqActPayloadLimit_U16, 36, 36, C_DLL_ISOCHR_MAX_PAYL)
+            OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x05, kObdTypeUInt16, kObdAccSGRW, tObdUnsigned16, PResActPayloadLimit_U16, 36, 36, C_DLL_ISOCHR_MAX_PAYL)
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x06, kObdTypeUInt32, kObdAccR, tObdUnsigned32, ASndMaxLatency_U32, 0)     // in [ns]
             OBD_SUBINDEX_RAM_VAR(0x1F98, 0x07, kObdTypeUInt8, kObdAccSRW, tObdUnsigned8, MultiplCycleCnt_U8, 0x00)
             OBD_SUBINDEX_RAM_VAR_RG(0x1F98, 0x08, kObdTypeUInt16, kObdAccSGRW, tObdUnsigned16, AsyncMTU_U16, C_DLL_MIN_ASYNC_MTU, C_DLL_MIN_ASYNC_MTU, C_DLL_MAX_ASYNC_MTU)
