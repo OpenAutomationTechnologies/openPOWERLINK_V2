@@ -5,10 +5,29 @@ Revision history of openPOWERLINK Protocol Stack {#page_revision_history}
 
 # Release 2 {#sect_revision_v2}
 
-## V2.7.1 {#sect_revision_v2_7_1}
+## V2.7.2 {#sect_revision_v2_7_2}
 
 This is the latest release of the V2.7 release series. This release is a stable
 release, it contains fixes and optimizations.
+
+Following is a summary of changes in V2.7.2. For a detailed revision history
+refer to the Git source code history.
+
+### Fixes:
+- Allow only Uni- Multi- and Broadcast ASnd frames
+- Correct openCONFORMANCE SoC error detection behavior of CN
+- Add range check for conformance tested objects
+- Adjust start time in generic user timer module
+- Remove edrv-i210 specific synchronization trigger
+
+### Known Issues:
+
+Refer to the [known issues](\ref page_known_issues).
+
+## V2.7.1 {#sect_revision_v2_7_1}
+
+This is the first stable version of the V2.7 release series.
+It contains fixes and optimizations.
 
 Following is a summary of changes in V2.7.1. For a detailed revision history
 refer to the Git source code history.
