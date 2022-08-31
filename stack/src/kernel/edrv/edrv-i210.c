@@ -1163,7 +1163,7 @@ tOplkError edrv_startTimer(const tTimerHdl* pTimerHdl_p, UINT32 index_p, UINT64 
 
     reg = 0;
     reg = EDRV_REGDW_READ(EDRV_TSIM);
-    reg |= (EDRV_TSIM_TT(index_p) | EDRV_TSICR_SYSTIM);
+    reg |= (EDRV_TSIM_TT(index_p));
     EDRV_REGDW_WRITE(EDRV_TSIM, reg);
 
     return kErrorOk;
@@ -1338,11 +1338,6 @@ static irqreturn_t edrvTimerInterrupt(int irqNum_p, void* ppDevInstData_p)
     status &= ~EDRV_INTR_ICR_TIME_SYNC;
     EDRV_REGDW_WRITE(EDRV_INTR_SET_REG, status);
     reg = EDRV_REGDW_READ(EDRV_TSICR);
-
-    if (reg & EDRV_TSICR_SYSTIM)
-    {
-        return handled;
-    }
 
     if (reg & EDRV_TSICR_TT0)
     {
